@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "320095092434",
+    "project_id": "studyshare-5866f",
+    "storage_bucket": "studyshare-5866f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320095092434:android:aa8bc040b99264aa00b70b",
+        "android_client_info": {
+          "package_name": "com.studyshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320095092434-nlbqjte4ojjgbkaeb784t6fbifej94v9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.studyshare",
+            "certificate_hash": "e47ab9e3a8061226ebc4d410c31d16ad2238a29e"
+          }
+        },
+        {
+          "client_id": "320095092434-d3p19btm7htmar26o2iq2d3ese32hit0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATgFB0_Wbvf1Zsu8gR6-6iTpjq21ReyOk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "320095092434-d3p19btm7htmar26o2iq2d3ese32hit0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
