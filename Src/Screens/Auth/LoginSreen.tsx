@@ -10,12 +10,11 @@ import {
   TextComponent,
 } from '../Components';
 import authenticationApi from '../../apis/authApi';
-
 const LoginSreen = () => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
-       "320095092434-d3p19btm7htmar26o2iq2d3ese32hit0.apps.googleusercontent.com"
+        '3200910092434-d3p19btm7htmar26o2iq2d3ese32hit0.apps.googleusercontent.com',
     });
   }, []);
 
@@ -24,8 +23,6 @@ const LoginSreen = () => {
       await GoogleSignin.hasPlayServices();
       // Get the users ID token
       const data = await GoogleSignin.signIn();
-      console.log(data);
-      
       const res = await authenticationApi.handleAuthentication(
         '/login',
         data,
@@ -55,7 +52,7 @@ const LoginSreen = () => {
     <ContainerComponent>
       <Image
         source={require('../../assets/images/scene-with-young-children-playing-nature-outdoors.jpg')}
-        style={{width: '100%', height: '57%'}}
+        style={{width: '100%', height: '60%'}}
         resizeMode="cover"
       />
       <View style={{flex: 1, alignItems: 'center', marginTop: -28}}>
@@ -63,8 +60,8 @@ const LoginSreen = () => {
           style={{
             backgroundColor: appColors.white,
             width: '100%',
-            borderTopLeftRadius: 50,
-            borderTopRightRadius: 50,
+            borderTopLeftRadius: 35,
+            borderTopRightRadius: 35,
             flex: 1,
             alignItems: 'center',
           }}>
@@ -106,7 +103,7 @@ const LoginSreen = () => {
           }}
         />
       </View>
-      <SpaceComponent height={60} />
+      <SpaceComponent height={30} />
     </ContainerComponent>
   );
 };

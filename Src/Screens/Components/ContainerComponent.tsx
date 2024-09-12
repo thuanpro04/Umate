@@ -20,11 +20,8 @@ const ContainerComponent = (props: Props) => {
     <ScrollView style={[globalStyles.container, styles]}>{children}</ScrollView>
   ) : isbg ? (
     <ImageBackground
-      style={[
-        globalStyles.container,
-        {width: appInfo.size.WIDTH, height: appInfo.size.HEIGHT, zIndex: 1},styles
-      ]}
-      source={require('../../assets/images/imgBg.jpg')}>
+      style={[globalStyles.container, {}, styles]}
+      source={require('../../assets/images/digital-art-isolated-house.jpg')}>
       {children}
     </ImageBackground>
   ) : (
