@@ -1,4 +1,4 @@
-package com.studyshare
+package com.umate
 
 import android.app.Application
 import com.facebook.react.PackageList

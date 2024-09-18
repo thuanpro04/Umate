@@ -12,7 +12,6 @@ const WelcomToApp = () => {
         <Image
           source={require('../assets/images/onboarding-1.png')}
           style={{
-
             width: 50,
             height: 50,
             resizeMode: 'cover',

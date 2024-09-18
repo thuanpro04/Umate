@@ -1,4 +1,4 @@
-package com.studyshare
+package com.umate
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

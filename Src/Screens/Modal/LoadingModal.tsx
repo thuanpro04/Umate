@@ -1,7 +1,7 @@
 import {ActivityIndicator, Modal, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {TextComponent} from '../Components';
-import {appColors} from '../Theme/AppColors';
+import { appColors } from '../../Theme/Colors/appColors';
 interface Props {
   visible: boolean;
 }

@@ -4,6 +4,7 @@ import TextComponent from './TextComponent';
 import RowComponent from './RowComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
 interface Props {
   lable?: string;
   isBg?: boolean;
@@ -58,7 +59,6 @@ const ButtonComponent = (props: Props) => {
           backgroundColor: props.bgColor ?? appColors.pink,
           width: '80%',
           borderRadius: 12,
-          
         },
         styles,
       ]}>
@@ -72,13 +72,14 @@ const ButtonComponent = (props: Props) => {
             paddingVertical: 20,
           },
         ]}
+        disabled={disabled}
         onPress={onPress}>
         <RowComponent styles={{justifyContent: justify ?? 'center', gap: 10}}>
           {iconLeft && iconLeft}
           <TextComponent
             label={lable ?? ''}
             color={lableColor}
-            size={20}
+            size={appInfo.size.WIDTH * 0.05}
             font="bold"
             styles={{fontWeight: '500', lineHeight: 23.87}}
           />

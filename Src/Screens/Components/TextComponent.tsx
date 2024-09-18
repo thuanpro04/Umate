@@ -2,6 +2,11 @@ import {View, Text, StyleProp, TextStyle} from 'react-native';
 import React from 'react';
 import RowComponent from './RowComponent';
 import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 interface Props {
   label: string;
   label2?: string;
@@ -21,7 +26,7 @@ const TextComponent = (props: Props) => {
       <Text
       style={[
         {
-          fontSize: title ? size ?? 26 : size ?? 18,
+          fontSize: title ? size ?? appInfo.size.WIDTH *0.08 : size ?? appInfo.size.WIDTH *0.04,
           color: props.color ?? appColors.white,
           flex: flex ?? 0,
           fontWeight: title ? font ?? 'bold' : 'regular',
@@ -34,7 +39,7 @@ const TextComponent = (props: Props) => {
     <Text
       style={[
         {
-          fontSize: title ? size ?? 26 : size ?? 18,
+          fontSize: title ? size ?? appInfo.size.WIDTH *0.08  : size ?? appInfo.size.WIDTH *0.04,
           color: props.color ?? appColors.blue,
           flex: flex ?? 0,
           fontWeight: title ? font ?? 'bold' : 'regular',
@@ -49,7 +54,7 @@ const TextComponent = (props: Props) => {
     <Text
       style={[
         {
-          fontSize: title ? size ?? 26 : size ?? 18,
+          fontSize: title ? size ?? appInfo.size.WIDTH *0.08  : size ?? appInfo.size.WIDTH *0.04,
           color: props.color ?? appColors.black,
           flex: flex ?? 0,
           fontWeight: title ? font ?? 'bold' : 'regular',

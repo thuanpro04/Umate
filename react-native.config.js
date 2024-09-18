@@ -6,5 +6,5 @@ module.exports = {
         },
       },
     },
-    assets:['../PlanPal/assets/fonts/']
+    assets:['../UMate/assets/fonts/']
   };
