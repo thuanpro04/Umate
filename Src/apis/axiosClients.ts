@@ -4,7 +4,7 @@ import queryString from 'query-string';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const axiosClient = axios.create({
-  baseURL: appInfo.URL_RENDER,
+  baseURL: appInfo.BASE_URL,
   paramsSerializer: params => queryString.stringify(params),
 });
 const getAccessToken = async () => {
@@ -24,7 +24,7 @@ axiosClient.interceptors.request.use(async (config: any) => {
 });
 axiosClient.interceptors.response.use(
   res => {
-    if (res.data && res.status === 200) {
+    if (res.data && (res.status === 200) ) {
       return res.data;
     }
     throw new Error(`Unexpected response format: ${JSON.stringify(res)}`);

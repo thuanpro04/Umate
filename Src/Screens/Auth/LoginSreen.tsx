@@ -1,6 +1,12 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import React, {useEffect, useState} from 'react';
-import {Alert, Image, StatusBar, StyleSheet, View} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
+import {useDispatch} from 'react-redux';
+import authenticationApi from '../../apis/authApi';
+import Google from '../../assets/svgs/Google.svg';
+import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
@@ -9,81 +15,82 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import authenticationApi from '../../apis/authApi';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import {appInfo} from '../../Theme/appInfo';
+import {Notification} from '../Untils/Notification';
+import {Validate} from '../Untils/Validate';
 import LoadingModal from '../Modal/LoadingModal';
-import Snackbar from 'react-native-snackbar';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [dataUser, setDataUser] = useState<any>();
+
+  const dispatch = useDispatch();
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
         '255214993798-jot48ccnfct32m4n9b1ud0pjgf17ag7p.apps.googleusercontent.com',
     });
   }, []);
+  const handleSignOutAndCleanup = async () => {
+    await GoogleSignin.signOut();
+    dispatch(removeAuth());
+    await AsyncStorage.removeItem('auth');
+  };
 
   const getDataUserWithGoogle = async () => {
     try {
-      // setIsLoading(true);
       await GoogleSignin.hasPlayServices();
-      const dataUsers = await GoogleSignin.signIn();
-      const emailUser = dataUsers.data?.user.email;
-      if (!emailUser?.endsWith('@student.tdmu.edu.vn')) {
-        // Alert.alert(`Please log in with your school's gmail account.`)
-        Snackbar.show({
-          text: `Please log in with your school's gmail account.`,
-          duration: Snackbar.LENGTH_LONG,
-          action: {
-            text: 'Đóng',
-            onPress: () => {},
-          },
-        });
-        await GoogleSignin.signOut();
-      } else {
-        console.log('get users', dataUsers.data?.user);
-        return dataUsers.data?.user;
+      const userInfo = await GoogleSignin.signIn();
+      const emailUser = userInfo.data?.user.email;
+
+      if (!Validate.Email(emailUser)) {
+        setIsLoading(false);
+        Notification.showSnackbar(
+          `Please log in with your school's gmail account.`,
+          handleSignOutAndCleanup,
+        );
+
+        return null; // Dừng lại nếu email không hợp lệ
       }
-      // Create a Google credential with the token
-    } catch (error: any) {
-      if (error.code === 'auth/account-exists-with-different-credential') {
-        // Handle error when the user has already signed up with a different credential
-        console.log('Error: account-exists-with-different-credential');
-      } else if (error.code === 'auth/invalid-credential') {
-        // Handle error when the credential is invalid
-        console.log('Error: invalid-credential');
-      } else if (error.code === 'auth/user-disabled') {
-        // Handle error when the user is disabled
-        console.log('Error: user-disabled');
-      } else {
-        // Handle other errors
-        console.log('Error: ', error);
-      }
+      return userInfo.data?.user;
+    } catch (error) {
       setIsLoading(false);
+      return null; // Đảm bảo trả về null khi có lỗi xảy ra
     }
   };
+
   const handleLoginWithGoogle = async () => {
+    setIsLoading(true);
+    const userInfo = await getDataUserWithGoogle();
+    if (!userInfo) {
+      setIsLoading(false);
+      return;
+    }
+
+    const data = {
+      id: userInfo.id,
+      email: userInfo.email,
+      name: userInfo.name,
+      familyName: userInfo.familyName,
+      givenName: userInfo.givenName,
+      photo: userInfo.photo,
+      access: Validate.Email_Admin(userInfo.email) ? 'true' : 'false',
+    };
     try {
-      const data = await getDataUserWithGoogle();
-      console.log('data', data);
-      // const data={
-      //   email:"phanminhthuan240304@gmail.com",
-      //   name:"ThuanPro"
-      // }
       const res = await authenticationApi.handleAuthentication(
         '/login',
         data,
         'post',
       );
-      console.log(res);
+      dispatch(addAuth(res?.data));
+      await AsyncStorage.setItem('auth', JSON.stringify(res?.data));
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
+      Notification.showSnackbar(
+        `Login failed, please try again later.`,
+        () => {},
+      );
     }
   };
+
   return (
     <ContainerComponent>
       <Image
@@ -108,7 +115,13 @@ const LoginSreen = () => {
           }}>
           <SpaceComponent height={appInfo.size.HEIGHT * 0.025} />
           <RowComponent>
-            <Image source={require('../../assets/images/Group.png')} />
+            <Image
+              source={require('../../assets/images/logoApp.png')}
+              style={{
+                height: appInfo.size.HEIGHT * 0.04,
+                width: appInfo.size.HEIGHT * 0.04,
+              }}
+            />
             <TextComponent label="UMATE" styles={{fontStyle: 'italic'}} title />
           </RowComponent>
           <SpaceComponent height={appInfo.size.HEIGHT * 0.03} />
@@ -137,8 +150,15 @@ const LoginSreen = () => {
           lableColor={appColors.white}
           onPress={handleLoginWithGoogle}
           disabled={isLoading}
+          iconLeft={
+            <Google
+              width={appInfo.size.HEIGHT * 0.04}
+              height={appInfo.size.HEIGHT * 0.04}
+            />
+          }
         />
         <SpaceComponent height={appInfo.size.HEIGHT * 0.02} />
+
         <TextComponent
           label="Please log in with your school's gmail account."
           size={appInfo.size.WIDTH * 0.04}
@@ -150,7 +170,6 @@ const LoginSreen = () => {
         />
       </View>
       <SpaceComponent height={appInfo.size.HEIGHT * 0.05} />
-      <LoadingModal visible={isLoading} />
     </ContainerComponent>
   );
 };

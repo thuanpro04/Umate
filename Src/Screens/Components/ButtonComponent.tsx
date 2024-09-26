@@ -20,7 +20,7 @@ interface Props {
     | 'space-evenly'
     | 'space-around';
   styles?: StyleProp<ViewStyle>;
-  type?: 'primary' | 'link' | 'none';
+  type?: 'primary' | 'link' | 'none' | 'action';
   onPress?: () => void;
   disabled?: boolean;
   flex?: number;
@@ -40,17 +40,10 @@ const ButtonComponent = (props: Props) => {
     disabled,
     flex,
   } = props;
-  return type === 'link' ? (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{paddingLeft: 10}}
-      disabled={disabled}>
-      <TextComponent
-        label={lable ?? ''}
-        color={lableColor ?? appColors.blue}
-        size={20}
-        font="regular"
-      />
+  return type === 'action' ? (
+    <TouchableOpacity onPress={onPress} style={styles}>
+      {iconLeft}
+      {iconRight}
     </TouchableOpacity>
   ) : (
     <View
@@ -65,16 +58,15 @@ const ButtonComponent = (props: Props) => {
       <TouchableOpacity
         style={[
           {
-            paddingHorizontal: 14,
             flex: flex ?? 0,
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: 20,
+            paddingVertical: 8,
           },
         ]}
         disabled={disabled}
         onPress={onPress}>
-        <RowComponent styles={{justifyContent: justify ?? 'center', gap: 10}}>
+        <RowComponent styles={{}}>
           {iconLeft && iconLeft}
           <TextComponent
             label={lable ?? ''}

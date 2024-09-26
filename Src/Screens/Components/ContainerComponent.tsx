@@ -25,7 +25,7 @@ const ContainerComponent = (props: Props) => {
       {children}
     </ImageBackground>
   ) : (
-    <View style={[globalStyles.container, {}, styles]}>{children}</View>
+    <View style={[globalStyles.container, {zIndex:1}, styles]}>{children}</View>
   );
 };
 

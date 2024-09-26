@@ -5,6 +5,5 @@ export const appInfo = {
     WIDTH: Dimensions.get('window').width,
     HEIGHT: Dimensions.get('window').height,
   },
-  BASE_URL:'http://192.168.1.7:8080',
-  URL_RENDER:'https://umate.onrender.com'
+  BASE_URL:'http://192.168.1.6:3004',
 };

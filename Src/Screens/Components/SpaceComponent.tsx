@@ -1,20 +1,20 @@
 import {View, Text} from 'react-native';
 import React from 'react';
 interface Props {
-  width?: number;
+  width?: any;
   height?: number;
-  isCrossBar?: boolean;
+
   bgCrossBar?: string;
 }
 const SpaceComponent = (props: Props) => {
-  const {width, height, isCrossBar, bgCrossBar} = props;
+  const {width, height, bgCrossBar} = props;
   return (
     <View
       style={{
         width: width,
         height: height,
-        backgroundColor: isCrossBar && bgCrossBar ? bgCrossBar : '',
-        
+        backgroundColor: bgCrossBar,
+        borderWidth: bgCrossBar ? 1 : 0,
       }}
     />
   );
