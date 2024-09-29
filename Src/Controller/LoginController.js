@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-const usersModel = require("../models/usersModel.js");
-const bcryp = require("bcrypt");
+const { UserModel } = require("../models/usersModel");
 const getJsonWebToken = async (email, id) => {
   const payload = {
     email,
@@ -11,38 +10,42 @@ const getJsonWebToken = async (email, id) => {
   });
   return token;
 };
+
 const hanleLoginWithGoogle = async (req, res) => {
   try {
-    const { id, email, name, familyName, givenName, photo, access } = req.body;
+    const userInfo = req.body;
     console.log(req.body);
-
-    // Process the received data here
-    // For example, you can store the user data in a database
-    const existingUser = await usersModel.findOne({ email });
-    if (!existingUser) {
-      const newUser = new usersModel({
-        id,
-        name,
-        email,
-        familyName,
-        givenName,
-        photo,
-        access,
+    const user = { ...userInfo, avatar: userInfo.photo };
+    // Kiểm tra người dùng có tồn tại không
+    const existingUser = await UserModel.findOne({ email: userInfo.email });
+    if (existingUser) {
+      await UserModel.findByIdAndUpdate(existingUser.id, {
+        ...userInfo,
+        updateAt: Date.now(),
+      });
+      user.accesstoken = await getJsonWebToken(userInfo.email, existingUser.id);
+      console.log("Update Done.");
+      // Người dùng mới, tạo tài khoản mới
+    } else {
+      // Cập nhật thông tin người dùng hiện tại nếu cần
+      const newUser = new UserModel({
+        userId: userInfo.id,
+        name: userInfo.name,
+        email: userInfo.email,
+        familyName: userInfo.familyName,
+        givenName: userInfo.givenName,
+        avatar: userInfo.photo,
+        access: userInfo.access,
       });
       await newUser.save();
+      user.accesstoken = await getJsonWebToken(userInfo.email, userInfo.id);
+      console.log("newUser", user.accesstoken);
+      console.log("Create user.");
+      // Sau khi cập nhật, trả về phản hồi
     }
     res.status(200).json({
-      message: "Login Successfully !!!",
-      data: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        familyName: newUser.familyName,
-        givenName: newUser.givenName,
-        photo: newUser.photo,
-        accesstoken: await getJsonWebToken(email, newUser.id),
-        access: newUser.access,
-      },
+      message: "Login with google successfully!!",
+      data: user,
     });
   } catch (error) {
     console.error(error);
