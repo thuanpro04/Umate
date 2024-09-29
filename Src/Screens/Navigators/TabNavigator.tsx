@@ -1,17 +1,24 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {HeartAdd, Message, Profile2User, Setting2} from 'iconsax-react-native';
+import {
+  HeartAdd,
+  Message,
+  Profile,
+  Profile2User,
+  Setting2,
+} from 'iconsax-react-native';
 import React, {ReactNode} from 'react';
 import {Platform} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {appColors} from '../../Theme/Colors/appColors';
-import AddGroupScreens from '../AddGroupScreens';
-import ChatHistory from '../ChatHistory/ChatHistory';
-import {TextComponent} from '../Components';
-import MyFriendScreen from '../Friends/MyFriendScreen';
-import HomeScreen from '../Home/HomeScreen';
-import ProfileScreen from '../Profile/ProfileScreen';
+import {CircleComponent, TextComponent} from '../Components/index';
 import {appInfo} from '../../Theme/appInfo';
-import CircleComponent from '../Components/CircleComponent';
+import {
+  HomeScreen,
+  MessageScreen,
+  MyFriendScreen,
+  ProfileScreen,
+  AddGroupScreens,
+} from '../index';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -35,14 +42,13 @@ const TabNavigator = () => {
               icon = <Ionicons name="home-outline" size={size} color={color} />;
               break;
             case 'Profile':
-              icon = <Setting2 size={size} color={color} />;
+              icon = <Profile size={size} color={color} />;
               break;
             case 'AddGroup':
               icon = (
                 <CircleComponent
                   size={52}
-                  styles={{marginTop: Platform.OS === 'ios' ? -50 : -60}}
-                  >
+                  styles={{marginTop: Platform.OS === 'ios' ? -50 : -60}}>
                   <HeartAdd size={24} color={appColors.white} variant="Bold" />
                 </CircleComponent>
               );
@@ -51,14 +57,14 @@ const TabNavigator = () => {
               icon = <Profile2User size={size} color={color} />;
               break;
 
-            case 'Chat':
+            case 'Message':
               icon = <Message size={size} color={color} />;
               break;
           }
           return icon;
         },
         tabBarLabel({focused}) {
-          return route.name === 'AddGroup' ? null : (
+          return route.name === 'AddGroup' || !focused ? null : (
             <TextComponent
               label={route.name}
               flex={0}
@@ -72,11 +78,11 @@ const TabNavigator = () => {
           marginBottom: 0,
         },
       })}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Friends" component={MyFriendScreen} />
-      <Tab.Screen name="AddGroup" component={AddGroupScreens} />
-      <Tab.Screen name="Chat" component={ChatHistory} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} key={"Home"}/>
+      <Tab.Screen name="Friends" component={MyFriendScreen} key={"Friends"}/>
+      <Tab.Screen name="AddGroup" component={AddGroupScreens} key={"AddGroup"}/>
+      <Tab.Screen name="Message" component={MessageScreen} key={"Message"}/>
+      <Tab.Screen name="Profile" component={ProfileScreen} key={"Profile"}/>
     </Tab.Navigator>
   );
 };

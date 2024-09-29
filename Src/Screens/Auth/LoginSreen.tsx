@@ -18,6 +18,7 @@ import {
 import {Notification} from '../Untils/Notification';
 import {Validate} from '../Untils/Validate';
 import LoadingModal from '../Modal/LoadingModal';
+import Toast from 'react-native-toast-message';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,11 +43,14 @@ const LoginSreen = () => {
 
       if (!Validate.Email(emailUser)) {
         setIsLoading(false);
-        Notification.showSnackbar(
-          `Please log in with your school's gmail account.`,
-          handleSignOutAndCleanup,
-        );
-
+        Toast.show({
+          type: 'error',
+          text1: 'Login failed',
+          text2: `Please log in with your school's gmail account.`,
+          position: 'top', // Vị trí của Toast (top, bottom)
+          visibilityTime: 4000, // Thời gian hiển thị toast
+        });
+        await handleSignOutAndCleanup();
         return null; // Dừng lại nếu email không hợp lệ
       }
       return userInfo.data?.user;
@@ -79,23 +83,36 @@ const LoginSreen = () => {
         data,
         'post',
       );
+      console.log(res.data);
       dispatch(addAuth(res?.data));
       await AsyncStorage.setItem('auth', JSON.stringify(res?.data));
+      setIsLoading(false);
+      Toast.show({
+        type: 'success',
+        text1: 'Login Success',
+        text2: 'Welcome to UMate 👋',
+        position: 'top', // Vị trí của Toast (top, bottom)
+        visibilityTime: 4000, // Thời gian hiển thị toast
+      });
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      Notification.showSnackbar(
-        `Login failed, please try again later.`,
-        () => {},
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Login failed',
+        text2: `Login failed, please try again later.`,
+        position: 'top', // Vị trí của Toast (top, bottom)
+        visibilityTime: 4000, // Thời gian hiển thị toast
+      });
     }
   };
 
   return (
     <ContainerComponent>
+      <LoadingModal visible={isLoading} />
       <Image
         source={require('../../assets/images/scene-with-young-children-playing-nature-outdoors.jpg')}
-        style={{width: appInfo.size.WIDTH, height: appInfo.size.HEIGHT * 0.6}}
+        style={styles.bgStyle}
         resizeMode="cover"
       />
       <View
@@ -104,48 +121,28 @@ const LoginSreen = () => {
           alignItems: 'center',
           marginTop: -appInfo.size.HEIGHT * 0.035,
         }}>
-        <View
-          style={{
-            backgroundColor: appColors.white,
-            width: '100%',
-            borderTopLeftRadius: appInfo.size.HEIGHT * 0.05,
-            borderTopRightRadius: appInfo.size.HEIGHT * 0.05,
-            flex: 1,
-            alignItems: 'center',
-          }}>
+        <View style={styles.VContainer}>
           <SpaceComponent height={appInfo.size.HEIGHT * 0.025} />
           <RowComponent>
             <Image
               source={require('../../assets/images/logoApp.png')}
-              style={{
-                height: appInfo.size.HEIGHT * 0.04,
-                width: appInfo.size.HEIGHT * 0.04,
-              }}
+              style={styles.logo}
             />
             <TextComponent label="UMATE" styles={{fontStyle: 'italic'}} title />
           </RowComponent>
           <SpaceComponent height={appInfo.size.HEIGHT * 0.03} />
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '90%',
-            }}>
+          <View style={styles.Vtext}>
             <TextComponent
               label="UMate - Your AI-powered social connector at Thu Dau Mot University. Find friends, join groups, and build meaningful connections based on your interests and personality."
-              styles={{
-                fontStyle: 'italic',
-                color: appColors.black,
-                textAlign: 'center',
-              }}
+              styles={styles.text}
             />
           </View>
         </View>
       </View>
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+      <View style={styles.VbtnStyle}>
         <ButtonComponent
           lable="Sign In with Google"
-          styles={{alignItems: 'center'}}
+          styles={styles.button}
           bgColor={appColors.blue2}
           lableColor={appColors.white}
           onPress={handleLoginWithGoogle}
@@ -156,20 +153,16 @@ const LoginSreen = () => {
               height={appInfo.size.HEIGHT * 0.04}
             />
           }
+          textStyle={{fontWeight: '600', fontSize: appInfo.size.WIDTH * 0.05}}
         />
         <SpaceComponent height={appInfo.size.HEIGHT * 0.02} />
 
         <TextComponent
           label="Please log in with your school's gmail account."
           size={appInfo.size.WIDTH * 0.04}
-          styles={{
-            fontStyle: 'italic',
-            color: appColors.blue3,
-            fontWeight: '500',
-          }}
+          styles={styles.hint}
         />
       </View>
-      <SpaceComponent height={appInfo.size.HEIGHT * 0.05} />
     </ContainerComponent>
   );
 };
@@ -179,5 +172,46 @@ const styles = StyleSheet.create({
   titleStyle: {
     fontWeight: '700',
     fontStyle: 'italic',
+  },
+  bgStyle: {
+    width: appInfo.size.WIDTH,
+    height: appInfo.size.HEIGHT * 0.6,
+  },
+  button: {
+    alignItems: 'center',
+    width: '80%',
+    paddingVertical: 8,
+  },
+  hint: {
+    fontStyle: 'italic',
+    color: appColors.blue3,
+    fontWeight: '500',
+  },
+  VbtnStyle: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  text: {
+    fontStyle: 'italic',
+    color: appColors.black,
+    textAlign: 'center',
+  },
+  VContainer: {
+    backgroundColor: appColors.white,
+    width: '100%',
+    borderTopLeftRadius: appInfo.size.HEIGHT * 0.05,
+    borderTopRightRadius: appInfo.size.HEIGHT * 0.05,
+    flex: 1,
+    alignItems: 'center',
+  },
+  logo: {
+    height: appInfo.size.HEIGHT * 0.04,
+    width: appInfo.size.HEIGHT * 0.04,
+  },
+  Vtext: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '90%',
   },
 });

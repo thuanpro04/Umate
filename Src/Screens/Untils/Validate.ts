@@ -5,4 +5,5 @@ export class Validate{
     static Email_Admin(mail:any){
         return mail?.endsWith('@tdmu.edu.vn')
     }
+    
 }

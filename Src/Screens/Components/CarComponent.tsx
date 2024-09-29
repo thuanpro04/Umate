@@ -1,20 +1,17 @@
-import {View, Text, Image} from 'react-native';
+import {Message, MessageQuestion} from 'iconsax-react-native';
 import React, {useState} from 'react';
-import ContainerComponent from './ContainerComponent';
-import RowComponent from './RowComponent';
-import TextComponent from './TextComponent';
-import SpaceComponent from './SpaceComponent';
-import {Heart, Message, MessageQuestion, Share} from 'iconsax-react-native';
-import {appColors} from '../../Theme/Colors/appColors';
-import ButtonComponent from './ButtonComponent';
-import ActionIconComponent from './ActionIconComponent';
+import {Image, StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import ActionIconComponent from './ActionIconComponent';
+import {RowComponent, SpaceComponent, TextComponent} from './index';
+
 interface Props {}
 const CarComponent = () => {
   const [isBackground, setBackground] = useState(false);
   return (
-    <View style={{paddingHorizontal: 15, backgroundColor: '#ffff'}}>
+    <View style={localStyles.container}>
       <RowComponent styles={{}}>
         <RowComponent>
           <Image
@@ -35,31 +32,67 @@ const CarComponent = () => {
       <View>
         <TextComponent
           label="Lễ trao bằng tốt nghiệp cho 4046 tân cử nhân, kỹ sư, kiến trúc sư lần I năm 2024"
-          size={17}
+          size={appInfo.size.WIDTH * 0.04}
         />
         <SpaceComponent height={10} />
         <Image
           source={require('../../assets/images/tdmu.jpg')}
-          style={{width: 358, height: 232, borderRadius: 10}}
+          style={localStyles.avatar}
         />
       </View>
       <RowComponent styles={{justifyContent: 'space-around'}}>
         <ActionIconComponent
+          styles={localStyles.IconStyle}
           icon={
             isBackground ? (
-              <AntDesign name="heart" size={22} color={appColors.red} />
+              <AntDesign
+                name="heart"
+                size={appInfo.sizeIcon}
+                color={appColors.red}
+              />
             ) : (
-              <AntDesign name="hearto" size={22} color={appColors.grey} />
+              <AntDesign
+                name="hearto"
+                size={appInfo.sizeIcon}
+                color={appColors.grey}
+              />
             )
           }
           onPress={() => setBackground(!isBackground)}
           quantity={10}
         />
-        <ActionIconComponent icon={<MessageQuestion color={appColors.grey} size={22}/>} title='Comment'/>
-        <ActionIconComponent icon={<Message size={22} color={appColors.grey}/>} title='Send'/>
+        <ActionIconComponent
+          icon={
+            <MessageQuestion color={appColors.grey} size={appInfo.sizeIcon} />
+          }
+          title="Comment"
+          styles={localStyles.IconStyle}
+        />
+        <ActionIconComponent
+          icon={<Message size={appInfo.sizeIcon} color={appColors.grey} />}
+          title="Send"
+          styles={localStyles.IconStyle}
+        />
       </RowComponent>
     </View>
   );
 };
 
 export default CarComponent;
+const localStyles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 15,
+    backgroundColor: appColors.white,
+  },
+  IconStyle: {
+    backgroundColor: appColors.bgIcon,
+    paddingHorizontal: 10,
+    marginVertical: 12,
+  },
+  avatar: {
+    width: appInfo.size.WIDTH * 0.92,
+    height: appInfo.size.HEIGHT * 0.3,
+    borderRadius: 10,
+    resizeMode: 'cover',
+  },
+});

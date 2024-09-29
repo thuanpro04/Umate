@@ -10,7 +10,9 @@ const config = {
     resolver:{
         assetExts:assetExts.filter(ext => ext!=='svg'),
         sourceExts:[...sourceExts,'svg']
-    }
+    },
+    resetCache: true // config drawer
+    
 };
 
 module.exports = mergeConfig(defaultConfig, config);

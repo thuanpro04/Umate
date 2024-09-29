@@ -1,7 +1,7 @@
 export const appColors = {
   blueBack: '#2F2E33',
   coolGray: '#D5D6D2',
-  background: '#0F0817',
+  background: '#eeeeee',
   white: '#FFFFFF',
   focus: '#FFB930',
   orange1: '#D8761C',
@@ -24,4 +24,5 @@ export const appColors = {
   linearFocus59_pink: '#DB28A9',
   linearFocus31_purple: '#842ED8',
   cobalt: '#3A5199',
+  bgIcon:'#fafaaf'
 };

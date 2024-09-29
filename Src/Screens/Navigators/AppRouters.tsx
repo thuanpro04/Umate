@@ -9,7 +9,7 @@ import AuthNavigator from './AuthNavigator';
 const AppRouters = () => {
   const {getItem, setItem} = useAsyncStorage('auth');
   const auth = useSelector(authSelector);
-  const disPath = useDispatch();
+  const dispatch = useDispatch();
   useEffect(() => {
     handleCheckLogin();
     console.log(auth);
@@ -18,7 +18,7 @@ const AppRouters = () => {
   const handleCheckLogin = async () => {
     const res = await getItem();
     console.log('res app routers', res);
-    res && disPath(addAuth(JSON.parse(res)));
+    res && dispatch(addAuth(JSON.parse(res)));
   };
   return auth.accesstoken ? <MainNavigator /> : <AuthNavigator />;
 };

@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const ChatHistory = () => {
+const SettingScreen = () => {
   return (
     <View>
-      <Text>ChatHistory</Text>
+      <Text>SettingScreen</Text>
     </View>
   )
 }
 
-export default ChatHistory
+export default SettingScreen

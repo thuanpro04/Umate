@@ -9,10 +9,7 @@ interface Props {
 
 const LoadingModal = ({visible}: Props) => {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      statusBarTranslucent>
+    <Modal visible={visible} transparent statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <ActivityIndicator color={appColors.white} size={28} />
@@ -33,19 +30,19 @@ export default LoadingModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     justifyContent: 'center', // Căn giữa theo chiều dọc
     alignItems: 'center', // Căn giữa theo chiều ngang
+    zIndex: 1, // Đặt zIndex thấp hơn so với Snackbar hoặc Toast
   },
   container: {
     alignItems: 'center',
-    padding: 20, // Thêm padding để tạo khoảng cách giữa các phần tử
-    borderRadius: 10, // Tạo góc bo cho modal
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Thay đổi màu nền cho modal
+    padding: 20,
+    borderRadius: 10,
   },
   text: {
     fontWeight: '500',
     fontStyle: 'italic',
-    marginTop: 10, // Thêm khoảng cách giữa ActivityIndicator và TextComponent
+    marginTop: 10,
   },
 });

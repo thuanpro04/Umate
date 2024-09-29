@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, StyleProp, ViewStyle} from 'react-native';
+import {View, Text, TouchableOpacity, StyleProp, ViewStyle, TextStyle} from 'react-native';
 import React, {ReactNode} from 'react';
 import TextComponent from './TextComponent';
 import RowComponent from './RowComponent';
@@ -24,6 +24,7 @@ interface Props {
   onPress?: () => void;
   disabled?: boolean;
   flex?: number;
+  textStyle?:StyleProp<TextStyle>
 }
 const ButtonComponent = (props: Props) => {
   const {
@@ -39,6 +40,7 @@ const ButtonComponent = (props: Props) => {
     onPress,
     disabled,
     flex,
+    textStyle
   } = props;
   return type === 'action' ? (
     <TouchableOpacity onPress={onPress} style={styles}>
@@ -50,7 +52,6 @@ const ButtonComponent = (props: Props) => {
       style={[
         {
           backgroundColor: props.bgColor ?? appColors.pink,
-          width: '80%',
           borderRadius: 12,
         },
         styles,
@@ -61,7 +62,7 @@ const ButtonComponent = (props: Props) => {
             flex: flex ?? 0,
             alignItems: 'center',
             justifyContent: 'center',
-            paddingVertical: 8,
+
           },
         ]}
         disabled={disabled}
@@ -71,9 +72,9 @@ const ButtonComponent = (props: Props) => {
           <TextComponent
             label={lable ?? ''}
             color={lableColor}
-            size={appInfo.size.WIDTH * 0.05}
+            size={appInfo.size.WIDTH * 0.04}
             font="bold"
-            styles={{fontWeight: '500', lineHeight: 23.87}}
+            styles={[textStyle]}
           />
           {iconRight && iconRight}
         </RowComponent>

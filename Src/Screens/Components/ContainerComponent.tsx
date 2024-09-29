@@ -17,7 +17,7 @@ interface Props {
 const ContainerComponent = (props: Props) => {
   const {children, styles, isScroll, isbg} = props;
   return isScroll ? (
-    <ScrollView style={[globalStyles.container, styles]}>{children}</ScrollView>
+    <ScrollView style={[globalStyles.container,{}, styles]}>{children}</ScrollView>
   ) : isbg ? (
     <ImageBackground
       style={[globalStyles.container, {}, styles]}
@@ -25,7 +25,7 @@ const ContainerComponent = (props: Props) => {
       {children}
     </ImageBackground>
   ) : (
-    <View style={[globalStyles.container, {zIndex:1}, styles]}>{children}</View>
+    <View style={[globalStyles.container, styles]}>{children}</View>
   );
 };
 
