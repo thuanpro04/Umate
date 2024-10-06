@@ -2,7 +2,7 @@ import {ActivityIndicator, Modal, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {TextComponent} from '../Components';
 import {appColors} from '../../Theme/Colors/appColors';
-
+import { Ballons } from '../../assets/svgs/indexSvg';
 interface Props {
   visible: boolean;
 }
@@ -12,13 +12,9 @@ const LoadingModal = ({visible}: Props) => {
     <Modal visible={visible} transparent statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <Ballons height={40} width={40}/>
           <ActivityIndicator color={appColors.white} size={28} />
-          <TextComponent
-            label="Loading..."
-            color={appColors.grey2}
-            size={22}
-            styles={styles.text}
-          />
+          
         </View>
       </View>
     </Modal>

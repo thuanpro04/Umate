@@ -1,13 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
-import {useDispatch} from 'react-redux';
-import authenticationApi from '../../apis/authApi';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
-import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { addAuth, removeAuth } from '../../redux/reducers/authReducer';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   ContainerComponent,
@@ -15,95 +14,73 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {Notification} from '../Untils/Notification';
-import {Validate} from '../Untils/Validate';
 import LoadingModal from '../Modal/LoadingModal';
-import Toast from 'react-native-toast-message';
+import { Auth } from '../Services/authService.';
+import { Notification } from '../Untils/Notification';
+import { Validate } from '../Untils/Validate';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
-
   const dispatch = useDispatch();
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId:
-        '255214993798-jot48ccnfct32m4n9b1ud0pjgf17ag7p.apps.googleusercontent.com',
+      webClientId: process.env.WEBCLIENTID,
     });
   }, []);
-  const handleSignOutAndCleanup = async () => {
-    await GoogleSignin.signOut();
-    dispatch(removeAuth());
-    await AsyncStorage.removeItem('auth');
-  };
+  // Hàm hiển thị toast để tái sử dụng
 
   const getDataUserWithGoogle = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const emailUser = userInfo.data?.user.email;
-
+      const userInfo = await Auth.getDataUserWithGoogle();
+      const emailUser = userInfo?.email;
       if (!Validate.Email(emailUser)) {
-        setIsLoading(false);
-        Toast.show({
-          type: 'error',
-          text1: 'Login failed',
-          text2: `Please log in with your school's gmail account.`,
-          position: 'top', // Vị trí của Toast (top, bottom)
-          visibilityTime: 4000, // Thời gian hiển thị toast
-        });
-        await handleSignOutAndCleanup();
+        Notification.showToast(
+          'error',
+          'Login failed',
+          "Please log in with your school's gmail account😔",
+        );
+        await Auth.SignOutAndCleanup();
+        dispatch(removeAuth());
         return null; // Dừng lại nếu email không hợp lệ
       }
-      return userInfo.data?.user;
+      const data = {
+        userID: userInfo?.id,
+        email: userInfo?.email,
+        name: userInfo?.name,
+        familyName: userInfo?.familyName,
+        givenName: userInfo?.givenName,
+        avatar: userInfo?.photo,
+        access: Validate.Email_Admin(userInfo?.email) ? 'true' : 'false',
+      };
+      return data;
     } catch (error) {
-      setIsLoading(false);
+      console.error('Error fetching Google user data:', error);
       return null; // Đảm bảo trả về null khi có lỗi xảy ra
     }
   };
 
   const handleLoginWithGoogle = async () => {
-    setIsLoading(true);
-    const userInfo = await getDataUserWithGoogle();
-    if (!userInfo) {
+    setIsLoading(true); // Chỉ gọi 1 lần lúc bắt đầu
+    const data = await getDataUserWithGoogle();
+    if (!data) {
       setIsLoading(false);
       return;
     }
-
-    const data = {
-      id: userInfo.id,
-      email: userInfo.email,
-      name: userInfo.name,
-      familyName: userInfo.familyName,
-      givenName: userInfo.givenName,
-      photo: userInfo.photo,
-      access: Validate.Email_Admin(userInfo.email) ? 'true' : 'false',
-    };
     try {
-      const res = await authenticationApi.handleAuthentication(
-        '/login',
-        data,
-        'post',
-      );
-      console.log(res.data);
+      const res = await Auth.loginWithGoogle(data);
       dispatch(addAuth(res?.data));
       await AsyncStorage.setItem('auth', JSON.stringify(res?.data));
-      setIsLoading(false);
-      Toast.show({
-        type: 'success',
-        text1: 'Login Success',
-        text2: 'Welcome to UMate 👋',
-        position: 'top', // Vị trí của Toast (top, bottom)
-        visibilityTime: 4000, // Thời gian hiển thị toast
-      });
+      Notification.showToast('success', 'Login Success', 'Welcome to UMate 👋');
     } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-      Toast.show({
-        type: 'error',
-        text1: 'Login failed',
-        text2: `Login failed, please try again later.`,
-        position: 'top', // Vị trí của Toast (top, bottom)
-        visibilityTime: 4000, // Thời gian hiển thị toast
-      });
+      console.error('Login error:', error);
+      Notification.showToast(
+        'error',
+        'Login failed',
+        'Login failed, please try again later.',
+      );
+      await Auth.SignOutAndCleanup();
+      dispatch(removeAuth());
+    } finally {
+      setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
 
@@ -180,7 +157,7 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     width: '80%',
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   hint: {
     fontStyle: 'italic',

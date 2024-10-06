@@ -22,7 +22,7 @@ const App = () => {
         
         <NavigationContainer>
           <AppRouters />
-          <Toast config={ToastConfig}/>
+          <Toast />
         </NavigationContainer>
       </Provider>
     </GestureHandlerRootView>

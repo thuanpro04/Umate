@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {HambergerMenu, Map, Map1, Menu, Star1} from 'iconsax-react-native';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
+import {Address} from '../../assets/svgs/indexSvg';
 
 const HomeScreen = ({navigation}: any) => {
   const disPath = useDispatch();
@@ -30,13 +31,7 @@ const HomeScreen = ({navigation}: any) => {
         iconLeft={
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.black} />
         }
-        iconRight={
-          <Map1
-            size={appInfo.sizeIconBold}
-            color={appColors.green}
-            variant="Bold" 
-          />
-        }
+        iconRight={<Address/>}
         onPress1={() => navigation.openDrawer()}
         isBcolor
       />
@@ -44,13 +39,13 @@ const HomeScreen = ({navigation}: any) => {
         <CarComponent />
         <SpaceComponent height={12} isCrossBar />
         <CarComponent />
-        <SpaceComponent height={12} isCrossBar/>
+        <SpaceComponent height={12} isCrossBar />
         <CarComponent />
-        <SpaceComponent height={12} isCrossBar/>
+        <SpaceComponent height={12} isCrossBar />
         <CarComponent />
-        <SpaceComponent height={12} isCrossBar/>
+        <SpaceComponent height={12} isCrossBar />
         <CarComponent />
-        <SpaceComponent height={12} isCrossBar/>
+        <SpaceComponent height={12} isCrossBar />
         <CarComponent />
       </View>
     </ContainerComponent>

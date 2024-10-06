@@ -65,7 +65,7 @@ const InputComponent = (props: Props) => {
         keyboardType={type ?? 'default'}
         autoCapitalize="none"
         maxLength={numberOfLines ? 280 : 150}
-        style={{flex: 1, color: appColors.black, paddingVertical: 4}}
+        style={{flex: 1, color: appColors.black, paddingVertical: 8}}
         placeholderTextColor={appColors.black}
       />
       <TouchableOpacity onPress={() => onChange('')}>
@@ -90,7 +90,7 @@ const style = StyleSheet.create({
     borderWidth: 1,
     borderColor: appColors.grey2,
     width: '90%',
-    borderRadius: 28,
+    borderRadius: 10,
     backgroundColor: '#eeeeeeAD',
     alignItems: 'center',
   },

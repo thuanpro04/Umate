@@ -1,16 +1,16 @@
-import {View, Text} from 'react-native';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import React from 'react';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { appColors } from '../../Theme/Colors/appColors';
 import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
-import {appColors} from '../../Theme/Colors/appColors';
+import SuggestFriend from '../Friends/SuggestFriend';
 
 const Tab = createMaterialTopTabNavigator();
 const TabTopNavigator = () => {
   return (
     <Tab.Navigator
       style={{flex: 1}}
-      initialRouteName='Request'
+      initialRouteName="SuggestFriend"
       screenOptions={() => ({
         tabBarStyle: {
           backgroundColor: appColors.white,
@@ -21,8 +21,9 @@ const TabTopNavigator = () => {
           backgroundColor: appColors.focus, // thanh phía dưới
         },
       })}>
-      <Tab.Screen name="Request" component={FriendsRequestScreen}  key={'request'}/>
-      <Tab.Screen name="Mate" component={FriendsRespondScreen} key={'mate'} />
+      <Tab.Screen name="SuggestFriend" component={SuggestFriend} key="suggestFriendTab" />
+      <Tab.Screen name="Request" component={FriendsRequestScreen} key="requestTab" />
+      <Tab.Screen name="Homie" component={FriendsRespondScreen} key="homieTab" />
     </Tab.Navigator>
   );
 };

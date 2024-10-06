@@ -3,10 +3,11 @@ import React from 'react'
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import DrawerNavigator from './DrawerNavigator';
 import {ContactUsScreen, SearchScreen, SettingScreen} from '../index';
+import WelcomtoApp from '../WelcomtoApp';
 const MainNavigator = () => {
     const Stack = createNativeStackNavigator();
     return (
-      <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Navigator screenOptions={{headerShown: false}} >
         <Stack.Screen name="Main" component={DrawerNavigator} />
         <Stack.Screen name="Setting" component={SettingScreen} />
         <Stack.Screen name="ContactUs" component={ContactUsScreen} />

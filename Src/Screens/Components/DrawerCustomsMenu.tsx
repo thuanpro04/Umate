@@ -7,7 +7,7 @@ import {
   StatusBar,
   FlatList,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {globalStyles} from '../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
@@ -19,16 +19,19 @@ import RowComponent from './RowComponent';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingModal from '../Modal/LoadingModal';
+import {UserInfo} from '../Untils/UserInfo';
 
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const disPathch = useDispatch();
   const user = useSelector(authSelector);
-  const getName = (fullName: string) => {
-    const name = fullName.split(' ');
-    const splitName = name[0] + ' ' + name[1];
-    return splitName;
-  };
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+        '255214993798-jot48ccnfct32m4n9b1ud0pjgf17ag7p.apps.googleusercontent.com',
+    });
+  }, []);
+
   const handleSignOutWithGoogle = async () => {
     try {
       await GoogleSignin.signOut();
@@ -39,7 +42,6 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     }
   };
   const handleShowItemMenu = async (key: string) => {
-    setIsLoading(true);
     switch (key) {
       case 'profile':
         navigation.closeDrawer();
@@ -68,6 +70,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
         break;
 
       case 'signOut':
+        setIsLoading(true);
         await handleSignOutWithGoogle();
         break;
     }
@@ -91,7 +94,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
             style={globalStyles.avatar}
           />
         )}
-        <TextComponent label={getName(user.name ?? ' ')} title size={28} />
+        <TextComponent label={UserInfo.getName(user.name)} title size={28} />
       </TouchableOpacity>
       <FlatList
         showsVerticalScrollIndicator={false}

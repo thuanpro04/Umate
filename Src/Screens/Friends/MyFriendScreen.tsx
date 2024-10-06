@@ -1,15 +1,14 @@
 import React from 'react';
-import {Image, StatusBar, View} from 'react-native';
-import {appColors} from '../../Theme/Colors/appColors';
+import { Image, StatusBar, View } from 'react-native';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   RowComponent,
-  SearchFriendsComponent,
-  SpaceComponent,
+  SearchFriendsComponent
 } from '../Components';
 import TabTopNavigator from '../Navigators/TabTopNavigator';
-import {useDispatch, useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {globalStyles} from '../../Styles/globalStyle';
 
 const MyFriendScreen = ({navigation}: any) => {
   const user = useSelector(authSelector);

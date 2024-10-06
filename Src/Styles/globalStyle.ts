@@ -5,6 +5,7 @@ const globalStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColors.white,
     paddingVertical: Platform.OS === 'android' ? StatusBar.currentHeight : 48,
+
   },
   row: {
     flexDirection: 'row',

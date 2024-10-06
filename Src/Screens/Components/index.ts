@@ -1,6 +1,7 @@
 import ActionIconComponent from './ActionIconComponent';
 import ButtonComponent from './ButtonComponent';
 import CarComponent from './CarComponent';
+import CarfeatureComponent from './CarfeatureComponent';
 import CarUserComponent from './CarUserComponent';
 import CircleComponent from './CircleComponent';
 import ContainerComponent from './ContainerComponent';
@@ -27,6 +28,6 @@ export {
   CircleComponent,
   SearchFriendsComponent,
   CarUserComponent,
-  ToastConfig
-  
+  ToastConfig,
+  CarfeatureComponent
 };

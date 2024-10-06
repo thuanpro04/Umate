@@ -28,6 +28,7 @@ const HeaderComponent = (props: Props) => {
         paddingHorizontal: 18,
         borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
         borderBottomWidth: isBcolor ? 0.2 : 0,
+        paddingVertical:13
       }, styles]}>
       <ButtonComponent
         onPress={onPress1 ?? goBack}

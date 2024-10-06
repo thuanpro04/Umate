@@ -1,23 +1,22 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
-  HeartAdd,
   Message,
+  People,
   Profile,
-  Profile2User,
-  Setting2,
+  Ship
 } from 'iconsax-react-native';
-import React, {ReactNode} from 'react';
-import {Platform} from 'react-native';
+import React, { ReactNode } from 'react';
+import { Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {appColors} from '../../Theme/Colors/appColors';
-import {CircleComponent, TextComponent} from '../Components/index';
-import {appInfo} from '../../Theme/appInfo';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { CircleComponent, TextComponent } from '../Components/index';
 import {
+  AddGroupScreens,
   HomeScreen,
   MessageScreen,
   MyFriendScreen,
   ProfileScreen,
-  AddGroupScreens,
 } from '../index';
 
 const TabNavigator = () => {
@@ -49,12 +48,12 @@ const TabNavigator = () => {
                 <CircleComponent
                   size={52}
                   styles={{marginTop: Platform.OS === 'ios' ? -50 : -60}}>
-                  <HeartAdd size={24} color={appColors.white} variant="Bold" />
+                  <Ship size={24} color={appColors.white} variant="Bold" />
                 </CircleComponent>
               );
               break;
             case 'Friends':
-              icon = <Profile2User size={size} color={color} />;
+              icon = <People size={size} color={color} />;
               break;
 
             case 'Message':
@@ -78,11 +77,11 @@ const TabNavigator = () => {
           marginBottom: 0,
         },
       })}>
-      <Tab.Screen name="Home" component={HomeScreen} key={"Home"}/>
-      <Tab.Screen name="Friends" component={MyFriendScreen} key={"Friends"}/>
-      <Tab.Screen name="AddGroup" component={AddGroupScreens} key={"AddGroup"}/>
-      <Tab.Screen name="Message" component={MessageScreen} key={"Message"}/>
-      <Tab.Screen name="Profile" component={ProfileScreen} key={"Profile"}/>
+      <Tab.Screen name="Home" component={HomeScreen}/>
+      <Tab.Screen name="Friends" component={MyFriendScreen} />
+      <Tab.Screen name="AddGroup" component={AddGroupScreens} />
+      <Tab.Screen name="Message" component={MessageScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

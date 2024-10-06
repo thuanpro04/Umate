@@ -5,6 +5,8 @@ import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import RowComponent from './RowComponent';
 import TextComponent from './TextComponent';
+import HeaderComponent from './HeaderComponent';
+
 interface Props {
   onPress?: () => void;
 }
@@ -12,13 +14,17 @@ const SearchFriendsComponent = (props: Props) => {
   const {onPress} = props;
   return (
     <View style={styles.container}>
+      
       <RowComponent onPress={onPress} styles={styles.searchStyles}>
         <SearchNormal
           size={appInfo.sizeIcon}
           color={appColors.grey}
           variant="Broken"
-      />
-        <TextComponent label="Search ..." styles={{fontWeight: '400', color:appColors.grey}} />
+        />
+        <TextComponent
+          label="Search ..."
+          styles={{fontWeight: '400', color: appColors.grey}}
+        />
       </RowComponent>
     </View>
   );
@@ -32,12 +38,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: appColors.grey2,
     width: '100%',
-    borderRadius: 28,
+    borderRadius: 12,
     alignItems: 'center',
-    paddingVertical:10
+    paddingVertical: 14,
   },
   container: {
     alignItems: 'center',
-    flex:1
+    flex: 1,
   },
 });

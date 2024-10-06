@@ -12,7 +12,7 @@ const RowComponent = (props: Props) => {
     <TouchableOpacity
       style={[globalStyles.row, styles]}
       onPress={onPress}
-      activeOpacity={0.5}>
+      activeOpacity={0.2}>
       {props.children}
     </TouchableOpacity>
   ) : (
