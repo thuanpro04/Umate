@@ -1,6 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const userSchema = new mongoose.Schema({
-  userId: {
+  userID: {
     type: String,
     required: true,
     unique: true,
@@ -23,11 +23,19 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
   },
+  majoring:{
+    type:String
+  },
+  sex:{
+    type:String
+  },
   access: {
     type: String,
   },
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
+  friendRequests:[{type:String, ref:"User"}],
+  removeFriends:[{type:String, ref:'User'}],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -46,14 +54,14 @@ const groupSchema = new mongoose.Schema({
 
 const postSchema = new mongoose.Schema({
   postId: { type: String, required: true, unique: true },
-  userId: { type: String, ref: "User", required: true },
+  userID: { type: String, ref: "User", required: true },
   content: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
   likes: [{ type: String, ref: "User" }],
   comments: [
     {
       commentId: { type: String, required: true, unique: true },
-      userId: { type: String, ref: "User", required: true },
+      userID: { type: String, ref: "User", required: true },
       content: { type: String, required: true },
       timestamp: { type: Date, default: Date.now },
     },

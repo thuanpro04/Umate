@@ -1,6 +1,6 @@
 const { mongoose } = require("mongoose");
 require("dotenv").config();
-const dbUrl = `mongodb+srv://phanminhthuan240304:66I6RYG2RDIAAd4C@cluster0.jignw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+const dbUrl = `mongodb+srv://phanminhthuan240304:66I6RYG2RDIAAd4C@cluster0.jignw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const connectMongoose = async () => {
   try {
     const connection = await mongoose.connect(dbUrl);
@@ -9,4 +9,4 @@ const connectMongoose = async () => {
     console.log("Connect mongoose fail", error);
   }
 };
-module.exports= connectMongoose;
+module.exports = connectMongoose;

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../models/usersModel");
+const { getUser } = require("../Services/userServices");
 const getJsonWebToken = async (email, id) => {
   const payload = {
     email,
@@ -15,9 +16,10 @@ const hanleLoginWithGoogle = async (req, res) => {
   try {
     const userInfo = req.body;
     console.log(req.body);
-    const user = { ...userInfo, avatar: userInfo.photo };
+    const user = { ...userInfo };
     // Kiểm tra người dùng có tồn tại không
-    const existingUser = await UserModel.findOne({ email: userInfo.email });
+    const existingUser = await getUser(userInfo.userID);
+
     if (existingUser) {
       await UserModel.findByIdAndUpdate(existingUser.id, {
         ...userInfo,
@@ -29,7 +31,7 @@ const hanleLoginWithGoogle = async (req, res) => {
     } else {
       // Cập nhật thông tin người dùng hiện tại nếu cần
       const newUser = new UserModel({
-        userId: userInfo.id,
+        userID: userInfo.userID,
         name: userInfo.name,
         email: userInfo.email,
         familyName: userInfo.familyName,
@@ -38,7 +40,7 @@ const hanleLoginWithGoogle = async (req, res) => {
         access: userInfo.access,
       });
       await newUser.save();
-      user.accesstoken = await getJsonWebToken(userInfo.email, userInfo.id);
+      user.accesstoken = await getJsonWebToken(userInfo.email, newUser.id);
       console.log("newUser", user.accesstoken);
       console.log("Create user.");
       // Sau khi cập nhật, trả về phản hồi
