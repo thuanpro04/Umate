@@ -11,6 +11,7 @@ import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {Users} from '../Services/friendService.';
 import {useFocusEffect} from '@react-navigation/native';
+import {userServices} from '../Services/userService';
 
 const SuggestFriend = () => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -32,6 +33,7 @@ const SuggestFriend = () => {
     const currenOffset = event.nativeEvent.contentOffset.y;
     currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
   };
+console.log(users);
 
   const handlePressYes = (userID: string) => {
     setButtonVisibility(prevState => ({
@@ -78,18 +80,19 @@ const SuggestFriend = () => {
 
     try {
       const res = await usersAPI.handleUsers(enpoint, data, 'post');
-      // console.log(res);
+      console.log(res);
     } catch (error) {
       console.log('handleFriendAction', error);
     }
   };
   const handlePressRemove = async (usersID: string) => {
-    const url = '/remove-suggested-friend';
-    const data = {friendUserID: usersID, currentUserID: auth.userID};
     try {
-      const res = await Users.getUsers(url, data, 'post');
-      console.log(res?.data);
-      
+      const res = await userServices.handlePressRemoveSuggested(
+        usersID,
+        auth.userID,
+      );
+      console.log(res);
+      getUsers();
     } catch (error) {
       console.log('handlePressRemove error', error);
     }
@@ -102,7 +105,8 @@ const SuggestFriend = () => {
   const handleCancelFriend = async (friendUserID: string) => {
     handleFriendAction(friendUserID, 'cancel');
   };
-  return !message ? (
+
+  return !message && users ? (
     <ScrollView
       style={styles.container}
       onScroll={handleScroll}

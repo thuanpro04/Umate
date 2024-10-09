@@ -7,27 +7,28 @@ import MainNavigator from './Src/Screens/Navigators/MainNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import AppRouters from './Src/Screens/Navigators/AppRouters';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import { appColors } from './Src/Theme/Colors/appColors';
+import {appColors} from './Src/Theme/Colors/appColors';
 import Toast from 'react-native-toast-message';
 import ToastConfig from './Src/Screens/Components/ToastConfig';
+import {Host} from 'react-native-portalize';
 const App = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <Provider store={store}>
         <StatusBar
           barStyle={'dark-content'} // điều chỉnh màu pin, wifi
-          translucent // quyết định liệu thanh trạng thái có trong suốt 
+          translucent // quyết định liệu thanh trạng thái có trong suốt
           backgroundColor={appColors.blue2}
         />
-        
-        <NavigationContainer>
-          <AppRouters />
-          <Toast />
-        </NavigationContainer>
+        <Host>
+          <NavigationContainer>
+            <AppRouters />
+            <Toast />
+          </NavigationContainer>
+        </Host>
       </Provider>
     </GestureHandlerRootView>
   );
 };
-
 
 export default App;

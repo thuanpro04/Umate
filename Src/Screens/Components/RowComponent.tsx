@@ -4,7 +4,7 @@ import {globalStyles} from '../../Styles/globalStyle';
 interface Props {
   children: ReactNode;
   styles?: StyleProp<ViewStyle>;
-  onPress?: () => void;
+  onPress?: (event?:any) => void;
 }
 const RowComponent = (props: Props) => {
   const {children, styles, onPress} = props;

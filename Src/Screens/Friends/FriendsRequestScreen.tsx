@@ -30,10 +30,10 @@ const FriendsRequestScreen = () => {
     }
   };
 
-  const handleAgreeFriend = async (friendID: string) => {
+  const handleAgreeFriend = async (friendUserID: string) => {
     const url = `/agree-friend`;
     const currentUserID = auth.userID;
-    const data = {friendID, currentUserID};
+    const data = {friendUserID, currentUserID};
     try {
       const res = await usersAPI.handleUsers(url, data, 'post');
       getUsers();

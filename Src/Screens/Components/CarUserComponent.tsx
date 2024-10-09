@@ -1,5 +1,12 @@
 import React, {ReactNode, useState} from 'react';
-import {Image, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import {appColors} from '../../Theme/Colors/appColors';
 import ButtonComponent from './ButtonComponent';
 import RowComponent from './RowComponent';
@@ -28,6 +35,7 @@ interface Props {
 }
 const CarUserComponent = (props: Props) => {
   const [isShowIcon, setIsShowIcon] = useState(false);
+  const [isShowModal, setisShowModal] = useState();
   const {
     img,
     name,
@@ -112,14 +120,18 @@ const CarUserComponent = (props: Props) => {
   ) : (
     <RowComponent styles={{flex: 1, justifyContent: 'flex-start'}}>
       <TouchableOpacity onPress={onPressImg} activeOpacity={0.7}>
-        <Image
-          source={{
-            uri:
-              img ??
-              'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F2023%2Flovepik-happy-man-png-image_401141286_wh1200.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fa-man-clipart-12.htm&docid=XVX5d6ymItErVM&tbnid=h-y_6bYduFw3RM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA..i&w=1002&h=1002&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA',
-          }}
-          style={localStyle.userImg}
-        />
+        {img ? (
+          <Image
+            source={{
+              uri:
+                img ??
+                'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F2023%2Flovepik-happy-man-png-image_401141286_wh1200.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fa-man-clipart-12.htm&docid=XVX5d6ymItErVM&tbnid=h-y_6bYduFw3RM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA..i&w=1002&h=1002&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA',
+            }}
+            style={localStyle.userImg}
+          />
+        ) : (
+          <ActivityIndicator style={localStyle.userImg} />
+        )}
       </TouchableOpacity>
       <View style={{alignItems: 'flex-start'}}>
         <TextComponent label={name} title />

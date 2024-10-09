@@ -4,12 +4,14 @@ import Digital from '../svgs/Digital.svg'
 import Rocket from '../svgs/Rocket.svg'
 import Ballons from '../svgs/Ballons.svg'
 import Address from '../svgs/Address.svg'
+import Loss from '../svgs/Loss.svg'
 export {
     Google,
     Liliu,
     Digital,
     Rocket,
     Ballons,
-    Address
+    Address,
+    Loss
 
 }

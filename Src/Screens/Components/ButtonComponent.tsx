@@ -1,5 +1,5 @@
 import {View, Text, TouchableOpacity, StyleProp, ViewStyle, TextStyle} from 'react-native';
-import React, {ReactNode} from 'react';
+import React, {Children, ReactNode} from 'react';
 import TextComponent from './TextComponent';
 import RowComponent from './RowComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -21,10 +21,11 @@ interface Props {
     | 'space-around';
   styles?: StyleProp<ViewStyle>;
   type?: 'primary' | 'link' | 'none' | 'action';
-  onPress?: () => void;
+  onPress?: (even?:any) => void;
   disabled?: boolean;
   flex?: number;
   textStyle?:StyleProp<TextStyle>
+  children?:ReactNode
 }
 const ButtonComponent = (props: Props) => {
   const {
@@ -40,12 +41,14 @@ const ButtonComponent = (props: Props) => {
     onPress,
     disabled,
     flex,
-    textStyle
+    textStyle,
+    children
   } = props;
   return type === 'action' ? (
     <TouchableOpacity onPress={onPress} style={styles}>
       {iconLeft}
       {iconRight}
+      {children}
     </TouchableOpacity>
   ) : (
     <View

@@ -1,14 +1,17 @@
 import {Message, MessageQuestion} from 'iconsax-react-native';
-import React, {useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import React, {ReactNode, useState} from 'react';
+import {Image, ImageSourcePropType, StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import ActionIconComponent from './ActionIconComponent';
 import {RowComponent, SpaceComponent, TextComponent} from './index';
 
-interface Props {}
-const CarComponent = () => {
+interface Props {
+  img:ImageSourcePropType
+}
+const CarComponent = (props:Props) => {
+  const{img}=props
   const [isBackground, setBackground] = useState(false);
   return (
     <View style={localStyles.container}>
@@ -36,7 +39,7 @@ const CarComponent = () => {
         />
         <SpaceComponent height={10} />
         <Image
-          source={require('../../assets/images/tdmu.jpg')}
+          source={img}
           style={localStyles.avatar}
         />
       </View>

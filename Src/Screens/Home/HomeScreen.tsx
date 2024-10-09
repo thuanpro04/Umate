@@ -36,17 +36,17 @@ const HomeScreen = ({navigation}: any) => {
         isBcolor
       />
       <View style={{marginBottom: appInfo.size.HEIGHT * 0.045}}>
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/tdmu.jpg')}/>
         <SpaceComponent height={12} isCrossBar />
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/image.png')}/>
         <SpaceComponent height={12} isCrossBar />
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/image1.png')}/>
         <SpaceComponent height={12} isCrossBar />
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/image2.png')} />
         <SpaceComponent height={12} isCrossBar />
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/image3.png')}/>
         <SpaceComponent height={12} isCrossBar />
-        <CarComponent />
+        <CarComponent img={require('../../assets/images/tdmu.jpg')}/>
       </View>
     </ContainerComponent>
   );
