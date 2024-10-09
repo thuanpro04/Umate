@@ -1,13 +1,14 @@
 const { UserModel } = require("../models/usersModel");
 const {
-  getUser,
-  handleUsersRequest,
-  handleUserAction,
-  handleActionFriend,
-  handleUpdate,
-  handleRemoveFriend,
-  getFilteredUsers,
-  formatUserData,
+  findUserById,
+  getUsersByIds,
+  handleFriendRequestAction,
+  manageFriendship,
+  updateUserById,
+  removeFriendSuggestion,
+  filterUsers,
+  transformUserData,
+  processRemoveFriendAction,
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
@@ -15,15 +16,15 @@ const getAllUsers = async (req, res) => {
 
   try {
     // Lấy thông tin người dùng hiện tại
-    const existingUser = await getUser(currentUserID);
+    const existingUser = await findUserById(currentUserID);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found!" });
     }
     // Lọc danh sách người dùng dựa trên filter
-    const filteredUsers = await getFilteredUsers(filter, existingUser);
+    const filteredUsers = await filterUsers(filter, existingUser);
     // Định dạng dữ liệu người dùng trước khi trả về
-    const formattedData = formatUserData(filteredUsers);
+    const formattedData = transformUserData(filteredUsers);
     // Trả về dữ liệu thành công
     res.status(200).json({
       message: "Get users successfully!!!",
@@ -36,25 +37,29 @@ const getAllUsers = async (req, res) => {
 };
 
 const handleAddFriends = (req, res) => {
-  handleUserAction(req, res, "add");
+  handleFriendRequestAction(req, res, "add");
 };
 
 const handleCancelFriend = (req, res) => {
-  handleUserAction(req, res, "cancel");
+  handleFriendRequestAction(req, res, "cancel");
 };
 
 const handleAgreeFriend = async (req, res) => {
-  handleActionFriend(req, res, "agree");
+  manageFriendship(req, res, "agree");
 };
-const handlePressRemove = async (req, res) => {
-  handleRemoveFriend(req, res);
+const handlePressRemoveSuggest = async (req, res) => {
+  removeFriendSuggestion(req, res);
 };
-const getYourFriends = async (req, res) => {};
+
+const handleRemoveFriends= async(req, res)=>{
+  processRemoveFriendAction(req, res)
+  
+}
 module.exports = {
   getAllUsers,
   handleAddFriends,
   handleCancelFriend,
   handleAgreeFriend,
-  getYourFriends,
-  handlePressRemove,
+  handlePressRemoveSuggest,
+  handleRemoveFriends
 };

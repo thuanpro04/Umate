@@ -1,17 +1,14 @@
 const { UserModel } = require("../models/usersModel");
 
-const getUser = async (userID) => {
+const findUserById = async (userID) => {
   return await UserModel.findOne({ userID: userID }).lean();
 };
-const handleUsersRequest = async (userFriends) => {
-  users = await UserModel.find({ userID: { $in: userFriends } }).lean();
-  return users;
-};
-const handleUpdate = async (userID, updateAction) => {
+
+const updateUserById = async (userID, updateAction) => {
   const result = await UserModel.updateOne({ userID: userID }, updateAction);
   return result;
 };
-const handleUserAction = async (req, res, action) => {
+const handleFriendRequestAction = async (req, res, action) => {
   const { friendUserID, currentUserID } = req.body;
   try {
     // Tìm thông tin người dùng
@@ -20,7 +17,7 @@ const handleUserAction = async (req, res, action) => {
       action === "add"
         ? { $addToSet: { friendRequests: currentUserID } } //thêm ko trùng lập
         : { $pull: { friendRequests: currentUserID } }; // xóa
-    const result = await handleUpdate(friendUserID, updateAction);
+    const result = await updateUserById(friendUserID, updateAction);
     if (result.nModified === 0) {
       return res
         .status(404)
@@ -37,8 +34,9 @@ const handleUserAction = async (req, res, action) => {
     res.status(500).json({ message: "Error processing request" });
   }
 };
-const handleActionFriend = async (req, res, action) => {
-  const { friendID, currentUserID } = req.body;
+
+const manageFriendship = async (req, res, action) => {
+  const { friendUserID, currentUserID } = req.body;
   const updateActions =
     action === "agree"
       ? [
@@ -46,16 +44,16 @@ const handleActionFriend = async (req, res, action) => {
             updateOne: {
               filter: { userID: currentUserID },
               update: {
-                $addToSet: { friends: friendID }, // Thêm friendID vào danh sách bạn bè của currentUserID
-                $pull: { friendRequests: friendID }, // Xóa friendID khỏi danh sách yêu cầu kết bạn
+                $addToSet: { friends: friendUserID }, // Thêm friendUserID vào danh sách bạn bè của currentUserID
+                $pull: { friendRequests: friendUserID }, // Xóa friendUserID khỏi danh sách yêu cầu kết bạn
               },
             },
           },
           {
             updateOne: {
-              filter: { userID: friendID },
+              filter: { userID: friendUserID },
               update: {
-                $addToSet: { friends: currentUserID }, // Thêm currentUserID vào danh sách bạn bè của friendID
+                $addToSet: { friends: currentUserID }, // Thêm currentUserID vào danh sách bạn bè của friendUserID
                 $pull: { friendRequests: currentUserID }, // Xóa currentUserID khỏi danh sách yêu cầu kết bạn
               },
             },
@@ -66,13 +64,13 @@ const handleActionFriend = async (req, res, action) => {
             updateOne: {
               filter: { userID: currentUserID },
               update: {
-                $pull: { friends: friendID, friendRequests: friendID }, // Xóa friendID khỏi danh sách bạn bè và yêu cầu kết bạn
+                $pull: { friends: friendUserID, friendRequests: friendUserID }, // Xóa friendUserID khỏi danh sách bạn bè và yêu cầu kết bạn
               },
             },
           },
           {
             updateOne: {
-              filter: { userID: friendID },
+              filter: { userID: friendUserID },
               update: {
                 $pull: {
                   friends: currentUserID,
@@ -104,33 +102,42 @@ const handleActionFriend = async (req, res, action) => {
     res.status(500).json({ message: "Error handling friend request" });
   }
 };
-const handleRemoveFriend = async (req, res) => {
+const removeFriendSuggestion = async (req, res) => {
   const { friendUserID, currentUserID } = req.body;
-  const updateAction = { $addToSet: { removeFriends: friendUserID } };
+  const updateAction = { $addToSet: { removeFriends: friendUserID } }; // Thêm friendUserID vào mảng removeFriends
+
   try {
-    const result = await handleUpdate(currentUserID, updateAction);
-    if (result.nModified === 0) {
+    // Thực hiện cập nhật
+    const result = await updateUserById(currentUserID, updateAction);
+
+    // Kiểm tra xem có sự thay đổi nào không (nếu không thay đổi, result.modifiedCount sẽ là 0)
+    if (!result.modifiedCount) {
       return res
         .status(404)
-        .json({ message: "User not found or no change made!" });
+        .json({ message: "No changes made or user not found!" });
     }
-
-    res.status(200).json({
-      message: "Update remove friend successfully!",
+    // Trả về thông báo thành công
+    return res.status(200).json({
+      message: "Friend removed successfully!",
     });
   } catch (error) {
-    console.log("Update remove fail", error);
-    res.status(500).json({ message: "Update remove failed", error });
+    // Trả về chi tiết lỗi nếu có
+    console.error("Failed to update remove friend:", error);
+    res.status(500).json({ message: "Failed to remove friend", error });
   }
 };
-const getFilteredUsers = async (filter, existingUser) => {
+const getUsersByIds = async (userFriends) => {
+  users = await UserModel.find({ userID: { $in: userFriends } }).lean();
+  return users;
+};
+const filterUsers = async (filter, existingUser) => {
   const { userID, friends, removeFriends, friendRequests } = existingUser;
 
   switch (filter) {
     case "requests":
       // Lấy người dùng có yêu cầu kết bạn
       return friendRequests.length > 0
-        ? await handleUsersRequest(friendRequests)
+        ? await getUsersByIds(friendRequests)
         : null;
 
     case "suggestfriend":
@@ -141,10 +148,14 @@ const getFilteredUsers = async (filter, existingUser) => {
 
     default:
       // Mặc định trả về danh sách bạn bè
-      return friends.length > 0 ? await handleUsersRequest(friends) : null;
+      return friends.length > 0
+        ? await UserModel.find({
+            userID: { $in: friends, $nin: removeFriends },
+          }).lean()
+        : null;
   }
 };
-const formatUserData = (users) => {
+const transformUserData = (users) => {
   return (
     users?.map((user) => ({
       email: user.email,
@@ -156,14 +167,58 @@ const formatUserData = (users) => {
     })) || []
   );
 };
+const processRemoveFriendAction = async (req, res) => {
+  const { friendUserID, currentUserID } = req.body;
+
+  const updateActions = [
+    {
+      updateOne: {
+        filter: { userID: currentUserID },
+        update: {
+          $pull: { friends: friendUserID },          // Xóa friendUserID khỏi danh sách bạn bè
+          $addToSet: { removeFriends: friendUserID } // Thêm friendUserID vào danh sách đã xóa
+        },
+      },
+    },
+    {
+      updateOne: {
+        filter: { userID: friendUserID },
+        update: {
+          $pull: { friends: currentUserID } // Xóa currentUserID khỏi danh sách bạn bè
+        },
+      },
+    },
+  ];
+  try {
+    // Thực hiện cập nhật đồng thời cho cả hai người dùng
+    const bulkResult = await UserModel.bulkWrite(updateActions);
+    // Kiểm tra kết quả để đảm bảo rằng cả hai đều đã được cập nhật
+    const totalModified = bulkResult.modifiedCount;
+
+    if (totalModified < 2) {
+      return res.status(400).json({ message: "Update failed!" });
+    }
+
+    return res.status(200).json({
+      message: "Delete friend successfully!!!",
+    });
+  } catch (error) {
+    console.error("Delete friend fail:", error);
+    return res.status(500).json({
+      message: "An error occurred while deleting the friend.",
+    });
+  }
+};
+
 
 module.exports = {
-  getUser,
-  handleUsersRequest,
-  handleUserAction,
-  handleActionFriend,
-  handleUpdate,
-  handleRemoveFriend,
-  getFilteredUsers,
-  formatUserData
+  findUserById,
+  getUsersByIds,
+  handleFriendRequestAction,
+  manageFriendship,
+  updateUserById,
+  removeFriendSuggestion,
+  filterUsers,
+  transformUserData,
+  processRemoveFriendAction,
 };

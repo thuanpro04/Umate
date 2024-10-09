@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../models/usersModel");
-const { getUser } = require("../Services/userServices");
+const { findUserById } = require("../Services/userServices");
 const getJsonWebToken = async (email, id) => {
   const payload = {
     email,
@@ -18,7 +18,7 @@ const hanleLoginWithGoogle = async (req, res) => {
     console.log(req.body);
     const user = { ...userInfo };
     // Kiểm tra người dùng có tồn tại không
-    const existingUser = await getUser(userInfo.userID);
+    const existingUser = await findUserById(userInfo.userID);
 
     if (existingUser) {
       await UserModel.findByIdAndUpdate(existingUser.id, {
@@ -36,7 +36,7 @@ const hanleLoginWithGoogle = async (req, res) => {
         email: userInfo.email,
         familyName: userInfo.familyName,
         givenName: userInfo.givenName,
-        avatar: userInfo.photo,
+        avatar: userInfo.avatar,
         access: userInfo.access,
       });
       await newUser.save();

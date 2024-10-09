@@ -4,8 +4,8 @@ const {
   handleAddFriends,
   handleCancelFriend,
   handleAgreeFriend,
-  getYourFriends,
-  handlePressRemove,
+  handlePressRemoveSuggest,
+  handleRemoveFriends,
 } = require("../Controller/UsersController");
 const usersRouter = Router();
 
@@ -13,7 +13,6 @@ usersRouter.get("/get-all", getAllUsers);
 usersRouter.post("/add-friend", handleAddFriends);
 usersRouter.post("/cancel-friend", handleCancelFriend);
 usersRouter.post("/agree-friend", handleAgreeFriend);
-usersRouter.get("/your-friend", getYourFriends);
-usersRouter.post("/remove-suggested-friend", handlePressRemove);
-
+usersRouter.post("/remove-suggested-friend", handlePressRemoveSuggest);
+usersRouter.post('/remove-friend', handleRemoveFriends)
 module.exports = usersRouter;
