@@ -1,4 +1,11 @@
-import {View, Text, TouchableOpacity, StyleProp, ViewStyle, TextStyle} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import React, {Children, ReactNode} from 'react';
 import TextComponent from './TextComponent';
 import RowComponent from './RowComponent';
@@ -21,11 +28,11 @@ interface Props {
     | 'space-around';
   styles?: StyleProp<ViewStyle>;
   type?: 'primary' | 'link' | 'none' | 'action';
-  onPress?: (even?:any) => void;
+  onPress?: (even?: any) => void;
   disabled?: boolean;
   flex?: number;
-  textStyle?:StyleProp<TextStyle>
-  children?:ReactNode
+  textStyle?: StyleProp<TextStyle>;
+  children?: ReactNode;
 }
 const ButtonComponent = (props: Props) => {
   const {
@@ -42,13 +49,14 @@ const ButtonComponent = (props: Props) => {
     disabled,
     flex,
     textStyle,
-    children
+    children,
   } = props;
   return type === 'action' ? (
-    <TouchableOpacity onPress={onPress} style={styles}>
+    <TouchableOpacity onPress={onPress} style={styles} disabled={disabled}>
       {iconLeft}
       {iconRight}
       {children}
+      {lable && <TextComponent label={lable} />}
     </TouchableOpacity>
   ) : (
     <View
@@ -65,7 +73,6 @@ const ButtonComponent = (props: Props) => {
             flex: flex ?? 0,
             alignItems: 'center',
             justifyContent: 'center',
-
           },
         ]}
         disabled={disabled}

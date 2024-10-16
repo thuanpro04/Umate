@@ -1,10 +1,15 @@
 module.exports = {
-    dependencies: {
-      'react-native-vector-icons': {
-        platforms: {
-          ios: null,
-        },
+  project: {
+    android: {
+      packageName: 'com.umate', // Đảm bảo đúng với cấu hình Android
+    },
+  },
+  dependencies: {
+    'react-native-vector-icons': {
+      platforms: {
+        ios: null,
       },
     },
-    assets:['../UMate/assets/fonts/']
-  };
+  },
+  assets: ['../UMate/assets/fonts/'],
+};

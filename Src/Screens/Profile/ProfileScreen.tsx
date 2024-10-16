@@ -6,7 +6,7 @@ import {
   User,
 } from 'iconsax-react-native';
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -15,6 +15,7 @@ import {
   CarUserComponent,
   ContainerComponent,
   HeaderComponent,
+  RowComponent,
   SpaceComponent,
 } from '../Components';
 import {useDispatch, useSelector} from 'react-redux';
@@ -28,20 +29,16 @@ const ProfileScreen = () => {
   };
   return (
     <ContainerComponent styles={{paddingHorizontal: 12}}>
-      <HeaderComponent
-        iconRight={
-          <Setting2 size={appInfo.sizeIconBold} color={appColors.black} />
-        }
-        iconLeft={
-          <ArrowLeft size={appInfo.sizeIconBold} color={appColors.black} />
-        }
-      />
-      <CarUserComponent
-        name={getName(auth.name)}
-        isFind
-        styles={{borderWidth: 0, gap: 20}}
-        img={auth.avatar}
-      />
+      <RowComponent styles={{justifyContent:'center',paddingHorizontal:20}}>
+        <CarUserComponent
+          name={getName(auth.name)}
+          isFind
+          styles={{borderWidth: 0, gap: 20}}
+          img={auth.avatar}
+        />
+        <Setting2 size={appInfo.sizeIconBold} color={appColors.black} />
+      </RowComponent>
+
       <SpaceComponent height={30} />
       <CarfeatureComponent
         label="View profile"

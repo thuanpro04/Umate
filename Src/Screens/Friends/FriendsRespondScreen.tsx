@@ -1,15 +1,14 @@
-import {View, ScrollView, StyleSheet} from 'react-native';
-import React, {useCallback, useRef, useState} from 'react';
-import {CarUserComponent} from '../Components';
-import {appColors} from '../../Theme/Colors/appColors';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {useSelector} from 'react-redux';
-import {UserInfo} from '../Untils/UserInfo';
-import {useFocusEffect} from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
+import { appColors } from '../../Theme/Colors/appColors';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { CarUserComponent } from '../Components';
 import UserInfoModal from '../Modal/UserInfoModal';
-import {Modalize} from 'react-native-modalize';
-import {Users} from '../Services/friendService.';
-import {userServices} from '../Services/userService';
+import { friendServices } from '../Services/friendService.';
+import { userServices } from '../Services/userService';
+import { UserInfo } from '../Untils/UserInfo';
 
 const initialUser = {
   avatar: '',
@@ -20,7 +19,7 @@ const initialUser = {
   userID: '',
 };
 
-const FriendsRespondScreen = ({navigate}: any) => {
+const FriendsRespondScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState(initialUser);
   const auth = useSelector(authSelector);
@@ -35,7 +34,7 @@ const FriendsRespondScreen = ({navigate}: any) => {
   const fetchUserFriends = async () => {
     const url = `/get-all?currentUserID=${auth.userID}`;
     try {
-      const res = await Users.getUsers(url);
+      const res = await userServices.getUsers(url);
       if (res) {
         setUsers(res);
       }
@@ -46,10 +45,8 @@ const FriendsRespondScreen = ({navigate}: any) => {
 
   const handleRemoveFriend = async (userID: string) => {
     try {
-      const res = await userServices.handleRemoveFriends(userID, auth.userID);
+      const res = await friendServices.handleRemoveFriends(userID, auth.userID);
       //xử lí thêm xóa trong friend và update người friend người bị xóa
-      console.log(res);
-
       setIsModal(false);
       fetchUserFriends();
     } catch (error) {
@@ -67,8 +64,6 @@ const FriendsRespondScreen = ({navigate}: any) => {
     setSelectedUser(user);
   };
 
-  console.log(isModal);
-
   return (
     <View style={styles.container}>
       <ScrollView scrollEventThrottle={16}>
@@ -78,7 +73,14 @@ const FriendsRespondScreen = ({navigate}: any) => {
             img={item.avatar}
             name={UserInfo.getName(item.name)}
             isFind
+            iconM
             styles={{borderWidth: 0}}
+            onPressMessages={()=> navigation.navigate('Chat', {
+              currentUserID: auth.userID,
+              userID: item.userID,
+              userName:item.name,
+              avatar:item.avatar
+            })}
             onPressEllipsis={() => handleOpenModal(item)}
           />
         ))}
@@ -89,7 +91,7 @@ const FriendsRespondScreen = ({navigate}: any) => {
         img={selectedUser.avatar}
         name={UserInfo.getName(selectedUser.name)}
         onClose={handleCloseModal}
-        handleNavigation={() => navigate.navigate('Message')}
+        handleNavigation={() => navigation.navigation('Message')}
         handleUnFriend={async () =>
           await handleRemoveFriend(selectedUser.userID)
         }

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import React, {ReactNode, useState} from 'react';
+import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import RowComponent from './RowComponent';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -28,6 +28,7 @@ interface Props {
   numberOfLines?: number;
   styles?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  isFocused?:boolean
 }
 const InputComponent = (props: Props) => {
   const {
@@ -44,13 +45,23 @@ const InputComponent = (props: Props) => {
     placehold,
     isPass,
     onPress,
+    isFocused
   } = props;
+
   const [isShowPass, setIsShowPass] = useState(isPass ?? false);
   const [isFocus, setIsFocus] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  useEffect(() => {
+    // Focus vào ô input khi component được render lần đầu
+    if (inputRef.current && isFocused) {
+      inputRef.current.focus();
+    }
+  }, []);
   return (
     <RowComponent styles={[style.searchStyles, {paddingVertical: 0}, styles]}>
       {affix && affix}
       <TextInput
+        ref={inputRef}
         placeholder={placehold}
         value={value}
         onEndEditing={() => {
@@ -64,15 +75,14 @@ const InputComponent = (props: Props) => {
         onChangeText={(element): any => onChange(element)}
         keyboardType={type ?? 'default'}
         autoCapitalize="none"
-        maxLength={numberOfLines ? 280 : 150}
-        style={{flex: 1, color: appColors.black, paddingVertical: 8}}
+        style={{flex: 1, color: appColors.black, paddingVertical: 4}}
         placeholderTextColor={appColors.black}
       />
       <TouchableOpacity onPress={() => onChange('')}>
         {value && value.length > 0 && props.allowClear && (
           <AntDesign
             name="close"
-            size={appInfo.sizeIcon-5}
+            size={appInfo.sizeIcon - 5}
             color={appColors.black}
           />
         )}
@@ -86,12 +96,12 @@ export default InputComponent;
 const style = StyleSheet.create({
   searchStyles: {
     justifyContent: 'flex-start',
-    paddingHorizontal: 18,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: appColors.grey2,
     width: '90%',
-    borderRadius: 10,
-    backgroundColor: '#eeeeeeAD',
+    borderRadius: 12,
+    backgroundColor: '#F8F9FA',
     alignItems: 'center',
   },
 });

@@ -24,5 +24,7 @@ export const appColors = {
   linearFocus59_pink: '#DB28A9',
   linearFocus31_purple: '#842ED8',
   cobalt: '#3A5199',
-  bgIcon:'#fafaaf'
+  bgIcon:'#fafaaf',
+  grey3: '#808080',
+  lightGrey: '#D3D3D3',
 };

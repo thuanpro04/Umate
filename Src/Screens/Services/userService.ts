@@ -1,23 +1,12 @@
-import {Users} from './friendService.'; // Giả sử đây là nơi bạn thực hiện các yêu cầu API
+import usersAPI from "../../apis/usersApi";
 
-const handlePressRemoveSuggested = async (
-  usersID: string,
-  currentUserID: string,
-) => {
-  const url = '/remove-suggested-friend';
-  const data = {friendUserID: usersID, currentUserID};
-  const res = await Users.getUsers(url, data, 'post');
-  console.log(res);
+ // Giả sử đây là nơi bạn thực hiện các yêu cầu API
+const getUsers = async (url: string, data?: any, method?: 'get' | 'post') => {
+  const res = await usersAPI.handleUsers(url, data, method ?? 'get');
   return res?.data;
 };
-const handleRemoveFriends = async (usersID: string, currentUserID: string) => {
-  const url = '/remove-friend';
-  const data = {friendUserID: usersID, currentUserID};
-  const res = await Users.getUsers(url, data, 'post');
- return res?.data;
-  
-};
+
+
 export const userServices = {
-  handlePressRemoveSuggested,
-  handleRemoveFriends,
+  getUsers
 };

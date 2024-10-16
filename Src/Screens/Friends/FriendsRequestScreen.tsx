@@ -6,8 +6,8 @@ import {CarUserComponent} from '../Components';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {UserInfo} from '../Untils/UserInfo';
-import {Users} from '../Services/friendService.';
 import {useFocusEffect} from '@react-navigation/native';
+import { userServices } from '../Services/userService';
 
 const FriendsRequestScreen = () => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -21,7 +21,7 @@ const FriendsRequestScreen = () => {
   const getUsers = async () => {
     const url = `/get-all?currentUserID=${auth.userID}&filter=requests`;
     try {
-      const res = await Users.getUsers(url);
+      const res = await userServices.getUsers(url);
       if (res) {
         setUsers(res);
       }

@@ -1,11 +1,11 @@
 import {useNavigation} from '@react-navigation/native';
-import {ArrowRight2, SearchNormal} from 'iconsax-react-native';
-import React, {useState} from 'react';
+import {SearchNormal} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Feather from 'react-native-vector-icons/Feather';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
-import Feather from 'react-native-vector-icons/Feather';
 
 import {
   CarfeatureComponent,
@@ -13,16 +13,43 @@ import {
   ContainerComponent,
   HeaderComponent,
   InputComponent,
-  RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {globalStyles} from '../../Styles/globalStyle';
+import {Users} from '../Services/friendService.';
+import {debounce} from 'lodash';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {useSelector} from 'react-redux';
+import {UserInfo} from '../Untils/UserInfo';
 const SearchScreen = () => {
   const [value, setValue] = useState('');
-  const navigation = useNavigation();
+  const [messageErr, setMessageErr] = useState('');
+  const [users, setUsers] = useState([]);
+  const auth = useSelector(authSelector);
+  
+  const handleSearchFriends = async (key: string) => {
+    if (!key) {
+      return;
+    }
+    const url = `/search?currentUserID=${auth.userID}&&searchTerm=${key}`;
+    try {
+      const res = await Users.getUsers(url);
+      setUsers(res);
+      setMessageErr('');
+    } catch (error) {
+      console.log('handleSearchFriends', error);
+    }
+  };
+  const debouncedFetchUsers = debounce(handleSearchFriends, 300);
+  useEffect(() => {
+    debouncedFetchUsers(value);
+    return () => {
+      debouncedFetchUsers.cancel();
+    };
+  }, [value]);
+ 
   return (
-    <ContainerComponent isScroll styles={[{paddingHorizontal:12}]}>
+    <ContainerComponent isScroll styles={[{paddingHorizontal: 12}]}>
       <HeaderComponent
         styles={{}}
         isBcolor
@@ -35,7 +62,7 @@ const SearchScreen = () => {
         }
         title="Find friends"
       />
-      <SpaceComponent height={20}/>
+      <SpaceComponent height={20} />
       <View style={{justifyContent: 'center', alignItems: 'center'}}>
         <InputComponent
           styles={{}}
@@ -51,9 +78,18 @@ const SearchScreen = () => {
               variant="Broken"
             />
           }
+          onEnd={() => {
+            !value && setMessageErr('Search term is required!');
+          }}
           multiline
           numberOfLines={2}
         />
+      </View>
+      <SpaceComponent height={4} />
+      <View style={{paddingLeft: 18}}>
+        {messageErr && (
+          <TextComponent label={messageErr} color={appColors.red} />
+        )}
       </View>
       <SpaceComponent height={20} />
 
@@ -63,31 +99,32 @@ const SearchScreen = () => {
           borderTopWidth: 0.2,
         }}
       />
-      <View style={{marginLeft:15}}><TextComponent title label="3 kết quả" /></View>
+      {users && (
+        <View style={{marginLeft: 15}}>
+          <TextComponent
+            title
+            label={`${users.length} result${users.length > 1 ? 's' : ''}`}
+          />
+        </View>
+      )}
       <View style={{alignItems: 'center'}}>
-        <SpaceComponent height={20} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
-        <CarUserComponent isFind name="Thuận Phan" icon />
-        <SpaceComponent height={12} />
+        {users &&
+          users.map((item: any, index) => (
+            <View key={index}>
+              <SpaceComponent height={20} />
+              <CarUserComponent
+                isFind
+                name={UserInfo.getName(item?.name)}
+                iconF
+                img={item?.avatar}
+              />
+            </View>
+          ))}
       </View>
       <SpaceComponent height={20} />
       <View>
         <CarfeatureComponent
-        onPress={()=> console.log("hello")
-        }
+          onPress={() => console.log('hello')}
           label={'By friends list'}
           icon={
             <Feather

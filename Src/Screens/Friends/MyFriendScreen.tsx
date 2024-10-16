@@ -4,10 +4,7 @@ import { useSelector } from 'react-redux';
 import { authSelector } from '../../redux/reducers/authReducer';
 import { globalStyles } from '../../Styles/globalStyle';
 import { appColors } from '../../Theme/Colors/appColors';
-import {
-  RowComponent,
-  SearchFriendsComponent
-} from '../Components';
+import { RowComponent, SearchFriendsComponent } from '../Components';
 import TabTopNavigator from '../Navigators/TabTopNavigator';
 
 const MyFriendScreen = ({navigation}: any) => {
@@ -21,7 +18,9 @@ const MyFriendScreen = ({navigation}: any) => {
         marginTop: StatusBar.currentHeight,
       }}>
       <RowComponent styles={{paddingHorizontal: 12}}>
-        <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
+        <RowComponent onPress={() => navigation.navigate('Profile')}>
+          <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
+        </RowComponent>
         <SearchFriendsComponent onPress={() => navigation.navigate('Search')} />
       </RowComponent>
       <View style={{flex: 1}}>

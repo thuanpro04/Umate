@@ -32,7 +32,7 @@ export default CarfeatureComponent;
 const localStyle = StyleSheet.create({
   carStyles: {
     paddingHorizontal: 12,
-    backgroundColor: appColors.grey2 + '3D',
+    backgroundColor: ' #F8F9FA',
     borderBottomWidth: 1,
     borderBottomColor: appColors.grey,
     paddingVertical: 12,

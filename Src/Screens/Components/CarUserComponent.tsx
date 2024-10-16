@@ -17,6 +17,7 @@ import {appInfo} from '../../Theme/appInfo';
 import SpaceComponent from './SpaceComponent';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Message, Messenger} from 'iconsax-react-native';
+import { globalStyles } from '../../Styles/globalStyle';
 interface Props {
   img?: any;
   name: string;
@@ -28,15 +29,18 @@ interface Props {
   isShowBtn?: boolean;
   onPressCancel?: () => void;
   isFind?: boolean;
-  icon?: boolean;
+  iconF?: boolean;
   styles?: StyleProp<ViewStyle>;
   majoring?: string;
   onPressEllipsis?: () => void;
+  iconM?: boolean;
+  onPressMessages?:() =>void
 }
 const CarUserComponent = (props: Props) => {
   const [isShowIcon, setIsShowIcon] = useState(false);
   const [isShowModal, setisShowModal] = useState();
   const {
+    onPressMessages,
     img,
     name,
     onPressYes,
@@ -46,33 +50,32 @@ const CarUserComponent = (props: Props) => {
     onPressImg,
     isShowBtn,
     onPressCancel,
-    icon,
+    iconF,
     isFind,
     styles,
     majoring,
     onPressEllipsis,
+    iconM,
   } = props;
   return isFind ? (
     <RowComponent
       styles={[
-        icon && localStyle.container,
+        iconF && localStyle.container,
         {paddingHorizontal: 10, paddingVertical: 10},
         styles,
       ]}>
       <Image
         source={{
-          uri:
-            img ??
-            'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F2023%2Flovepik-happy-man-png-image_401141286_wh1200.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fa-man-clipart-12.htm&docid=XVX5d6ymItErVM&tbnid=h-y_6bYduFw3RM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA..i&w=1002&h=1002&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA',
+          uri: img,
         }}
-        style={[localStyle.userImg, icon && {width: 50, height: 50}]}
+        style={[globalStyles.userImg, iconF && {width: 50, height: 50}]}
       />
       <View style={{flex: 1}}>
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
         <TextComponent label={majoring ?? '...'} />
       </View>
-      {icon ? (
+      {iconF && (
         <TouchableOpacity
           onPress={() => setIsShowIcon(!isShowIcon)}
           activeOpacity={0.7}
@@ -95,13 +98,15 @@ const CarUserComponent = (props: Props) => {
             />
           )}
         </TouchableOpacity>
-      ) : (
+      )}
+      {iconM && (
         <RowComponent>
           <ButtonComponent
             type="action"
             iconLeft={
               <Messenger size={appInfo.sizeIconBold} color={appColors.grey} />
             }
+            onPress={onPressMessages}
           />
           <ButtonComponent
             type="action"
@@ -127,10 +132,10 @@ const CarUserComponent = (props: Props) => {
                 img ??
                 'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F2023%2Flovepik-happy-man-png-image_401141286_wh1200.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fa-man-clipart-12.htm&docid=XVX5d6ymItErVM&tbnid=h-y_6bYduFw3RM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA..i&w=1002&h=1002&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA',
             }}
-            style={localStyle.userImg}
+            style={globalStyles.userImg}
           />
         ) : (
-          <ActivityIndicator style={localStyle.userImg} />
+          <ActivityIndicator style={globalStyles.userImg} />
         )}
       </TouchableOpacity>
       <View style={{alignItems: 'flex-start'}}>
@@ -199,12 +204,6 @@ const localStyle = StyleSheet.create({
     borderColor: appColors.grey2,
     borderRadius: 10,
     width: '90%',
-  },
-  userImg: {
-    width: 65,
-    height: 65,
-    borderRadius: 100,
-    backgroundColor: appColors.grey2,
   },
   imgHint: {
     width: 25,

@@ -1,9 +1,22 @@
-import usersAPI from '../../apis/usersApi';
-
-const getUsers = async (url: string, data?: any, method?: 'get' | 'post') => {
-  const res = await usersAPI.handleUsers(url, data, method ?? 'get');
+import { userServices } from './userService';
+const handlePressRemoveSuggested = async (
+  usersID: string,
+  currentUserID: string,
+) => {
+  const url = '/remove-suggested-friend';
+  const data = {friendUserID: usersID, currentUserID};
+  const res = await userServices.getUsers(url, data, 'post');
+  console.log(res);
   return res?.data;
 };
-export const Users = {
-  getUsers,
+const handleRemoveFriends = async (usersID: string, currentUserID: string) => {
+  const url = '/remove-friend';
+  const data = {friendUserID: usersID, currentUserID};
+  const res = await userServices.getUsers(url, data, 'post');
+ return res?.data;
+  
+};
+export const friendServices = {
+  handlePressRemoveSuggested,
+  handleRemoveFriends,
 };

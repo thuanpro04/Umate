@@ -23,5 +23,22 @@ const globalStyles = StyleSheet.create({
     borderRadius: 100,
     marginBottom: 12,
   },
+  userImg: {
+    width: 65,
+    height: 65,
+    borderRadius: 100,
+    backgroundColor: appColors.grey2,
+  },
+  
+
+  // Other user's message (căn trái)
+ 
+  // Thời gian tin nhắn
+  timeText: {
+    marginLeft: 11.5,
+    fontSize: 11.5,
+    alignSelf: 'flex-end', // Đặt thời gian ở dưới cùng
+  }
+ 
 });
 export {globalStyles};

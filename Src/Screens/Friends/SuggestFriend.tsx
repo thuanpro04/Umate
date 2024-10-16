@@ -1,17 +1,17 @@
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import usersAPI from '../../apis/usersApi';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   CarUserComponent,
   ContainerComponent,
   TextComponent,
 } from '../Components';
-import usersAPI from '../../apis/usersApi';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {Users} from '../Services/friendService.';
-import {useFocusEffect} from '@react-navigation/native';
-import {userServices} from '../Services/userService';
+import { friendServices } from '../Services/friendService.';
+import { userServices } from '../Services/userService';
 
 const SuggestFriend = () => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -54,7 +54,7 @@ console.log(users);
     const url = `/get-all?currentUserID=${auth.userID}&filter=suggestfriend`;
     try {
       //console.log('res.data', res.data);
-      const allUsers = await Users.getUsers(url);
+      const allUsers = await userServices.getUsers(url);
       if (allUsers) {
         setUsers(allUsers);
         allUsers.forEach((item: any) => {
@@ -87,7 +87,7 @@ console.log(users);
   };
   const handlePressRemove = async (usersID: string) => {
     try {
-      const res = await userServices.handlePressRemoveSuggested(
+      const res = await friendServices.handlePressRemoveSuggested(
         usersID,
         auth.userID,
       );
