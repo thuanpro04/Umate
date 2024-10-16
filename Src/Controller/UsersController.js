@@ -9,11 +9,11 @@ const {
   filterUsers,
   transformUserData,
   processRemoveFriendAction,
+  searchFriendByName,
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
   const { currentUserID, filter } = req.query;
-
   try {
     // Lấy thông tin người dùng hiện tại
     const existingUser = await findUserById(currentUserID);
@@ -55,11 +55,15 @@ const handleRemoveFriends= async(req, res)=>{
   processRemoveFriendAction(req, res)
   
 }
+const handleSearchFriendsByName=async (req, res)=>{
+  searchFriendByName(req, res);
+}
 module.exports = {
   getAllUsers,
   handleAddFriends,
   handleCancelFriend,
   handleAgreeFriend,
   handlePressRemoveSuggest,
-  handleRemoveFriends
+  handleRemoveFriends,
+  handleSearchFriendsByName
 };

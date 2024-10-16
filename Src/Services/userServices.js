@@ -155,6 +155,7 @@ const filterUsers = async (filter, existingUser) => {
         : null;
   }
 };
+
 const transformUserData = (users) => {
   return (
     users?.map((user) => ({
@@ -175,8 +176,8 @@ const processRemoveFriendAction = async (req, res) => {
       updateOne: {
         filter: { userID: currentUserID },
         update: {
-          $pull: { friends: friendUserID },          // Xóa friendUserID khỏi danh sách bạn bè
-          $addToSet: { removeFriends: friendUserID } // Thêm friendUserID vào danh sách đã xóa
+          $pull: { friends: friendUserID }, // Xóa friendUserID khỏi danh sách bạn bè
+          $addToSet: { removeFriends: friendUserID }, // Thêm friendUserID vào danh sách đã xóa
         },
       },
     },
@@ -184,7 +185,7 @@ const processRemoveFriendAction = async (req, res) => {
       updateOne: {
         filter: { userID: friendUserID },
         update: {
-          $pull: { friends: currentUserID } // Xóa currentUserID khỏi danh sách bạn bè
+          $pull: { friends: currentUserID }, // Xóa currentUserID khỏi danh sách bạn bè
         },
       },
     },
@@ -210,7 +211,36 @@ const processRemoveFriendAction = async (req, res) => {
   }
 };
 
+const searchFriendByName = async (req, res) => {
+  const { searchTerm, currentUserID } = req.query;
+  //$regex là toán tử để tìm kiếm chuỗi theo biểu thức chính quy (regular expression).
+  //$options: "i" cho phép tìm kiếm không phân biệt chữ hoa chữ thường (case-insensitive).
+  try {
+    const users = await UserModel.find({
+      $or: [
+        { name: { $regex: searchTerm, $options: "i" } }, // Tìm theo tên
+      ],
+      userID: { $nin: [currentUserID] }, // Không bao gồm người dùng hiện tại
+    });
+    if (users.length === 0) {
+      return res.status(200).json({
+        message: "User not found !!!",
+      });
+    }
+    const data = transformUserData(users);
+    console.log(data);
 
+    return res.status(200).json({
+      message: "Search users successlly!!!",
+      data,
+    });
+  } catch (error) {
+    console.log("searchFriendByName fail", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -221,4 +251,5 @@ module.exports = {
   filterUsers,
   transformUserData,
   processRemoveFriendAction,
+  searchFriendByName,
 };
