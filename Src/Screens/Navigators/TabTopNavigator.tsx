@@ -9,21 +9,21 @@ const Tab = createMaterialTopTabNavigator();
 const TabTopNavigator = () => {
   return (
     <Tab.Navigator
-      style={{flex: 1}}
+      style={{ flex: 1 }}
       initialRouteName="SuggestFriend"
-      screenOptions={() => ({
+      screenOptions={{
         tabBarStyle: {
           backgroundColor: appColors.white,
         },
-        tabBarActiveTintColor: appColors.focus, // focussed
-        tabBarInactiveTintColor: appColors.green, // đổi màu còn lại,
+        tabBarActiveTintColor: appColors.focus,
+        tabBarInactiveTintColor: appColors.green,
         tabBarIndicatorStyle: {
-          backgroundColor: appColors.focus, // thanh phía dưới
+          backgroundColor: appColors.focus,
         },
-      })}>
-      <Tab.Screen name="SuggestFriend" component={SuggestFriend} key="suggestFriendTab" />
-      <Tab.Screen name="Request" component={FriendsRequestScreen} key="requestTab" />
-      <Tab.Screen name="Homie" component={FriendsRespondScreen} key="homieTab" />
+      }}>
+      <Tab.Screen name="SuggestFriend" component={SuggestFriend}/>
+      <Tab.Screen name="Request" component={FriendsRequestScreen} />
+      <Tab.Screen name="Homie" component={FriendsRespondScreen}  />
     </Tab.Navigator>
   );
 };

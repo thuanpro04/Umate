@@ -32,28 +32,24 @@ const ChatFoot = (props: Props) => {
 
   const handleSendMessage = async (urlImage?: string[] | string) => {
     setIsDisable(true);
-    const imagesUrl = Array.isArray(urlImage)
-      ? urlImage.filter(url => typeof url === 'string' && url.trim() !== '')
-      : [urlImage].filter(url => typeof url === 'string' && url.trim() !== '');
-    try {
-      if (imagesUrl.length > 0 || content.length > 0) {
-        onSendMessage({
-          content: content ?? '',
-          imagesUrl: (imagesUrl as string[]) ?? [],
-        });
-      }
-      const data = {
-        senderID: currentUserID,
-        receiverID: userID,
-        content: content.trim(),
-        imagesUrl: imagesUrl,
-      };
+    const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
+    if (!content && !imagesUrl) {
+      console.log('Message is empty, nothing to send.');
+      setIsDisable(false); // Đừng quên bật lại khi không gửi
+      return;
+    }
+    const data = {
+      senderID: currentUserID,
+      receiverID: userID,
+      content: content.trim(),
+      imagesUrl: imagesUrl,
+    };
 
-      if (!data.content && !data.imagesUrl) {
-        console.log('Message is empty, nothing to send.');
-        setIsDisable(false); // Đừng quên bật lại khi không gửi
-        return;
-      }
+    try {
+      onSendMessage({
+        content: content ?? '',
+        imagesUrl: imagesUrl as string[],
+      });
 
       console.log('messageInfo', data);
       // Emit the message data via socket
@@ -73,6 +69,15 @@ const ChatFoot = (props: Props) => {
     const filePaths = Array.isArray(val)
       ? val.map(item => item.path).filter(Boolean)
       : [val.path];
+    if (filePaths.length > 20) {
+      return;
+    }
+    onSendMessage({
+      content: '',
+      imagesUrl: [
+        'https://www.google.com/url?sa=i&url=https%3A%2F%2Floading.io%2Fspinner%2Fspinner%2F&psig=AOvVaw1xd1SMphC9s5adCKFqrwU8&ust=1729258395069000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCYuPHDlYkDFQAAAAAdAAAAABAE',
+      ],
+    });
 
     const arrImage = await Promise.all(
       filePaths.map(async filePath => {
@@ -83,6 +88,7 @@ const ChatFoot = (props: Props) => {
         let temp = filePath.toString().split('/');
         const fileName = temp[temp.length - 1];
         const path = `images/${fileName}`;
+
         try {
           const res = await storage().ref(path).putFile(filePath);
           console.log(
@@ -111,7 +117,7 @@ const ChatFoot = (props: Props) => {
         <ButtonImagePicker
           onSelect={val =>
             val.type === 'url'
-              ? handleSendMessage(val.value.toString())
+              ? handleSendMessage(val.value.toString().trim())
               : handleSelected(val.value as ImageOrVideo)
           }
         />
@@ -131,7 +137,7 @@ const ChatFoot = (props: Props) => {
           <ButtonComponent
             disabled={isDisable}
             type="action"
-            onPress={handleSendMessage}
+            onPress={() => handleSendMessage()}
             iconRight={
               <Send size={appInfo.sizeIconBold} color={appColors.blueBack} />
             }

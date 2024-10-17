@@ -1,23 +1,95 @@
-import {View, Text} from 'react-native';
-import React, {useState} from 'react';
-import {ContainerComponent, HeaderComponent} from '../Components';
-import ChatHeader from './Component/ChatHeader';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { ArrowLeft } from 'iconsax-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet
+} from 'react-native';
+import ImageViewing from 'react-native-image-viewing';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import chatsAPI from '../../apis/chatApi';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import {
+  ButtonComponent,
+  ContainerComponent,
+  HeaderComponent
+} from '../Components';
 import ChatBody from './Component/ChatBody';
 import ChatFoot from './Component/ChatFoot';
-import {useRoute} from '@react-navigation/native';
-import {ArrowLeft} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-const ChatScreen = () => {
+
+const ChatScreen = ({navigation}: any) => {
   const {userName, avatar, currentUserID, userID} = useRoute().params as {
     userName: string;
     avatar: string;
     currentUserID: string;
     userID: string;
   };
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [displayImgs, setDisplayImgs] = useState<any[]>([]);
+  useFocusEffect(
+    useCallback(() => {
+      getMessages();
+    }, []),
+  );
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToEnd();
+    }, 100);
+  }, [messages]);
+  const getMessages = async () => {
+    // lấy tin nhắn từ server
+    const url = `/receive-messages?senderID=${currentUserID}&receiverID=${userID}`;
+    try {
+      const res = await chatsAPI.handleChats(url);
+      // console.log('res.data', res.data);
+      if (res?.data) {
+        setMessages(res.data);
+      } 
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+  const onSendMessages = (val: {content?: string; imagesUrl?: string[]}) => {
+    const newMessage = {
+      senderID: currentUserID,
+      receiverID: userID,
+      content: val.content?.trim() || '',
+      imagesUrl: val.imagesUrl || [],
+      timestamp: new Date().toISOString(),
+    };
+    if (val.content?.trim() || val.imagesUrl) {
+      setMessages(prevMessages => [...prevMessages, newMessage]);
+    }
+  };
+  const handleScroll = (event: any) => {
+    // layoutMeasurement: Đây là một đối tượng chứa thông tin về kích thước của khu vực hiển thị hiện tại (viewport) trong ứng dụng.
+    // contentOffset.y: Giá trị này cho biết vị trí cuộn theo chiều dọc.
+    const {contentOffset, layoutMeasurement, contentSize} = event.nativeEvent;
+    const yOffSet = contentOffset.y;
+    const contentHeight = contentSize.height;
+    const layoutHeight = layoutMeasurement.height;
+    yOffSet + layoutHeight < contentHeight - 100
+      ? setShowScrollToBottom(true)
+      : setShowScrollToBottom(false);
+  };
+  const scrollToEnd = () => {
+    scrollViewRef.current?.scrollToEnd({animated: true});
+  };
+  const onPressImg = (arrImages: any[]) => {
+    const imageFormats= arrImages.map(url => ({uri:url}))
+    setDisplayImgs(imageFormats);
+    console.log("displayImgs",displayImgs);
+    
+    setIsVisible(true);
+  };
+
   return (
-    <ContainerComponent styles={{paddingBottom: 0}}>
+    <ContainerComponent styles={styles.container}>
       <HeaderComponent
         title={userName}
         image={avatar}
@@ -33,9 +105,60 @@ const ChatScreen = () => {
           />
         }
       />
-      <ChatBody currentUserID={currentUserID} userID={userID} />
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={handleScroll}>
+        <ChatBody
+          currentUserID={currentUserID}
+          userID={userID}
+          allMessages={messages}
+          onPressImg={onPressImg}
+        />
+      </ScrollView>
+      {showScrollToBottom && (
+        <ButtonComponent
+          type="action"
+          styles={styles.scrollButton}
+          iconLeft={
+            <Icon name="arrow-down" size={appInfo.sizeIcon} color="#fff" />
+          }
+          onPress={scrollToEnd}
+        />
+      )}
+      <ChatFoot
+        currentUserID={currentUserID}
+        userID={userID}
+        onSendMessage={onSendMessages}
+      />
+      {displayImgs && (
+        <ImageViewing
+          imageIndex={0}
+          images={displayImgs}
+          visible={isVisible}
+          onRequestClose={() => setIsVisible(false)}
+        />
+      )}
     </ContainerComponent>
   );
 };
 
 export default ChatScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 0,
+    paddingHorizontal: 12,
+  },
+
+
+  scrollButton: {
+    position: 'absolute',
+    bottom: 60,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 25,
+    padding: 10,
+    left: '50%',
+  },
+});

@@ -36,7 +36,7 @@ const UserMessageView = React.memo((props: MessageProps) => {
 export default UserMessageView
 const localStyles = StyleSheet.create({
     userMessageContainer: {
-        marginVertical: 10.5,
+        marginVertical: 6.5,
         // Căn phải tin nhắn của người dùng
         alignItems: 'flex-end',
       },

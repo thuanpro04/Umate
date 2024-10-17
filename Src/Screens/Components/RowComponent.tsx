@@ -4,15 +4,16 @@ import {globalStyles} from '../../Styles/globalStyle';
 interface Props {
   children: ReactNode;
   styles?: StyleProp<ViewStyle>;
-  onPress?: (event?:any) => void;
+  onPress?: (event?: any) => void;
+  activeOpacity?: number;
 }
 const RowComponent = (props: Props) => {
-  const {children, styles, onPress} = props;
+  const {children, styles, onPress, activeOpacity} = props;
   return onPress ? (
     <TouchableOpacity
       style={[globalStyles.row, styles]}
       onPress={onPress}
-      activeOpacity={0.2}>
+      activeOpacity={activeOpacity ?? 0.2}>
       {props.children}
     </TouchableOpacity>
   ) : (

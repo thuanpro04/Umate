@@ -33,6 +33,7 @@ interface Props {
   flex?: number;
   textStyle?: StyleProp<TextStyle>;
   children?: ReactNode;
+  activeOpacity?:number
 }
 const ButtonComponent = (props: Props) => {
   const {
@@ -50,9 +51,10 @@ const ButtonComponent = (props: Props) => {
     flex,
     textStyle,
     children,
+    activeOpacity
   } = props;
   return type === 'action' ? (
-    <TouchableOpacity onPress={onPress} style={styles} disabled={disabled}>
+    <TouchableOpacity onPress={onPress} style={styles} disabled={disabled} activeOpacity={activeOpacity}>
       {iconLeft}
       {iconRight}
       {children}

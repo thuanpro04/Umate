@@ -1,19 +1,19 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
+import {ScrollView, StyleSheet} from 'react-native';
+import {useSelector} from 'react-redux';
 import usersAPI from '../../apis/usersApi';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appColors } from '../../Theme/Colors/appColors';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   CarUserComponent,
   ContainerComponent,
   TextComponent,
 } from '../Components';
-import { friendServices } from '../Services/friendService.';
-import { userServices } from '../Services/userService';
+import {friendServices} from '../Services/friendService.';
+import {userServices} from '../Services/userService';
 
-const SuggestFriend = () => {
+const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
   const [message, setMessage] = useState('');
@@ -33,7 +33,7 @@ const SuggestFriend = () => {
     const currenOffset = event.nativeEvent.contentOffset.y;
     currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
   };
-console.log(users);
+  console.log(users);
 
   const handlePressYes = (userID: string) => {
     setButtonVisibility(prevState => ({
@@ -141,7 +141,7 @@ console.log(users);
       <TextComponent label={message} />
     </ContainerComponent>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

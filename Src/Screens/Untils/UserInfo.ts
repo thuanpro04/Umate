@@ -12,8 +12,6 @@ export class UserInfo {
     return vietNameTime.slice(0, 5).toString();
   };
   static getMessageWidth = (x: number) => {
-    console.log(x);
-    
-    return Math.min(Math.max(x * 5, 30), 80);
+    return Math.min(Math.max(x * 5, 40), 80);
   };
 }

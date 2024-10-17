@@ -36,7 +36,7 @@ const OtherUserMessageView = React.memo((props: MessageProps) => {
 export default OtherUserMessageView
 const localStyles = StyleSheet.create({
     otherUserMessageContainer: {
-        marginVertical: 10.5,
+        marginVertical: 6.5,
         alignItems: 'flex-start', // Căn trái tin nhắn của người khác
       },
       otherUserMessageBox: {
