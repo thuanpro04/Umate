@@ -72,7 +72,7 @@ const messageSchema = new mongoose.Schema({
   messageID: { type: String, required: true, unique: true },
   senderID: { type: String, ref: "User", required: true },
   receiverID: { type: String, ref: "User", required: true },
-  content: { type: String},
+  content: { type: String },
   imagesUrl: [{ type: String }],
   timestamp: { type: Date, default: Date.now, index: true },
   status: {
@@ -88,11 +88,17 @@ const conversationSchema = new mongoose.Schema(
     participants: [{ type: String, ref: "User", required: true }],
     messages: [messageSchema],
     lastMessage: { type: String }, // Tin nhắn mới nhất
+    lastMessageTimestamp: { type: Date, default: Date.now },
   },
   {
     timestamps: true,
   }
 );
+conversationSchema.index({
+  participants: 1,
+  lastMessageTimestamp: -1,
+  lastMessage: "text",
+});
 
 const UserModel = mongoose.model("User", userSchema);
 const GroupModel = mongoose.model("Group", groupSchema);
