@@ -74,12 +74,12 @@ const SuggestFriend = React.memo(() => {
     friendUserID: string,
     action: 'add' | 'cancel',
   ) => {
-    const enpoint = action === 'add' ? '/add-friend' : '/cancel-friend';
-    const currentUserID = auth.userID;
-    const data = {friendUserID, currentUserID};
-
     try {
-      const res = await usersAPI.handleUsers(enpoint, data, 'post');
+      const res = await friendServices.handleFriendActionAdd_Cancel(
+        friendUserID,
+        action,
+        auth.userID,
+      );
       console.log(res);
     } catch (error) {
       console.log('handleFriendAction', error);
@@ -114,6 +114,7 @@ const SuggestFriend = React.memo(() => {
       {users &&
         users.map((item, index): any => (
           <CarUserComponent
+            iconAddCancel={false}
             key={item.userID}
             img={item.avatar}
             name={item.name}

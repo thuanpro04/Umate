@@ -1,71 +1,169 @@
-import {useNavigation} from '@react-navigation/native';
-import {SearchNormal} from 'iconsax-react-native';
+import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 
+import {debounce} from 'lodash';
+import {useSelector} from 'react-redux';
+import {Accelerate, Creativity} from '../../assets/svgs/indexSvg';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {
   CarfeatureComponent,
   CarUserComponent,
   ContainerComponent,
-  HeaderComponent,
   InputComponent,
+  RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {Users} from '../Services/friendService.';
-import {debounce} from 'lodash';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {useSelector} from 'react-redux';
+import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
-const SearchScreen = () => {
+import {useRoute} from '@react-navigation/native';
+import {messageServices} from '../Services/messageServices';
+import CarUserChat from '../Messages/Component/CarUserChat';
+const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
   const [users, setUsers] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const route = useRoute();
+  const {key} = route.params as {key: string};
+
+  const [backgroundItem, setBackgroundItem] = useState<any[]>([]);
   const auth = useSelector(authSelector);
-  
-  const handleSearchFriends = async (key: string) => {
-    if (!key) {
+
+  const optionsKey = [
+    {
+      key: 'byFriends',
+      title: 'By friends list',
+      icon: <HeartCircle size={appInfo.sizeIconBold} color={appColors.blue} />,
+    },
+    {
+      key: 'byField',
+      title: 'By field of study',
+      icon: (
+        <Creativity
+          height={appInfo.sizeIconBold}
+          width={appInfo.sizeIconBold}
+          color={appColors.blue}
+        />
+      ),
+    },
+    {
+      key: 'byClass',
+      title: 'By class',
+      icon: (
+        <Accelerate
+          height={appInfo.sizeIconBold}
+          width={appInfo.sizeIconBold}
+          color={appColors.blue}
+        />
+      ),
+    },
+  ];
+  const selectItems = (key: any) => {
+    setBackgroundItem(prev => ({
+      ...prev,
+      [key]: !backgroundItem[key],
+    }));
+  };
+  const handleSearchFriends = async (keySearch: string) => {
+    if (!keySearch) {
       return;
     }
-    const url = `/search?currentUserID=${auth.userID}&&searchTerm=${key}`;
+    const url = `/search?currentUserID=${auth.userID}&searchTerm=${keySearch}`;
     try {
-      const res = await Users.getUsers(url);
+      const res = await userServices.getUsers(url);
       setUsers(res);
+      console.log('users', users);
+
       setMessageErr('');
     } catch (error) {
       console.log('handleSearchFriends', error);
     }
   };
-  const debouncedFetchUsers = debounce(handleSearchFriends, 300);
+  const handleSearchConversations = async (keySearch: string) => {
+    const url = `/search-conversations?currentUserID=${auth.userID}&keyWord=${keySearch}`;
+    console.log(url);
+
+    try {
+      const res = await messageServices.searchConversationUsers(url);
+      if (res && res.data) {
+        setUsers(res.data);
+      }
+    } catch (error) {
+      console.log('handleSearchConversations', error);
+    }
+  };
+  const debouncedFetchUsers =
+    key === 'searchFriends'
+      ? debounce(handleSearchFriends, 300)
+      : debounce(handleSearchConversations, 300);
   useEffect(() => {
     debouncedFetchUsers(value);
     return () => {
       debouncedFetchUsers.cancel();
     };
   }, [value]);
- 
+  const renderCarUsers = (item: any, index: number) => {
+    const isShowIconAddCancel = item.friends.includes(auth.userID);
+    const isShowRequest = item.friendRequests.includes(auth.userID);
+
+    return (
+      <View key={index}>
+        <SpaceComponent height={20} />
+        <CarUserComponent
+          userID={item.userID}
+          isFind
+          name={UserInfo.getName(item?.name)}
+          iconAddCancel
+          isFriend={isShowIconAddCancel}
+          img={item?.avatar}
+          isRequestFriend={isShowRequest}
+        />
+      </View>
+    );
+  };
+  const onNavigationChat = (name: string, avatar: string, userID: string) => {
+    navigation.navigate('Chat', {
+      userName: name,
+      avatar: avatar,
+      currentUserID: auth.userID,
+      userID: userID,
+    });
+  };
+
+  const renderItemsConversation = (item: any, index: number) => {
+    return (
+      <CarUserChat
+        key={item.userID}
+        name={UserInfo.getName(item.name)}
+        massv={UserInfo.getYearOfbirth(item.email)}
+        image={item.avatar}
+        lastMessage={item.lastMessage}
+        onPress={() =>
+          onNavigationChat(
+            UserInfo.getName(item.name),
+            item.avatar,
+            item.userID,
+          )
+        }
+      />
+    );
+  };
   return (
     <ContainerComponent isScroll styles={[{paddingHorizontal: 12}]}>
-      <HeaderComponent
-        styles={{}}
-        isBcolor
-        iconLeft={
-          <AntDesign
-            name="close"
-            size={appInfo.sizeIconBold}
-            color={appColors.black}
-          />
-        }
-        title="Find friends"
-      />
-      <SpaceComponent height={20} />
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
+      <SpaceComponent height={10} />
+      <RowComponent styles={{justifyContent: 'center', alignItems: 'center'}}>
+        <ArrowLeft2
+          size={appInfo.sizeIconBold}
+          color={appColors.blue}
+          onPress={() => navigation.goBack()}
+        />
         <InputComponent
-          styles={{}}
+          styles={{paddingVertical: 3}}
           type="default"
           placehold="Search ..."
           value={value}
@@ -83,8 +181,16 @@ const SearchScreen = () => {
           }}
           multiline
           numberOfLines={2}
+          subffix={
+            <AntDesign
+              name="filter"
+              size={appInfo.sizeIconBold}
+              color={appColors.blue}
+            />
+          }
+          onPressFilter={() => setShowFilter(true)}
         />
-      </View>
+      </RowComponent>
       <SpaceComponent height={4} />
       <View style={{paddingLeft: 18}}>
         {messageErr && (
@@ -103,64 +209,56 @@ const SearchScreen = () => {
         <View style={{marginLeft: 15}}>
           <TextComponent
             title
-            label={`${users.length} result${users.length > 1 ? 's' : ''}`}
+            label={`${users.length} ${
+              key === 'searchFriends' ? 'result' : 'suggest'
+            }${users.length > 1 ? 's' : ''}`}
           />
         </View>
       )}
-      <View style={{alignItems: 'center'}}>
-        {users &&
-          users.map((item: any, index) => (
-            <View key={index}>
-              <SpaceComponent height={20} />
-              <CarUserComponent
-                isFind
-                name={UserInfo.getName(item?.name)}
-                iconF
-                img={item?.avatar}
-              />
-            </View>
-          ))}
-      </View>
-      <SpaceComponent height={20} />
-      <View>
-        <CarfeatureComponent
-          onPress={() => console.log('hello')}
-          label={'By friends list'}
-          icon={
-            <Feather
-              name="book-open"
-              size={appInfo.sizeIcon}
-              color={'#363B4BC2'}
-            />
-          }
-          styles={{borderTopLeftRadius: 10, borderTopRightRadius: 10}}
-        />
-        <CarfeatureComponent
-          label={'Theo khoa'}
-          icon={
-            <Feather
-              name="external-link"
-              size={appInfo.sizeIcon}
-              color={'#363B4BC2'}
-            />
-          }
-        />
-        <CarfeatureComponent
-          label={'By class'}
-          icon={
-            <Feather
-              name="user-plus"
-              size={appInfo.sizeIcon}
-              color={'#363B4BC2'}
-            />
-          }
-          styles={{
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10,
-            borderBottomColor: appColors.white,
-          }}
-        />
-      </View>
+      {key === 'searchFriends' && (
+        <>
+          <View style={{alignItems: 'center'}}>
+            {users &&
+              users.map((item: any, index) => renderCarUsers(item, index))}
+          </View>
+          <SpaceComponent height={20} />
+          <View>
+            {showFilter &&
+              optionsKey.map((item: any, index) => (
+                <CarfeatureComponent
+                  key={index}
+                  onPress={() => selectItems(item.key)}
+                  label={item.title}
+                  icon={item.icon}
+                  styles={[
+                    index === 1 && {
+                      borderTopLeftRadius: 10,
+                      borderTopRightRadius: 10,
+                    },
+                    index === optionsKey.length && {
+                      borderBottomLeftRadius: 10,
+                      borderBottomRightRadius: 10,
+                      borderBottomColor: appColors.white,
+                    },
+                    {
+                      backgroundColor: backgroundItem[item.key.toString()]
+                        ? appColors.blue
+                        : appColors.white,
+                    },
+                  ]}
+                  labelColor={
+                    backgroundItem[item.key.toString()]
+                      ? appColors.white
+                      : appColors.black
+                  }
+                />
+              ))}
+          </View>
+        </>
+      )}
+      {key === 'searchConversations' &&
+        users &&
+        users.map((item: any, index) => renderItemsConversation(item, index))}
       <SpaceComponent height={40} />
     </ContainerComponent>
   );

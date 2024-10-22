@@ -8,9 +8,10 @@ interface Props {
   massv: string;
   image: string;
   onPress?: () => void;
+  lastMessage:string
 }
 const CarUserChat = (props: Props) => {
-  const {name, massv, image,onPress} = props;
+  const {name, massv, image,onPress, lastMessage} = props;
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.5} >
@@ -27,7 +28,7 @@ const CarUserChat = (props: Props) => {
           <TextComponent label={name} />
           <TextComponent label={`@${massv}`} />
         </RowComponent>
-        <TextComponent label="Hello, My name is Thuận  " />
+        <TextComponent label={lastMessage} />
       </View>
     </RowComponent>
     </TouchableOpacity>

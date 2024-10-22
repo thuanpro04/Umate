@@ -21,10 +21,10 @@ const MyFriendScreen = ({navigation}: any) => {
         <RowComponent onPress={() => navigation.navigate('Profile')}>
           <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
         </RowComponent>
-        <SearchFriendsComponent onPress={() => navigation.navigate('Search')} />
+        <SearchFriendsComponent onPress={() => navigation.navigate('Search',{key:'searchFriends'})} />
       </RowComponent>
       <View style={{flex: 1}}>
-        <TabTopNavigator />
+        <TabTopNavigator/>
       </View>
     </View>
   );

@@ -1,6 +1,7 @@
-import React, {ReactNode, useState} from 'react';
+import React, {ReactNode, useRef, useState} from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Image,
   StyleProp,
   StyleSheet,
@@ -17,7 +18,10 @@ import {appInfo} from '../../Theme/appInfo';
 import SpaceComponent from './SpaceComponent';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {Message, Messenger} from 'iconsax-react-native';
-import { globalStyles } from '../../Styles/globalStyle';
+import {globalStyles} from '../../Styles/globalStyle';
+import {friendServices} from '../Services/friendService.';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
 interface Props {
   img?: any;
   name: string;
@@ -29,16 +33,18 @@ interface Props {
   isShowBtn?: boolean;
   onPressCancel?: () => void;
   isFind?: boolean;
-  iconF?: boolean;
+  iconAddCancel?: boolean;
   styles?: StyleProp<ViewStyle>;
   majoring?: string;
   onPressEllipsis?: () => void;
   iconM?: boolean;
-  onPressMessages?:() =>void
+  onPressMessages?: () => void;
+  userID?: string;
+  isFriend?: boolean;
+  isRequestFriend?: boolean;
 }
+
 const CarUserComponent = (props: Props) => {
-  const [isShowIcon, setIsShowIcon] = useState(false);
-  const [isShowModal, setisShowModal] = useState();
   const {
     onPressMessages,
     img,
@@ -50,17 +56,54 @@ const CarUserComponent = (props: Props) => {
     onPressImg,
     isShowBtn,
     onPressCancel,
-    iconF,
+    iconAddCancel,
     isFind,
     styles,
     majoring,
     onPressEllipsis,
     iconM,
+    userID,
+    isFriend,
+    isRequestFriend,
   } = props;
+  const [isShowIcon, setIsShowIcon] = useState(isRequestFriend ?? false);
+  const auth = useSelector(authSelector);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const handleAdd_CancelFriends = async () => {
+    if (userID) {
+      try {
+        const action = isShowIcon ? 'add' : 'cancel';
+        const res = await friendServices.handleFriendActionAdd_Cancel(
+          userID,
+          action,
+          auth.userID,
+        );
+
+        if (res) {
+          // Thay đổi trạng thái ngay lập tức
+          setIsShowIcon(!isShowIcon);
+          // Tạo hiệu ứng hoạt hình
+          Animated.spring(scaleAnim, {
+            toValue: 1.15,
+            friction: 3,
+            useNativeDriver: true,
+          }).start(() => {
+            Animated.spring(scaleAnim, {
+              toValue: 1,
+              friction: 3,
+              useNativeDriver: true,
+            }).start();
+          });
+        }
+      } catch (error) {
+        console.log('handleAdd_CancelFriends', error);
+      }
+    }
+  };
   return isFind ? (
     <RowComponent
       styles={[
-        iconF && localStyle.container,
+        iconAddCancel && localStyle.container,
         {paddingHorizontal: 10, paddingVertical: 10},
         styles,
       ]}>
@@ -68,22 +111,18 @@ const CarUserComponent = (props: Props) => {
         source={{
           uri: img,
         }}
-        style={[globalStyles.userImg, iconF && {width: 50, height: 50}]}
+        style={[globalStyles.userImg, iconAddCancel && {width: 50, height: 50}]}
       />
       <View style={{flex: 1}}>
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
         <TextComponent label={majoring ?? '...'} />
       </View>
-      {iconF && (
+      {!isFriend && iconAddCancel && (
         <TouchableOpacity
-          onPress={() => setIsShowIcon(!isShowIcon)}
+          onPress={handleAdd_CancelFriends}
           activeOpacity={0.7}
-          style={{
-            borderRadius: 100,
-            padding: 7,
-            backgroundColor: appColors.blue,
-          }}>
+          style={[localStyle.buttonStyles, {transform: [{scale: scaleAnim}]}]}>
           {isShowIcon ? (
             <AntDesign
               name="check"
@@ -211,5 +250,10 @@ const localStyle = StyleSheet.create({
     marginRight: -12,
     borderRadius: 100,
     backgroundColor: appColors.grey2,
+  },
+  buttonStyles: {
+    borderRadius: 100,
+    padding: 7,
+    backgroundColor: appColors.blue,
   },
 });

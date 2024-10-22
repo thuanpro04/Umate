@@ -5,6 +5,8 @@ import Rocket from '../svgs/Rocket.svg'
 import Ballons from '../svgs/Ballons.svg'
 import Address from '../svgs/Address.svg'
 import Loss from '../svgs/Loss.svg'
+import Accelerate from '../svgs/Accelerate.svg'
+import Creativity from '../svgs/Creativity.svg'
 export {
     Google,
     Liliu,
@@ -12,6 +14,8 @@ export {
     Rocket,
     Ballons,
     Address,
-    Loss
+    Loss,
+    Accelerate,
+    Creativity
 
 }

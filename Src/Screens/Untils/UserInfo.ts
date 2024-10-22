@@ -14,4 +14,7 @@ export class UserInfo {
   static getMessageWidth = (x: number) => {
     return Math.min(Math.max(x * 5, 40), 80);
   };
+  static getYearOfbirth = (year: string) => {
+    return year.slice(0, 2);
+  };
 }

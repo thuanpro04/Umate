@@ -17,6 +17,7 @@ interface Props {
   isBcolor?: boolean;
   styles?: StyleProp<ViewStyle>;
   image?: string;
+  iconStyle?: boolean;
 }
 const HeaderComponent = (props: Props) => {
   const {
@@ -28,6 +29,7 @@ const HeaderComponent = (props: Props) => {
     isBcolor,
     styles,
     image,
+    iconStyle,
   } = props;
   const navigation = useNavigation();
   const goBack = () => {
@@ -38,22 +40,36 @@ const HeaderComponent = (props: Props) => {
     <RowComponent
       styles={[
         {
-          paddingHorizontal: 18,
+          paddingHorizontal: image ? 0 : 16,
           borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
           borderBottomWidth: isBcolor ? 0.2 : 0,
           paddingVertical: image ? 4 : 13,
         },
         styles,
       ]}>
-      <RowComponent >
+      <RowComponent>
         <ButtonComponent
           onPress={onPress1 ?? goBack}
           iconLeft={iconLeft}
           type="action"
-         
+          styles={iconStyle && localStyles.iconStyles}
         />
-        <SpaceComponent width={5}/>
-        {image && <Image source={{uri: image}} style={localStyles.image} />}
+        <SpaceComponent width={5} />
+        {image && (
+          <>
+            <Image source={{uri: image}} style={localStyles.image} />
+            <TextComponent
+              label={title ?? ''}
+              styles={{
+                fontSize: appInfo.sizeTitle,
+                fontWeight: '500',
+                fontStyle: 'italic',
+              }}
+            />
+          </>
+        )}
+      </RowComponent>
+      {!image && (
         <TextComponent
           label={title ?? ''}
           styles={{
@@ -62,9 +78,13 @@ const HeaderComponent = (props: Props) => {
             fontStyle: 'italic',
           }}
         />
-      </RowComponent>
-
-      <ButtonComponent onPress={onPress2} iconRight={iconRight} type="action" />
+      )}
+      <ButtonComponent
+        onPress={onPress2}
+        iconRight={iconRight}
+        type="action"
+        styles={iconStyle && localStyles.iconStyles}
+      />
     </RowComponent>
   );
 };
@@ -74,6 +94,11 @@ const localStyles = StyleSheet.create({
     height: 45,
     borderRadius: 100,
     backgroundColor: appColors.grey2,
+  },
+  iconStyles: {
+    borderWidth: 0.1,
+    borderRadius: 4,
+    padding: 4,
   },
 });
 export default HeaderComponent;

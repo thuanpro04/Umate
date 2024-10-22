@@ -10,6 +10,7 @@ interface Props {
   userID: string;
   allMessages: any[];
   onPressImg: (arrImages:any[]) => void;
+
 }
 const ChatBody = (props: Props) => {
   const {currentUserID, userID, allMessages, onPressImg} = props;
@@ -63,6 +64,7 @@ const ChatBody = (props: Props) => {
               />
             ) : (
               <OtherUserMessageView
+               
                 key={index}
                 message={item.content}
                 time={item.timestamp}

@@ -4,6 +4,7 @@ import {ContactUsScreen, SearchScreen, SettingScreen} from '../index';
 import ChatScreen from '../Messages/ChatScreen';
 import DrawerNavigator from './DrawerNavigator';
 import ListUsersChat from '../Messages/Component/ListUsersChat';
+import SetUpProfile from '../Profile/SetUpProfile';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -13,6 +14,9 @@ const MainNavigator = () => {
       <Stack.Screen name="ContactUs" component={ContactUsScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="SetUpProfile" component={SetUpProfile} />
+
+      
     </Stack.Navigator>
   );
 };

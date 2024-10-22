@@ -6,17 +6,23 @@ import {ImageOrVideo} from 'react-native-image-crop-picker';
 import io from 'socket.io-client';
 import {appInfo} from '../../../Theme/appInfo';
 import {appColors} from '../../../Theme/Colors/appColors';
-import {ButtonComponent, InputComponent, RowComponent} from '../../Components';
+import {
+  ButtonComponent,
+  InputComponent,
+  RowComponent,
+  TextComponent,
+} from '../../Components';
 
 import ButtonImagePicker from './ButtonImagePicker';
 interface Props {
   currentUserID: string;
   userID: string;
   onSendMessage: (val: {content?: string; imagesUrl?: string[]}) => void;
+  reply?: string;
 }
 
 const ChatFoot = (props: Props) => {
-  const {currentUserID, userID, onSendMessage} = props;
+  const {currentUserID, userID, onSendMessage, reply} = props;
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const socket = io(appInfo.BASE_URL);
@@ -113,6 +119,11 @@ const ChatFoot = (props: Props) => {
         backgroundColor: '#eeeeee',
         paddingHorizontal: 34,
       }}>
+      {reply && (
+        <RowComponent>
+          <TextComponent label={reply} />
+        </RowComponent>
+      )}
       <RowComponent styles={{justifyContent: 'center'}}>
         <ButtonImagePicker
           onSelect={val =>

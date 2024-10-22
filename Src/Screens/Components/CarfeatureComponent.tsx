@@ -10,9 +10,10 @@ interface Props {
   onPress?: () => void;
   icon: ReactNode;
   styles?: StyleProp<ViewStyle>;
+  labelColor?: string;
 }
 const CarfeatureComponent = (props: Props) => {
-  const {label,  onPress, icon, styles} = props;
+  const {label, onPress, icon, styles, labelColor} = props;
   return (
     <RowComponent onPress={onPress} styles={[localStyle.carStyles, {}, styles]}>
       <RowComponent>
@@ -20,7 +21,7 @@ const CarfeatureComponent = (props: Props) => {
         <TextComponent
           label={label}
           size={appInfo.sizeTitle}
-          color="#363B4BC2"
+          color={labelColor ?? '#363B4BC2'}
         />
       </RowComponent>
       <ArrowRight2 size={appInfo.sizeIconBold} color={appColors.black} />

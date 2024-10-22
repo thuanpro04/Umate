@@ -14,6 +14,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
+import ButtonComponent from './ButtonComponent';
 interface Props {
   value: string;
   onChange: (val: string) => void;
@@ -28,7 +29,8 @@ interface Props {
   numberOfLines?: number;
   styles?: StyleProp<ViewStyle>;
   onPress?: () => void;
-  isFocused?:boolean
+  isFocused?: boolean;
+  onPressFilter?: () => void;
 }
 const InputComponent = (props: Props) => {
   const {
@@ -45,7 +47,8 @@ const InputComponent = (props: Props) => {
     placehold,
     isPass,
     onPress,
-    isFocused
+    isFocused,
+    onPressFilter,
   } = props;
 
   const [isShowPass, setIsShowPass] = useState(isPass ?? false);
@@ -87,7 +90,13 @@ const InputComponent = (props: Props) => {
           />
         )}
       </TouchableOpacity>
-      {subffix && subffix}
+      {subffix && (
+        <ButtonComponent
+          iconRight={subffix}
+          type="action"
+          onPress={onPressFilter}
+        />
+      )}
     </RowComponent>
   );
 };

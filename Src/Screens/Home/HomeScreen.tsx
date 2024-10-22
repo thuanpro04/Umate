@@ -33,7 +33,7 @@ const HomeScreen = ({navigation}: any) => {
         }
         iconRight={<Address/>}
         onPress1={() => navigation.openDrawer()}
-        isBcolor
+        
       />
       <View style={{marginBottom: appInfo.size.HEIGHT * 0.045}}>
         <CarComponent img={require('../../assets/images/tdmu.jpg')}/>

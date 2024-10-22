@@ -20,7 +20,7 @@ import {
 } from '../Components';
 import {useDispatch, useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-const ProfileScreen = () => {
+const ProfileScreen = ({navigation}:any) => {
   const auth = useSelector(authSelector);
   console.log(auth);
   const getName = (fullName: string) => {
@@ -44,6 +44,7 @@ const ProfileScreen = () => {
         label="View profile"
         icon={<User size={appInfo.sizeIconBold} color={appColors.black} />}
         styles={{borderTopLeftRadius: 12, borderTopRightRadius: 12}}
+        onPress={() => navigation.navigate('SetUpProfile')}
       />
       <SpaceComponent height={3} />
       <CarfeatureComponent

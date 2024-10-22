@@ -24,8 +24,8 @@ const globalStyles = StyleSheet.create({
     marginBottom: 12,
   },
   userImg: {
-    width: 65,
-    height: 65,
+    width: 60,
+    height: 60,
     borderRadius: 100,
     backgroundColor: appColors.grey2,
   },
@@ -38,7 +38,16 @@ const globalStyles = StyleSheet.create({
     marginLeft: 11.5,
     fontSize: 11.5,
     alignSelf: 'flex-end', // Đặt thời gian ở dưới cùng
-  }
+  }, searchStyles: {
+    justifyContent: 'flex-start',
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: appColors.grey2,
+    width: '100%',
+    borderRadius: 12,
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
  
 });
 export {globalStyles};

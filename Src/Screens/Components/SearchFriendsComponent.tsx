@@ -1,28 +1,37 @@
 import {SearchNormal} from 'iconsax-react-native';
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import RowComponent from './RowComponent';
 import TextComponent from './TextComponent';
 import HeaderComponent from './HeaderComponent';
+import {globalStyles} from '../../Styles/globalStyle';
 
 interface Props {
   onPress?: () => void;
+  placeHold?: string;
+  styles?: StyleProp<ViewStyle>;
 }
 const SearchFriendsComponent = (props: Props) => {
-  const {onPress} = props;
+  const {onPress, placeHold, styles} = props;
   return (
-    <View style={styles.container}>
-      
-      <RowComponent onPress={onPress} styles={styles.searchStyles}>
+    <View style={[localStyles.container, styles]}>
+      <RowComponent onPress={onPress} styles={globalStyles.searchStyles}>
         <SearchNormal
           size={appInfo.sizeIcon}
           color={appColors.grey}
           variant="Broken"
         />
         <TextComponent
-          label="Search ..."
+          label={placeHold ?? 'Search ...'}
           styles={{fontWeight: '400', color: appColors.grey}}
         />
       </RowComponent>
@@ -31,17 +40,7 @@ const SearchFriendsComponent = (props: Props) => {
 };
 
 export default SearchFriendsComponent;
-const styles = StyleSheet.create({
-  searchStyles: {
-    justifyContent: 'flex-start',
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: appColors.grey2,
-    width: '100%',
-    borderRadius: 12,
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
+const localStyles = StyleSheet.create({
   container: {
     alignItems: 'center',
     flex: 1,
