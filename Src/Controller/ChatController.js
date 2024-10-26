@@ -1,6 +1,6 @@
 const {
   handleReceiveMessageUsers,
-  handleGetAllConversationUsers,handleSearchConversations
+  handleGetAllConversationUsers
 } = require("../Services/chatServices");
 
 const receiveMessageUsers = async (req, res) => {
@@ -9,11 +9,9 @@ const receiveMessageUsers = async (req, res) => {
 const getAllConversationUsers = async (req, res) => {
   handleGetAllConversationUsers(req,res);
 };
-const getConversationUsers = async(req, res) =>{
-  handleSearchConversations(req,res)
-}
+
 module.exports = {
   receiveMessageUsers,
   getAllConversationUsers,
-  getConversationUsers
+
 };

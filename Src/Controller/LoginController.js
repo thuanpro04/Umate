@@ -16,17 +16,21 @@ const hanleLoginWithGoogle = async (req, res) => {
   try {
     const userInfo = req.body;
     console.log(req.body);
-    const user = { ...userInfo };
+
     // Kiểm tra người dùng có tồn tại không
     const existingUser = await findUserById(userInfo.userID);
-
+    let user;
     if (existingUser) {
       await UserModel.findByIdAndUpdate(existingUser.id, {
         ...userInfo,
         updateAt: Date.now(),
       });
-      user.accesstoken = await getJsonWebToken(userInfo.email, existingUser.id);
-      console.log("Update Done.");
+      user = {
+        ...existingUser,
+        accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
+      };
+
+      console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
     } else {
       // Cập nhật thông tin người dùng hiện tại nếu cần
@@ -39,8 +43,13 @@ const hanleLoginWithGoogle = async (req, res) => {
         avatar: userInfo.avatar,
         access: userInfo.access,
       });
+      console.log(newUser);
+
       await newUser.save();
-      user.accesstoken = await getJsonWebToken(userInfo.email, newUser.id);
+      user = {
+        ...newUser._doc,
+        accesstoken: await getJsonWebToken(userInfo.email, newUser.id),
+      };
       console.log("newUser", user.accesstoken);
       console.log("Create user.");
       // Sau khi cập nhật, trả về phản hồi

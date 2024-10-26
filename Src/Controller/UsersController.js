@@ -1,15 +1,9 @@
 const { UserModel } = require("../models/usersModel");
 const {
   findUserById,
-  getUsersByIds,
-  handleFriendRequestAction,
-  manageFriendship,
-  updateUserById,
-  removeFriendSuggestion,
+  updateOneProfileInfo,
   filterUsers,
   transformUserData,
-  processRemoveFriendAction,
-  searchFriendByName,
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
@@ -35,35 +29,10 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Error fetching users" });
   }
 };
-
-const handleAddFriends = (req, res) => {
-  handleFriendRequestAction(req, res, "add");
-};
-
-const handleCancelFriend = (req, res) => {
-  handleFriendRequestAction(req, res, "cancel");
-};
-
-const handleAgreeFriend = async (req, res) => {
-  manageFriendship(req, res, "agree");
-};
-const handlePressRemoveSuggest = async (req, res) => {
-  removeFriendSuggestion(req, res);
-};
-
-const handleRemoveFriends= async(req, res)=>{
-  processRemoveFriendAction(req, res)
-  
-}
-const handleSearchFriendsByName=async (req, res)=>{
-  searchFriendByName(req, res);
+const setUpProfileInfo= async(req, res) =>{
+  updateOneProfileInfo(req, res)
 }
 module.exports = {
   getAllUsers,
-  handleAddFriends,
-  handleCancelFriend,
-  handleAgreeFriend,
-  handlePressRemoveSuggest,
-  handleRemoveFriends,
-  handleSearchFriendsByName
+  setUpProfileInfo
 };

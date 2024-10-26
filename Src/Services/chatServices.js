@@ -1,16 +1,14 @@
-const { MessageModel, UserModel } = require("../models/usersModel");
 const { v4: uuidv4 } = require("uuid");
 const {
   getUsersByIds,
   transformUserData,
-  handleSearchByName,
 } = require("./userServices");
-
+const { ConversationModel } = require("../models/usersModel");
 const handleReceiveMessageUsers = async (req, res) => {
   const { senderID, receiverID } = req.query;
   const setting = { limit: 20, page: 1 };
   try {
-    const dataMessages = await MessageModel.findOne({
+    const dataMessages = await ConversationModel.findOne({
       participants: { $all: [senderID, receiverID] },
     })
       .populate({
@@ -51,12 +49,12 @@ const getLastMessages = (data) => {
 };
 const handleSaveMessagesUser = async (data) => {
   try {
-    const conversation = await MessageModel.findOne({
+    const conversation = await ConversationModel.findOne({
       participants: { $all: [data.senderID, data.receiverID] },
     });
 
     if (!conversation) {
-      const newConversation = new MessageModel({
+      const newConversation = new ConversationModel({
         conversationID: uuidv4(),
         participants: [data.senderID, data.receiverID],
         messages: [data],
@@ -79,7 +77,8 @@ const handleSaveMessagesUser = async (data) => {
 };
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserID } = req.query;
-  const existingConversation = await MessageModel.find({
+
+  const existingConversation = await ConversationModel.find({
     participants: { $in: [currentUserID] },
   })
     .sort({ lastMessageTimestamp: -1 })
@@ -117,28 +116,9 @@ const handleGetAllConversationUsers = async (req, res) => {
     data,
   });
 };
-const handleSearchConversations = async (req, res) => {
-  const { currentUserID, keyWord } = req.query;
-  try {
-    const data = await handleSearchByName(keyWord, currentUserID);
-    if (keyWord === "") {
-      const userSuggests = data.slice(0, 3);
-      return res.status(200).json({
-        message: "Conversation not found !!!",
-        data: userSuggests,
-      });
-    }
-    return res.status(200).json({
-      message: "Search conversations successfully !!!",
-      data,
-    });
-  } catch (error) {
-    console.log("handleSearchConversation", error);
-  }
-};
+
 module.exports = {
   handleReceiveMessageUsers,
   handleSaveMessagesUser,
   handleGetAllConversationUsers,
-  handleSearchConversations,
 };

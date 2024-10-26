@@ -23,14 +23,20 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
   },
-  majoring: {
-    type: String,
-  },
   sex: {
     type: String,
   },
   access: {
     type: String,
+  },
+  className:{
+    type:String
+  },
+  majoring:{
+    type:String
+  },
+  majorCategory:{
+    type:String
   },
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
@@ -94,20 +100,17 @@ const conversationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-conversationSchema.index({
-  participants: 1,
-  lastMessageTimestamp: -1,
-  lastMessage: "text",
-});
 
 const UserModel = mongoose.model("User", userSchema);
 const GroupModel = mongoose.model("Group", groupSchema);
 const PostModel = mongoose.model("Post", postSchema);
-const MessageModel = mongoose.model("Message", conversationSchema);
+const ConversationModel = mongoose.model("Conversation", conversationSchema);
+ConversationModel.collection.dropIndexes();
+ConversationModel.collection.createIndex({ participants: 1, lastMessageTimestamp: -1 });
 
 module.exports = {
   UserModel,
   GroupModel,
   PostModel,
-  MessageModel,
+  ConversationModel,
 };

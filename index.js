@@ -3,12 +3,16 @@ const http = require("http"); // Sử dụng http module để tạo server
 const socketIO = require("socket.io"); // Gọi Socket.IO
 const appRouters = require("./Src/Routers/authRouters");
 const cors = require("cors");
+const { v4: uuidv4 } = require("uuid");
+require("dotenv").config();
 const connectMongoose = require("./Src/config/connectDB");
 const usersRouter = require("./Src/Routers/usersRouters");
 const chatRouter = require("./Src/Routers/ChatRouters");
+const searchRouter = require("./Src/Routers/searchRouters");
+const friendRouter = require("./Src/Routers/friendRouters");
 const { handleSaveMessagesUser } = require("./Src/Services/chatServices");
-require("dotenv").config();
-const { v4: uuidv4 } = require("uuid");
+
+
 const app = express();
 app.use(cors());
 const port = process.env.PORT || 3001; // Cung cấp cổng mặc định nếu không có biến môi trường
@@ -18,7 +22,8 @@ app.use(express.json());
 app.use("/auth", appRouters);
 app.use("/users", usersRouter);
 app.use("/chats", chatRouter);
-
+app.use("/api", searchRouter);
+app.use("/api-friends", friendRouter);
 // Tạo HTTP server và tích hợp với Socket.IO
 const server = http.createServer(app);
 const io = socketIO(server, {
@@ -35,8 +40,8 @@ io.on("connection", (socket) => {
       ...data,
       messageID,
     };
-    console.log("userMessages",userMessages);
-    
+    console.log("userMessages", userMessages);
+
     console.log("Received message: ", userMessages);
     handleSaveMessagesUser(userMessages);
     io.emit("receive_message", userMessages);
