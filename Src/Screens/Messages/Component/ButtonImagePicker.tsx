@@ -22,9 +22,11 @@ interface Props {
     type: 'url' | 'file';
     value: string | ImageOrVideo[] | ImageOrVideo;
   }) => void;
+  icon: ReactNode;
+  multiple?: boolean;
 }
 const ButtonImagePicker = (props: Props) => {
-  const {onSelect} = props;
+  const {onSelect, icon, multiple} = props;
   const modalizeRef = useRef<Modalize>();
   const [imageUrl, setImageUrl] = useState('');
   const [isVisibleModalAddUrl, setIsVisibleModalAddUrl] = useState(false);
@@ -65,7 +67,7 @@ const ButtonImagePicker = (props: Props) => {
         ImageCropPicker.openPicker({
           cropping: true,
           mediaType: 'photo',
-          multiple: true,
+          multiple: multiple ?? true,
         })
           .then(res => {
             onSelect({type: 'file', value: res});
@@ -101,9 +103,7 @@ const ButtonImagePicker = (props: Props) => {
     <View>
       <ButtonComponent
         type="action"
-        iconLeft={
-          <Image size={appInfo.sizeIconBold} color={appColors.blueBack} />
-        }
+        iconLeft={icon}
         onPress={() => modalizeRef.current?.open()}
       />
       <Portal>

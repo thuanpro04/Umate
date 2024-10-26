@@ -8,8 +8,8 @@ import SetUpProfile from '../Profile/SetUpProfile';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Main" component={DrawerNavigator} />
+    <Stack.Navigator screenOptions={{headerShown: false, }}>
+      <Stack.Screen name="MainDrawer" component={DrawerNavigator} />
       <Stack.Screen name="Setting" component={SettingScreen} />
       <Stack.Screen name="ContactUs" component={ContactUsScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />

@@ -33,7 +33,7 @@ interface Props {
   flex?: number;
   textStyle?: StyleProp<TextStyle>;
   children?: ReactNode;
-  activeOpacity?:number
+  activeOpacity?: number;
 }
 const ButtonComponent = (props: Props) => {
   const {
@@ -51,10 +51,15 @@ const ButtonComponent = (props: Props) => {
     flex,
     textStyle,
     children,
-    activeOpacity
+    activeOpacity,
   } = props;
+  
   return type === 'action' ? (
-    <TouchableOpacity onPress={onPress} style={styles} disabled={disabled} activeOpacity={activeOpacity}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={styles}
+      disabled={disabled}
+      activeOpacity={activeOpacity}>
       {iconLeft}
       {iconRight}
       {children}
@@ -64,7 +69,8 @@ const ButtonComponent = (props: Props) => {
     <View
       style={[
         {
-          backgroundColor: props.bgColor ?? appColors.pink,
+          backgroundColor:
+            props.bgColor ?? !disabled ? appColors.blue2 : appColors.coolGray,
           borderRadius: 12,
         },
         styles,
@@ -83,7 +89,7 @@ const ButtonComponent = (props: Props) => {
           {iconLeft && iconLeft}
           <TextComponent
             label={lable ?? ''}
-            color={lableColor}
+            color={lableColor ?? appColors.white}
             size={appInfo.size.WIDTH * 0.04}
             font="bold"
             styles={[textStyle]}

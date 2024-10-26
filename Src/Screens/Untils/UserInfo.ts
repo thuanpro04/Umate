@@ -1,6 +1,12 @@
 export class UserInfo {
   static getName = (fullName: string) => {
+    if (!fullName) {
+      return '';
+    }
     const name = fullName.split(' ');
+    if (name.length === 1) {
+      return name[0];
+    }
     const splitName = name[0] + ' ' + name[1];
     return splitName;
   };
@@ -15,6 +21,6 @@ export class UserInfo {
     return Math.min(Math.max(x * 5, 40), 80);
   };
   static getYearOfbirth = (year: string) => {
-    return year.slice(0, 2);
+    return year ? year.slice(0, 2) : '';
   };
 }

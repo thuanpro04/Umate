@@ -1,13 +1,14 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 import usersAPI from '../../apis/usersApi';
-import {appColors} from '../../Theme/Colors/appColors';
-import {CarUserComponent} from '../Components';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {UserInfo} from '../Untils/UserInfo';
-import {useFocusEffect} from '@react-navigation/native';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appColors } from '../../Theme/Colors/appColors';
+import { CarUserComponent } from '../Components';
 import { userServices } from '../Services/userService';
+import { UserInfo } from '../Untils/UserInfo';
+import friendsAPI from '../../apis/friendsApi';
 
 const FriendsRequestScreen = () => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -19,9 +20,8 @@ const FriendsRequestScreen = () => {
   };
 
   const getUsers = async () => {
-    const url = `/get-all?currentUserID=${auth.userID}&filter=requests`;
     try {
-      const res = await userServices.getUsers(url);
+      const res = await userServices.getEquestFriendUsers(auth.userID,'requests')
       if (res) {
         setUsers(res);
       }
@@ -31,11 +31,11 @@ const FriendsRequestScreen = () => {
   };
 
   const handleAgreeFriend = async (friendUserID: string) => {
-    const url = `/agree-friend`;
+    const url = `/agree`;
     const currentUserID = auth.userID;
     const data = {friendUserID, currentUserID};
     try {
-      const res = await usersAPI.handleUsers(url, data, 'post');
+      const res = await friendsAPI.handleFriendsApi(url, data, 'post');
       getUsers();
     } catch (error) {
       console.log('FriendsRequestScreen', error);

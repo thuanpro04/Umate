@@ -8,7 +8,8 @@ const getAllMessagesUser = async (url: string) => {
     console.log('getAllMessagesUser', error);
   }
 };
-const getAllConversationUsers = async (url: string) => {
+const getAllConversationUsers = async (currentUserID: string) => {
+  const url = `/get-all-conversation?currentUserID=${currentUserID}`;
   try {
     const res = await chatsAPI.handleChats(url);
     return res;
@@ -16,16 +17,9 @@ const getAllConversationUsers = async (url: string) => {
     console.log('getAllConversationUsers', error);
   }
 };
-const searchConversationUsers = async (url: string) => {
-  try {
-    const res = await chatsAPI.handleChats(url);
-    return res;
-  } catch (error) {
-    console.log('getConversationusers', error);
-  }
-};
+
 export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
-  searchConversationUsers,
+  
 };

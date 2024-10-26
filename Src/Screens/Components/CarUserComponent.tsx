@@ -72,7 +72,10 @@ const CarUserComponent = (props: Props) => {
   const handleAdd_CancelFriends = async () => {
     if (userID) {
       try {
-        const action = isShowIcon ? 'add' : 'cancel';
+        setIsShowIcon(!isShowIcon);
+        const action = !isShowIcon ? 'add' : 'cancel';
+        console.log(action);
+
         const res = await friendServices.handleFriendActionAdd_Cancel(
           userID,
           action,
@@ -80,9 +83,6 @@ const CarUserComponent = (props: Props) => {
         );
 
         if (res) {
-          // Thay đổi trạng thái ngay lập tức
-          setIsShowIcon(!isShowIcon);
-          // Tạo hiệu ứng hoạt hình
           Animated.spring(scaleAnim, {
             toValue: 1.15,
             friction: 3,
@@ -239,7 +239,6 @@ const localStyle = StyleSheet.create({
   container: {
     justifyContent: 'flex-start',
     borderWidth: 1,
-
     borderColor: appColors.grey2,
     borderRadius: 10,
     width: '90%',

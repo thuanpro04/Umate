@@ -31,6 +31,7 @@ const TabNavigator = () => {
           alignItems: 'center',
           borderTopLeftRadius: appInfo.size.HEIGHT * 0.038,
           borderTopRightRadius: appInfo.size.HEIGHT * 0.038,
+          backgroundColor:appColors.white
         },
         tabBarIcon: ({focused, color, size}) => {
           let icon: ReactNode;

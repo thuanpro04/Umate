@@ -1,14 +1,5 @@
-import {
-  ArrowLeft,
-  ArrowLeft2,
-  ArrowLeft3,
-  BrushSquare,
-  CloseCircle,
-  More,
-  SearchNormal,
-} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import Feather from 'react-native-vector-icons/Feather';
+import {ArrowLeft2, More} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
@@ -16,19 +7,16 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import {
   ContainerComponent,
   HeaderComponent,
-  InputComponent,
-  RowComponent,
   SearchFriendsComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
 
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {ActivityIndicator, Keyboard, View} from 'react-native';
-import {userServices} from '../Services/userService';
+import {useFocusEffect} from '@react-navigation/native';
+import {ActivityIndicator, View} from 'react-native';
+import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
-import {messageServices} from '../Services/messageServices';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
@@ -38,17 +26,17 @@ const MessageScreen = ({navigation}: any) => {
 
   useFocusEffect(
     useCallback(() => {
-      getUsers();
+      getAllConversation();
     }, []),
   );
 
-  const getUsers = async () => {
-    const url = `/get-all-conversation?currentUserID=${auth.userID}`;
+  const getAllConversation = async () => {
     setIsLoading(true);
     try {
-      const res = await messageServices.getAllConversationUsers(url);
+      const res = await messageServices.getAllConversationUsers(auth.userID);
       if (res?.data.usersInfo && res) {
         setUsers(res?.data.usersInfo);
+        console.log(users);
       }
       setIsLoading(false);
     } catch (error) {
@@ -64,7 +52,8 @@ const MessageScreen = ({navigation}: any) => {
       userID: userID,
     });
   };
-
+  console.log("users",users);
+  
   return (
     <ContainerComponent>
       <HeaderComponent
@@ -98,8 +87,7 @@ const MessageScreen = ({navigation}: any) => {
             <SpaceComponent height={200} />
             <ActivityIndicator />
           </>
-        ) : (
-          users &&
+        ) : users.length > 0 ? (
           users.map((item: any, index) => (
             <CarUserChat
               key={item.userID}
@@ -116,6 +104,8 @@ const MessageScreen = ({navigation}: any) => {
               }
             />
           ))
+        ) : (
+          <></>
         )}
         {users.length === 0 && (
           <View style={{alignItems: 'center'}}>

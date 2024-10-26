@@ -50,6 +50,7 @@ const LoginSreen = () => {
         givenName: userInfo?.givenName,
         avatar: userInfo?.photo,
         access: Validate.Email_Admin(userInfo?.email) ? 'true' : 'false',
+        
       };
       return data;
     } catch (error) {

@@ -1,17 +1,16 @@
-import {useFocusEffect} from '@react-navigation/native';
-import React, {useCallback, useState} from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
-import {useSelector} from 'react-redux';
-import usersAPI from '../../apis/usersApi';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   CarUserComponent,
   ContainerComponent,
   TextComponent,
 } from '../Components';
-import {friendServices} from '../Services/friendService.';
-import {userServices} from '../Services/userService';
+import { friendServices } from '../Services/friendService.';
+import { userServices } from '../Services/userService';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -33,7 +32,6 @@ const SuggestFriend = React.memo(() => {
     const currenOffset = event.nativeEvent.contentOffset.y;
     currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
   };
-  console.log(users);
 
   const handlePressYes = (userID: string) => {
     setButtonVisibility(prevState => ({
@@ -51,10 +49,9 @@ const SuggestFriend = React.memo(() => {
   // Chưa xử lí
 
   const getUsers = async () => {
-    const url = `/get-all?currentUserID=${auth.userID}&filter=suggestfriend`;
     try {
       //console.log('res.data', res.data);
-      const allUsers = await userServices.getUsers(url);
+      const allUsers = await userServices.getEquestFriendUsers(auth.userID,'suggestfriend');
       if (allUsers) {
         setUsers(allUsers);
         allUsers.forEach((item: any) => {
@@ -80,7 +77,8 @@ const SuggestFriend = React.memo(() => {
         action,
         auth.userID,
       );
-      console.log(res);
+      console.log(res?.data);
+      
     } catch (error) {
       console.log('handleFriendAction', error);
     }

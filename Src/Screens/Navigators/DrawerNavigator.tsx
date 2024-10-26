@@ -3,6 +3,7 @@ import React from 'react';
 import TabNavigator from './TabNavigator';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import DrawerCustomsMenu from '../Components/DrawerCustomsMenu';
+import {appColors} from '../../Theme/Colors/appColors';
 const Drawer = createDrawerNavigator();
 const DrawerNavigator = () => {
   return (
@@ -10,8 +11,10 @@ const DrawerNavigator = () => {
       screenOptions={{
         headerShown: false,
         drawerPosition: 'left',
+        
       }}
-      drawerContent={props => <DrawerCustomsMenu {...props}/>}>
+      initialRouteName='HomeNavigator'
+      drawerContent={props => <DrawerCustomsMenu {...props} />}>
       <Drawer.Screen
         name="HomeNavigator"
         component={TabNavigator}

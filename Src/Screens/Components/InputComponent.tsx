@@ -79,7 +79,7 @@ const InputComponent = (props: Props) => {
         keyboardType={type ?? 'default'}
         autoCapitalize="none"
         style={{flex: 1, color: appColors.black, paddingVertical: 4}}
-        placeholderTextColor={appColors.black}
+        placeholderTextColor={appColors.grey}
       />
       <TouchableOpacity onPress={() => onChange('')}>
         {value && value.length > 0 && props.allowClear && (

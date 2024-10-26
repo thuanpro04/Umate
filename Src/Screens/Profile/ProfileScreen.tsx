@@ -1,44 +1,40 @@
 import {
-  ArrowLeft,
   Image,
   MessageQuestion,
   Setting2,
-  User,
+  User
 } from 'iconsax-react-native';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   CarfeatureComponent,
   CarUserComponent,
   ContainerComponent,
-  HeaderComponent,
   RowComponent,
-  SpaceComponent,
+  SpaceComponent
 } from '../Components';
-import {useDispatch, useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-const ProfileScreen = ({navigation}:any) => {
+import { UserInfo } from '../Untils/UserInfo';
+const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
-  console.log(auth);
-  const getName = (fullName: string) => {
-    const name = fullName.split(' ');
-    return name[0] + ' ' + name[1];
-  };
+  console.log("auth",auth);
+
   return (
     <ContainerComponent styles={{paddingHorizontal: 12}}>
-      <RowComponent styles={{justifyContent:'center',paddingHorizontal:20}}>
+      <RowComponent styles={{justifyContent: 'center', paddingHorizontal: 20}}>
         <CarUserComponent
-          name={getName(auth.name)}
+          name={UserInfo.getName(auth.name)}
           isFind
+          majoring={auth.majoring}
           styles={{borderWidth: 0, gap: 20}}
           img={auth.avatar}
         />
         <Setting2 size={appInfo.sizeIconBold} color={appColors.black} />
       </RowComponent>
-
       <SpaceComponent height={30} />
       <CarfeatureComponent
         label="View profile"
@@ -58,7 +54,6 @@ const ProfileScreen = ({navigation}:any) => {
         }
       />
       <SpaceComponent height={3} />
-
       <CarfeatureComponent
         label="Images"
         icon={<Image size={appInfo.sizeIconBold} color={appColors.black} />}
@@ -84,10 +79,4 @@ const ProfileScreen = ({navigation}:any) => {
 };
 
 export default ProfileScreen;
-const localStyle = StyleSheet.create({
-  img: {
-    height: 100,
-    width: 100,
-    borderRadius: 100,
-  },
-});
+const localStyle = StyleSheet.create({});

@@ -9,11 +9,12 @@ interface Props {
   currentUserID: string;
   userID: string;
   allMessages: any[];
-  onPressImg: (arrImages:any[]) => void;
-
+  onPressImg: (arrImages: any[]) => void;
 }
 const ChatBody = (props: Props) => {
   const {currentUserID, userID, allMessages, onPressImg} = props;
+  const [isLoading, setLoading] = useState(true);
+
   const renderImage = (
     index: number,
     arrImages: string[],
@@ -21,31 +22,34 @@ const ChatBody = (props: Props) => {
   ) => {
     const totalImages = arrImages.length;
     const isStacked = totalImages > 1;
-
-    // Kiểm tra nếu không có hình ảnh thì hiển thị loading
-    if (arrImages.length === 0) {
-      return <ActivityIndicator style={localStyles.image} />;
-    }
+    console.log("arrImages",isLoading);
+    
     return (
       <RowComponent onPress={() => onPressImg(arrImages)} activeOpacity={0.8}>
         {arrImages.map((item, index) => (
-          <Image
-            key={index}
-            source={{uri: item}}
-            style={[
-              localStyles.image,
-              isStacked && {
-                position: 'absolute', // Đặt vị trí hình ảnh là absolute
-                left: isRight ? undefined : index * 2, // Điều chỉnh khoảng cách từ trái cho người khác
-                right: isRight ? index * 2 : undefined, // Điều chỉnh khoảng cách từ phải cho chính mình
-                top: index, // Điều chỉnh vị trí dọc để xếp chồng
-                zIndex: totalImages - index,
-              },
-            ]}
-            onError={error =>
-              console.log('Error loading image:', error.nativeEvent.error)
-            }
-          />
+          <View style={{}}>
+            {isLoading && (
+              <ActivityIndicator style={localStyles.loadingIndicator} />
+            )}
+            <Image
+              key={index}
+              source={{uri: item}}
+              onLoadEnd={() => setLoading(false)}
+              style={[
+                localStyles.image,
+                isStacked && {
+                  position: 'absolute', // Đặt vị trí hình ảnh là absolute
+                  left: isRight ? undefined : index * 2, // Điều chỉnh khoảng cách từ trái cho người khác
+                  right: isRight ? index * 2 : undefined, // Điều chỉnh khoảng cách từ phải cho chính mình
+                  top: index, // Điều chỉnh vị trí dọc để xếp chồng
+                  zIndex: totalImages - index,
+                },
+              ]}
+              onError={error =>
+                console.log('Error loading image:', error.nativeEvent.error)
+              }
+            />
+          </View>
         ))}
       </RowComponent>
     );
@@ -64,7 +68,6 @@ const ChatBody = (props: Props) => {
               />
             ) : (
               <OtherUserMessageView
-               
                 key={index}
                 message={item.content}
                 time={item.timestamp}
@@ -107,5 +110,12 @@ const localStyles = StyleSheet.create({
     borderRadius: 10, // Bo góc hình ảnh
     backgroundColor: appColors.grey,
     resizeMode: 'cover',
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    zIndex: 1, // Đảm bảo rằng indicator nằm trên ảnh
+    
   },
 });

@@ -1,6 +1,6 @@
 import storage from '@react-native-firebase/storage';
-import {Microscope, Send} from 'iconsax-react-native';
-import React, {useEffect, useState} from 'react';
+import {Image, Microscope, Send} from 'iconsax-react-native';
+import React, {useCallback, useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {ImageOrVideo} from 'react-native-image-crop-picker';
 import io from 'socket.io-client';
@@ -12,7 +12,6 @@ import {
   RowComponent,
   TextComponent,
 } from '../../Components';
-
 import ButtonImagePicker from './ButtonImagePicker';
 interface Props {
   currentUserID: string;
@@ -26,6 +25,7 @@ const ChatFoot = (props: Props) => {
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const socket = io(appInfo.BASE_URL);
+  
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
       console.log('Received message: ', data);
@@ -36,82 +36,88 @@ const ChatFoot = (props: Props) => {
     };
   }, []);
 
-  const handleSendMessage = async (urlImage?: string[] | string) => {
-    setIsDisable(true);
-    const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
-    if (!content && !imagesUrl) {
-      console.log('Message is empty, nothing to send.');
-      setIsDisable(false); // Đừng quên bật lại khi không gửi
-      return;
-    }
-    const data = {
-      senderID: currentUserID,
-      receiverID: userID,
-      content: content.trim(),
-      imagesUrl: imagesUrl,
-    };
-
-    try {
+  const handleSendMessage = useCallback(
+    async (urlImage?: string[] | string) => {
+      setIsDisable(true);
+      const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
+      if (!content && !imagesUrl) {
+        console.log('Message is empty, nothing to send.');
+        setIsDisable(false); // Đừng quên bật lại khi không gửi
+        return;
+      }
       onSendMessage({
         content: content ?? '',
         imagesUrl: imagesUrl as string[],
       });
+      const data = {
+        senderID: currentUserID,
+        receiverID: userID,
+        content: content.trim(),
+        imagesUrl: imagesUrl,
+      };
+      try {
+        console.log('messageInfo', data);
+        // Emit the message data via socket
+        socket.emit('send_message', data, (response: any) => {
+          console.log('Message sent, server response:', response);
+        });
 
-      console.log('messageInfo', data);
-      // Emit the message data via socket
-      socket.emit('send_message', data, (response: any) => {
-        console.log('Message sent, server response:', response);
-      });
+        setContent('');
+        setIsDisable(false);
+      } catch (error) {
+        console.log('Error in handleSendMessage:', error);
+        setIsDisable(false);
+      }
+    },
+    [content, currentUserID, userID, onSendMessage, socket],
+  );
 
-      setContent('');
-      setIsDisable(false);
-    } catch (error) {
-      console.log('Error in handleSendMessage:', error);
-      setIsDisable(false);
-    }
-  };
-
-  const handleSelected = async (val: ImageOrVideo[] | ImageOrVideo) => {
-    const filePaths = Array.isArray(val)
+  const getFilePaths = (val: ImageOrVideo[] | ImageOrVideo): string[] => {
+    return Array.isArray(val)
       ? val.map(item => item.path).filter(Boolean)
       : [val.path];
-    if (filePaths.length > 20) {
-      return;
-    }
-    onSendMessage({
-      content: '',
-      imagesUrl: [
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Floading.io%2Fspinner%2Fspinner%2F&psig=AOvVaw1xd1SMphC9s5adCKFqrwU8&ust=1729258395069000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCYuPHDlYkDFQAAAAAdAAAAABAE',
-      ],
-    });
-
-    const arrImage = await Promise.all(
-      filePaths.map(async filePath => {
-        if (!filePath) {
-          console.log('No file selected.');
-          return null;
-        }
-        let temp = filePath.toString().split('/');
-        const fileName = temp[temp.length - 1];
-        const path = `images/${fileName}`;
-
-        try {
-          const res = await storage().ref(path).putFile(filePath);
-          console.log(
-            'Upload completed with bytes transferred:',
-            res.bytesTransferred,
-          );
-          const url = await storage().ref(path).getDownloadURL();
-          return url;
-        } catch (error) {
-          console.log('Firebase storage error:', error);
-          return null;
-        }
-      }),
-    );
-    const validImageUrls = arrImage.filter(url => url !== null);
-    await handleSendMessage(validImageUrls);
   };
+
+  const uploadFileToStorage = useCallback(
+    async (filePath: string): Promise<string | null> => {
+      if (!filePath) {
+        console.log('No file selected.');
+        return null;
+      }
+      const fileName = filePath.split('/').pop();
+      const path = `images/${fileName}`;
+
+      try {
+        const res = await storage().ref(path).putFile(filePath);
+        console.log(
+          'Upload completed with bytes transferred:',
+          res.bytesTransferred,
+        );
+        const url = await storage().ref(path).getDownloadURL();
+        return url;
+      } catch (error) {
+        console.log('Firebase storage error:', error);
+        return null;
+      }
+    },
+    [],
+  );
+
+  const handleSelected = useCallback(
+    async (val: ImageOrVideo[] | ImageOrVideo) => {
+      const filePaths = getFilePaths(val);
+
+      if (filePaths.length > 20) {
+        return;
+      }
+
+      const arrImage = await Promise.all(filePaths.map(uploadFileToStorage));
+      const validImageUrls = arrImage.filter(url => url !== null);
+
+      await handleSendMessage(validImageUrls);
+    },
+    [getFilePaths, handleSendMessage, uploadFileToStorage],
+  );
 
   return (
     <View
@@ -126,6 +132,9 @@ const ChatFoot = (props: Props) => {
       )}
       <RowComponent styles={{justifyContent: 'center'}}>
         <ButtonImagePicker
+          icon={
+            <Image size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          }
           onSelect={val =>
             val.type === 'url'
               ? handleSendMessage(val.value.toString().trim())

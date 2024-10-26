@@ -1,14 +1,15 @@
-import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import { ArrowLeft2, HeartCircle, SearchNormal } from 'iconsax-react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 
-import {debounce} from 'lodash';
-import {useSelector} from 'react-redux';
-import {Accelerate, Creativity} from '../../assets/svgs/indexSvg';
-import {authSelector} from '../../redux/reducers/authReducer';
+import { useRoute } from '@react-navigation/native';
+import { debounce } from 'lodash';
+import { useSelector } from 'react-redux';
+import { Accelerate, Creativity } from '../../assets/svgs/indexSvg';
+import { authSelector } from '../../redux/reducers/authReducer';
 import {
   CarfeatureComponent,
   CarUserComponent,
@@ -18,11 +19,9 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {userServices} from '../Services/userService';
-import {UserInfo} from '../Untils/UserInfo';
-import {useRoute} from '@react-navigation/native';
-import {messageServices} from '../Services/messageServices';
 import CarUserChat from '../Messages/Component/CarUserChat';
+import { searchServices } from '../Services/searchServices';
+import { UserInfo } from '../Untils/UserInfo';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -41,8 +40,8 @@ const SearchScreen = ({navigation}: any) => {
       icon: <HeartCircle size={appInfo.sizeIconBold} color={appColors.blue} />,
     },
     {
-      key: 'byField',
-      title: 'By field of study',
+      key: 'bymajorcategory',
+      title: 'By major category',
       icon: (
         <Creativity
           height={appInfo.sizeIconBold}
@@ -73,10 +72,14 @@ const SearchScreen = ({navigation}: any) => {
     if (!keySearch) {
       return;
     }
-    const url = `/search?currentUserID=${auth.userID}&searchTerm=${keySearch}`;
     try {
-      const res = await userServices.getUsers(url);
-      setUsers(res);
+      const res = await searchServices.handleSearchFriends(
+        auth.userID,
+        keySearch,
+      );
+      if (res?.data) {
+        setUsers(res.data);
+      }
       console.log('users', users);
 
       setMessageErr('');
@@ -85,11 +88,12 @@ const SearchScreen = ({navigation}: any) => {
     }
   };
   const handleSearchConversations = async (keySearch: string) => {
-    const url = `/search-conversations?currentUserID=${auth.userID}&keyWord=${keySearch}`;
-    console.log(url);
 
     try {
-      const res = await messageServices.searchConversationUsers(url);
+      const res = await searchServices.searchConversationUsers(
+        auth.userID,
+        keySearch,
+      );
       if (res && res.data) {
         setUsers(res.data);
       }
