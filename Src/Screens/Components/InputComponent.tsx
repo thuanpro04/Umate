@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {ReactNode, useEffect, useRef, useState} from 'react';
 import RowComponent from './RowComponent';
@@ -31,6 +33,9 @@ interface Props {
   onPress?: () => void;
   isFocused?: boolean;
   onPressFilter?: () => void;
+  inputRef?: any;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 const InputComponent = (props: Props) => {
   const {
@@ -49,55 +54,54 @@ const InputComponent = (props: Props) => {
     onPress,
     isFocused,
     onPressFilter,
+    inputRef,
+    onFocus,
+    onBlur,
   } = props;
 
   const [isShowPass, setIsShowPass] = useState(isPass ?? false);
-  const [isFocus, setIsFocus] = useState(false);
-  const inputRef = useRef<TextInput>(null);
-  useEffect(() => {
-    // Focus vào ô input khi component được render lần đầu
-    if (inputRef.current && isFocused) {
-      inputRef.current.focus();
-    }
-  }, []);
+
   return (
-    <RowComponent styles={[style.searchStyles, {paddingVertical: 0}, styles]}>
-      {affix && affix}
-      <TextInput
-        ref={inputRef}
-        placeholder={placehold}
-        value={value}
-        onEndEditing={() => {
-          setIsFocus(false);
-          onEnd && onEnd();
-        }}
-        onFocus={() => setIsFocus(true)}
-        multiline={multiline}
-        numberOfLines={numberOfLines}
-        secureTextEntry={isShowPass}
-        onChangeText={(element): any => onChange(element)}
-        keyboardType={type ?? 'default'}
-        autoCapitalize="none"
-        style={{flex: 1, color: appColors.black, paddingVertical: 4}}
-        placeholderTextColor={appColors.grey}
-      />
-      <TouchableOpacity onPress={() => onChange('')}>
-        {value && value.length > 0 && props.allowClear && (
-          <AntDesign
-            name="close"
-            size={appInfo.sizeIcon - 5}
-            color={appColors.black}
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <RowComponent styles={[style.searchStyles, {paddingVertical: 0}, styles]}>
+        {affix && affix}
+        <TextInput
+          ref={inputRef}
+          placeholder={placehold}
+          value={value}
+          onEndEditing={() => {
+            onEnd && onEnd();
+          }}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          blurOnSubmit={false}
+          multiline={multiline}
+          numberOfLines={numberOfLines}
+          secureTextEntry={isShowPass}
+          onChangeText={(element): any => onChange(element)}
+          keyboardType={type ?? 'default'}
+          autoCapitalize="none"
+          style={{flex: 1, color: appColors.black, paddingVertical: 4}}
+          placeholderTextColor={appColors.grey}
+        />
+        <TouchableOpacity onPress={() => onChange('')}>
+          {value && value.length > 0 && props.allowClear && (
+            <AntDesign
+              name="close"
+              size={appInfo.sizeIcon - 5}
+              color={appColors.black}
+            />
+          )}
+        </TouchableOpacity>
+        {subffix && (
+          <ButtonComponent
+            iconRight={subffix}
+            type="action"
+            onPress={onPressFilter}
           />
         )}
-      </TouchableOpacity>
-      {subffix && (
-        <ButtonComponent
-          iconRight={subffix}
-          type="action"
-          onPress={onPressFilter}
-        />
-      )}
-    </RowComponent>
+      </RowComponent>
+    </TouchableWithoutFeedback>
   );
 };
 

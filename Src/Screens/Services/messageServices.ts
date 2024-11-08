@@ -1,6 +1,9 @@
 import chatsAPI from '../../apis/chatApi';
 
-const getAllMessagesUser = async (url: string) => {
+const getAllMessagesUser = async (currentUserID: string, userID:string) => {
+  const url = `/receive-messages?senderID=${currentUserID}&receiverID=${userID}`;
+  console.log(url);
+  
   try {
     const res = await chatsAPI.handleChats(url);
     return res;

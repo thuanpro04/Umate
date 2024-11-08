@@ -1,20 +1,57 @@
 import React, {useState} from 'react';
-import {ActivityIndicator, Image, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Vibration,
+  View,
+} from 'react-native';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {appInfo} from '../../../Theme/appInfo';
-import {ButtonComponent, RowComponent} from '../../Components';
+import {
+  ButtonComponent,
+  RowComponent,
+  SpaceComponent,
+  TextComponent,
+} from '../../Components';
 import OtherUserMessageView from './OtherUserMessageView';
 import UserMessageView from './UserMessageView';
+import {UserInfo} from '../../Untils/UserInfo';
+import {TouchableOpacity} from 'react-native';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 interface Props {
   currentUserID: string;
   userID: string;
   allMessages: any[];
-  onPressImg: (arrImages: any[]) => void;
+  onPressImg: (urlImg: string) => void;
+  navigation?: any;
 }
 const ChatBody = (props: Props) => {
-  const {currentUserID, userID, allMessages, onPressImg} = props;
+  const {currentUserID, userID, allMessages, onPressImg, navigation} = props;
   const [isLoading, setLoading] = useState(true);
+  const [showTimeMessages, setShowTimeMessages] = useState(false);
+  const [showItems, setShowItems] = useState(false);
 
+  const iconShare = (
+    isStacked: boolean,
+    isRight: boolean,
+    arrImages: string[],
+  ) => {
+    return (
+      <EvilIcons
+        name="share-google"
+        color={appColors.blueBack}
+        size={appInfo.sizeIconBold}
+        style={{
+          position: isStacked ? 'absolute' : 'relative',
+          left: isRight ? undefined : appInfo.size.WIDTH * 0.57, // Điều chỉnh khoảng cách từ trái
+          right: isRight && isStacked ? appInfo.size.WIDTH * 0.57 : 0,
+          top: isStacked ? appInfo.size.HEIGHT * 0.12 : 0,
+        }}
+        onPress={() => navigation.navigate('ShareScreen', {arrUrlImages:arrImages, isShare:true})}
+      />
+    );
+  };
   const renderImage = (
     index: number,
     arrImages: string[],
@@ -22,38 +59,41 @@ const ChatBody = (props: Props) => {
   ) => {
     const totalImages = arrImages.length;
     const isStacked = totalImages > 1;
-    console.log("arrImages",isLoading);
-    
-    return (
-      <RowComponent onPress={() => onPressImg(arrImages)} activeOpacity={0.8}>
-        {arrImages.map((item, index) => (
-          <View style={{}}>
-            {isLoading && (
-              <ActivityIndicator style={localStyles.loadingIndicator} />
-            )}
-            <Image
-              key={index}
-              source={{uri: item}}
-              onLoadEnd={() => setLoading(false)}
-              style={[
-                localStyles.image,
-                isStacked && {
-                  position: 'absolute', // Đặt vị trí hình ảnh là absolute
-                  left: isRight ? undefined : index * 2, // Điều chỉnh khoảng cách từ trái cho người khác
-                  right: isRight ? index * 2 : undefined, // Điều chỉnh khoảng cách từ phải cho chính mình
-                  top: index, // Điều chỉnh vị trí dọc để xếp chồng
-                  zIndex: totalImages - index,
-                },
-              ]}
-              onError={error =>
-                console.log('Error loading image:', error.nativeEvent.error)
-              }
-            />
-          </View>
-        ))}
+
+    return arrImages.map((item, imgIndex) => (
+      <RowComponent
+        onPress={() => onPressImg(item)}
+        activeOpacity={0.8}
+        styles={{}}
+        key={imgIndex}>
+        {imgIndex === arrImages.length - 1 &&
+          isRight &&
+          iconShare(isStacked, isRight ?? false, arrImages)}
+        <Image
+          key={imgIndex}
+          source={{uri: item}}
+          onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
+          style={[
+            localStyles.image,
+            isStacked && {
+              position: 'absolute',
+              left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
+              right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
+              top: -imgIndex, // Xếp chồng theo index
+              zIndex: totalImages - imgIndex,
+            },
+          ]}
+          onError={error =>
+            console.log('Error loading image:', error.nativeEvent.error)
+          }
+        />
+        {imgIndex === arrImages.length - 1 &&
+          !isRight &&
+          iconShare(isStacked, !isRight, arrImages)}
       </RowComponent>
-    );
+    ));
   };
+
   return (
     <View style={{flex: 1, marginBottom: 22}}>
       {allMessages &&
@@ -62,6 +102,7 @@ const ChatBody = (props: Props) => {
             item.senderID === currentUserID ? (
               <UserMessageView
                 key={index}
+                timeIndex={index}
                 message={item.content}
                 time={item.timestamp}
                 imageURL={item.imagesUrl}
@@ -69,6 +110,7 @@ const ChatBody = (props: Props) => {
             ) : (
               <OtherUserMessageView
                 key={index}
+                timeIndex={index}
                 message={item.content}
                 time={item.timestamp}
                 imageURL={item.imagesUrl}
@@ -92,6 +134,12 @@ const ChatBody = (props: Props) => {
                   item.imagesUrl,
                   item.senderID === currentUserID,
                 )}
+              {showTimeMessages && (
+                <TextComponent
+                  label={UserInfo.getTimePresent(item.timestamp)}
+                  color={appColors.grey2}
+                />
+              )}
             </View>
           ),
         )}
@@ -116,6 +164,5 @@ const localStyles = StyleSheet.create({
     top: '50%',
     left: '50%',
     zIndex: 1, // Đảm bảo rằng indicator nằm trên ảnh
-    
   },
 });

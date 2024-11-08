@@ -28,7 +28,7 @@ const OrtherLoginComponent = () => {
       </RowComponent>
       <SpaceComponent height={30} />
       <ButtonComponent
-          lable="Google"
+          label="Google"
           styles={{
             backgroundColor: 'transparent',
             borderWidth: 2,

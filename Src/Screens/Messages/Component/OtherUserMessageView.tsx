@@ -12,10 +12,11 @@ interface MessageProps {
   message: string;
   time: any;
   imageURL?: string[];
-
+  timeIndex: number;
 }
 const OtherUserMessageView = React.memo((props: MessageProps) => {
-  const {message, time, imageURL} = props;
+  const {message, time, imageURL, timeIndex} = props;
+  const [showTime, setShowTime] = useState<any[]>([]);
   const timePresent = UserInfo.getTimePresent(time);
   const messageWidth = UserInfo.getMessageWidth(message.length);
   const [swipeValue, setswipeValue] = useState(0);
@@ -30,8 +31,7 @@ const OtherUserMessageView = React.memo((props: MessageProps) => {
       }
     },
     onPanResponderRelease: () => {
-      if (swipeValue > 20) {                                                                
-        
+      if (swipeValue > 20) {
       } else {
         Animated.spring(swipeAnim, {
           toValue: 0,
@@ -43,6 +43,9 @@ const OtherUserMessageView = React.memo((props: MessageProps) => {
     },
   });
 
+  const onChangeShowTime = (key: any) => {
+    setShowTime(prev => ({...prev, [key]: !showTime[key]}));
+  };
   return (
     <Animated.View
       style={[
@@ -57,14 +60,17 @@ const OtherUserMessageView = React.memo((props: MessageProps) => {
       )}
 
       <RowComponent
+        onPress={() => onChangeShowTime(timeIndex)}
         styles={[localStyles.otherUserMessageBox, {width: `${messageWidth}%`}]}>
         <TextComponent label={message} color={appColors.black} flex={1} />
+      </RowComponent>
+      {showTime[timeIndex] && (
         <TextComponent
           label={timePresent}
           color={appColors.grey}
-          styles={globalStyles.timeText}
+          styles={[globalStyles.timeText, {paddingTop: 40, left: -30}]}
         />
-      </RowComponent>
+      )}
     </Animated.View>
   );
 });

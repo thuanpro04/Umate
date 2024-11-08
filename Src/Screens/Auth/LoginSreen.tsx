@@ -119,10 +119,10 @@ const LoginSreen = () => {
       </View>
       <View style={styles.VbtnStyle}>
         <ButtonComponent
-          lable="Sign In with Google"
+          label="Sign In with Google"
           styles={styles.button}
           bgColor={appColors.blue2}
-          lableColor={appColors.white}
+          labelColor={appColors.white}
           onPress={handleLoginWithGoogle}
           disabled={isLoading}
           iconLeft={

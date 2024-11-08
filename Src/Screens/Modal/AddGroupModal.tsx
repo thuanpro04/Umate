@@ -16,14 +16,14 @@ import {List} from 'react-native-paper';
 import {useFocusEffect} from '@react-navigation/native';
 
 interface Props {
-  onChangeProfile: (key: string, value:string) => void;
+  onChangeGroup: (key: string, value:{name:string, userID?:string} | string) => void;
   nameField: string;
   isVisible: boolean;
   onClose: () => void;
 }
 
-const EditUserModal = (props: Props) => {
-  const {onChangeProfile, nameField, isVisible, onClose} = props;
+const AddGroupModal = (props: Props) => {
+  const {onChangeGroup, nameField, isVisible, onClose} = props;
   const [value, setValue] = useState('');
   const modalizeRef = useRef<Modalize>(null);
   const [messageError, setMessageError] = useState('');
@@ -51,16 +51,16 @@ const EditUserModal = (props: Props) => {
     Keyboard.dismiss();
     const messagesErr =
       value.length < 6
-        ? 'Username must be at least 6 characters long.'
+        ? `${nameField} must be at least 6 characters long.`
         : value.length > 15
-        ? 'Username must be no longer than 15 characters.'
+        ? `${nameField} must be no longer than 15 characters.`
         : '';
 
     setMessageError(messagesErr);
 
     if (messagesErr.length === 0) {
       const text = nameField === 'userName' ? Validate.UserName(value) : value;
-      onChangeProfile(nameField, text);
+      onChangeGroup(nameField, text);
       onCloseModal();
       setValue(''); // Clear input after successful save
     }
@@ -88,8 +88,8 @@ const EditUserModal = (props: Props) => {
                     key={element}
                     title={element}
                     onPress={() => {
-                      onChangeProfile(nameField, element);
-                      onChangeProfile('majorCategory', item.title.toString());
+                      onChangeGroup(nameField, element);
+                      onChangeGroup('majorCategory',item.title);
                     }}
                   />
                 ))}
@@ -140,13 +140,13 @@ const EditUserModal = (props: Props) => {
   );
 };
 
-export default EditUserModal;
+export default AddGroupModal;
 
 const styles = StyleSheet.create({
   modalStyle: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 15,
-    flex: 1,
+ 
   },
 });

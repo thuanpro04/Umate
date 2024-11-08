@@ -74,8 +74,6 @@ const CarUserComponent = (props: Props) => {
       try {
         setIsShowIcon(!isShowIcon);
         const action = !isShowIcon ? 'add' : 'cancel';
-        console.log(action);
-
         const res = await friendServices.handleFriendActionAdd_Cancel(
           userID,
           action,
@@ -202,13 +200,13 @@ const CarUserComponent = (props: Props) => {
           {!isShowBtn ? (
             <>
               <ButtonComponent
-                lable={sayYes}
+                label={sayYes}
                 styles={{backgroundColor: appColors.blue, width: '40%'}}
                 textStyle={{color: appColors.white}}
                 onPress={onPressYes}
               />
               <ButtonComponent
-                lable={sayNo}
+                label={sayNo}
                 styles={{
                   backgroundColor: appColors.grey2,
                   width: '40%',
@@ -219,7 +217,7 @@ const CarUserComponent = (props: Props) => {
             </>
           ) : (
             <ButtonComponent
-              lable={'Cancel'}
+              label={'Cancel'}
               styles={{
                 backgroundColor: appColors.grey2,
                 width: '80%',

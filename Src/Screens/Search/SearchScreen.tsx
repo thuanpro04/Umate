@@ -1,15 +1,14 @@
-import { ArrowLeft2, HeartCircle, SearchNormal } from 'iconsax-react-native';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
-
-import { useRoute } from '@react-navigation/native';
-import { debounce } from 'lodash';
-import { useSelector } from 'react-redux';
-import { Accelerate, Creativity } from '../../assets/svgs/indexSvg';
-import { authSelector } from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {useRoute} from '@react-navigation/native';
+import {debounce} from 'lodash';
+import {useSelector} from 'react-redux';
+import {Accelerate, Creativity} from '../../assets/svgs/indexSvg';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {
   CarfeatureComponent,
   CarUserComponent,
@@ -20,13 +19,14 @@ import {
   TextComponent,
 } from '../Components';
 import CarUserChat from '../Messages/Component/CarUserChat';
-import { searchServices } from '../Services/searchServices';
-import { UserInfo } from '../Untils/UserInfo';
+import {searchServices} from '../Services/searchServices';
+import {UserInfo} from '../Untils/UserInfo';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
   const [users, setUsers] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [titleSearch, setTitleSearch] = useState<any[]>([]);
   const route = useRoute();
   const {key} = route.params as {key: string};
 
@@ -35,12 +35,12 @@ const SearchScreen = ({navigation}: any) => {
 
   const optionsKey = [
     {
-      key: 'byFriends',
+      key: 'friends',
       title: 'By friends list',
       icon: <HeartCircle size={appInfo.sizeIconBold} color={appColors.blue} />,
     },
     {
-      key: 'bymajorcategory',
+      key: 'majorCategory',
       title: 'By major category',
       icon: (
         <Creativity
@@ -51,7 +51,7 @@ const SearchScreen = ({navigation}: any) => {
       ),
     },
     {
-      key: 'byClass',
+      key: 'className',
       title: 'By class',
       icon: (
         <Accelerate
@@ -67,28 +67,32 @@ const SearchScreen = ({navigation}: any) => {
       ...prev,
       [key]: !backgroundItem[key],
     }));
+    const data = titleSearch.includes(key)
+      ? titleSearch.filter((item: any) => item !== key) // Xóa key nếu đã tồn tại
+      : [...titleSearch, key]; // Thêm key nếu chưa tồn tại
+    setTitleSearch(data);
   };
+
   const handleSearchFriends = async (keySearch: string) => {
     if (!keySearch) {
       return;
     }
+
     try {
       const res = await searchServices.handleSearchFriends(
         auth.userID,
         keySearch,
+        titleSearch,
       );
       if (res?.data) {
         setUsers(res.data);
       }
-      console.log('users', users);
-
       setMessageErr('');
     } catch (error) {
       console.log('handleSearchFriends', error);
     }
   };
   const handleSearchConversations = async (keySearch: string) => {
-
     try {
       const res = await searchServices.searchConversationUsers(
         auth.userID,
@@ -126,6 +130,7 @@ const SearchScreen = ({navigation}: any) => {
           isFriend={isShowIconAddCancel}
           img={item?.avatar}
           isRequestFriend={isShowRequest}
+          majoring={item.majoring ?? '....'}
         />
       </View>
     );
@@ -235,11 +240,11 @@ const SearchScreen = ({navigation}: any) => {
                   label={item.title}
                   icon={item.icon}
                   styles={[
-                    index === 1 && {
+                    index === 0 && {
                       borderTopLeftRadius: 10,
                       borderTopRightRadius: 10,
                     },
-                    index === optionsKey.length && {
+                    index === optionsKey.length -1 && {
                       borderBottomLeftRadius: 10,
                       borderBottomRightRadius: 10,
                       borderBottomColor: appColors.white,

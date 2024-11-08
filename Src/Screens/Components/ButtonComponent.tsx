@@ -13,9 +13,9 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 interface Props {
-  lable?: string;
+  label?: string;
   isBg?: boolean;
-  lableColor?: string;
+  labelColor?: string;
   bgColor?: string;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
@@ -37,8 +37,8 @@ interface Props {
 }
 const ButtonComponent = (props: Props) => {
   const {
-    lable,
-    lableColor,
+    label,
+    labelColor,
     isBg,
     iconLeft,
     iconRight,
@@ -53,7 +53,7 @@ const ButtonComponent = (props: Props) => {
     children,
     activeOpacity,
   } = props;
-  
+
   return type === 'action' ? (
     <TouchableOpacity
       onPress={onPress}
@@ -63,7 +63,7 @@ const ButtonComponent = (props: Props) => {
       {iconLeft}
       {iconRight}
       {children}
-      {lable && <TextComponent label={lable} />}
+      {label && <TextComponent label={label} />}
     </TouchableOpacity>
   ) : (
     <View
@@ -88,11 +88,11 @@ const ButtonComponent = (props: Props) => {
         <RowComponent styles={{}}>
           {iconLeft && iconLeft}
           <TextComponent
-            label={lable ?? ''}
-            color={lableColor ?? appColors.white}
+            label={label ?? ''}
+            color={labelColor ?? appColors.white}
             size={appInfo.size.WIDTH * 0.04}
             font="bold"
-            styles={[textStyle]}
+            styles={[{paddingVertical:2, paddingHorizontal:12},textStyle]}
           />
           {iconRight && iconRight}
         </RowComponent>

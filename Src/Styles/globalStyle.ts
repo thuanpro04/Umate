@@ -5,7 +5,6 @@ const globalStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: appColors.white,
     paddingVertical: Platform.OS === 'android' ? StatusBar.currentHeight : 48,
-
   },
   row: {
     flexDirection: 'row',
@@ -13,7 +12,6 @@ const globalStyles = StyleSheet.create({
     paddingVertical: 6,
     gap: 10,
     alignItems: 'center',
-    
   },
   avatar: {
     width: 52,
@@ -27,18 +25,21 @@ const globalStyles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 100,
-    backgroundColor: appColors.grey2,
+    backgroundColor: 'rgba(0,0,0,0.3)'
   },
-  
-
-  // Other user's message (căn trái)
- 
-  // Thời gian tin nhắn
+  overlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    
+  },
   timeText: {
-    marginLeft: 11.5,
     fontSize: 11.5,
     alignSelf: 'flex-end', // Đặt thời gian ở dưới cùng
-  }, searchStyles: {
+  },
+  searchStyles: {
     justifyContent: 'flex-start',
     paddingHorizontal: 18,
     borderWidth: 1,
@@ -48,6 +49,27 @@ const globalStyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
   },
- 
+  button: {
+    backgroundColor: appColors.white,
+    borderWidth: 0.5,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  spaceBetween: {
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontWeight: '600',
+    color: appColors.blueBack,
+  },
+  inputRow: {
+    borderBottomWidth: 0.2,
+    borderColor: appColors.blue3,
+  },
+  imgStyles: {
+    width: 160,
+    height: 160,
+    borderRadius: 100,
+  },
 });
 export {globalStyles};

@@ -16,6 +16,7 @@ import {
 import ChatBody from './Component/ChatBody';
 import ChatFoot from './Component/ChatFoot';
 import {messageServices} from '../Services/messageServices';
+import CustomFootImages from './Component/CustomFootImages';
 
 const ChatScreen = ({navigation}: any) => {
   const {userName, avatar, currentUserID, userID} = useRoute().params as {
@@ -29,7 +30,7 @@ const ChatScreen = ({navigation}: any) => {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
-  const [text, setText] = useState();
+  const [imageIndex, setImageIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   useFocusEffect(
     useCallback(() => {
@@ -43,9 +44,11 @@ const ChatScreen = ({navigation}: any) => {
     }, 100);
   }, [messages]);
   const getMessages = useCallback(async () => {
-    const url = `/receive-messages?senderID=${currentUserID}&receiverID=${userID}`;
     try {
-      const res = await messageServices.getAllMessagesUser(url);
+      const res = await messageServices.getAllMessagesUser(
+        currentUserID,
+        userID,
+      );
 
       if (res?.data) {
         setMessages(res.data);
@@ -57,7 +60,7 @@ const ChatScreen = ({navigation}: any) => {
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]}) => {
       val.imagesUrl && setRefreshKey(prevKey => prevKey + 1);
-      console.log('val.imagesUrl', val.imagesUrl);
+
       const newMessage = {
         senderID: currentUserID,
         receiverID: userID,
@@ -85,14 +88,27 @@ const ChatScreen = ({navigation}: any) => {
   const scrollToEnd = useCallback(() => {
     scrollViewRef.current?.scrollToEnd({animated: true});
   }, []);
-  const onPressImg = (arrImages: any[]) => {
-    const imageFormats = arrImages.map(url => ({uri: url}));
-    setDisplayImgs(imageFormats);
+  const onPressImg = (urlImg: string) => {
+    const tempUrl = {uri: urlImg};
+    const allImagesMessages = messages
+      .filter(item => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
+      .flatMap(item => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
+      .filter(imageUrl => imageUrl !== null); // Loại bỏ các giá trị null
+    const Images = allImagesMessages.map(url => ({uri: url}));
+    setDisplayImgs(Images);
+    const imageIndex = Images.findIndex(img => img.uri === tempUrl.uri);
+    setImageIndex(imageIndex);
     setIsVisible(true);
+  };
+  const onChangeImageIndex = (index: number) => {
+    setTimeout(() => {
+      setImageIndex(index);
+    }, 300);
   };
   const renderChatBody = useCallback(() => {
     return (
       <ChatBody
+        navigation={navigation}
         currentUserID={currentUserID}
         userID={userID}
         allMessages={messages}
@@ -117,6 +133,7 @@ const ChatScreen = ({navigation}: any) => {
               name="ellipsis1"
             />
           }
+          onPress2={() => console.log('hello')}
         />
         <ScrollView
           ref={scrollViewRef}
@@ -137,17 +154,23 @@ const ChatScreen = ({navigation}: any) => {
         )}
       </View>
       <ChatFoot
-        reply={text}
         currentUserID={currentUserID}
         userID={userID}
         onSendMessage={onSendMessages}
       />
       {displayImgs && (
         <ImageViewing
-          imageIndex={0}
+          imageIndex={imageIndex}
           images={displayImgs}
           visible={isVisible}
           onRequestClose={() => setIsVisible(false)}
+          FooterComponent={() => (
+            <CustomFootImages
+              indexImage={imageIndex}
+              arrImages={displayImgs}
+              onChangeImageIndex={onChangeImageIndex}
+            />
+          )}
         />
       )}
     </ContainerComponent>

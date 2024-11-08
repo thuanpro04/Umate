@@ -18,7 +18,7 @@ const MyFriendScreen = ({navigation}: any) => {
         marginTop: StatusBar.currentHeight,
       }}>
       <RowComponent styles={{paddingHorizontal: 12}}>
-        <RowComponent onPress={() => navigation.navigate('Profile')}>
+        <RowComponent onPress={() => navigation.openDrawer()}>
           <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
         </RowComponent>
         <SearchFriendsComponent onPress={() => navigation.navigate('Search',{key:'searchFriends'})} />

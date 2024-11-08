@@ -23,4 +23,21 @@ export class Validate {
     });
     return capitalizedParts.join(' ');
   }
+  static eventValidation(data: any) {
+    const mess: string[] = [];
+    const persent= new Date();
+    Object.keys(data).forEach(key => {
+      if (key !== 'users' && key !== 'photoUrl') {
+        !data[`${key}`] && mess.push(`${key} is required !!!`);
+      }
+    });
+    if (data.startAt && data.endAt && data.endAt <= data.startAt) {
+      mess.push('endAt must be greater than startAt !!!');
+    }
+    if (data.endAt && new Date(data.endAt) < persent) {
+      mess.push('endAt must be a future date !!!');
+    }
+  
+    return mess;
+  }
 }

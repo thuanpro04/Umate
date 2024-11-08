@@ -40,14 +40,15 @@ const HeaderComponent = (props: Props) => {
     <RowComponent
       styles={[
         {
-          paddingHorizontal: image ? 0 : 16,
+          paddingHorizontal: image ? 0 : 10,
           borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
           borderBottomWidth: isBcolor ? 0.2 : 0,
           paddingVertical: image ? 4 : 13,
+          gap: 0,
         },
         styles,
       ]}>
-      <RowComponent>
+      <RowComponent styles={{}}>
         <ButtonComponent
           onPress={onPress1 ?? goBack}
           iconLeft={iconLeft}
@@ -57,13 +58,14 @@ const HeaderComponent = (props: Props) => {
         <SpaceComponent width={5} />
         {image && (
           <>
-            <Image source={{uri: image}} style={localStyles.image} />
+            {image && <Image source={{uri: image}} style={localStyles.image} />}
             <TextComponent
               label={title ?? ''}
               styles={{
                 fontSize: appInfo.sizeTitle,
                 fontWeight: '500',
                 fontStyle: 'italic',
+              
               }}
             />
           </>

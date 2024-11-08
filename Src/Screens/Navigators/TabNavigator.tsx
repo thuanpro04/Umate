@@ -1,16 +1,11 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  Message,
-  People,
-  Profile,
-  Ship
-} from 'iconsax-react-native';
-import React, { ReactNode } from 'react';
-import { Platform } from 'react-native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Message, People, Profile, Ship} from 'iconsax-react-native';
+import React, {ReactNode, useState} from 'react';
+import {Platform} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
-import { CircleComponent, TextComponent } from '../Components/index';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {CircleComponent, TextComponent} from '../Components/index';
 import {
   AddGroupScreens,
   HomeScreen,
@@ -18,9 +13,11 @@ import {
   MyFriendScreen,
   ProfileScreen,
 } from '../index';
+import PostEvent from '../Events/PostEvent';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
+  const [isTabBarVisible, setIsTabBarVisible] = useState(true);
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -31,7 +28,8 @@ const TabNavigator = () => {
           alignItems: 'center',
           borderTopLeftRadius: appInfo.size.HEIGHT * 0.038,
           borderTopRightRadius: appInfo.size.HEIGHT * 0.038,
-          backgroundColor:appColors.white
+          backgroundColor: appColors.white,
+          display: isTabBarVisible ? 'flex' : 'none',
         },
         tabBarIcon: ({focused, color, size}) => {
           let icon: ReactNode;
@@ -44,7 +42,7 @@ const TabNavigator = () => {
             case 'Profile':
               icon = <Profile size={size} color={color} />;
               break;
-            case 'AddGroup':
+            case 'PostEvent':
               icon = (
                 <CircleComponent
                   size={52}
@@ -57,14 +55,14 @@ const TabNavigator = () => {
               icon = <People size={size} color={color} />;
               break;
 
-            case 'Message':
+            case 'Messages':
               icon = <Message size={size} color={color} />;
               break;
           }
           return icon;
         },
         tabBarLabel({focused}) {
-          return route.name === 'AddGroup' || !focused ? null : (
+          return route.name === 'PostEvent' ? null : (
             <TextComponent
               label={route.name}
               flex={0}
@@ -78,10 +76,15 @@ const TabNavigator = () => {
           marginBottom: 0,
         },
       })}>
-      <Tab.Screen name="Home" component={HomeScreen}/>
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Friends" component={MyFriendScreen} />
-      <Tab.Screen name="AddGroup" component={AddGroupScreens} />
-      <Tab.Screen name="Message" component={MessageScreen} />
+      <Tab.Screen
+        name="PostEvent"
+        children={() => (
+          <PostEvent setIsTabBarVisible={setIsTabBarVisible} />
+        )}
+      />
+      <Tab.Screen name="Messages" component={MessageScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

@@ -22,11 +22,12 @@ interface Props {
     type: 'url' | 'file';
     value: string | ImageOrVideo[] | ImageOrVideo;
   }) => void;
-  icon: ReactNode;
+  icon?: ReactNode;
   multiple?: boolean;
+  title?: string;
 }
 const ButtonImagePicker = (props: Props) => {
-  const {onSelect, icon, multiple} = props;
+  const {onSelect, icon, multiple, title} = props;
   const modalizeRef = useRef<Modalize>();
   const [imageUrl, setImageUrl] = useState('');
   const [isVisibleModalAddUrl, setIsVisibleModalAddUrl] = useState(false);
@@ -67,7 +68,7 @@ const ButtonImagePicker = (props: Props) => {
         ImageCropPicker.openPicker({
           cropping: true,
           mediaType: 'photo',
-          multiple: multiple ?? true,
+          multiple: multiple ?? false,
         })
           .then(res => {
             onSelect({type: 'file', value: res});
@@ -102,10 +103,12 @@ const ButtonImagePicker = (props: Props) => {
   return (
     <View>
       <ButtonComponent
+        styles={{marginTop: 10}}
         type="action"
         iconLeft={icon}
-        onPress={() => modalizeRef.current?.open()}
-      />
+        onPress={() => modalizeRef.current?.open()}>
+        {<TextComponent label={title ?? ''} color={appColors.blue} />}
+      </ButtonComponent>
       <Portal>
         <Modalize
           adjustToContentHeight
@@ -116,6 +119,7 @@ const ButtonImagePicker = (props: Props) => {
           </View>
         </Modalize>
       </Portal>
+
       <Modal
         visible={isVisibleModalAddUrl}
         style={{flex: 1}}
@@ -155,17 +159,18 @@ const ButtonImagePicker = (props: Props) => {
               value={imageUrl}
               onChange={val => setImageUrl(val)}
               allowClear
+              styles={{width: '100%', marginTop: 8, paddingVertical: 6}}
             />
             <SpaceComponent height={10} />
             <RowComponent styles={{justifyContent: 'flex-end'}}>
               <ButtonComponent
-                lable="Agree"
+                label="Agree"
                 onPress={() => {
                   setIsVisibleModalAddUrl(false);
                   onSelect({type: 'url', value: imageUrl});
                   setImageUrl('');
                 }}
-                lableColor={appColors.white}
+                labelColor={appColors.white}
                 styles={{
                   backgroundColor: appColors.blue,
                   paddingHorizontal: 10,

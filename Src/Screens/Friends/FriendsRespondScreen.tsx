@@ -34,7 +34,7 @@ const FriendsRespondScreen = ({navigation}: any) => {
   const fetchUserFriends = async () => {
     const url = `/get-all?currentUserID=${auth.userID}`;
     try {
-      const res = await userServices.getUsers(url);
+      const res = await userServices.getEquestFriendUsers(auth.userID,'');
       if (res) {
         setUsers(res);
       }

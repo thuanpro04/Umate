@@ -7,16 +7,16 @@ import {
   Edit2,
   Man,
   More,
-  Woman
+  Woman,
 } from 'iconsax-react-native';
-import React, { useCallback, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { ImageOrVideo } from 'react-native-image-crop-picker';
-import { useDispatch, useSelector } from 'react-redux';
-import { addAuth, authSelector } from '../../redux/reducers/authReducer';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import React, {useCallback, useState} from 'react';
+import {Image, StyleSheet, Vibration, View} from 'react-native';
+import {ImageOrVideo} from 'react-native-image-crop-picker';
+import {useDispatch, useSelector} from 'react-redux';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   ContainerComponent,
@@ -27,9 +27,11 @@ import {
 } from '../Components';
 import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
 import EditUserModal from '../Modal/EditUserModal';
-import { userServices } from '../Services/userService';
-import { Notification } from '../Untils/Notification';
-import { UserInfo } from '../Untils/UserInfo';
+import {userServices} from '../Services/userService';
+import {Notification} from '../Untils/Notification';
+import {UserInfo} from '../Untils/UserInfo';
+import LoadingModal from '../Modal/LoadingModal';
+import {imageService} from '../Services/imageService';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -56,41 +58,94 @@ const SetUpProfile = ({navigation}: any) => {
   const [profile, setProfile] = useState(initialProfile);
   const [visible, setVisible] = useState(false);
   const [nameField, setNameField] = useState('');
+
   const dispatch = useDispatch();
   const onNavigation = () => {
     navigation.navigate('Profile');
   };
-  const onchangeProfile = useCallback((key: string, value: string) => {
-     setProfile(prev => ({...prev, [key]: value}));
+  const onchangeProfile = useCallback((key: string, value:string) => {
+    setProfile(prev => ({...prev, [key]: value}));
     setVisible(false);
     setErrors(prev => ({...prev, [key]: ''}));
   }, []);
-  
-  const validateFields = () => {
-    const newErrors = {className: '', majoring: '', sex: ''};
-    let valid = true;
-
-    if (!profile.className) {
-      newErrors.className = 'className is required';
-      valid = false;
-    }
-    if (!profile.majoring) {
-      newErrors.majoring = 'Majoring is required';
-      valid = false;
-    }
-    if (!profile.sex) {
-      newErrors.sex = 'Sex is required';
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    console.log(errors);
-    return valid;
-  };
 
   const handleModal = (key: string) => {
     setNameField(key);
     setVisible(true);
+  };
+  const onCloseModal = () => {
+    setVisible(false);
+  };
+  const validateFields = () => {
+    let valid = true;
+    const requiredFields: Array<'className' | 'majoring' | 'sex'> = [
+      'className',
+      'majoring',
+      'sex',
+    ];
+
+    const newErrors = requiredFields.reduce((acc, field) => {
+      if (!profile[field]) {
+        acc[field] = `${field} is required`;
+        valid = false;
+      }
+      return acc;
+    }, {} as {className?: string; majoring?: string; sex?: string});
+
+    setErrors(newErrors as {className: string; majoring: string; sex: string});
+    console.log(newErrors);
+    return valid;
+  };
+  const handleSelected = async (val: ImageOrVideo) => {
+    try {
+      const filePath = val.path;
+      const fileName = filePath.split('/').pop();
+      const path = `avatars/${fileName}`;
+      const urlImage = await imageService.uploadImageToFirebase(filePath, path);
+      console.log(urlImage);
+      onchangeProfile('avatar', urlImage ?? auth.avatar);
+      setRefreshKey(prevKey => prevKey + 1);
+    } catch (error) {
+      console.log('upload failed', error);
+    }
+  };
+
+  const handleNotification = (key: 'error' | 'sucess') => {
+    key === 'error'
+      ? Notification.showToast(
+          'error',
+          'Save failed',
+          'Please fill in all information😔',
+        )
+      : Notification.showToast(
+          'success',
+          'Setup Success',
+          'Welcome to UMate 👋',
+        );
+  };
+  const setUpProfileUser = async () => {
+    if (!validateFields()) {
+      handleNotification('error');
+      return;
+    }
+    const userInfo = {
+      ...profile,
+      userID: auth.userID,
+      name: profile.userName,
+    };
+    try {
+      const res = await userServices.updateUsersById(userInfo);
+      if (res.data) {
+        const updatedData = {...res.data, accesstoken: auth.accesstoken};
+        dispatch(addAuth(updatedData));
+        await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
+      }
+      handleNotification('sucess');
+      setLoading(false);
+    } catch (error) {
+      console.log('Set up profile failed', error);
+      setLoading(false);
+    }
   };
   const renderGenderButton = (
     gender: string,
@@ -129,73 +184,6 @@ const SetUpProfile = ({navigation}: any) => {
       />
     </View>
   );
-  const onCloseModal = () => {
-    setVisible(false);
-  };
-  const handleSelected = async (val: ImageOrVideo) => {
-    const filePath = val.path;
-    const fileName = filePath.split('/').pop();
-    const path = `avatars/${fileName}`;
-    const urlImage = await getDownloadURLFirebase(filePath, path);
-    onchangeProfile('avatar', urlImage ?? auth.avatar);
-    setRefreshKey(prevKey => prevKey + 1);
-  };
-  const getDownloadURLFirebase = async (filePath: string, path: string) => {
-    try {
-      const res = await storage().ref(path).putFile(filePath);
-      console.log(
-        'Upload completed with bytes transferred:',
-        res.bytesTransferred,
-      );
-      const url = await storage().ref(path).getDownloadURL();
-      return url;
-    } catch (error) {
-      console.log('handleSelected profile', error);
-    }
-  };
-  console.log(auth, 'Profile');
-
-  const setUpProfileUser = async () => {
-    setLoading(true);
-    if (!validateFields()) {
-      Notification.showToast(
-        'error',
-        'Save failed',
-        'Please fill in all information😔',
-      );
-      return;
-    }
-    const userInfo = {
-      userID: auth.userID,
-      name: profile.userName,
-      className: profile.className,
-      majoring: profile.majoring,
-      majorCategory: profile.majorCategory,
-      avatar: profile.avatar,
-      sex: profile.sex,
-    };
-
-    try {
-      const res = await userServices.updateUsersById(userInfo);
-      console.log('profile', res.data);
-
-      if (res.data) {
-        let accesstoken = auth.accesstoken;
-        const userData = {...res.data, accesstoken};
-        dispatch(addAuth(userData));
-        await AsyncStorage.setItem('auth', JSON.stringify(userData));
-        Notification.showToast(
-          'success',
-          'Setup Success',
-          'Welcome to UMate 👋',
-        );
-      }
-      setLoading(false);
-    } catch (error) {
-      console.log('Set up profile failed', error);
-      setLoading(false);
-    }
-  };
   return (
     <ContainerComponent styles={{}} key={refreshKey}>
       <HeaderComponent
@@ -214,44 +202,45 @@ const SetUpProfile = ({navigation}: any) => {
           resizeMode="cover"
           style={[globalStyles.userImg, {zIndex: -1, width: 160, height: 160}]}
         />
-        <View style={styles.overlay}>
+        <View style={[globalStyles.overlay, {...globalStyles.imgStyles}]}>
           <ButtonImagePicker
             multiple={false}
             icon={
               <Camera size={appInfo.sizeIconBold} color={appColors.blueBack} />
             }
-            onSelect={val =>
+            onSelect={val => {
               val.type === 'url'
                 ? onchangeProfile('avatar', val.value.toString().trim())
-                : handleSelected(val.value as ImageOrVideo)
-            }
+                : handleSelected(val.value as ImageOrVideo);
+              handleModal('avatar');
+            }}
           />
         </View>
       </View>
       <SpaceComponent height={80} />
       <View style={styles.content}>
-        <RowComponent styles={styles.spaceBetween}>
-          <TextComponent label="UserName" styles={styles.label} />
+        <RowComponent styles={globalStyles.spaceBetween}>
+          <TextComponent label="UserName" styles={globalStyles.label} />
           <RowComponent
-            styles={styles.inputRow}
+            styles={globalStyles.inputRow}
             onPress={() => handleModal('userName')}>
             <TextComponent label={profile.userName} color={appColors.grey} />
             <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
           </RowComponent>
         </RowComponent>
 
-        <RowComponent styles={styles.spaceBetween}>
-          <TextComponent label="Sex" styles={styles.label} />
+        <RowComponent styles={globalStyles.spaceBetween}>
+          <TextComponent label="Sex" styles={globalStyles.label} />
           <RowComponent styles={styles.genderRow}>
             {renderGenderButton('men', 'Men', Man)}
             {renderGenderButton('woman', 'Women', Woman)}
           </RowComponent>
         </RowComponent>
 
-        <RowComponent styles={styles.spaceBetween}>
-          <TextComponent label="Majoring" styles={styles.label} />
+        <RowComponent styles={globalStyles.spaceBetween}>
+          <TextComponent label="Majoring" styles={globalStyles.label} />
           <RowComponent
-            styles={styles.inputRow}
+            styles={globalStyles.inputRow}
             onPress={() => handleModal('majoring')}>
             <TextComponent label={profile.majoring} color={appColors.grey} />
             <ArrowSquareDown
@@ -261,10 +250,10 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
         </RowComponent>
         <SpaceComponent height={18} />
-        <RowComponent styles={styles.spaceBetween}>
-          <TextComponent label="className" styles={styles.label} />
+        <RowComponent styles={globalStyles.spaceBetween}>
+          <TextComponent label="className" styles={globalStyles.label} />
           <RowComponent
-            styles={styles.inputRow}
+            styles={globalStyles.inputRow}
             onPress={() => handleModal('className')}>
             <TextComponent label={profile.className} color={appColors.grey} />
             <Edit2
@@ -275,11 +264,14 @@ const SetUpProfile = ({navigation}: any) => {
         </RowComponent>
         <SpaceComponent height={50} />
         <ButtonComponent
-          lable="Save"
+          label="Save"
           styles={{paddingVertical: 6}}
           onPress={() => {
-            setUpProfileUser();
-            onNavigation();
+            setLoading(true);
+            setTimeout(() => {
+              setUpProfileUser();
+              onNavigation();
+            }, 1000);
           }}
           disabled={nameField ? false : true}
         />
@@ -291,6 +283,7 @@ const SetUpProfile = ({navigation}: any) => {
         isVisible={visible}
         onClose={onCloseModal}
       />
+      <LoadingModal visible={isLoading} />
     </ContainerComponent>
   );
 };
@@ -302,29 +295,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  overlay: {
-    ...globalStyles.userImg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-    position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
+
   content: {
     paddingHorizontal: 35,
     justifyContent: 'center',
   },
-  spaceBetween: {
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontWeight: '400',
-    color: appColors.blueBack,
-  },
-  inputRow: {
-    borderBottomWidth: 0.2,
-    borderColor: appColors.blue3,
-  },
+  
   genderRow: {
     justifyContent: 'space-evenly',
     flex: 1,
@@ -337,4 +313,5 @@ const styles = StyleSheet.create({
   italicText: {
     fontStyle: 'italic',
   },
+  
 });

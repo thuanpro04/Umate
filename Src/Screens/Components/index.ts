@@ -5,6 +5,7 @@ import CarfeatureComponent from './CarfeatureComponent';
 import CarUserComponent from './CarUserComponent';
 import CircleComponent from './CircleComponent';
 import ContainerComponent from './ContainerComponent';
+import DateTimePickerComponent from './DateTimePickerComponent';
 import HeaderComponent from './HeaderComponent';
 import InputComponent from './InputComponent';
 import OrtherLoginComponent from './OrtherLoginComponent';
@@ -29,5 +30,6 @@ export {
   SearchFriendsComponent,
   CarUserComponent,
   ToastConfig,
-  CarfeatureComponent
+  CarfeatureComponent,
+  DateTimePickerComponent,
 };

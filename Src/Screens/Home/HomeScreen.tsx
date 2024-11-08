@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, ScrollView} from 'react-native';
 import React from 'react';
 import {
   ButtonComponent,
@@ -26,7 +26,7 @@ const HomeScreen = ({navigation}: any) => {
     } catch (error) {}
   };
   return (
-    <ContainerComponent isScroll>
+    <ContainerComponent styles={{marginBottom:- appInfo.size.HEIGHT * 0.045}}>
       <HeaderComponent
         iconLeft={
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.black} />
@@ -35,7 +35,7 @@ const HomeScreen = ({navigation}: any) => {
         onPress1={() => navigation.openDrawer()}
         
       />
-      <View style={{marginBottom: appInfo.size.HEIGHT * 0.045}}>
+      <ScrollView >
         <CarComponent img={require('../../assets/images/tdmu.jpg')}/>
         <SpaceComponent height={12} isCrossBar />
         <CarComponent img={require('../../assets/images/image.png')}/>
@@ -47,7 +47,7 @@ const HomeScreen = ({navigation}: any) => {
         <CarComponent img={require('../../assets/images/image3.png')}/>
         <SpaceComponent height={12} isCrossBar />
         <CarComponent img={require('../../assets/images/tdmu.jpg')}/>
-      </View>
+      </ScrollView>
     </ContainerComponent>
   );
 };

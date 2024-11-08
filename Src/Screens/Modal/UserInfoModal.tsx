@@ -55,7 +55,7 @@ const UserInfoModal = (props: Props) => {
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content} onPress={handleNavigation}>
-          <Messenger size={appInfo.sizeIconBold} color={appColors.blue} />
+          <Messenger size={appInfo.sizeIconBold} color={appColors.blueBack} />
           <TextComponent label={`Message with ${getFirstName(name)}`} title />
         </RowComponent>
         <SpaceComponent height={18} />
@@ -63,13 +63,13 @@ const UserInfoModal = (props: Props) => {
           <AntDesign
             name="tool"
             size={appInfo.sizeIconBold}
-            color={appColors.blue}
+            color={appColors.blueBack}
           />
           <TextComponent label={`Block ${getFirstName(name)}`} title />
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content}>
-          <ProfileDelete size={appInfo.sizeIconBold} color={appColors.blue} />
+          <ProfileDelete size={appInfo.sizeIconBold} color={appColors.blueBack} />
           <ButtonComponent type="action" onPress={handleUnFriend}>
             <TextComponent label={`Unfriend ${getFirstName(name)}`} title />
             <TextComponent

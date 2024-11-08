@@ -1,7 +1,7 @@
 import storage from '@react-native-firebase/storage';
 import {Image, Microscope, Send} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Keyboard, StyleSheet, TextInput, View} from 'react-native';
 import {ImageOrVideo} from 'react-native-image-crop-picker';
 import io from 'socket.io-client';
 import {appInfo} from '../../../Theme/appInfo';
@@ -13,6 +13,7 @@ import {
   TextComponent,
 } from '../../Components';
 import ButtonImagePicker from './ButtonImagePicker';
+import {imageService} from '../../Services/imageService';
 interface Props {
   currentUserID: string;
   userID: string;
@@ -24,8 +25,10 @@ const ChatFoot = (props: Props) => {
   const {currentUserID, userID, onSendMessage, reply} = props;
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+
   const socket = io(appInfo.BASE_URL);
-  
+
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
       console.log('Received message: ', data);
@@ -39,6 +42,7 @@ const ChatFoot = (props: Props) => {
   const handleSendMessage = useCallback(
     async (urlImage?: string[] | string) => {
       setIsDisable(true);
+
       const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
       if (!content && !imagesUrl) {
         console.log('Message is empty, nothing to send.');
@@ -68,6 +72,7 @@ const ChatFoot = (props: Props) => {
         console.log('Error in handleSendMessage:', error);
         setIsDisable(false);
       }
+      inputRef.current?.focus();
     },
     [content, currentUserID, userID, onSendMessage, socket],
   );
@@ -88,13 +93,7 @@ const ChatFoot = (props: Props) => {
       const path = `images/${fileName}`;
 
       try {
-        const res = await storage().ref(path).putFile(filePath);
-        console.log(
-          'Upload completed with bytes transferred:',
-          res.bytesTransferred,
-        );
-        const url = await storage().ref(path).getDownloadURL();
-        return url;
+        return await imageService.uploadImageToFirebase(filePath, path);
       } catch (error) {
         console.log('Firebase storage error:', error);
         return null;
@@ -135,6 +134,7 @@ const ChatFoot = (props: Props) => {
           icon={
             <Image size={appInfo.sizeIconBold} color={appColors.blueBack} />
           }
+          multiple
           onSelect={val =>
             val.type === 'url'
               ? handleSendMessage(val.value.toString().trim())
@@ -142,11 +142,13 @@ const ChatFoot = (props: Props) => {
           }
         />
         <InputComponent
+          inputRef={inputRef}
           value={content}
           onChange={e => setContent(e)}
           type="default"
           placehold="content ..."
           multiline
+          isFocused
           numberOfLines={2}
           allowClear
           styles={{

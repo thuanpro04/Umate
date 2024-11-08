@@ -1,5 +1,5 @@
 import {ArrowLeft2, More} from 'iconsax-react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
@@ -17,13 +17,16 @@ import {ActivityIndicator, View} from 'react-native';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
+import {Portal} from 'react-native-portalize';
+import {Modalize} from 'react-native-modalize';
+import InfomationModal from '../Modal/InfomationModal';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
   const auth = useSelector(authSelector);
   const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = useState('');
-
+  const [isVisible, setIsVisible] = useState(false);
   useFocusEffect(
     useCallback(() => {
       getAllConversation();
@@ -34,8 +37,8 @@ const MessageScreen = ({navigation}: any) => {
     setIsLoading(true);
     try {
       const res = await messageServices.getAllConversationUsers(auth.userID);
-      if (res?.data.usersInfo && res) {
-        setUsers(res?.data.usersInfo);
+      if (res?.data && res) {
+        setUsers(res?.data);
         console.log(users);
       }
       setIsLoading(false);
@@ -52,8 +55,13 @@ const MessageScreen = ({navigation}: any) => {
       userID: userID,
     });
   };
-  console.log("users",users);
-  
+  const onCloseModal=() =>{
+    setIsVisible(false)
+  }
+  const handleAddGroup =() =>{
+    navigation.navigate('AddGroup')
+    onCloseModal()
+  }
   return (
     <ContainerComponent>
       <HeaderComponent
@@ -64,6 +72,7 @@ const MessageScreen = ({navigation}: any) => {
         }
         iconRight={<More color={appColors.black} size={appInfo.sizeIconBold} />}
         title="Messages"
+        onPress2={() => setIsVisible(true)}
       />
       <View style={{justifyContent: 'center', alignItems: 'center'}}>
         <SearchFriendsComponent
@@ -118,6 +127,7 @@ const MessageScreen = ({navigation}: any) => {
           </View>
         )}
       </ContainerComponent>
+      <InfomationModal visible={isVisible} onClose={onCloseModal} onPressAddGroud={handleAddGroup}/>
     </ContainerComponent>
   );
 };

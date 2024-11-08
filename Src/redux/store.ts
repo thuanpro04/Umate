@@ -8,6 +8,7 @@ const store= configureStore({
      middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
           serializableCheck: false, // Tắt kiểm tra tính tuần tự
+          immutableCheck: false,  // Tắt kiểm tra bất biến
         }),
     
 })
