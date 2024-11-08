@@ -109,11 +109,11 @@ const handleGetAllConversationUsers = async (req, res) => {
     }),
   };
 
-  console.log(data);
+  console.log(data.usersInfo);
 
   return res.status(200).json({
     message: "Get all conversation successlly !!",
-    data,
+    data: data.usersInfo,
   });
 };
 

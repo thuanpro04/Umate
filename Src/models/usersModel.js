@@ -29,14 +29,14 @@ const userSchema = new mongoose.Schema({
   access: {
     type: String,
   },
-  className:{
-    type:String
+  className: {
+    type: String,
   },
-  majoring:{
-    type:String
+  majoring: {
+    type: String,
   },
-  majorCategory:{
-    type:String
+  majorCategory: {
+    type: String,
   },
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
@@ -52,32 +52,26 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const groupSchema = new mongoose.Schema({
-  groupID: { type: String, required: true, unique: true },
-  groupName: { type: String, required: true },
-  members: [{ type: String, ref: "User" }],
+const commentSchema = new mongoose.Schema({
+  commentID: { type: String, unique: true },
+  userID: { type: String, ref: "User", required: true },
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
 });
 
-const postSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
   postID: { type: String, required: true, unique: true },
   userID: { type: String, ref: "User", required: true },
   content: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
   likes: [{ type: String, ref: "User" }],
-  comments: [
-    {
-      commentID: { type: String, required: true, unique: true },
-      userID: { type: String, ref: "User", required: true },
-      content: { type: String, required: true },
-      timestamp: { type: Date, default: Date.now },
-    },
-  ],
+  comments: [commentSchema],
 });
-
 const messageSchema = new mongoose.Schema({
   messageID: { type: String, required: true, unique: true },
   senderID: { type: String, ref: "User", required: true },
-  receiverID: { type: String, ref: "User", required: true },
+  receiverID: { type: String, ref: "User" }, // Chỉ dùng cho tin nhắn cá nhân
+  groupID: { type: String, ref: "GroupConversation" }, // Chỉ dùng cho tin nhắn nhóm
   content: { type: String },
   imagesUrl: [{ type: String }],
   timestamp: { type: Date, default: Date.now, index: true },
@@ -85,8 +79,25 @@ const messageSchema = new mongoose.Schema({
     type: String,
     enum: ["sent", "delivered", "read"],
     default: "sent",
-  }, // Trạng thái tin nhắn
+  },
 });
+
+messageSchema.index({ senderID: 1, timestamp: -1 });
+messageSchema.index({ groupID: 1, timestamp: -1 });
+const groupConversationSchema = new mongoose.Schema(
+  {
+    groupID: { type: String, required: true, unique: true },
+    groupName: { type: String, required: true },
+    description: { type: String },
+    invitedUsers: [{ type: String, ref: "User" }],
+    leader: { type: String, required: true, ref: "User" },
+    deputyLeader: { type: String, ref: "User" },
+    messages: [messageSchema], // Tin nhắn của nhóm
+    lastMessage: { type: String },
+    lastMessageTimestamp: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
 const conversationSchema = new mongoose.Schema(
   {
@@ -102,15 +113,21 @@ const conversationSchema = new mongoose.Schema(
 );
 
 const UserModel = mongoose.model("User", userSchema);
-const GroupModel = mongoose.model("Group", groupSchema);
-const PostModel = mongoose.model("Post", postSchema);
+const GroupConversationModel = mongoose.model(
+  "GroupConversation",
+  groupConversationSchema
+);
+const EventModel = mongoose.model("Post", eventSchema);
 const ConversationModel = mongoose.model("Conversation", conversationSchema);
 ConversationModel.collection.dropIndexes();
-ConversationModel.collection.createIndex({ participants: 1, lastMessageTimestamp: -1 });
+ConversationModel.collection.createIndex({
+  participants: 1,
+  lastMessageTimestamp: -1,
+});
 
 module.exports = {
   UserModel,
-  GroupModel,
-  PostModel,
+  GroupConversationModel,
+  EventModel,
   ConversationModel,
 };

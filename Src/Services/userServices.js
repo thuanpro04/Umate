@@ -46,6 +46,10 @@ const transformUserData = (users) => {
       userID: user.userID,
       friendRequests: user.friendRequests,
       friends: user.friends,
+      majoring: user.majoring,
+      sex: user.sex,
+      majorCategory: user.majorCategory,
+      className: user.className,
     })) || []
   );
 };
