@@ -1,9 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
+const { getUsersByIds, transformUserData } = require("./userServices");
 const {
-  getUsersByIds,
-  transformUserData,
-} = require("./userServices");
-const { ConversationModel } = require("../models/usersModel");
+  ConversationModel,
+  GroupConversationModel,
+} = require("../models/usersModel");
 const handleReceiveMessageUsers = async (req, res) => {
   const { senderID, receiverID } = req.query;
   const setting = { limit: 20, page: 1 };
@@ -78,43 +78,86 @@ const handleSaveMessagesUser = async (data) => {
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserID } = req.query;
 
-  const existingConversation = await ConversationModel.find({
-    participants: { $in: [currentUserID] },
-  })
-    .sort({ lastMessageTimestamp: -1 })
-    .exec();
-  if (!existingConversation) {
-    return res.status(401).json({
-      message: "Chats not found !!",
-    });
-  }
+  try {
+    // Lấy tất cả các cuộc trò chuyện cá nhân của người dùng hiện tại
+    const personalConversations = await ConversationModel.find({
+      participants: { $in: [currentUserID] },
+    })
+      .sort({ lastMessageTimestamp: -1 })
+      .exec();
 
-  const usersID = existingConversation.map((conv) =>
-    conv.participants.find((userID) => userID !== currentUserID)
-  );
-  const usersInfo = await getUsersByIds(usersID);
+    // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
+    const groupConversations = await GroupConversationModel.find({
+      "invitedUsers.userID": currentUserID,
+    }).sort({ lastMessageTimestamp: -1 });
 
-  const formatData = transformUserData(usersInfo);
+    // Kiểm tra nếu cả hai loại cuộc trò chuyện đều rỗng
+    if (!personalConversations.length && !groupConversations.length) {
+      return res.status(404).json({
+        message: "No conversations found!",
+      });
+    }
 
-  const data = {
-    usersInfo: existingConversation.map((conv, index) => {
+    // Lấy danh sách ID của các user từ cuộc trò chuyện cá nhân
+    const usersID = personalConversations.map((conv) =>
+      conv.participants.find((userID) => userID !== currentUserID)
+    );
+
+    const usersInfo = await getUsersByIds(usersID); // Hàm này lấy thông tin nhiều user
+    const formatData = transformUserData(usersInfo);
+
+    // Chuẩn bị dữ liệu cho các cuộc trò chuyện cá nhân
+    const personalConversationsData = personalConversations.map((conv) => {
       const otherUserID = conv.participants.find(
         (userID) => userID !== currentUserID
       );
       const user = formatData.find((user) => user.userID === otherUserID);
       return {
+        type: "personal",
         ...user,
-        lastMessage: conv.lastMessage || "", // Thêm lastMessage vào mỗi user
+        lastMessage: conv.lastMessage || "",
+        lastMessageTimestamp: conv.lastMessageTimestamp,
       };
-    }),
-  };
+    });
 
-  console.log(data.usersInfo);
+    // Chuẩn bị dữ liệu cho các cuộc trò chuyện nhóm
+    const groupConversationsData = groupConversations.map((group) => ({
+      type: "group",
+      groupName: group.groupName,
+      groupID: group.groupID,
+      avatar: group.avatar,
+      lastMessage: group.lastMessage || "",
+      lastMessageTimestamp: group.lastMessageTimestamp,
+      invitedUsers: group.invitedUsers,
+      leader: group.leader,
+      deputyLeader: group.deputyLeader,
+      lastMessage: group.lastMessage,
+      messages: group.messages,
+      type:group.type
+    }));
 
-  return res.status(200).json({
-    message: "Get all conversation successlly !!",
-    data: data.usersInfo,
-  });
+    // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
+    const allConversations = [
+      ...personalConversationsData,
+      ...groupConversationsData,
+    ];
+    console.log(groupConversationsData);
+
+    allConversations.sort(
+      (a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp
+    );
+
+    return res.status(200).json({
+      message: "Get all conversations successfully!",
+      data: allConversations,
+    });
+  } catch (error) {
+    console.error("handleGetAllConversationUsers Error:", error);
+    return res.status(500).json({
+      message: "Error retrieving conversations",
+      error: error.message,
+    });
+  }
 };
 
 module.exports = {

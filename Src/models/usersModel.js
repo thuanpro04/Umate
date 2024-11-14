@@ -69,7 +69,7 @@ const eventSchema = new mongoose.Schema({
 });
 const messageSchema = new mongoose.Schema({
   messageID: { type: String, required: true, unique: true },
-  senderID: { type: String, ref: "User", required: true },
+  senderID: { type: String, ref: "User" },
   receiverID: { type: String, ref: "User" }, // Chỉ dùng cho tin nhắn cá nhân
   groupID: { type: String, ref: "GroupConversation" }, // Chỉ dùng cho tin nhắn nhóm
   content: { type: String },
@@ -80,6 +80,7 @@ const messageSchema = new mongoose.Schema({
     enum: ["sent", "delivered", "read"],
     default: "sent",
   },
+  readBy: [{ type: String, ref: "User" }] // Danh sách user đã đọc tin nhắn
 });
 
 messageSchema.index({ senderID: 1, timestamp: -1 });
@@ -87,14 +88,29 @@ messageSchema.index({ groupID: 1, timestamp: -1 });
 const groupConversationSchema = new mongoose.Schema(
   {
     groupID: { type: String, required: true, unique: true },
+    authorId: { type: String, required: true },
     groupName: { type: String, required: true },
     description: { type: String },
-    invitedUsers: [{ type: String, ref: "User" }],
-    leader: { type: String, required: true, ref: "User" },
-    deputyLeader: { type: String, ref: "User" },
+    invitedUsers: [
+      {
+        userID: { type: String, ref: "User" },
+        avatar: { type: String },
+        majoring: { type: String },
+      },
+    ],
+    leader: {
+      userID: { type: String, required: true, ref: "User" },
+      username: { type: String, required: true },
+    },
+    deputyLeader: {
+      userID: { type: String, ref: "User" },
+      username: { type: String },
+    },
+    avatar: { type: String },
     messages: [messageSchema], // Tin nhắn của nhóm
     lastMessage: { type: String },
     lastMessageTimestamp: { type: Date, default: Date.now },
+    type:{type:String}
   },
   { timestamps: true }
 );
@@ -103,8 +119,8 @@ const conversationSchema = new mongoose.Schema(
   {
     conversationID: { type: String, required: true, unique: true },
     participants: [{ type: String, ref: "User", required: true }],
-    messages: [messageSchema],
-    lastMessage: { type: String }, // Tin nhắn mới nhất
+    messages: { type: [messageSchema], default: [] },
+    lastMessage: { type: String, default: "" }, // Tin nhắn mới nhất
     lastMessageTimestamp: { type: Date, default: Date.now },
   },
   {

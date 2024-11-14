@@ -12,6 +12,7 @@ const searchRouter = require("./Src/Routers/searchRouters");
 const friendRouter = require("./Src/Routers/friendRouters");
 const { handleSaveMessagesUser } = require("./Src/Services/chatServices");
 const eventRouter = require("./Src/Routers/eventRouters");
+const groupRouter = require("./Src/Routers/groupRouters");
 
 const app = express();
 app.use(cors());
@@ -25,6 +26,7 @@ app.use("/chats", chatRouter);
 app.use("/api", searchRouter);
 app.use("/api-friends", friendRouter);
 app.use("/events-api", eventRouter);
+app.use("/group-api", groupRouter);
 // Tạo HTTP server và tích hợp với Socket.IO
 const server = http.createServer(app);
 const io = socketIO(server, {
