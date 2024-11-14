@@ -16,7 +16,7 @@ import ButtonImagePicker from './ButtonImagePicker';
 import {imageService} from '../../Services/imageService';
 interface Props {
   currentUserID: string;
-  userID: string;
+  userID: string| string[];
   onSendMessage: (val: {content?: string; imagesUrl?: string[]}) => void;
   reply?: string;
 }
@@ -26,7 +26,8 @@ const ChatFoot = (props: Props) => {
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const inputRef = useRef<TextInput>(null);
-
+  console.log("userID", userID);
+  
   const socket = io(appInfo.BASE_URL);
 
   useEffect(() => {
@@ -42,30 +43,48 @@ const ChatFoot = (props: Props) => {
   const handleSendMessage = useCallback(
     async (urlImage?: string[] | string) => {
       setIsDisable(true);
-
       const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
+
       if (!content && !imagesUrl) {
         console.log('Message is empty, nothing to send.');
-        setIsDisable(false); // Đừng quên bật lại khi không gửi
+        setIsDisable(false);
         return;
       }
-      onSendMessage({
-        content: content ?? '',
-        imagesUrl: imagesUrl as string[],
-      });
-      const data = {
+
+      // Định nghĩa nội dung tin nhắn
+      const messageData = {
         senderID: currentUserID,
-        receiverID: userID,
         content: content.trim(),
         imagesUrl: imagesUrl,
       };
-      try {
-        console.log('messageInfo', data);
-        // Emit the message data via socket
-        socket.emit('send_message', data, (response: any) => {
-          console.log('Message sent, server response:', response);
-        });
 
+      try {
+        if (Array.isArray(userID)) {
+          // Trường hợp gửi cho nhiều userID
+          userID.forEach((id) => {
+            const data = {
+              ...messageData,
+              receiverID: id,
+            };
+            socket.emit('send_message', data, (response: any) => {
+              console.log('Message sent to user:', id, 'server response:', response);
+            });
+          });
+        } else {
+          // Trường hợp gửi cho một userID
+          const data = {
+            ...messageData,
+            receiverID: userID,
+          };
+          socket.emit('send_message', data, (response: any) => {
+            console.log('Message sent to user:', userID, 'server response:', response);
+          });
+        }
+
+        onSendMessage({
+          content: content ?? '',
+          imagesUrl: imagesUrl as string[],
+        });
         setContent('');
         setIsDisable(false);
       } catch (error) {

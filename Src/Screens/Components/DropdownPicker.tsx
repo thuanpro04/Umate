@@ -6,7 +6,7 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {SelectedModel} from '../models/SelectModel';
 import {Modalize} from 'react-native-modalize';
 import ContainerComponent from './ContainerComponent';
@@ -27,7 +27,14 @@ import CarUserComponent from './CarUserComponent';
 import {UserInfo} from '../Untils/UserInfo';
 import {appInfo} from '../../Theme/appInfo';
 import Entypo from 'react-native-vector-icons/Entypo';
-
+interface SelectedUser {
+  name: string;
+  data?: {
+    userID?: any;
+    avatar?: string;
+    majorCategory?: string;
+  };
+}
 interface Props {
   placeHold: string;
   users: SelectedModel[];
@@ -35,47 +42,58 @@ interface Props {
     key: string,
     val: {name: string | string[]; data?: any},
   ) => void;
-  userSelected: SelectedModel[];
-  nameField?: string;
+  userSelected: SelectedUser[];
+  nameField: string;
   isLeader?: boolean;
   styles?: StyleProp<ViewStyle>;
+  userName?: string;
+  isDeputyLeader?: boolean;
 }
 
 const DropdownPicker = (props: Props) => {
   const {
+    userName,
     placeHold,
     users,
     onChangeValue,
     userSelected,
     nameField,
     isLeader,
+    isDeputyLeader,
     styles,
   } = props;
-  console.log('userSelected', userSelected);
 
   const [value, setValue] = useState('');
-  const [backgroundUsers, setBackgroundUsers] = useState<any[]>([]);
+  const [backgroundUsers, setBackgroundUsers] = useState<{
+    [key: number]: boolean;
+  }>({});
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
-  const [tempSelectedUsers, setTempSelectedUsers] = useState<any>([]); // Temp state for selections
+  const [tempSelectedUsers, setTempSelectedUsers] = useState<any>([]);
   const modalizeRef = useRef<Modalize>(null);
-
+  const [selectLeader, setSelectLeader] = useState<any>({});
   const onOpenModalize = () => {
-    // Khi mở modal, đồng bộ `backgroundUsers` từ `selectedUsers`
-    setTempSelectedUsers(selectedUsers);
-    setBackgroundUsers(
-      selectedUsers.reduce((acc: any, user: any) => {
-        acc[user.userID] = true; // Đánh dấu người dùng đã được chọn
-        return acc;
-      }, {}),
-    );
+    if (!isLeader) {
+      setTempSelectedUsers(
+        userSelected.length > 0
+          ? [
+              ...new Map(
+                userSelected.map((item: any) => [item.data.userID, item]),
+              ).values(),
+            ]
+          : userSelected,
+      );
+
+      setBackgroundUsers(
+        userSelected.length > 0 &&
+          userSelected.reduce((acc: any, user: any) => {
+            acc[user.data.userID] = true; // Đánh dấu người dùng đã được chọn
+            return acc;
+          }, {}),
+      );
+    }
+
     modalizeRef.current?.open();
   };
-
-  const onCloseModalize = () => {
-    modalizeRef.current?.close();
-  };
-
-  
 
   const optionUsers = (
     key: any,
@@ -83,61 +101,75 @@ const DropdownPicker = (props: Props) => {
     avatar: any,
     majorCategory: any,
   ) => {
-    const data = { userID: key, avatar, majorCategory };
+    const data: any = {userID: key, avatar, majorCategory};
 
+    const userSelect = [{name, data}];
     if (isLeader) {
-      // Cập nhật backgroundUsers và chỉ chọn một leader
-      setBackgroundUsers((prev) => {
-        const newBackgroundUsers: any = {};
-        // Đặt tất cả giá trị thành false, chỉ chọn người leader
-        Object.keys(prev).forEach((userID) => {
-          newBackgroundUsers[userID] = false;
-        });
-        newBackgroundUsers[key] = true; // Đánh dấu người leader là true
-        return newBackgroundUsers;
-      });
-
-      // Cập nhật danh sách người được chọn chỉ với leader
-      const userSelect = [{ name, data }];
       setTempSelectedUsers(userSelect);
-
-      // Gửi giá trị của leader nếu cần
-      onChangeValue(nameField ?? 'leader', { name, data });
-
-      // Nếu modal được mở thì không đóng khi chọn leader
-      if (modalizeRef.current) {
-        modalizeRef.current.open();
-      }
-
+      // setSelectLeader(userSelect); // Cập nhật leader đã chọn
+      onChangeValue('leader', {name, data});
+      onCloseModalize();
+    } else if (isDeputyLeader) {
+      setTempSelectedUsers(userSelect);
+      onChangeValue('deputyLeader', {name, data});
+      onCloseModalize();
     } else {
-      // Cập nhật trạng thái chọn người dùng
-      setBackgroundUsers((prev) => ({
+      setBackgroundUsers(prev => ({
         ...prev,
-        [key]: !prev[key], // Toggle trạng thái chọn hoặc bỏ chọn
+        [key]: !prev[key],
       }));
 
-      // Tránh trùng lặp khi thêm người vào danh sách
-      const userExists = tempSelectedUsers.find((user: any) => user.userID === key);
+      const userExists = tempSelectedUsers.find(
+        (user: any) => user.data.userID === key,
+      );
       let userSelect = [];
-
       if (userExists) {
-        // Nếu đã chọn thì bỏ chọn (remove from list)
-        userSelect = tempSelectedUsers.filter((x: any) => x.userID !== key);
+        userSelect = tempSelectedUsers.filter(
+          (x: any) => x.data.userID !== key,
+        );
       } else {
-        // Nếu chưa chọn thì thêm vào danh sách (add to list)
-        userSelect = [...tempSelectedUsers, { name, data }];
-      }                     
-
-      // Cập nhật lại danh sách người dùng đã chọn
+        userSelect = [...tempSelectedUsers, {name, data}];
+      }
       setTempSelectedUsers(userSelect);
     }
   };
+  const onCloseModalize = () => {
+    modalizeRef.current?.close();
+  };
+  const renderFooter = () => {
+    return (
+      <View style={{paddingHorizontal: 20, paddingBottom: 30}}>
+        <ButtonComponent
+          type="primary"
+          onPress={() => {
+            // Loại bỏ các phần tử trùng lặp trước khi lưu
+            const uniqueSelectedUsers: any = [
+              ...new Map(
+                tempSelectedUsers.map((item: any) => [item.data.userID, item]),
+              ).values(),
+            ];
+            setSelectedUsers(uniqueSelectedUsers);
+            onChangeValue(nameField ?? 'invitedUsers', uniqueSelectedUsers);
+            onCloseModalize();
+          }}
+          label="Agree"
+          styles={{paddingVertical: 6}}
+        />
+      </View>
+    );
+  };
   const renderUsers = (item: any, index: number) => {
+    const users = item.data ? item.data : item;
     return (
       <RowComponent
         key={index}
         onPress={() =>
-          optionUsers(item.userID, item.name, item.avatar, item.majorCategory)
+          optionUsers(
+            users.userID,
+            item.name,
+            users.avatar,
+            users.majorCategory,
+          )
         }
         styles={{
           justifyContent: 'center',
@@ -155,9 +187,9 @@ const DropdownPicker = (props: Props) => {
         <CarUserComponent
           name={item.name}
           isFind
-          majoring={item.majorCategory}
+          majoring={users.majorCategory}
           styles={{borderWidth: 0, gap: 20}}
-          img={item.avatar}
+          img={users.avatar}
         />
       </RowComponent>
     );
@@ -181,60 +213,41 @@ const DropdownPicker = (props: Props) => {
     );
   };
 
-  const renderFooter = () => {
-    return (
-      <View style={{paddingHorizontal: 20, paddingBottom: 30}}>
-        <ButtonComponent
-          type="primary"
-          onPress={() => {
-            setSelectedUsers(tempSelectedUsers); // Confirm selections
-            onChangeValue(nameField ?? 'invitedUsers', tempSelectedUsers);
-            onCloseModalize();
-          }}
-          label="Agree"
-          styles={{paddingVertical: 6}}
-        />
-      </View>
-    );
+  const renderSelectedUsers = () => {
+    if (isLeader || isDeputyLeader) {
+      // Khi là Leader, chỉ hiển thị tên của leader đã chọn'
+      const nameLeader: any = userName ? userName : placeHold;
+      return (
+        <TextComponent label={nameLeader} styles={{textAlign: 'center'}} />
+      );
+    } else {
+      if (userSelected && userSelected.length > 0) {
+        return userSelected.map((item: any, index: number) => (
+          <TextComponent
+            key={index}
+            label={item.name}
+            styles={{textAlign: 'center'}}
+          />
+        ));
+      }
+    }
+    return <TextComponent label={placeHold} styles={{textAlign: 'center'}} />;
   };
-  console.log('item', tempSelectedUsers);
 
-  const renderSelectedUsers = (item: any, index: number) => {
-    
-    return (
-      <TextComponent
-        key={index}
-        label={item.name}
-        styles={{textAlign: 'center'}}
-      />
-    );
-  };
   return (
     <View style={{justifyContent: 'center', alignItems: 'center'}}>
       <TouchableOpacity
         style={[localStyles.borderStyles, {}, styles]}
         onPress={onOpenModalize}>
-        {userSelected.length > 0 ? (
-          userSelected.map((item: any, index: number) =>
-            renderSelectedUsers(item, index),
-          )
-        ) : (
-          <RowComponent>
-            <TextComponent
-              label={placeHold}
-              flex={1}
-              styles={{textAlign: 'center'}}
-            />
-            <ArrowDown2 size={22} color={appColors.grey} />
-          </RowComponent>
-        )}
+        {renderSelectedUsers()}
+        <ArrowDown2 size={22} color={appColors.grey} />
       </TouchableOpacity>
       <Portal>
         <Modalize
           ref={modalizeRef}
           modalHeight={650}
           HeaderComponent={renderHearder()}
-          FooterComponent={renderFooter()}>
+          FooterComponent={!(isDeputyLeader || isLeader) && renderFooter()}>
           {users.map((item: any, index: number) => renderUsers(item, index))}
         </Modalize>
       </Portal>

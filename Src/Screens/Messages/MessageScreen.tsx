@@ -39,7 +39,6 @@ const MessageScreen = ({navigation}: any) => {
       const res = await messageServices.getAllConversationUsers(auth.userID);
       if (res?.data && res) {
         setUsers(res?.data);
-        console.log(users);
       }
       setIsLoading(false);
     } catch (error) {
@@ -47,21 +46,52 @@ const MessageScreen = ({navigation}: any) => {
       setIsLoading(false);
     }
   };
-  const onNavigationChat = (name: string, avatar: string, userID: string) => {
-    navigation.navigate('Chat', {
-      userName: name,
-      avatar: avatar,
-      currentUserID: auth.userID,
-      userID: userID,
-    });
+  const onNavigationChat = (
+    person?: {
+      name: string;
+      avatar: string;
+      userID: string;
+    },
+    group?: {
+      groupName: string;
+      invitedUsers: any[];
+      leader: any;
+      deputyLeader: any;
+      avatar: string;
+    },
+  ) => {
+    if (person) {
+      console.log(person);
+
+      navigation.navigate('Chat', {
+        person: {
+          userName: person?.name,
+          avatar: person?.avatar,
+          userID: person?.userID,
+        },
+        currentUserID: auth.userID,
+      });
+    } else if (group) {
+      navigation.navigate('Chat', {
+        myGroup: {
+          groupName: group?.groupName,
+          invitedUsers: group?.invitedUsers,
+          leader: group?.leader,
+          deputyLeader: group?.deputyLeader,
+          avatar: group.avatar,
+        },
+        currentUserID: auth.userID,
+      });
+    }
   };
-  const onCloseModal=() =>{
-    setIsVisible(false)
-  }
-  const handleAddGroup =() =>{
-    navigation.navigate('AddGroup')
-    onCloseModal()
-  }
+  const onCloseModal = () => {
+    setIsVisible(false);
+  };
+  const handleAddGroup = () => {
+    navigation.navigate('AddGroup');
+    onCloseModal();
+  };
+
   return (
     <ContainerComponent>
       <HeaderComponent
@@ -99,17 +129,25 @@ const MessageScreen = ({navigation}: any) => {
         ) : users.length > 0 ? (
           users.map((item: any, index) => (
             <CarUserChat
-              key={item.userID}
-              name={UserInfo.getName(item.name)}
+              key={index}
+              name={item.groupName ?? UserInfo.getName(item.name)}
               massv={UserInfo.getYearOfbirth(item.email)}
               image={item.avatar}
               lastMessage={item.lastMessage}
               onPress={() =>
-                onNavigationChat(
-                  UserInfo.getName(item.name),
-                  item.avatar,
-                  item.userID,
-                )
+                item.type === 'personal'
+                  ? onNavigationChat({
+                      name: UserInfo.getName(item.name),
+                      avatar: item.avatar,
+                      userID: item.userID,
+                    })
+                  : onNavigationChat(undefined, {
+                      groupName: item.groupName,
+                      invitedUsers: item.invitedUsers,
+                      leader: item.leader,
+                      deputyLeader: item.deputyLeader,
+                      avatar: item.avatar,
+                    })
               }
             />
           ))
@@ -127,7 +165,11 @@ const MessageScreen = ({navigation}: any) => {
           </View>
         )}
       </ContainerComponent>
-      <InfomationModal visible={isVisible} onClose={onCloseModal} onPressAddGroud={handleAddGroup}/>
+      <InfomationModal
+        visible={isVisible}
+        onClose={onCloseModal}
+        onPressAddGroud={handleAddGroup}
+      />
     </ContainerComponent>
   );
 };

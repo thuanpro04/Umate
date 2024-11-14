@@ -21,7 +21,7 @@ import {TouchableOpacity} from 'react-native';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 interface Props {
   currentUserID: string;
-  userID: string;
+  userID: string | string[];
   allMessages: any[];
   onPressImg: (urlImg: string) => void;
   navigation?: any;

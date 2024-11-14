@@ -23,9 +23,21 @@ export class Validate {
     });
     return capitalizedParts.join(' ');
   }
+  static groupValidation(data: any) {
+    const mess: string[] = [];
+    Object.keys(data).forEach(key => {
+      if (key !== 'description' && key !== 'authorId' && key !== 'avatar') {
+        !data[`${key}`] && mess.push(`${key} is required !!!`);
+      }
+    });
+    if (data.invitedUsers.length < 2) {
+      mess.push('invitedUsers must be greater than two !!!');
+    }
+    return mess
+  }
   static eventValidation(data: any) {
     const mess: string[] = [];
-    const persent= new Date();
+    const persent = new Date();
     Object.keys(data).forEach(key => {
       if (key !== 'users' && key !== 'photoUrl') {
         !data[`${key}`] && mess.push(`${key} is required !!!`);
@@ -37,7 +49,7 @@ export class Validate {
     if (data.endAt && new Date(data.endAt) < persent) {
       mess.push('endAt must be a future date !!!');
     }
-  
+
     return mess;
   }
 }

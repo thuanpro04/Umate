@@ -32,6 +32,7 @@ import {Notification} from '../Untils/Notification';
 import {UserInfo} from '../Untils/UserInfo';
 import LoadingModal from '../Modal/LoadingModal';
 import {imageService} from '../Services/imageService';
+import UpdateInfoModal from '../Modal/UpdateInfoModal';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -63,7 +64,7 @@ const SetUpProfile = ({navigation}: any) => {
   const onNavigation = () => {
     navigation.navigate('Profile');
   };
-  const onchangeProfile = useCallback((key: string, value:string) => {
+  const onchangeProfile = useCallback((key: string, value: string) => {
     setProfile(prev => ({...prev, [key]: value}));
     setVisible(false);
     setErrors(prev => ({...prev, [key]: ''}));
@@ -277,12 +278,23 @@ const SetUpProfile = ({navigation}: any) => {
         />
       </View>
 
-      <EditUserModal
-        nameField={nameField}
-        onChangeProfile={onchangeProfile}
-        isVisible={visible}
-        onClose={onCloseModal}
-      />
+      {nameField === 'majoring' ? (
+        <EditUserModal
+          nameField={nameField}
+          onChangeProfile={onchangeProfile}
+          isVisible={visible}
+          onClose={onCloseModal}
+        />
+      ) : (
+        visible && (
+          <UpdateInfoModal
+            onChangeProfile={onchangeProfile}
+            onCloseModal={onCloseModal}
+            isVisible={visible}
+            nameField={nameField}
+          />
+        )
+      )}
       <LoadingModal visible={isLoading} />
     </ContainerComponent>
   );
@@ -300,7 +312,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
     justifyContent: 'center',
   },
-  
+
   genderRow: {
     justifyContent: 'space-evenly',
     flex: 1,
@@ -313,5 +325,4 @@ const styles = StyleSheet.create({
   italicText: {
     fontStyle: 'italic',
   },
-  
 });

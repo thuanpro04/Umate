@@ -17,6 +17,8 @@ interface Props {
 const TextComponent = (props: Props) => {
   const {label, size, color, font, title, styles, flex, numberOfLine, label2} =
     props;
+    
+    
   return label && label2 ? (
     <RowComponent >
       <Text

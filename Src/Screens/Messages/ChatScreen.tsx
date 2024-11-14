@@ -1,5 +1,5 @@
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {ArrowLeft} from 'iconsax-react-native';
+import {ArrowLeft, HambergerMenu} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import ImageViewing from 'react-native-image-viewing';
@@ -12,6 +12,7 @@ import {
   ButtonComponent,
   ContainerComponent,
   HeaderComponent,
+  TextComponent,
 } from '../Components';
 import ChatBody from './Component/ChatBody';
 import ChatFoot from './Component/ChatFoot';
@@ -19,12 +20,23 @@ import {messageServices} from '../Services/messageServices';
 import CustomFootImages from './Component/CustomFootImages';
 
 const ChatScreen = ({navigation}: any) => {
-  const {userName, avatar, currentUserID, userID} = useRoute().params as {
-    userName: string;
-    avatar: string;
+  const {person, myGroup, currentUserID} = useRoute().params as {
+    person: {
+      userName: string;
+      avatar: string;
+      userID: string;
+    };
+    myGroup: {
+      groupName: string;
+      invitedUsers: any[];
+      leader: any;
+      deputyLeader: any;
+      avatar: string;
+    };
     currentUserID: string;
-    userID: string;
   };
+  console.log('person', person);
+
   const [messages, setMessages] = useState<any[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
@@ -47,7 +59,7 @@ const ChatScreen = ({navigation}: any) => {
     try {
       const res = await messageServices.getAllMessagesUser(
         currentUserID,
-        userID,
+        person.userID,
       );
 
       if (res?.data) {
@@ -56,14 +68,14 @@ const ChatScreen = ({navigation}: any) => {
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  }, [currentUserID, userID]);
+  }, [currentUserID, person && person.userID, myGroup && myGroup.invitedUsers]);
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]}) => {
       val.imagesUrl && setRefreshKey(prevKey => prevKey + 1);
 
       const newMessage = {
         senderID: currentUserID,
-        receiverID: userID,
+        receiverID: person.userID,
         content: val.content?.trim() || '',
         imagesUrl: val.imagesUrl || [],
         timestamp: new Date().toISOString(),
@@ -72,7 +84,7 @@ const ChatScreen = ({navigation}: any) => {
         setMessages(prevMessages => [...prevMessages, newMessage]);
       }
     },
-    [currentUserID, userID],
+    [currentUserID, person && person.userID, myGroup && myGroup.invitedUsers],
   );
   const handleScroll = useCallback((event: any) => {
     // layoutMeasurement: Đây là một đối tượng chứa thông tin về kích thước của khu vực hiển thị hiện tại (viewport) trong ứng dụng.
@@ -110,38 +122,67 @@ const ChatScreen = ({navigation}: any) => {
       <ChatBody
         navigation={navigation}
         currentUserID={currentUserID}
-        userID={userID}
+        userID={person ? person.userID : myGroup ? myGroup.invitedUsers : ''}
         allMessages={messages}
         onPressImg={onPressImg}
       />
     );
-  }, [messages, currentUserID, userID, onSendMessages]);
+  }, [
+    messages,
+    currentUserID,
+    person && person.userID,
+    myGroup && myGroup.invitedUsers,
+    ,
+    onSendMessages,
+  ]);
+  const getUserIdGroup = () => {
+    return myGroup
+      ? myGroup.invitedUsers
+          .filter(item => item.userID !== currentUserID)
+          .map(item => item.userID)
+      : '';
+  };
   return (
     <ContainerComponent styles={styles.container} key={refreshKey}>
       <View style={{paddingHorizontal: 18, flex: 1}}>
         <HeaderComponent
-          title={userName}
-          image={avatar}
+          title={person ? person.userName : myGroup ? myGroup.groupName : ''}
+          image={
+            person
+              ? person.avatar
+              : myGroup
+              ? myGroup.avatar
+              : 'data:image/png;base64,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'
+          }
           iconLeft={
             <ArrowLeft size={appInfo.sizeIconBold} color={appColors.black} />
           }
           isBcolor
           iconRight={
-            <AntDesign
+            <HambergerMenu
               size={appInfo.sizeIconBold}
-              color={appColors.grey}
-              name="ellipsis1"
+              color={appColors.black}
             />
           }
           onPress2={() => console.log('hello')}
         />
-        <ScrollView
-          ref={scrollViewRef}
-          showsVerticalScrollIndicator={false}
-          scrollEventThrottle={16}
-          onScroll={handleScroll}>
-          {renderChatBody()}
-        </ScrollView>
+        {messages.length > 0 ? (
+          <ScrollView
+            ref={scrollViewRef}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={handleScroll}>
+            {renderChatBody()}
+          </ScrollView>
+        ) : (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <TextComponent
+              label="Messages not found 🙁"
+              color={appColors.blue3}
+            />
+          </View>
+        )}
         {showScrollToBottom && (
           <ButtonComponent
             type="action"
@@ -155,7 +196,7 @@ const ChatScreen = ({navigation}: any) => {
       </View>
       <ChatFoot
         currentUserID={currentUserID}
-        userID={userID}
+        userID={person ? person.userID : myGroup ? getUserIdGroup() : ''}
         onSendMessage={onSendMessages}
       />
       {displayImgs && (

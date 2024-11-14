@@ -1,13 +1,13 @@
-import {
-  Image,
-  Keyboard,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
+import {CloseCircle} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
+import {Image, StyleSheet, View} from 'react-native';
+import {ImageOrVideo} from 'react-native-image-crop-picker';
+import {useSelector} from 'react-redux';
+import eventApi from '../../apis/eventApi';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   ContainerComponent,
@@ -17,20 +17,11 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {appColors} from '../../Theme/Colors/appColors';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import DropdownPicker from '../Components/DropdownPicker';
-import {globalStyles} from '../../Styles/globalStyle';
-import {userServices} from '../Services/userService';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
 import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
-import {ImageOrVideo} from 'react-native-image-crop-picker';
 import {imageService} from '../Services/imageService';
-import {CloseCircle} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
+import {userServices} from '../Services/userService';
 import {Validate} from '../Untils/Validate';
-import eventApi from '../../apis/eventApi';
 const initValues = {
   content: '',
   photoUrl: '',
@@ -202,6 +193,7 @@ const PostEvent = ({setIsTabBarVisible, navigation}: any) => {
       <View>
         <TextComponent label={'Invited users'} styles={styles.textStyle} />
         <DropdownPicker
+          nameField="invitedUsers"
           placeHold="Selected"
           users={users}
           onChangeValue={onChangeValue}
