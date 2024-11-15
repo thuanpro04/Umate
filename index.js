@@ -10,9 +10,10 @@ const usersRouter = require("./Src/Routers/usersRouters");
 const chatRouter = require("./Src/Routers/ChatRouters");
 const searchRouter = require("./Src/Routers/searchRouters");
 const friendRouter = require("./Src/Routers/friendRouters");
-const { handleSaveMessagesUser } = require("./Src/Services/chatServices");
+const { sendMessageToGroupAndPersonal } = require("./Src/Services/chatServices");
 const eventRouter = require("./Src/Routers/eventRouters");
 const groupRouter = require("./Src/Routers/groupRouters");
+const { generateUniqueID } = require("./Src/untils/infomationUntils");
 
 const app = express();
 app.use(cors());
@@ -38,7 +39,7 @@ const io = socketIO(server, {
 io.on("connection", (socket) => {
   // console.log(`User connected: ${socket.id}`);
   socket.on("send_message", async (data) => {
-    const messageID = uuidv4();
+    const messageID =generateUniqueID();
     const userMessages = {
       ...data,
       messageID,
@@ -46,7 +47,7 @@ io.on("connection", (socket) => {
     console.log("userMessages", userMessages);
 
     console.log("Received message: ", userMessages);
-    handleSaveMessagesUser(userMessages);
+    sendMessageToGroupAndPersonal(userMessages);
     io.emit("receive_message", userMessages);
   });
 

@@ -1,4 +1,4 @@
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, Document } = require("mongoose");
 const userSchema = new mongoose.Schema({
   userID: {
     type: String,
@@ -67,11 +67,12 @@ const eventSchema = new mongoose.Schema({
   likes: [{ type: String, ref: "User" }],
   comments: [commentSchema],
 });
+
 const messageSchema = new mongoose.Schema({
   messageID: { type: String, required: true, unique: true },
   senderID: { type: String, ref: "User" },
   receiverID: { type: String, ref: "User" }, // Chỉ dùng cho tin nhắn cá nhân
-  groupID: { type: String, ref: "GroupConversation" }, // Chỉ dùng cho tin nhắn nhóm
+  recipients: [{ type: String, ref: "Users" }],
   content: { type: String },
   imagesUrl: [{ type: String }],
   timestamp: { type: Date, default: Date.now, index: true },
@@ -80,7 +81,7 @@ const messageSchema = new mongoose.Schema({
     enum: ["sent", "delivered", "read"],
     default: "sent",
   },
-  readBy: [{ type: String, ref: "User" }] // Danh sách user đã đọc tin nhắn
+  readBy: [{ type: String, ref: "User" }], // Danh sách user đã đọc tin nhắn
 });
 
 messageSchema.index({ senderID: 1, timestamp: -1 });
@@ -94,6 +95,7 @@ const groupConversationSchema = new mongoose.Schema(
     invitedUsers: [
       {
         userID: { type: String, ref: "User" },
+        userName: { type: String },
         avatar: { type: String },
         majoring: { type: String },
       },
@@ -110,7 +112,7 @@ const groupConversationSchema = new mongoose.Schema(
     messages: [messageSchema], // Tin nhắn của nhóm
     lastMessage: { type: String },
     lastMessageTimestamp: { type: Date, default: Date.now },
-    type:{type:String}
+    type: { type: String },
   },
   { timestamps: true }
 );
