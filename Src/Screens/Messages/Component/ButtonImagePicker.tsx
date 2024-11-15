@@ -1,4 +1,4 @@
-import {Modal, StyleSheet, Text, View} from 'react-native';
+import {Keyboard, Modal, StyleSheet, Text, View} from 'react-native';
 import React, {ReactNode, useRef, useState} from 'react';
 import ImageCropPicker, {ImageOrVideo} from 'react-native-image-crop-picker';
 import {appColors} from '../../../Theme/Colors/appColors';
@@ -96,6 +96,7 @@ const ButtonImagePicker = (props: Props) => {
         break;
       default:
         setIsVisibleModalAddUrl(true);
+        
         break;
     }
     modalizeRef.current?.close();

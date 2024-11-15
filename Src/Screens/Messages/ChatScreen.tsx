@@ -1,4 +1,8 @@
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {ArrowLeft, HambergerMenu} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
@@ -18,6 +22,7 @@ import ChatBody from './Component/ChatBody';
 import ChatFoot from './Component/ChatFoot';
 import {messageServices} from '../Services/messageServices';
 import CustomFootImages from './Component/CustomFootImages';
+import {UserInfo} from '../Untils/UserInfo';
 
 const ChatScreen = ({navigation}: any) => {
   const {person, myGroup, currentUserID} = useRoute().params as {
@@ -27,6 +32,7 @@ const ChatScreen = ({navigation}: any) => {
       userID: string;
     };
     myGroup: {
+      groupID: string;
       groupName: string;
       invitedUsers: any[];
       leader: any;
@@ -35,7 +41,6 @@ const ChatScreen = ({navigation}: any) => {
     };
     currentUserID: string;
   };
-  console.log('person', person);
 
   const [messages, setMessages] = useState<any[]>([]);
   const [isVisible, setIsVisible] = useState(false);
@@ -44,6 +49,7 @@ const ChatScreen = ({navigation}: any) => {
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [imageIndex, setImageIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [members, setMembers] = useState<any>([]);
   useFocusEffect(
     useCallback(() => {
       getMessages();
@@ -59,32 +65,54 @@ const ChatScreen = ({navigation}: any) => {
     try {
       const res = await messageServices.getAllMessagesUser(
         currentUserID,
-        person.userID,
+        person ? person.userID : undefined,
+        myGroup ? UserInfo.getIdUsers(myGroup.invitedUsers) : undefined,
+        myGroup ? myGroup.groupID : undefined,
       );
 
       if (res?.data) {
-        setMessages(res.data);
+        setMembers(res.data.invitedUsers);
+        setMessages(res.data.messagesAll);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  }, [currentUserID, person && person.userID, myGroup && myGroup.invitedUsers]);
+  }, [
+    currentUserID,
+    person ? person.userID : myGroup ? myGroup.invitedUsers : undefined,
+  ]);
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]}) => {
-      val.imagesUrl && setRefreshKey(prevKey => prevKey + 1);
-
-      const newMessage = {
-        senderID: currentUserID,
-        receiverID: person.userID,
-        content: val.content?.trim() || '',
-        imagesUrl: val.imagesUrl || [],
-        timestamp: new Date().toISOString(),
-      };
       if (val.content?.trim() || val.imagesUrl) {
-        setMessages(prevMessages => [...prevMessages, newMessage]);
+        const newMessage = {
+          senderID: currentUserID,
+          content: val.content?.trim() || '',
+          imagesUrl: val.imagesUrl || [],
+          timestamp: new Date().toISOString(),
+        };
+        let updatedMessages = [...messages];
+        if (myGroup) {
+          const groupMessages = {
+            ...newMessage,
+            groupName: myGroup.groupName,
+            recipients: getUserIdGroup(),
+            type: 'group',
+          };
+          updatedMessages.push('groupMessages', groupMessages); // Thêm tin nhắn nhóm vào
+        } else {
+          const personMessages = {
+            ...newMessage,
+            receiverID: person.userID,
+            type: 'personal',
+          };
+          updatedMessages.push(personMessages); // Thêm tin nhắn cá nhân vào
+        }
+        // Chỉ gọi setMessages một lần
+        setMessages(updatedMessages);
+        console.log('updatedMessages', updatedMessages);
       }
     },
-    [currentUserID, person && person.userID, myGroup && myGroup.invitedUsers],
+    [currentUserID, person?.userID, myGroup?.invitedUsers, messages],
   );
   const handleScroll = useCallback((event: any) => {
     // layoutMeasurement: Đây là một đối tượng chứa thông tin về kích thước của khu vực hiển thị hiện tại (viewport) trong ứng dụng.
@@ -117,6 +145,7 @@ const ChatScreen = ({navigation}: any) => {
       setImageIndex(index);
     }, 300);
   };
+
   const renderChatBody = useCallback(() => {
     return (
       <ChatBody
@@ -125,6 +154,7 @@ const ChatScreen = ({navigation}: any) => {
         userID={person ? person.userID : myGroup ? myGroup.invitedUsers : ''}
         allMessages={messages}
         onPressImg={onPressImg}
+        members={members}
       />
     );
   }, [
@@ -141,6 +171,9 @@ const ChatScreen = ({navigation}: any) => {
           .filter(item => item.userID !== currentUserID)
           .map(item => item.userID)
       : '';
+  };
+  const onDrawerNavigation = () => {
+    navigation.openDrawer();
   };
   return (
     <ContainerComponent styles={styles.container} key={refreshKey}>
@@ -164,7 +197,7 @@ const ChatScreen = ({navigation}: any) => {
               color={appColors.black}
             />
           }
-          onPress2={() => console.log('hello')}
+          onPress2={onDrawerNavigation}
         />
         {messages.length > 0 ? (
           <ScrollView
@@ -198,6 +231,7 @@ const ChatScreen = ({navigation}: any) => {
         currentUserID={currentUserID}
         userID={person ? person.userID : myGroup ? getUserIdGroup() : ''}
         onSendMessage={onSendMessages}
+        groupID={myGroup ? myGroup.groupID : undefined}
       />
       {displayImgs && (
         <ImageViewing

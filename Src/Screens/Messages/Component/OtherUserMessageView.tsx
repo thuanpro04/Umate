@@ -13,9 +13,11 @@ interface MessageProps {
   time: any;
   imageURL?: string[];
   timeIndex: number;
+  senderName?: string;
 }
 const OtherUserMessageView = React.memo((props: MessageProps) => {
-  const {message, time, imageURL, timeIndex} = props;
+  const {message, time, imageURL, timeIndex, senderName} = props;
+
   const [showTime, setShowTime] = useState<any[]>([]);
   const timePresent = UserInfo.getTimePresent(time);
   const messageWidth = UserInfo.getMessageWidth(message.length);
@@ -65,11 +67,28 @@ const OtherUserMessageView = React.memo((props: MessageProps) => {
         <TextComponent label={message} color={appColors.black} flex={1} />
       </RowComponent>
       {showTime[timeIndex] && (
-        <TextComponent
-          label={timePresent}
-          color={appColors.grey}
-          styles={[globalStyles.timeText, {paddingTop: 40, left: -30}]}
-        />
+        <RowComponent styles={senderName && {left: -50, marginTop: 34}}>
+          {senderName && (
+            <TextComponent
+              label={senderName}
+              size={10}
+              color={appColors.grey}
+              styles={[
+                {
+                  fontStyle: 'italic',
+                },
+              ]}
+            />
+          )}
+          <TextComponent
+            label={timePresent}
+            color={appColors.grey}
+            styles={[
+              globalStyles.timeText,
+              !senderName ? {paddingTop: 32, left: -30} : {},
+            ]}
+          />
+        </RowComponent>
       )}
     </Animated.View>
   );

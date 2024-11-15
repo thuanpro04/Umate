@@ -107,10 +107,14 @@ const AddGroupScreens = ({navigation}: any) => {
   };
 
   function getDataGroup() {
-    const member = groupInfo.invitedUsers.map((item: any) => item.data);
+    const member = groupInfo.invitedUsers.map((item: any) => ({
+      ...item.data,
+      userName: item.name,
+    }));
 
     const currentUser = {
       userID: auth.userID,
+      userName:auth.name,
       avatar: auth.avatar,
       majoring: auth.majoring,
     };

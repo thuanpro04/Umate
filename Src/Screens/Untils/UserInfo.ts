@@ -18,12 +18,23 @@ export class UserInfo {
     return vietNameTime.slice(0, 5).toString();
   };
   static getMessageWidth = (x: number) => {
-    return Math.min(Math.max(x * 5, 20), 80);
+    return Math.min(Math.max(x * 4, 20), 80);
   };
   static getYearOfbirth = (year: string) => {
     return year ? year.slice(0, 2) : '';
   };
   static numberToString = (num: number) => {
     return num < 10 ? `0${num}` : `${num}`;
+  };
+  static getIdUsers = (data: any[]) => {
+    const users = data.map(item => item.userID);
+    return users;
+  };
+  static getUserInfo = (userID: string, allUsers: any[]) => {
+    let temp: any = '';
+    if (allUsers) {
+      temp = allUsers.filter(user => user.userID === userID)[0].userName;
+    }
+    return temp;
   };
 }

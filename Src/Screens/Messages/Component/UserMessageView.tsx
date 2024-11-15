@@ -21,6 +21,7 @@ const UserMessageView = React.memo((props: MessageProps) => {
   const onChangeShowTime = (key: any) => {
     setShowTime(prev => ({...prev, [key]: !showTime[key]}));
   };
+  
   return (
     <View style={[localStyles.userMessageContainer, {alignSelf: 'flex-end'}]}>
       <RowComponent
@@ -35,7 +36,7 @@ const UserMessageView = React.memo((props: MessageProps) => {
         <TextComponent
           label={timePresent}
           color={appColors.grey}
-          styles={globalStyles.timeText}
+          styles={[globalStyles.timeText,]}
         />
       )}
     </View>

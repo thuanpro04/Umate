@@ -1,20 +1,19 @@
-import {View, Text, ScrollView} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { HambergerMenu } from 'iconsax-react-native';
 import React from 'react';
+import { ScrollView } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { Address } from '../../assets/svgs/indexSvg';
+import { removeAuth } from '../../redux/reducers/authReducer';
 import {
-  ButtonComponent,
   CarComponent,
   ContainerComponent,
   HeaderComponent,
-  SpaceComponent,
+  SpaceComponent
 } from '../Components';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useDispatch} from 'react-redux';
-import {removeAuth} from '../../redux/reducers/authReducer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {HambergerMenu, Map, Map1, Menu, Star1} from 'iconsax-react-native';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
-import {Address} from '../../assets/svgs/indexSvg';
 
 const HomeScreen = ({navigation}: any) => {
   const disPath = useDispatch();

@@ -19,15 +19,15 @@ interface Props {
   userID: string| string[];
   onSendMessage: (val: {content?: string; imagesUrl?: string[]}) => void;
   reply?: string;
+  groupID?:string;
 }
 
 const ChatFoot = (props: Props) => {
-  const {currentUserID, userID, onSendMessage, reply} = props;
+  const {currentUserID, userID, onSendMessage, reply,groupID} = props;
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const inputRef = useRef<TextInput>(null);
-  console.log("userID", userID);
-  
+
   const socket = io(appInfo.BASE_URL);
 
   useEffect(() => {
@@ -56,6 +56,7 @@ const ChatFoot = (props: Props) => {
         senderID: currentUserID,
         content: content.trim(),
         imagesUrl: imagesUrl,
+        groupID
       };
 
       try {
@@ -124,7 +125,6 @@ const ChatFoot = (props: Props) => {
   const handleSelected = useCallback(
     async (val: ImageOrVideo[] | ImageOrVideo) => {
       const filePaths = getFilePaths(val);
-
       if (filePaths.length > 20) {
         return;
       }

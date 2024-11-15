@@ -25,9 +25,11 @@ interface Props {
   allMessages: any[];
   onPressImg: (urlImg: string) => void;
   navigation?: any;
+  members?: any[];
 }
 const ChatBody = (props: Props) => {
-  const {currentUserID, userID, allMessages, onPressImg, navigation} = props;
+  const {currentUserID, userID, allMessages, onPressImg, navigation, members} =
+    props;
   const [isLoading, setLoading] = useState(true);
   const [showTimeMessages, setShowTimeMessages] = useState(false);
   const [showItems, setShowItems] = useState(false);
@@ -48,7 +50,12 @@ const ChatBody = (props: Props) => {
           right: isRight && isStacked ? appInfo.size.WIDTH * 0.57 : 0,
           top: isStacked ? appInfo.size.HEIGHT * 0.12 : 0,
         }}
-        onPress={() => navigation.navigate('ShareScreen', {arrUrlImages:arrImages, isShare:true})}
+        onPress={() =>
+          navigation.navigate('ShareScreen', {
+            arrUrlImages: arrImages,
+            isShare: true,
+          })
+        }
       />
     );
   };
@@ -93,7 +100,7 @@ const ChatBody = (props: Props) => {
       </RowComponent>
     ));
   };
-
+  
   return (
     <View style={{flex: 1, marginBottom: 22}}>
       {allMessages &&
@@ -114,6 +121,9 @@ const ChatBody = (props: Props) => {
                 message={item.content}
                 time={item.timestamp}
                 imageURL={item.imagesUrl}
+                senderName={
+                  members ? UserInfo.getUserInfo(item.senderID, members).toString() : ''
+                }
               />
             )
           ) : (
@@ -124,7 +134,8 @@ const ChatBody = (props: Props) => {
                   ? {alignItems: 'flex-end'}
                   : {alignItems: 'flex-start'},
                 {
-                  marginBottom: item.imagesUrl.length > 2 ? '50%' : 10,
+                  marginBottom:
+                    item.imagesUrl && item.imagesUrl.length > 2 ? '50%' : 10,
                   marginTop: 10,
                 },
               ]}>

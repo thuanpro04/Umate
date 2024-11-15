@@ -53,6 +53,7 @@ const MessageScreen = ({navigation}: any) => {
       userID: string;
     },
     group?: {
+      groupID: string;
       groupName: string;
       invitedUsers: any[];
       leader: any;
@@ -61,8 +62,6 @@ const MessageScreen = ({navigation}: any) => {
     },
   ) => {
     if (person) {
-      console.log(person);
-
       navigation.navigate('Chat', {
         person: {
           userName: person?.name,
@@ -72,8 +71,11 @@ const MessageScreen = ({navigation}: any) => {
         currentUserID: auth.userID,
       });
     } else if (group) {
+    
+      
       navigation.navigate('Chat', {
         myGroup: {
+          groupID: group.groupID,
           groupName: group?.groupName,
           invitedUsers: group?.invitedUsers,
           leader: group?.leader,
@@ -142,6 +144,7 @@ const MessageScreen = ({navigation}: any) => {
                       userID: item.userID,
                     })
                   : onNavigationChat(undefined, {
+                      groupID: item.groupID,
                       groupName: item.groupName,
                       invitedUsers: item.invitedUsers,
                       leader: item.leader,
