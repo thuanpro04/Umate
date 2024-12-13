@@ -3,29 +3,37 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {ArrowLeft, HambergerMenu} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
-import ImageViewing from 'react-native-image-viewing';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import { ArrowLeft } from 'iconsax-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  View
+} from 'react-native';
+
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import chatsAPI from '../../apis/chatApi';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
-  ContainerComponent,
   HeaderComponent,
-  TextComponent,
+  TextComponent
 } from '../Components';
-import ChatBody from './Component/ChatBody';
-import ChatFoot from './Component/ChatFoot';
-import {messageServices} from '../Services/messageServices';
-import CustomFootImages from './Component/CustomFootImages';
-import {UserInfo} from '../Untils/UserInfo';
-
-const ChatScreen = ({navigation}: any) => {
-  const {person, myGroup, currentUserID} = useRoute().params as {
+import { messageServices } from '../Services/messageServices';
+import { UserInfo } from '../Untils/UserInfo';
+import ChatInput from './Component/ChatInput';
+import ChatItems from './Component/ChatItems';
+type ChatScreenNavigationProp = DrawerNavigationProp<any, 'MessageDrawer'>;
+const ChatScreen = () => {
+  const {person, myGroup} = useRoute().params as {
     person: {
       userName: string;
       avatar: string;
@@ -39,20 +47,26 @@ const ChatScreen = ({navigation}: any) => {
       deputyLeader: any;
       avatar: string;
     };
-    currentUserID: string;
   };
 
+  const navigation = useNavigation<ChatScreenNavigationProp>();
   const [messages, setMessages] = useState<any[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
+
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
-  const [displayImgs, setDisplayImgs] = useState<any[]>([]);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const scrollViewRef = useRef<FlatList>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
   const [members, setMembers] = useState<any>([]);
+  const [page, setPage] = useState(1);
+  const SwipeableRowRef = useRef<any>(null);
+  const [replyMessage, setReplyMessage] = useState<any>(null);
+  const auth = useSelector(authSelector);
+  const currentUserID = auth.userID;
+  const clearReplyMessage = () => setReplyMessage(null);
+
   useFocusEffect(
     useCallback(() => {
-      getMessages();
+      handleLoadMoreMessages();
     }, []),
   );
 
@@ -61,13 +75,14 @@ const ChatScreen = ({navigation}: any) => {
       scrollToEnd();
     }, 100);
   }, [messages]);
-  const getMessages = useCallback(async () => {
+  const handleLoadMoreMessages = useCallback(async () => {
     try {
       const res = await messageServices.getAllMessagesUser(
         currentUserID,
         person ? person.userID : undefined,
         myGroup ? UserInfo.getIdUsers(myGroup.invitedUsers) : undefined,
         myGroup ? myGroup.groupID : undefined,
+        page,
       );
 
       if (res?.data) {
@@ -82,13 +97,16 @@ const ChatScreen = ({navigation}: any) => {
     person ? person.userID : myGroup ? myGroup.invitedUsers : undefined,
   ]);
   const onSendMessages = useCallback(
-    (val: {content?: string; imagesUrl?: string[]}) => {
+    (val: {content?: string; imagesUrl?: string[]; reply?: string}) => {
+      setReplyMessage(null);
+      scrollToEnd();
       if (val.content?.trim() || val.imagesUrl) {
         const newMessage = {
           senderID: currentUserID,
           content: val.content?.trim() || '',
           imagesUrl: val.imagesUrl || [],
           timestamp: new Date().toISOString(),
+          reply: val.reply ?? '',
         };
         let updatedMessages = [...messages];
         if (myGroup) {
@@ -98,18 +116,30 @@ const ChatScreen = ({navigation}: any) => {
             recipients: getUserIdGroup(),
             type: 'group',
           };
-          updatedMessages.push('groupMessages', groupMessages); // Thêm tin nhắn nhóm vào
-        } else {
+          const isMessageExist = updatedMessages.some(
+            msg =>
+              msg.groupName === groupMessages.groupName &&
+              msg.type === 'group' &&
+              JSON.stringify(msg.recipients) ===
+                JSON.stringify(groupMessages.recipients) &&
+              msg.content === groupMessages.content, // Thêm điều kiện phù hợp với dữ liệu của bạn
+          );
+          if (!isMessageExist) {
+            updatedMessages.push(groupMessages); // Thêm tin nhắn vào mảng
+          }
+        } else if (person && person.userID) {
           const personMessages = {
             ...newMessage,
             receiverID: person.userID,
             type: 'personal',
           };
           updatedMessages.push(personMessages); // Thêm tin nhắn cá nhân vào
+        } else {
+          console.error('person không hợp lệ hoặc không có userID:', person);
         }
         // Chỉ gọi setMessages một lần
+
         setMessages(updatedMessages);
-        console.log('updatedMessages', updatedMessages);
       }
     },
     [currentUserID, person?.userID, myGroup?.invitedUsers, messages],
@@ -121,50 +151,21 @@ const ChatScreen = ({navigation}: any) => {
     const yOffSet = contentOffset.y;
     const contentHeight = contentSize.height;
     const layoutHeight = layoutMeasurement.height;
-    yOffSet + layoutHeight < contentHeight - 100
-      ? setShowScrollToBottom(true)
-      : setShowScrollToBottom(false);
+
+    // Nếu cuộn lên đầu
+    if (yOffSet + layoutHeight < contentHeight - 100) {
+      setShowScrollToBottom(true);
+      setPage(page + 1);
+      handleLoadMoreMessages();
+    } else {
+      setShowScrollToBottom(false);
+    }
   }, []);
+
   const scrollToEnd = useCallback(() => {
     scrollViewRef.current?.scrollToEnd({animated: true});
   }, []);
-  const onPressImg = (urlImg: string) => {
-    const tempUrl = {uri: urlImg};
-    const allImagesMessages = messages
-      .filter(item => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
-      .flatMap(item => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
-      .filter(imageUrl => imageUrl !== null); // Loại bỏ các giá trị null
-    const Images = allImagesMessages.map(url => ({uri: url}));
-    setDisplayImgs(Images);
-    const imageIndex = Images.findIndex(img => img.uri === tempUrl.uri);
-    setImageIndex(imageIndex);
-    setIsVisible(true);
-  };
-  const onChangeImageIndex = (index: number) => {
-    setTimeout(() => {
-      setImageIndex(index);
-    }, 300);
-  };
 
-  const renderChatBody = useCallback(() => {
-    return (
-      <ChatBody
-        navigation={navigation}
-        currentUserID={currentUserID}
-        userID={person ? person.userID : myGroup ? myGroup.invitedUsers : ''}
-        allMessages={messages}
-        onPressImg={onPressImg}
-        members={members}
-      />
-    );
-  }, [
-    messages,
-    currentUserID,
-    person && person.userID,
-    myGroup && myGroup.invitedUsers,
-    ,
-    onSendMessages,
-  ]);
   const getUserIdGroup = () => {
     return myGroup
       ? myGroup.invitedUsers
@@ -172,12 +173,43 @@ const ChatScreen = ({navigation}: any) => {
           .map(item => item.userID)
       : '';
   };
-  const onDrawerNavigation = () => {
-    navigation.openDrawer();
+  const updateRowRef = useCallback((ref: any) => {
+    if (
+      ref &&
+      replyMessage &&
+      ref.props.children.props?.id === replyMessage.id
+    ) {
+      SwipeableRowRef.current = ref;
+    }
+  }, []);
+
+  const keyExtractor = useCallback(
+    (item: any, index: number) => index.toString(),
+    [],
+  );
+
+  const renderItemMessages = (props: any) => {
+    const allUrlImages = messages
+      .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
+      .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
+      .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
+    return (
+      <ChatItems
+        updateRowRef={updateRowRef}
+        navigation={navigation}
+        currentUserID={currentUserID}
+        userID={person ? person.userID : myGroup ? myGroup.invitedUsers : ''}
+        {...props}
+        members={members}
+        urlImages={allUrlImages}
+        setReplyOnSwipeOpen={setReplyMessage}
+      />
+    );
   };
+
   return (
-    <ContainerComponent styles={styles.container} key={refreshKey}>
-      <View style={{paddingHorizontal: 18, flex: 1}}>
+    <KeyboardAvoidingView style={styles.container}>
+      <SafeAreaView style={styles.main}>
         <HeaderComponent
           title={person ? person.userName : myGroup ? myGroup.groupName : ''}
           image={
@@ -192,21 +224,27 @@ const ChatScreen = ({navigation}: any) => {
           }
           isBcolor
           iconRight={
-            <HambergerMenu
-              size={appInfo.sizeIconBold}
-              color={appColors.black}
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/15240/15240459.png',
+              }}
+              style={{height: 25, width: 25}}
             />
           }
-          onPress2={onDrawerNavigation}
+          onPress2={() => {}}
         />
-        {messages.length > 0 ? (
-          <ScrollView
+        {messages && messages.length > 0 ? (
+          <FlatList
             ref={scrollViewRef}
-            showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16}
-            onScroll={handleScroll}>
-            {renderChatBody()}
-          </ScrollView>
+            data={messages}
+            keyExtractor={keyExtractor}
+            style={{flex: 1}}
+            renderItem={renderItemMessages}
+            contentContainerStyle={{
+              paddingHorizontal: 10,
+              paddingTop: 65,
+            }}
+          />
         ) : (
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -226,29 +264,16 @@ const ChatScreen = ({navigation}: any) => {
             onPress={scrollToEnd}
           />
         )}
-      </View>
-      <ChatFoot
-        currentUserID={currentUserID}
-        userID={person ? person.userID : myGroup ? getUserIdGroup() : ''}
-        onSendMessage={onSendMessages}
-        groupID={myGroup ? myGroup.groupID : undefined}
-      />
-      {displayImgs && (
-        <ImageViewing
-          imageIndex={imageIndex}
-          images={displayImgs}
-          visible={isVisible}
-          onRequestClose={() => setIsVisible(false)}
-          FooterComponent={() => (
-            <CustomFootImages
-              indexImage={imageIndex}
-              arrImages={displayImgs}
-              onChangeImageIndex={onChangeImageIndex}
-            />
-          )}
+        <ChatInput
+          onSendMessage={onSendMessages}
+          onScroll={() => scrollToEnd()}
+          clearReply={clearReplyMessage}
+          reply={replyMessage}
+          userID={person ? person.userID : myGroup ? getUserIdGroup() : ''}
+          groupID={myGroup ? myGroup.groupID : undefined}
         />
-      )}
-    </ContainerComponent>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -256,7 +281,13 @@ export default ChatScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 0,
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  main: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingHorizontal: 8,
   },
 
   scrollButton: {

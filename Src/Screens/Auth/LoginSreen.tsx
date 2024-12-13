@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { useDispatch } from 'react-redux';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import React, {useEffect, useState} from 'react';
+import {Image, StyleSheet, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
-import { addAuth, removeAuth } from '../../redux/reducers/authReducer';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   ContainerComponent,
@@ -15,9 +15,9 @@ import {
   TextComponent,
 } from '../Components';
 import LoadingModal from '../Modal/LoadingModal';
-import { Auth } from '../Services/authService.';
-import { Notification } from '../Untils/Notification';
-import { Validate } from '../Untils/Validate';
+import {Auth} from '../Services/authService.';
+import {Notification} from '../Untils/Notification';
+import {Validate} from '../Untils/Validate';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -50,7 +50,6 @@ const LoginSreen = () => {
         givenName: userInfo?.givenName,
         avatar: userInfo?.photo,
         access: Validate.Email_Admin(userInfo?.email) ? 'true' : 'false',
-        
       };
       return data;
     } catch (error) {
@@ -84,6 +83,16 @@ const LoginSreen = () => {
       setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
+  
+  function validateGroupName(groupName: any) {
+    if (!groupName || groupName.length > 100) {
+      throw new Error('Tên nhóm không hợp lệ');
+    }
+    if (!/^[a-zA-Z0-9 ]+$/.test(groupName)) {
+      throw new Error('Tên nhóm chỉ được chứa chữ và số');
+    }
+    return true;
+  }
 
   return (
     <ContainerComponent>

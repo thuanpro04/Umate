@@ -8,6 +8,7 @@ import {
 } from '../../Components';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
+import { appColors } from '../../../Theme/Colors/appColors';
 interface Props {
   name: string;
   massv?: string;
@@ -36,7 +37,7 @@ const CarUserChat = (props: Props) => {
             <TextComponent label={name} />
             {!isBtnSend && <TextComponent label={`@${massv}`} />}
           </RowComponent>
-          <TextComponent label={lastMessage} />
+          <TextComponent label={lastMessage} numberOfLine={1} color={appColors.grey} />
         </View>
         {isBtnSend && <ButtonComponent label="Send" onPress={onPressSend}/>}
       </RowComponent>

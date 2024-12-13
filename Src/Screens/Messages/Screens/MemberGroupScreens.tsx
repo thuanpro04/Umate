@@ -3,7 +3,7 @@ import React from 'react'
 
 const MemberGroupScreens = () => {
   return (
-    <View>
+    <View style={{backgroundColor:'red'}}>
       <Text>MemberGroupScreens</Text>
     </View>
   )

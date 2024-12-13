@@ -40,7 +40,7 @@ const HeaderComponent = (props: Props) => {
     <RowComponent
       styles={[
         {
-          paddingHorizontal: image ? 0 : 10,
+          paddingHorizontal: image ? 8 : 10,
           borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
           borderBottomWidth: isBcolor ? 0.2 : 0,
           paddingVertical: image ? 4 : 13,
@@ -55,7 +55,7 @@ const HeaderComponent = (props: Props) => {
           type="action"
           styles={iconStyle && localStyles.iconStyles}
         />
-        <SpaceComponent width={5} />
+        
         {image && (
           <>
             {image && <Image source={{uri: image}} style={localStyles.image} />}

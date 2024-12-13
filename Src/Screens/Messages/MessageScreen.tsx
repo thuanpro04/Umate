@@ -68,11 +68,8 @@ const MessageScreen = ({navigation}: any) => {
           avatar: person?.avatar,
           userID: person?.userID,
         },
-        currentUserID: auth.userID,
       });
     } else if (group) {
-    
-      
       navigation.navigate('Chat', {
         myGroup: {
           groupID: group.groupID,
@@ -82,7 +79,6 @@ const MessageScreen = ({navigation}: any) => {
           deputyLeader: group?.deputyLeader,
           avatar: group.avatar,
         },
-        currentUserID: auth.userID,
       });
     }
   };
@@ -124,10 +120,19 @@ const MessageScreen = ({navigation}: any) => {
           paddingVertical: 0,
         }}>
         {isLoading ? (
-          <>
+          <View
+            style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
             <SpaceComponent height={200} />
             <ActivityIndicator />
-          </>
+
+            {users.length === 0 && (
+              <TextComponent
+                label={'Chats not found !!'}
+                color={appColors.grey2}
+                styles={{fontStyle: 'italic', fontWeight: '300'}}
+              />
+            )}
+          </View>
         ) : users.length > 0 ? (
           users.map((item: any, index) => (
             <CarUserChat
@@ -156,16 +161,6 @@ const MessageScreen = ({navigation}: any) => {
           ))
         ) : (
           <></>
-        )}
-        {users.length === 0 && (
-          <View style={{alignItems: 'center'}}>
-            <SpaceComponent height={200} />
-            <TextComponent
-              label={'Chats not found !!'}
-              color={appColors.grey2}
-              styles={{fontStyle: 'italic', fontWeight: '300'}}
-            />
-          </View>
         )}
       </ContainerComponent>
       <InfomationModal

@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleProp, Text, TextStyle } from 'react-native';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
+import {StyleProp, Text, TextStyle} from 'react-native';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
 import RowComponent from './RowComponent';
 interface Props {
   label: string;
@@ -17,42 +17,14 @@ interface Props {
 const TextComponent = (props: Props) => {
   const {label, size, color, font, title, styles, flex, numberOfLine, label2} =
     props;
-    
-    
-  return label && label2 ? (
-    <RowComponent >
-      <Text
-      style={[
-        {
-          fontSize: title ? size ?? appInfo.sizeTitle: size ?? appInfo.sizeText,
-          color: props.color ?? appColors.black,
-          flex: flex ?? 0,
-          fontWeight: title ? font ?? 'bold' : 'regular',
-        },
-        props.styles,
-      ]}
-      numberOfLines={numberOfLine}>
-      {props.label}
-    </Text>
+
+  return (
     <Text
       style={[
         {
-          fontSize: title ? size ?? appInfo.sizeTitle : size ?? appInfo.sizeText,
-          color: props.color ?? appColors.blue,
-          flex: flex ?? 0,
-          fontWeight: title ? font ?? 'bold' : 'regular',
-        },
-        props.styles,
-      ]}
-      numberOfLines={numberOfLine}>
-      {props.label2}
-    </Text>
-    </RowComponent>
-  ) : (
-    <Text
-      style={[
-        {
-          fontSize: title ? size ?? appInfo.sizeTitle  : size ?? appInfo.sizeText,
+          fontSize: title
+            ? size ?? appInfo.sizeTitle
+            : size ?? appInfo.sizeText,
           color: props.color ?? appColors.black,
           flex: flex ?? 0,
           fontWeight: title ? font ?? 'bold' : 'regular',

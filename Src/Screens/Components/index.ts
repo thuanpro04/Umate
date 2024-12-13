@@ -6,6 +6,7 @@ import CarUserComponent from './CarUserComponent';
 import CircleComponent from './CircleComponent';
 import ContainerComponent from './ContainerComponent';
 import DateTimePickerComponent from './DateTimePickerComponent';
+import DrawerCustomMenuMessages from './DrawerCustomMenuMessages';
 import HeaderComponent from './HeaderComponent';
 import InputComponent from './InputComponent';
 import OrtherLoginComponent from './OrtherLoginComponent';
@@ -32,4 +33,5 @@ export {
   ToastConfig,
   CarfeatureComponent,
   DateTimePickerComponent,
+  DrawerCustomMenuMessages
 };

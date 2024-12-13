@@ -105,6 +105,7 @@ const AddGroupScreens = ({navigation}: any) => {
       console.log('upload failed', error);
     }
   };
+  console.log(groupInfo.avatar.name);
 
   function getDataGroup() {
     const member = groupInfo.invitedUsers.map((item: any) => ({
@@ -114,7 +115,7 @@ const AddGroupScreens = ({navigation}: any) => {
 
     const currentUser = {
       userID: auth.userID,
-      userName:auth.name,
+      userName: auth.name,
       avatar: auth.avatar,
       majoring: auth.majoring,
     };
@@ -122,7 +123,12 @@ const AddGroupScreens = ({navigation}: any) => {
       authorId: groupInfo.authorId,
       groupName: groupInfo.groupName,
       description: groupInfo.description,
-      avatar: groupInfo.avatar,
+      avatar:
+        groupInfo.avatar &&
+        typeof groupInfo.avatar === 'object' &&
+        groupInfo.avatar.name
+          ? groupInfo.avatar.name
+          : groupInfo.avatar,
       invitedUsers: [...member, currentUser],
       leader: {
         userID: groupInfo.leader.data.userID,
