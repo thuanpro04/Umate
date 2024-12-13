@@ -74,6 +74,7 @@ const messageSchema = new mongoose.Schema({
   receiverID: { type: String, ref: "User" }, // Chỉ dùng cho tin nhắn cá nhân
   recipients: [{ type: String, ref: "Users" }],
   content: { type: String },
+  reply: { type: {} },
   imagesUrl: [{ type: String }],
   timestamp: { type: Date, default: Date.now, index: true },
   status: {

@@ -3,10 +3,13 @@ const { generateUniqueID } = require("../untils/infomationUntils");
 
 const handleNewGroupUser = async (req, res) => {
   const groupInfo = { groupID: generateUniqueID(), ...req.body };
+  console.log("group", groupInfo);
+  
   try {
+    const messageID =generateUniqueID();
     const newGroup = new GroupConversationModel({
       ...groupInfo,
-      messages: [], 
+      messages: [{messageID}], 
       lastMessage: "", 
       lastMessageTimestamp: null,
       

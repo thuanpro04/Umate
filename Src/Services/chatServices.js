@@ -6,44 +6,49 @@ const {
 } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/infomationUntils");
 const handleReceiveMessageUsers = async (req, res) => {
-  const { senderID, receiverID, groupID, limit = 20, page = 1 } = req.query;
+  const { senderID, receiverID, groupID, limit = 20, page } = req.query;
+  console.log("page", page);
+
   try {
     let dataMessages;
 
     if (receiverID && receiverID !== "undefined") {
       // Lấy tin nhắn trong cuộc trò chuyện cá nhân
-      dataMessages = await ConversationModel.findOne({
-        participants: { $all: [senderID, receiverID] },
-      })
-        .select("messages") // Chỉ lấy trường messages
-        .slice("messages", [(page - 1) * limit, parseInt(limit)]) // Áp dụng phân trang
-        .exec();
+      dataMessages = await ConversationModel.aggregate([
+        {
+          $match: {
+            participants: { $all: [senderID, receiverID] },
+          },
+        },
+        { $unwind: "$messages" }, // Tách mảng messages thành từng document
+        { $sort: { "messages.timestamp": -1 } }, // Sắp xếp theo thời gian giảm dần
+        { $skip: (page - 1) * limit }, // Bỏ qua các tin nhắn trước đó
+        { $limit: parseInt(limit) }, // Giới hạn số lượng tin nhắn
+        { $group: { _id: "$_id", messages: { $push: "$messages" } } }, // Gom lại mảng messages
+      ]);
     } else if (groupID) {
       // Lấy tin nhắn trong nhóm
-
-      const allMessages = await GroupConversationModel.find({ groupID })
-        .select("messages") // Chỉ lấy trường messages
-        .slice("messages", [(page - 1) * limit, parseInt(limit)]) // Áp dụng phân trang
-        .exec();
-      dataMessages = allMessages[0];
+      dataMessages = await GroupConversationModel.aggregate([
+        {
+          $match: { groupID },
+        },
+        { $unwind: "$messages" },
+        { $sort: { "messages.timestamp": -1 } },
+        { $skip: (page - 1) * limit },
+        { $limit: parseInt(limit) },
+        { $group: { _id: "$_id", messages: { $push: "$messages" } } },
+      ]);
     }
-    console.log("dataMessages", dataMessages.invitedUsers);
-    console.log("dataMessages.messages", dataMessages.messages);
 
-    if (dataMessages?.messages?.length > 0) {
-      // Sắp xếp lại tin nhắn theo thời gian tăng dần
-      const sortedMessages = dataMessages.messages.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
-      console.log("sortedMessages", sortedMessages);
-
+    // Nếu có dữ liệu tin nhắn
+    if (dataMessages.length > 0) {
+      const sortedMessages = dataMessages[0].messages.reverse(); // Đảo ngược lại để tăng dần thời gian
       return res.status(200).json({
         message: "ReceiveMessageUsers successfully!",
         data: {
           messagesAll: sortedMessages,
-          invitedUsers: dataMessages.invitedUsers,
         },
-        totalMessages: dataMessages.messages.length,
+        totalMessages: sortedMessages.length,
       });
     } else {
       return res.status(200).json({
@@ -66,10 +71,10 @@ const getLastMessages = (data) => {
   return "";
 };
 const sendMessageToGroupAndPersonal = async (data) => {
-  console.log("datamess", data);
+  console.log("dataMessage", data);
 
   try {
-    if (data.type === "personal") {
+    if (!data.groupID) {
       if (!data.senderID || !data.receiverID) {
         console.error("Sender or receiver ID is missing");
         return;
@@ -118,10 +123,18 @@ const sendMessageToGroupAndPersonal = async (data) => {
         recipients,
         timestamp: new Date(),
       };
-      groupConversations.messages.push(newMessages);
-      groupConversations.lastMessage = getLastMessages(data);
-      groupConversations.lastMessageTimestamp = new Date();
-      await groupConversations.save();
+      try {
+        groupConversations.messages.push(newMessages);
+        groupConversations.lastMessage = getLastMessages(data);
+        groupConversations.lastMessageTimestamp = new Date();
+        await groupConversations.save();
+        console.log("Message saved successfully!");
+      } catch (error) {
+        console.error("Error saving groupConversations:", error);
+        return res
+          .status(500)
+          .json({ message: "Failed to save group conversations" });
+      }
     }
     console.log("Message saved successfully!");
   } catch (error) {
@@ -194,7 +207,6 @@ const handleGetAllConversationUsers = async (req, res) => {
       ...personalConversationsData,
       ...groupConversationsData,
     ];
-    console.log(groupConversationsData);
 
     allConversations.sort(
       (a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp
