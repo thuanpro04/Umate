@@ -20,14 +20,15 @@ const TabNavigator = () => {
   const [isTabBarVisible, setIsTabBarVisible] = useState(true);
   return (
     <Tab.Navigator
+      initialRouteName="Profile"
       screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: {
           height: Platform.OS === 'ios' ? 88 : 68,
           justifyContent: 'center',
           alignItems: 'center',
-          borderTopLeftRadius: appInfo.size.HEIGHT * 0.038,
-          borderTopRightRadius: appInfo.size.HEIGHT * 0.038,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
           backgroundColor: appColors.white,
           display: isTabBarVisible ? 'flex' : 'none',
         },
@@ -80,9 +81,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Friends" component={MyFriendScreen} />
       <Tab.Screen
         name="PostEvent"
-        children={() => (
-          <PostEvent setIsTabBarVisible={setIsTabBarVisible} />
-        )}
+        children={() => <PostEvent setIsTabBarVisible={setIsTabBarVisible} />}
       />
       <Tab.Screen name="Messages" component={MessageScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />

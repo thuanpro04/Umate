@@ -33,6 +33,7 @@ import {UserInfo} from '../Untils/UserInfo';
 import LoadingModal from '../Modal/LoadingModal';
 import {imageService} from '../Services/imageService';
 import UpdateInfoModal from '../Modal/UpdateInfoModal';
+import { profileStyles } from './profileStyles';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -47,7 +48,6 @@ const SetUpProfile = ({navigation}: any) => {
   const [isLoading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [errors, setErrors] = useState({className: '', majoring: '', sex: ''});
-  const [isDisable, setIsDisable] = useState(true);
   const initialProfile: ProfileType = {
     userName: UserInfo.getName(auth.name),
     majoring: auth.majoring ?? '',
@@ -153,7 +153,7 @@ const SetUpProfile = ({navigation}: any) => {
     label: string,
     IconComponent: any,
   ) => (
-    <View style={styles.centered}>
+    <View style={profileStyles.centered}>
       <ButtonComponent
         type="action"
         iconLeft={
@@ -169,7 +169,7 @@ const SetUpProfile = ({navigation}: any) => {
           />
         }
         styles={[
-          styles.buttonStyles,
+          profileStyles.buttonStyles,
           {
             backgroundColor:
               profile.sex === gender ? appColors.blue : appColors.white,
@@ -181,7 +181,7 @@ const SetUpProfile = ({navigation}: any) => {
       <TextComponent
         label={profile.sex === gender ? label : ''}
         size={12}
-        styles={styles.italicText}
+        styles={profileStyles.italicText}
       />
     </View>
   );
@@ -197,7 +197,7 @@ const SetUpProfile = ({navigation}: any) => {
         }
       />
       <SpaceComponent height={20} />
-      <View style={styles.centered}>
+      <View style={profileStyles.centered}>
         <Image
           source={{uri: profile.avatar}}
           resizeMode="cover"
@@ -219,7 +219,7 @@ const SetUpProfile = ({navigation}: any) => {
         </View>
       </View>
       <SpaceComponent height={80} />
-      <View style={styles.content}>
+      <View style={profileStyles.content}>
         <RowComponent styles={globalStyles.spaceBetween}>
           <TextComponent label="UserName" styles={globalStyles.label} />
           <RowComponent
@@ -232,7 +232,7 @@ const SetUpProfile = ({navigation}: any) => {
 
         <RowComponent styles={globalStyles.spaceBetween}>
           <TextComponent label="Sex" styles={globalStyles.label} />
-          <RowComponent styles={styles.genderRow}>
+          <RowComponent styles={profileStyles.genderRow}>
             {renderGenderButton('men', 'Men', Man)}
             {renderGenderButton('woman', 'Women', Woman)}
           </RowComponent>
@@ -302,27 +302,3 @@ const SetUpProfile = ({navigation}: any) => {
 
 export default SetUpProfile;
 
-const styles = StyleSheet.create({
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  content: {
-    paddingHorizontal: 35,
-    justifyContent: 'center',
-  },
-
-  genderRow: {
-    justifyContent: 'space-evenly',
-    flex: 1,
-  },
-  buttonStyles: {
-    borderWidth: 0.3,
-    padding: 8,
-    borderRadius: 12,
-  },
-  italicText: {
-    fontStyle: 'italic',
-  },
-});

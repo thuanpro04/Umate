@@ -1,16 +1,17 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appColors } from '../../Theme/Colors/appColors';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {memo, useCallback, useMemo, useState} from 'react';
+import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   CarUserComponent,
   ContainerComponent,
   TextComponent,
 } from '../Components';
-import { friendServices } from '../Services/friendService.';
-import { userServices } from '../Services/userService';
+import {friendServices} from '../Services/friendService.';
+import {userServices} from '../Services/userService';
+import {FlatList} from 'react-native';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -20,7 +21,7 @@ const SuggestFriend = React.memo(() => {
     [key: string]: boolean;
   }>({});
   const [listRemove, setlistRemove] = useState<String[]>([]);
-
+  const memoUsers = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
   useFocusEffect(
     useCallback(() => {
@@ -51,7 +52,10 @@ const SuggestFriend = React.memo(() => {
   const getUsers = async () => {
     try {
       //console.log('res.data', res.data);
-      const allUsers = await userServices.getEquestFriendUsers(auth.userID,'suggestfriend');
+      const allUsers = await userServices.getEquestFriendUsers(
+        auth.userID,
+        'suggestfriend',
+      );
       if (allUsers) {
         setUsers(allUsers);
         allUsers.forEach((item: any) => {
@@ -78,7 +82,6 @@ const SuggestFriend = React.memo(() => {
         auth.userID,
       );
       console.log(res?.data);
-      
     } catch (error) {
       console.log('handleFriendAction', error);
     }
@@ -103,42 +106,45 @@ const SuggestFriend = React.memo(() => {
   const handleCancelFriend = async (friendUserID: string) => {
     handleFriendAction(friendUserID, 'cancel');
   };
-
+  const renderItems = ({item, index}: any) => {
+    return (
+      <CarUserComponent
+        iconAddCancel={false}
+        key={item.userID}
+        img={item.avatar}
+        name={item.name}
+        sayYes="Add Friend"
+        sayNo="Remove"
+        isShowBtn={buttonVisibility[item.userID]}
+        onPressYes={async () => {
+          handlePressYes(item.userID);
+          await handleAddFriends(item.userID);
+        }}
+        onPressCancel={() => {
+          handlePressCancel(item.userID);
+          handleCancelFriend(item.userID);
+        }}
+        onPressNo={() => handlePressRemove(item.userID)}
+      />
+    );
+  };
   return !message && users ? (
-    <ScrollView
-      style={styles.container}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}>
-      {users &&
-        users.map((item, index): any => (
-          <CarUserComponent
-            iconAddCancel={false}
-            key={item.userID}
-            img={item.avatar}
-            name={item.name}
-            sayYes="Add Friend"
-            sayNo="Remove"
-            isShowBtn={buttonVisibility[item.userID]}
-            onPressYes={async () => {
-              handlePressYes(item.userID);
-              await handleAddFriends(item.userID);
-            }}
-            onPressCancel={() => {
-              handlePressCancel(item.userID);
-              handleCancelFriend(item.userID);
-            }}
-            onPressNo={() => handlePressRemove(item.userID)}
-          />
-        ))}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={memoUsers}
+        renderItem={renderItems}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+    </SafeAreaView>
   ) : (
-    <ContainerComponent
-      styles={[
+    <SafeAreaView
+      style={[
         styles.container,
         {justifyContent: 'center', alignItems: 'center'},
       ]}>
       <TextComponent label={message} />
-    </ContainerComponent>
+    </SafeAreaView>
   );
 });
 

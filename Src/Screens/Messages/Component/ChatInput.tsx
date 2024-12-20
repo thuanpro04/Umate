@@ -15,6 +15,8 @@ import io from 'socket.io-client';
 import {appInfo} from '../../../Theme/appInfo';
 import {ImageOrVideo} from 'react-native-image-crop-picker';
 import {imageService} from '../../Services/imageService';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Send2} from 'iconsax-react-native';
 interface Props {
   reply: string;
   clearReply: any;
@@ -56,7 +58,7 @@ const ChatInput = (props: Props) => {
         content: content.trim(),
         imagesUrl: imagesUrl,
         groupID,
-        reply
+        reply,
       };
 
       try {
@@ -163,11 +165,10 @@ const ChatInput = (props: Props) => {
       <View style={styles.inputContainer}>
         <ButtonImagePicker
           icon={
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/1829/1829415.png',
-              }}
-              style={[styles.btn_Send, {marginTop: 5}]}
+            <MaterialCommunityIcons
+              name="image-multiple-outline"
+              size={appInfo.sizeIcon}
+              color={'green'}
             />
           }
           multiple
@@ -193,12 +194,7 @@ const ChatInput = (props: Props) => {
             onSendMessage({content, imagesUrl: [], reply});
             onActionSendMessages();
           }}>
-          <Image
-            style={styles.btn_Send}
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/3019/3019010.png',
-            }}
-          />
+          <Send2 size={appInfo.sizeIcon} color="green" />
         </TouchableOpacity>
       </View>
     </View>

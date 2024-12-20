@@ -25,7 +25,7 @@ const globalStyles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 100,
-    backgroundColor: 'rgba(0,0,0,0.3)'
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   overlay: {
     justifyContent: 'center',
@@ -33,7 +33,6 @@ const globalStyles = StyleSheet.create({
     zIndex: 1,
     position: 'absolute',
     backgroundColor: 'rgba(0,0,0,0.3)',
-    
   },
   timeText: {
     fontSize: 11.5,
@@ -70,6 +69,12 @@ const globalStyles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 100,
+  },
+  iconImage: {height: 25, width: 25, resizeMode: 'cover'},
+  main: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingHorizontal: 8,
   },
 });
 export {globalStyles};

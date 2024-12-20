@@ -36,12 +36,10 @@ export const majors = [
   {
     title: 'Khối Ngành Kỹ Thuật - Công Nghệ',
     data: [
-      'Công nghệ thông tin',
       'Công nghệ ô tô',
       'Kỹ thuật điều kiển và tự động hóa',
       'Kỹ thuật cơ điện tử',
       'Kỹ thuật điện',
-      'Kỹ thuật phần mềm',
     ],
   },
   {
@@ -84,6 +82,15 @@ export const majors = [
       'Thiết kế đồ họa',
     ],
   },
+  {
+    title: 'Viện đào tạo cntt && chuyển đổi số',
+    data: [
+      'Công nghệ thông tin',
+      'Hệ thống thông tin',
+      'Kỹ thuật phần mềm',
+    ],
+  },
+  
   {
     title: 'Khối ngành Y - Dược',
     data: [],

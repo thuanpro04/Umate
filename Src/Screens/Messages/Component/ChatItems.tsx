@@ -1,18 +1,26 @@
-import {Image, StyleSheet, Text, View, Animated} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
-import {RowComponent, TextComponent} from '../../Components';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {appInfo} from '../../../Theme/appInfo';
-import {UserInfo} from '../../Untils/UserInfo';
+import React, { useState } from 'react';
+import {
+  Animated,
+  Image,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import ImageViewing from 'react-native-image-viewing';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import { appColors } from '../../../Theme/Colors/appColors';
+import { appInfo } from '../../../Theme/appInfo';
+import { RowComponent, TextComponent } from '../../Components';
+import { UserInfo } from '../../Untils/UserInfo';
 import CustomFootImages from './CustomFootImages';
+
 interface Props {
   currentUserID: string;
   userID: string | string[];
   urlImages?: any[];
-  // onPressImg: (urlImg: string) => void;
   navigation?: any;
   members?: any[];
   updateRowRef: any;
@@ -35,14 +43,18 @@ const ChatItems = (props: Props) => {
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
+  const [showTime, setShowTime] = useState<any[]>([]);
+  const isNextMyMessage = true;
   const isUser = props?.item.senderID === props?.currentUserID;
   const onChangeImageIndex = (index: number) => {
     setTimeout(() => {
       setImageIndex(index);
     }, 300);
   };
-
-  const iconShare = (
+  const onChangeShowTime = (key: any) => {
+    setShowTime(prev => ({...prev, [key]: !showTime[key]}));
+  };
+  const shareDocuments = (
     isStacked: boolean,
     isRight: boolean,
     arrImages: string[],
@@ -71,38 +83,41 @@ const ChatItems = (props: Props) => {
     const totalImages = arrImages.length;
     const isStacked = totalImages > 1;
 
-    return arrImages.map((item, imgIndex) => (
-      <RowComponent
-        onPress={() => onPressImg(item)}
-        activeOpacity={0.8}
-        styles={{}}
-        key={imgIndex}>
-        {imgIndex === arrImages.length - 1 &&
-          isRight &&
-          iconShare(isStacked, isRight ?? false, arrImages)}
-        <Image
-          key={imgIndex}
-          source={{uri: item}}
-          onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
-          style={[
-            styles.image,
-            isStacked && {
-              position: 'absolute',
-              left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
-              right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
-              top: -imgIndex, // Xếp chồng theo index
-              zIndex: totalImages - imgIndex,
-            },
-          ]}
-          onError={error =>
-            console.log('Error loading image:', error.nativeEvent.error)
-          }
-        />
-        {imgIndex === arrImages.length - 1 &&
-          !isRight &&
-          iconShare(isStacked, !isRight, arrImages)}
-      </RowComponent>
-    ));
+    return (
+      arrImages.length > 0 &&
+      arrImages.map((item, imgIndex) => (
+        <RowComponent
+          onPress={() => onPressImg(item)}
+          activeOpacity={0.8}
+          styles={{}}
+          key={imgIndex}>
+          {imgIndex === arrImages.length - 1 &&
+            isRight &&
+            shareDocuments(isStacked, isRight ?? false, arrImages)}
+          <Image
+            key={imgIndex}
+            source={{uri: item}}
+            onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
+            style={[
+              styles.image,
+              isStacked && {
+                position: 'absolute',
+                left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
+                right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
+                top: -imgIndex, // Xếp chồng theo index
+                zIndex: totalImages - imgIndex,
+              },
+            ]}
+            onError={error =>
+              console.log('Error loading image:', error.nativeEvent.error)
+            }
+          />
+          {imgIndex === arrImages.length - 1 &&
+            !isRight &&
+            shareDocuments(isStacked, !isRight, arrImages)}
+        </RowComponent>
+      ))
+    );
   };
   const onSwipeableOpenAction = () => {
     if (props.item) {
@@ -111,7 +126,6 @@ const ChatItems = (props: Props) => {
     updateRowRef.current = null;
   };
 
-  const isNextMyMessage = true;
   const renderLeftActions = (progressAnimatedValue: any) => {
     const size = progressAnimatedValue.interpolate({
       inputRange: [0, 1, 100],
@@ -158,44 +172,96 @@ const ChatItems = (props: Props) => {
     setImageIndex(imageIndex);
     setIsVisible(true);
   };
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const handleLinkPress = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.error('Error opening URL:', error);
+    }
+  };
+
   const Message = ({item, index}: any) => {
     const isUser = item.senderID === currentUserID ? false : true;
+    let parts = item.content.split(urlRegex);
+
     return (
-      <View
-        style={[
-          styles.container,
-          {
-            backgroundColor: isUser
-              ? 'rgba(121,178,243,0.3)'
-              : 'rgba(116,208,103,0.3)',
-            alignSelf: isUser ? 'flex-start' : 'flex-end',
-            borderBottomLeftRadius: !isUser ? 20 : 0,
-            paddingTop: item?.reply ? 2 : 8,
-            borderBottomRightRadius: isUser ? 20 : 0,
-            paddingHorizontal: item?.reply ? 2 : 8,
-          },
-        ]}>
-        {item?.reply && item.reply.content && (
-          <View
-            style={[
-              styles.replyStyles,
-              {
-                borderLeftColor:
-                  item?.reply?.senderID === currentUserID ? '#2196f3' : 'green',
-              },
-            ]}>
-            <Text style={{fontSize: 14, color: 'black'}}>
-              {item?.reply?.content}
-            </Text>
+      <View>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={() => onChangeShowTime(index)}
+          style={[
+            styles.container,
+            {
+              backgroundColor: isUser
+                ? 'rgba(121,178,243,0.3)'
+                : 'rgba(116,208,103,0.3)',
+              alignSelf: isUser ? 'flex-start' : 'flex-end',
+              borderBottomLeftRadius: !isUser ? 20 : 0,
+              paddingTop: item?.reply ? 2 : 8,
+              borderBottomRightRadius: isUser ? 20 : 0,
+              paddingHorizontal: item?.reply ? 2 : 8,
+            
+            },
+          ]}>
+          {item?.reply && item.reply.content && (
+            <View
+              style={[
+                styles.replyStyles,
+                {
+                  borderLeftColor:
+                    item?.reply?.senderID === currentUserID
+                      ? '#2196f3'
+                      : 'green',
+                },
+              ]}>
+              <Text style={{fontSize: 14, color: 'black'}}>
+                {item?.reply?.content}
+              </Text>
+            </View>
+          )}
+          {parts.map((part: any, index: any) => {
+            if (urlRegex.test(part)) {
+              return (
+                <TouchableOpacity
+                  onPress={() => handleLinkPress(part)}
+                  key={index}>
+                  <TextComponent
+                    label={part}
+                    styles={[
+                      styles.contentStyles,
+                      {
+                        marginHorizontal: item?.reply ? 15 : 0,
+                        color: '#1e90ff',
+                        textDecorationLine: 'underline',
+                      },
+                    ]}
+                  />
+                </TouchableOpacity>
+              );
+            } else if (part.length > 0) {
+              return (
+                <TextComponent
+                  key={index}
+                  label={part}
+                  styles={[
+                    styles.contentStyles,
+                    {marginHorizontal: item?.reply ? 15 : 0},
+                  ]}
+                />
+              );
+            }
+          })}
+        </TouchableOpacity>
+        {showTime[index] && (
+          <View style={{alignItems: isUser ? 'flex-start' : 'flex-end'}}>
+            <TextComponent
+              label={UserInfo.getTimePresent(props?.item.timestamp)}
+              color={appColors.grey2}
+              size={8}
+            />
           </View>
         )}
-        <TextComponent
-          label={item.content}
-          styles={[
-            styles.contentStyles,
-            {marginHorizontal: item?.reply ? 15 : 0},
-          ]}
-        />
       </View>
     );
   };
@@ -214,10 +280,11 @@ const ChatItems = (props: Props) => {
         ) : (
           <View
             style={[
-              props?.item.senderID === currentUserID
-                ? {alignItems: 'flex-end'}
-                : {alignItems: 'flex-start'},
               {
+                alignItems:
+                  props?.item.senderID === currentUserID
+                    ? 'flex-end'
+                    : 'flex-start',
                 marginBottom:
                   props?.item.imagesUrl && props?.item.imagesUrl.length > 2
                     ? '50%'
@@ -230,12 +297,6 @@ const ChatItems = (props: Props) => {
                 props?.item.imagesUrl,
                 props?.item.senderID === currentUserID,
               )}
-            {showTimeMessages && (
-              <TextComponent
-                label={UserInfo.getTimePresent(props?.item.timestamp)}
-                color={appColors.grey2}
-              />
-            )}
           </View>
         )}
       </Swipeable>

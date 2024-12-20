@@ -5,12 +5,21 @@ const getAllMessagesUser = async (
   userID?: string,
   recipients?: string[],
   groupID?: string,
-  newPage?:number
+  newPage?: number,
 ) => {
-  const url = `/receive-messages?senderID=${currentUserID}&receiverID=${userID}&recipients=${recipients}&groupID=${groupID}&page=${newPage}`;
   try {
+    const body = {
+      senderID: currentUserID,
+      receiverID: userID,
+      recipients: recipients,
+      groupID: groupID,
+      page: newPage,
+    };
+
+    const url = `/receive-messages`;
     console.log(url);
-    const res = await chatsAPI.handleChats(url);
+
+    const res = await chatsAPI.handleChats(url, body, 'post');
     return res;
   } catch (error) {
     console.log('getAllMessagesUser', error);
@@ -19,8 +28,6 @@ const getAllMessagesUser = async (
 const getAllConversationUsers = async (currentUserID: string) => {
   const url = `/get-all-conversation?currentUserID=${currentUserID}`;
   try {
-
-    
     const res = await chatsAPI.handleChats(url);
     return res;
   } catch (error) {

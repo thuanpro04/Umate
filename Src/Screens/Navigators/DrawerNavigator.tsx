@@ -11,8 +11,8 @@ const DrawerNavigator = () => {
       screenOptions={{
         headerShown: false,
         drawerPosition: 'left',
-        
       }}
+    
       initialRouteName='HomeNavigator'
       drawerContent={props => <DrawerCustomsMenu {...props} />}>
       <Drawer.Screen

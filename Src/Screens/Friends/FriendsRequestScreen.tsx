@@ -1,18 +1,19 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {FlatList, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {useSelector} from 'react-redux';
 import usersAPI from '../../apis/usersApi';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appColors } from '../../Theme/Colors/appColors';
-import { CarUserComponent } from '../Components';
-import { userServices } from '../Services/userService';
-import { UserInfo } from '../Untils/UserInfo';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appColors} from '../../Theme/Colors/appColors';
+import {CarUserComponent} from '../Components';
+import {userServices} from '../Services/userService';
+import {UserInfo} from '../Untils/UserInfo';
 import friendsAPI from '../../apis/friendsApi';
 
 const FriendsRequestScreen = () => {
   const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
+  const memoUser = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
   const handleScroll = (event: any) => {
     const currenOffset = event.nativeEvent.contentOffset.y;
@@ -21,7 +22,10 @@ const FriendsRequestScreen = () => {
 
   const getUsers = async () => {
     try {
-      const res = await userServices.getEquestFriendUsers(auth.userID,'requests')
+      const res = await userServices.getEquestFriendUsers(
+        auth.userID,
+        'requests',
+      );
       if (res) {
         setUsers(res);
       }
@@ -47,24 +51,28 @@ const FriendsRequestScreen = () => {
       getUsers();
     }, []),
   );
-
+  const renderItems = ({item, index}: any) => {
+    return (
+      <CarUserComponent
+        img={item.avatar}
+        name={UserInfo.getName(item.name)}
+        sayYes="Agree"
+        sayNo="Remove"
+        key={index}
+        onPressYes={() => handleAgreeFriend(item.userID)}
+      />
+    );
+  };
   return (
-    <ScrollView
-      style={styles.container}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}>
-      {users &&
-        users.map((item, index): any => (
-          <CarUserComponent
-            img={item.avatar}
-            name={UserInfo.getName(item.name)}
-            sayYes="Agree"
-            sayNo="Remove"
-            key={index}
-            onPressYes={() => handleAgreeFriend(item.userID)}
-          />
-        ))}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={memoUser}
+        renderItem={renderItems}
+        style={styles.container}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+    </SafeAreaView>
   );
 };
 

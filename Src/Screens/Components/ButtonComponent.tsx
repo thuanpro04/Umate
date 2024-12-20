@@ -63,7 +63,7 @@ const ButtonComponent = (props: Props) => {
       {iconLeft}
       {iconRight}
       {children}
-      {label && <TextComponent label={label} />}
+      {label && <TextComponent label={label} styles={textStyle} />}
     </TouchableOpacity>
   ) : (
     <View
@@ -92,7 +92,7 @@ const ButtonComponent = (props: Props) => {
             color={labelColor ?? appColors.white}
             size={appInfo.size.WIDTH * 0.04}
             font="bold"
-            styles={[{paddingVertical:2, paddingHorizontal:12},textStyle]}
+            styles={[{paddingVertical: 2, paddingHorizontal: 12}, textStyle]}
           />
           {iconRight && iconRight}
         </RowComponent>

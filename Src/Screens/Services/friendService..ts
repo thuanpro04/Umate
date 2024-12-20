@@ -10,14 +10,14 @@ const handlePressRemoveSuggested = async (
 ) => {
   const url = '/remove-suggested';
   const data = {friendUserID: usersID, currentUserID};
-  const res = await userServices.getUsers(url, data, 'post');
+  const res = await friendsAPI.handleFriendsApi(url, data, 'post');
   console.log(res);
   return res?.data;
 };
 const handleRemoveFriends = async (usersID: string, currentUserID: string) => {
   const url = '/remove';
   const data = {friendUserID: usersID, currentUserID};
-  const res = await userServices.getUsers(url, data, 'post');
+  const res = await friendsAPI.handleFriendsApi(url, data, 'post');
   return res?.data;
 };
 const handleFriendActionAdd_Cancel = async (
@@ -27,7 +27,6 @@ const handleFriendActionAdd_Cancel = async (
 ) => {
   const enpoint = action === 'add' ? '/add' : '/cancel';
   const data = {friendUserID, currentUserID};
-  console.log('data', data);
 
   try {
     const res = await friendsAPI.handleFriendsApi(enpoint, data, 'post');

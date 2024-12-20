@@ -1,38 +1,27 @@
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import { ArrowLeft } from 'iconsax-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {ArrowLeft, Setting} from 'iconsax-react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   FlatList,
   Image,
   KeyboardAvoidingView,
-  Platform,
   SafeAreaView,
-  StatusBar,
   StyleSheet,
-  View
+  View,
 } from 'react-native';
 
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
-import {
-  ButtonComponent,
-  HeaderComponent,
-  TextComponent
-} from '../Components';
-import { messageServices } from '../Services/messageServices';
-import { UserInfo } from '../Untils/UserInfo';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {ButtonComponent, HeaderComponent, TextComponent} from '../Components';
+import {messageServices} from '../Services/messageServices';
+import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
-type ChatScreenNavigationProp = DrawerNavigationProp<any, 'MessageDrawer'>;
-const ChatScreen = () => {
+
+const ChatScreen = ({navigation}: any) => {
   const {person, myGroup} = useRoute().params as {
     person: {
       userName: string;
@@ -49,13 +38,9 @@ const ChatScreen = () => {
     };
   };
 
-  const navigation = useNavigation<ChatScreenNavigationProp>();
   const [messages, setMessages] = useState<any[]>([]);
-
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const scrollViewRef = useRef<FlatList>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
   const [members, setMembers] = useState<any>([]);
   const [page, setPage] = useState(1);
   const SwipeableRowRef = useRef<any>(null);
@@ -70,11 +55,6 @@ const ChatScreen = () => {
     }, []),
   );
 
-  useEffect(() => {
-    setTimeout(() => {
-      scrollToEnd();
-    }, 100);
-  }, [messages]);
   const handleLoadMoreMessages = useCallback(async () => {
     try {
       const res = await messageServices.getAllMessagesUser(
@@ -155,15 +135,13 @@ const ChatScreen = () => {
     // Nếu cuộn lên đầu
     if (yOffSet + layoutHeight < contentHeight - 100) {
       setShowScrollToBottom(true);
-      setPage(page + 1);
-      handleLoadMoreMessages();
     } else {
       setShowScrollToBottom(false);
     }
   }, []);
 
   const scrollToEnd = useCallback(() => {
-    scrollViewRef.current?.scrollToEnd({animated: true});
+    scrollViewRef.current?.scrollToEnd();
   }, []);
 
   const getUserIdGroup = () => {
@@ -206,10 +184,12 @@ const ChatScreen = () => {
       />
     );
   };
-
+  useEffect(() => {
+    scrollToEnd();
+  }, [messages]);
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <SafeAreaView style={styles.main}>
+      <SafeAreaView style={globalStyles.main}>
         <HeaderComponent
           title={person ? person.userName : myGroup ? myGroup.groupName : ''}
           image={
@@ -224,14 +204,11 @@ const ChatScreen = () => {
           }
           isBcolor
           iconRight={
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/15240/15240459.png',
-              }}
-              style={{height: 25, width: 25}}
-            />
+            <Setting size={appInfo.sizeIconBold} color={appColors.black} />
           }
-          onPress2={() => {}}
+          onPress2={() =>
+            navigation.navigate('UserInfoChat', {person, myGroup})
+          }
         />
         {messages && messages.length > 0 ? (
           <FlatList
@@ -244,6 +221,7 @@ const ChatScreen = () => {
               paddingHorizontal: 10,
               paddingTop: 65,
             }}
+            onScroll={handleScroll}
           />
         ) : (
           <View
@@ -256,14 +234,24 @@ const ChatScreen = () => {
         )}
         {showScrollToBottom && (
           <ButtonComponent
-            type="action"
-            styles={styles.scrollButton}
-            iconLeft={
-              <Icon name="arrow-down" size={appInfo.sizeIcon} color="#fff" />
-            }
             onPress={scrollToEnd}
-          />
+            type="action"
+            styles={{
+              position: 'absolute',
+              left: '50%',
+              bottom: 100,
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              borderRadius: 12,
+            }}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/11229/11229037.png',
+              }}
+              style={[globalStyles.iconImage]}
+            />
+          </ButtonComponent>
         )}
+
         <ChatInput
           onSendMessage={onSendMessages}
           onScroll={() => scrollToEnd()}
@@ -284,18 +272,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  main: {
-    flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    paddingHorizontal: 8,
-  },
 
   scrollButton: {
-    position: 'absolute',
-    bottom: 60,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 25,
-    padding: 10,
-    left: '50%',
+
+    width: '10%',
   },
 });

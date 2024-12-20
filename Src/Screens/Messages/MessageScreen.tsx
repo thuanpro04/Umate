@@ -1,5 +1,5 @@
 import {ArrowLeft2, More} from 'iconsax-react-native';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
@@ -14,12 +14,10 @@ import {
 
 import {useFocusEffect} from '@react-navigation/native';
 import {ActivityIndicator, View} from 'react-native';
+import InfomationModal from '../Modal/InfomationModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
-import {Portal} from 'react-native-portalize';
-import {Modalize} from 'react-native-modalize';
-import InfomationModal from '../Modal/InfomationModal';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
@@ -27,6 +25,7 @@ const MessageScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const memoizedUsers = useMemo(() => users, [users]);
   useFocusEffect(
     useCallback(() => {
       getAllConversation();
@@ -125,7 +124,7 @@ const MessageScreen = ({navigation}: any) => {
             <SpaceComponent height={200} />
             <ActivityIndicator />
 
-            {users.length === 0 && (
+            {memoizedUsers.length === 0 && (
               <TextComponent
                 label={'Chats not found !!'}
                 color={appColors.grey2}
@@ -133,8 +132,8 @@ const MessageScreen = ({navigation}: any) => {
               />
             )}
           </View>
-        ) : users.length > 0 ? (
-          users.map((item: any, index) => (
+        ) : memoizedUsers.length > 0 ? (
+          memoizedUsers.map((item: any, index) => (
             <CarUserChat
               key={index}
               name={item.groupName ?? UserInfo.getName(item.name)}
