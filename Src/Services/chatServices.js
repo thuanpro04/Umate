@@ -6,9 +6,14 @@ const {
 } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/infomationUntils");
 const handleReceiveMessageUsers = async (req, res) => {
-  const { senderID, receiverID, groupID, limit = 20, page } = req.query;
-  console.log("page", page);
-
+  const {
+    senderID,
+    receiverID,
+    recipients,
+    groupID,
+    page,
+    limit = 20,
+  } = req.body;
   try {
     let dataMessages;
 
@@ -23,7 +28,7 @@ const handleReceiveMessageUsers = async (req, res) => {
         { $unwind: "$messages" }, // Tách mảng messages thành từng document
         { $sort: { "messages.timestamp": -1 } }, // Sắp xếp theo thời gian giảm dần
         { $skip: (page - 1) * limit }, // Bỏ qua các tin nhắn trước đó
-        { $limit: parseInt(limit) }, // Giới hạn số lượng tin nhắn
+        { $limit: parseInt(limit * page) }, // Giới hạn số lượng tin nhắn
         { $group: { _id: "$_id", messages: { $push: "$messages" } } }, // Gom lại mảng messages
       ]);
     } else if (groupID) {
