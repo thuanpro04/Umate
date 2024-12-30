@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,15 +8,21 @@ import {
   FlatList,
   StatusBar,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {ButtonComponent} from '../Components';
+import {ButtonComponent, TextComponent} from '../Components';
 import {profileStyles} from './profileStyles';
-
+import {UserEdit} from 'iconsax-react-native';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import Orientation from 'react-native-orientation-locker';
 const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+ 
+
   const userInfo = {
     avatar: 'https://via.placeholder.com/150',
     name: 'John Doe',
@@ -58,13 +64,27 @@ const ProfileScreen = ({navigation}: any) => {
       <View style={locastyles.header}>
         <ZoomImageComponent url={auth.avatar} styles={profileStyles.avatar} />
         <View style={profileStyles.infoContainer}>
-          <Text style={[profileStyles.name, {color: '#333'}]}>{auth.name}</Text>
-          <Text style={[profileStyles.majoring,{color: '#666',}]}>{auth.majoring}</Text>
-          <Text style={[profileStyles.bio,{color: '#555',}]}>{userInfo.bio}</Text>
+          <TextComponent
+            styles={[profileStyles.name, {color: '#333'}]}
+            label={auth.name}
+          />
+          <TextComponent
+            styles={[profileStyles.majoring, {color: '#666'}]}
+            label={auth.majoring}
+          />
+          <TextComponent
+            styles={[profileStyles.bio, {color: '#555'}]}
+            label={auth.bio ?? '...'}
+          />
+
           <TouchableOpacity
             style={locastyles.editButton}
             onPress={() => navigation.navigate('EditProfile')}>
-            <Text style={profileStyles.editButtonText}>Edit Profile</Text>
+            <UserEdit color={appColors.white} size={appInfo.sizeIcon} />
+            <TextComponent
+              styles={profileStyles.editButtonText}
+              label="Edit Profile"
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -77,7 +97,7 @@ const ProfileScreen = ({navigation}: any) => {
         </View>
         <View style={profileStyles.stat}>
           <Text style={profileStyles.statNumber}>{userInfo.stats.posts}</Text>
-          <Text style={profileStyles.statLabel}>Posts</Text>
+          <Text style={profileStyles.statLabel}>Shares</Text>
         </View>
         <View style={profileStyles.stat}>
           <Text style={profileStyles.statNumber}>{userInfo.stats.likes}</Text>
@@ -98,7 +118,6 @@ const ProfileScreen = ({navigation}: any) => {
 };
 
 const locastyles = StyleSheet.create({
- 
   header: {
     flexDirection: 'row',
     padding: 20,
@@ -106,9 +125,8 @@ const locastyles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    borderRadius: 12,
   },
- 
-
 
   editButton: {
     marginTop: 10,
@@ -117,6 +135,8 @@ const locastyles = StyleSheet.create({
     backgroundColor: 'coral',
     borderTopLeftRadius: 12,
     borderBottomRightRadius: 12,
+    flexDirection: 'row',
+    gap: 10,
   },
 });
 

@@ -112,7 +112,7 @@ const UserInfoChat = ({navigation}: any) => {
         setVisible(true);
         break;
       case 'personal':
-        navigation.navigate('PersonalScreen');
+        navigation.navigate('PersonalScreen', {userID: person.userID});
         break;
       case 'notification':
         setStatusNotification(!statusNotification);
@@ -164,6 +164,12 @@ const UserInfoChat = ({navigation}: any) => {
                 {item.key === 'notification' && statusNotification ? (
                   <Ionicons
                     name="notifications-off-outline"
+                    size={appInfo.sizeIconBold}
+                    color={appColors.cobalt}
+                  />
+                ) : myGroup ? (
+                  <MaterialIcons
+                    name="person-add-alt"
                     size={appInfo.sizeIconBold}
                     color={appColors.cobalt}
                   />

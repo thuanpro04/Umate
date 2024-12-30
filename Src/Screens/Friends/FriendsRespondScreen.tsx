@@ -15,6 +15,7 @@ import UserInfoModal from '../Modal/UserInfoModal';
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
+import ActionModal from '../Modal/ActionModal';
 
 const initialUser = {
   avatar: '',
@@ -30,6 +31,8 @@ const FriendsRespondScreen = ({navigation}: any) => {
   const [selectedUser, setSelectedUser] = useState(initialUser);
   const memoUsers = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
+  const [isShowActionModal, setShowActionModal] = useState(false);
+
   const [isModal, setIsModal] = useState(false);
   // Reload dữ liệu mỗi khi trang được focus
   useFocusEffect(
@@ -72,25 +75,48 @@ const FriendsRespondScreen = ({navigation}: any) => {
   };
   const renderItems = ({item, index}: any) => {
     return (
-      <CarUserComponent
-        key={item.userID}
-        img={item.avatar}
-        name={UserInfo.getName(item.name)}
-        isFind
-        iconM
-        styles={{borderWidth: 0}}
-        onPressMessages={() =>
-          navigation.navigate('Chat', {
-            currentUserID: auth.userID,
-            userID: item.userID,
-            userName: item.name,
-            avatar: item.avatar,
-          })
-        }
-        onPressEllipsis={() => handleOpenModal(item)}
-      />
+      <React.Fragment key={index}>
+        <CarUserComponent
+          key={item.userID}
+          img={item.avatar}
+          name={UserInfo.getName(item.name)}
+          isFind
+          iconM
+          styles={{borderWidth: 0}}
+          onPressMessages={() =>
+            navigation.navigate('Chat', {
+              currentUserID: auth.userID,
+              userID: item.userID,
+              userName: item.name,
+              avatar: item.avatar,
+            })
+          }
+          onPressEllipsis={() => handleOpenModal(item)}
+        />
+
+        <ActionModal
+          visible={isShowActionModal}
+          onPressNo={() => {
+            closeModalAction();
+          }}
+          onPressYes={async () => await handleRemoveFriend(selectedUser.userID)}
+          descriptions="Do you really want to remove this friend?"
+          title={`Hủy kết bạn với ${UserInfo.getName(item.name)}`}
+        />
+      </React.Fragment>
     );
   };
+  const actionUnFriend = async () => {
+    openModalAction();
+    handleCloseModal();
+  };
+  function closeModalAction() {
+    setShowActionModal(false);
+  }
+  function openModalAction() {
+    setShowActionModal(true);
+    console.log(isShowActionModal);
+  }
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -105,9 +131,7 @@ const FriendsRespondScreen = ({navigation}: any) => {
         name={UserInfo.getName(selectedUser.name)}
         onClose={handleCloseModal}
         handleNavigation={() => navigation.navigation('Message')}
-        handleUnFriend={async () =>
-          await handleRemoveFriend(selectedUser.userID)
-        }
+        handleUnFriend={() => actionUnFriend()}
       />
     </SafeAreaView>
   );

@@ -119,6 +119,7 @@ export const profileStyles = StyleSheet.create({
   infoContainer: {
     marginLeft: 20,
     flex: 1,
+    
   },
   editButton: {
     marginTop: 10,

@@ -1,6 +1,7 @@
 import React, {ReactNode} from 'react';
 import {
   ImageBackground,
+  SafeAreaView,
   ScrollView,
   StyleProp,
   View,
@@ -25,7 +26,7 @@ const ContainerComponent = (props: Props) => {
       {children}
     </ImageBackground>
   ) : (
-    <View style={[globalStyles.container, styles]}>{children}</View>
+    <SafeAreaView style={[globalStyles.container, styles]}>{children}</SafeAreaView>
   );
 };
 

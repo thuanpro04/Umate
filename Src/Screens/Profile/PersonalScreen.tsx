@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -23,19 +23,20 @@ import {
   TextComponent,
 } from '../Components';
 import {profileStyles} from './profileStyles';
+import {ArrowLeft, ArrowLeft2} from 'iconsax-react-native';
+import {appInfo} from '../../Theme/appInfo';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {userServices} from '../Services/userService';
+import LoadingModal from '../Modal/LoadingModal';
 
-const PersonalScreen = () => {
+const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const {userID} = useRoute().params as {userID: string};
+  const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
-  const userInfo = {
-    avatar: 'https://via.placeholder.com/150',
-    name: 'John Doe',
-    majoring: 'Công nghệ thông tin',
-    email: 'phanminhthuan240304@gmail.com',
-    link: 'https://www.facebook.com/profile.php?id=100072424793021',
-    address: 'Tây Ninh ',
-    bio: 'Loving life, learning every day!',
+  const infoUser = {
     stats: {
       friends: 120,
       shares: 45,
@@ -66,10 +67,28 @@ const PersonalScreen = () => {
       }),
     };
   });
-
+  useFocusEffect(
+    useCallback(() => {
+      handleGetUserInfoById();
+    }, [userID]),
+  );
+  const handleGetUserInfoById = async () => {
+    try {
+      setIsLoading(true);
+      const res = await userServices.getUserInfo(userID);
+      if (res && res.data) {
+        setUserInfo(res.data);
+        console.log(userInfo);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
   const toggleDetail = () => {
     setDetail(!isDetail);
-    bgColor.value = isDetail ? '#009688' : '#00968891';
+    bgColor.value = isDetail ? '#009688' : '#009688C2';
   };
   const renderPost = ({item}: any) => (
     <View style={profileStyles.postContainer}>
@@ -77,108 +96,132 @@ const PersonalScreen = () => {
       <Text style={profileStyles.postContent}>{item.content}</Text>
     </View>
   );
-  const dataUser = [
-    {
-      key: 'majoring',
-      content: (
-        <TextComponent
-          styles={profileStyles.majoring}
-          label={userInfo.majoring}
-        />
-      ),
-      icon: <Icon name="school" size={20} color={'#1b4f72'} />,
-    },
-    {
-      key: 'link',
-      content: (
-        <TextComponent
-          styles={profileStyles.link}
-          label={userInfo.link.slice(0, 24) + '...'}
-        />
-      ),
-      icon: <Icon name="link" size={20} color={appColors.blue} />,
-    },
-    {
-      key: 'email',
-      content: (
-        <TextComponent label={userInfo.email} styles={profileStyles.email} />
-      ),
-      icon: (
-        <Icon name="email" size={20} color={appColors.linearFocus59_pink} />
-      ),
-    },
-    {
-      key: 'majoring',
-      content: (
-        <TextComponent
-          styles={profileStyles.majoring}
-          label={userInfo.address}
-        />
-      ),
-      icon: <Icon name="location-on" size={20} color={appColors.green2} />,
-    },
-  ];
 
   const renderHeader = () => {
+    const dataUser = [
+      {
+        key: 'majoring',
+        content: (
+          <TextComponent
+            styles={profileStyles.majoring}
+            label={userInfo?.majoring}
+          />
+        ),
+        icon: <Icon name="school" size={20} color={'#1b4f72'} />,
+      },
+      {
+        key: 'link',
+        content: (
+          <TextComponent
+            styles={profileStyles.link}
+            label={userInfo?.link ? userInfo?.link.slice(0, 24) + '...' : '...'}
+          />
+        ),
+        icon: <Icon name="link" size={20} color={appColors.blue} />,
+      },
+      {
+        key: 'email',
+        content: (
+          <TextComponent label={userInfo?.email} styles={profileStyles.email} />
+        ),
+        icon: (
+          <Icon name="email" size={20} color={appColors.linearFocus59_pink} />
+        ),
+      },
+      {
+        key: 'majoring',
+        content: (
+          <TextComponent
+            styles={profileStyles.majoring}
+            label={userInfo?.address ? userInfo?.address : '...'}
+          />
+        ),
+        icon: <Icon name="location-on" size={20} color={appColors.green2} />,
+      },
+    ];
     return (
       <Animated.View style={[profileStyles.header, animatedStyle]}>
-        {isDetail ? (
-          <View style={profileStyles.profileContainer}>
-            <TextComponent styles={profileStyles.name} label={userInfo.name} />
-            <Animated.View style={[{alignItems: 'flex-start'}]}>
-              {dataUser.map((item, index) => {
-                return (
-                  <RowComponent key={index}>
-                    {item.icon}
-                    {item.content}
-                  </RowComponent>
-                );
-              })}
-            </Animated.View>
-            <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
-            <SpaceComponent height={10} />
-            <ButtonComponent
-              onPress={toggleDetail}
-              type="action"
-              label="Cancel"
-              textStyle={[
-                profileStyles.btn_Detail,
-                {backgroundColor: '#009688'},
-              ]}
-              styles={{}}
-            />
-          </View>
+        <ArrowLeft
+          onPress={() => navigation.goBack()}
+          size={appInfo.sizeIconBold}
+          color={appColors.white}
+          style={{position: 'absolute', left: '5%', top: '5%'}}
+        />
+        {userInfo ? (
+          isDetail ? (
+            <View style={profileStyles.profileContainer}>
+              <TextComponent
+                styles={profileStyles.name}
+                label={userInfo.name}
+              />
+              <Animated.View style={[{alignItems: 'flex-start'}]}>
+                {dataUser.map((item, index) => {
+                  return (
+                    <RowComponent key={index}>
+                      {item.icon}
+                      {item.content}
+                    </RowComponent>
+                  );
+                })}
+              </Animated.View>
+              <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
+              <SpaceComponent height={10} />
+              <ButtonComponent
+                onPress={toggleDetail}
+                type="action"
+                label="Cancel"
+                textStyle={[
+                  profileStyles.btn_Detail,
+                  {backgroundColor: '#009688'},
+                ]}
+                styles={{}}
+              />
+            </View>
+          ) : (
+            <View style={profileStyles.profileContainer}>
+              <Image
+                source={{
+                  uri: userInfo.avatar
+                    ? userInfo.avatar
+                    : 'https://via.placeholder.com/150',
+                }}
+                style={profileStyles.avatar}
+              />
+              <TextComponent
+                styles={profileStyles.name}
+                label={userInfo.name}
+              />
+              <TextComponent
+                styles={profileStyles.majoring}
+                label={userInfo.majoring}
+              />
+              <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
+              <SpaceComponent height={10} />
+              <ButtonComponent
+                onPress={toggleDetail}
+                type="action"
+                label="Detail"
+                textStyle={[
+                  profileStyles.btn_Detail,
+                  {backgroundColor: '#00961047'},
+                ]}
+              />
+            </View>
+          )
         ) : (
-          <View style={profileStyles.profileContainer}>
-            <Image source={{uri: auth.avatar}} style={profileStyles.avatar} />
-            <TextComponent styles={profileStyles.name} label={userInfo.name} />
-            <TextComponent
-              styles={profileStyles.majoring}
-              label={userInfo.majoring}
-            />
-            <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
-            <SpaceComponent height={10} />
-            <ButtonComponent
-              onPress={toggleDetail}
-              type="action"
-              label="Detail"
-              textStyle={[
-                profileStyles.btn_Detail,
-                {backgroundColor: '#00961047'},
-              ]}
-            />
-          </View>
+          <></>
         )}
       </Animated.View>
     );
   };
 
-  return (
+  return !isLoading ? (
     <SafeAreaView style={profileStyles.container}>
       <StatusBar barStyle="dark-content" />
+
       {renderHeader()}
       <View style={profileStyles.statsContainer}>
-        {Object.entries(userInfo.stats).map(([key, value]) => (
+        {Object.entries(infoUser.stats).map(([key, value]) => (
           <View key={key} style={profileStyles.stat}>
             <Text style={profileStyles.statNumber}>{value}</Text>
             <Text style={profileStyles.statLabel}>{key.toUpperCase()}</Text>
@@ -189,12 +232,14 @@ const PersonalScreen = () => {
       {/* Recent Posts */}
       <Text style={profileStyles.sectionTitle}>Shared recently</Text>
       <FlatList
-        data={userInfo.recentPosts}
+        data={infoUser.recentPosts}
         renderItem={renderPost}
         keyExtractor={item => item.id}
         contentContainerStyle={profileStyles.postList}
       />
     </SafeAreaView>
+  ) : (
+    <LoadingModal visible={isLoading} />
   );
 };
 

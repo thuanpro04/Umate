@@ -29,7 +29,7 @@ const TextComponent = (props: Props) => {
           flex: flex ?? 0,
           fontWeight: title ? font ?? 'bold' : 'regular',
         },
-        props.styles,
+        styles,
       ]}
       numberOfLines={numberOfLine}>
       {props.label}

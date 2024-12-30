@@ -12,6 +12,8 @@ import {
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
 import {FlatList} from 'react-native';
+import ActionModal from '../Modal/ActionModal';
+import {debounce} from 'lodash';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -86,7 +88,8 @@ const SuggestFriend = React.memo(() => {
       console.log('handleFriendAction', error);
     }
   };
-  const handlePressRemove = async (usersID: string) => {
+
+  const handlePressRemove = debounce(async (usersID: string) => {
     try {
       const res = await friendServices.handlePressRemoveSuggested(
         usersID,
@@ -97,15 +100,15 @@ const SuggestFriend = React.memo(() => {
     } catch (error) {
       console.log('handlePressRemove error', error);
     }
-  };
-
-  const handleAddFriends = async (friendUserID: string) => {
+  }, 1000);
+  const debounceAddFriend = debounce(async (friendUserID: string) => {
     handleFriendAction(friendUserID, 'add');
-  };
+  }, 1000);
 
-  const handleCancelFriend = async (friendUserID: string) => {
+  const handleCancelFriend = debounce(async (friendUserID: string) => {
     handleFriendAction(friendUserID, 'cancel');
-  };
+  }, 1000);
+
   const renderItems = ({item, index}: any) => {
     return (
       <CarUserComponent
@@ -118,7 +121,7 @@ const SuggestFriend = React.memo(() => {
         isShowBtn={buttonVisibility[item.userID]}
         onPressYes={async () => {
           handlePressYes(item.userID);
-          await handleAddFriends(item.userID);
+          await debounceAddFriend(item.userID);
         }}
         onPressCancel={() => {
           handlePressCancel(item.userID);
@@ -136,6 +139,7 @@ const SuggestFriend = React.memo(() => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
+      
     </SafeAreaView>
   ) : (
     <SafeAreaView

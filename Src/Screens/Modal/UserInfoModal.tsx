@@ -50,7 +50,8 @@ const UserInfoModal = (props: Props) => {
         onClose={onClose}
         modalStyle={styles.modalStyle}>
         <RowComponent styles={styles.content}>
-          <Image source={{uri: img}} style={styles.image} />
+          {img && <Image source={{uri: img}} style={styles.image} />}
+
           <TextComponent label={name} title />
         </RowComponent>
         <SpaceComponent height={18} />
@@ -69,7 +70,10 @@ const UserInfoModal = (props: Props) => {
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content}>
-          <ProfileDelete size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <ProfileDelete
+            size={appInfo.sizeIconBold}
+            color={appColors.blueBack}
+          />
           <ButtonComponent type="action" onPress={handleUnFriend}>
             <TextComponent label={`Unfriend ${getFirstName(name)}`} title />
             <TextComponent

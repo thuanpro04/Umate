@@ -37,4 +37,13 @@ export class UserInfo {
     }
     return temp;
   };
+  static compareObject = (obj: any, obj2: any) => {
+    
+    for (let key in obj) {
+      if (obj[key] != obj2[key]) {
+        return true;
+      }
+    }
+    return false;
+  };
 }

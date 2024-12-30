@@ -10,7 +10,14 @@ import {
   Woman,
 } from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
-import {Image, StyleSheet, Vibration, View} from 'react-native';
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Vibration,
+  View,
+} from 'react-native';
 import {ImageOrVideo} from 'react-native-image-crop-picker';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAuth, authSelector} from '../../redux/reducers/authReducer';
@@ -33,7 +40,8 @@ import {UserInfo} from '../Untils/UserInfo';
 import LoadingModal from '../Modal/LoadingModal';
 import {imageService} from '../Services/imageService';
 import UpdateInfoModal from '../Modal/UpdateInfoModal';
-import { profileStyles } from './profileStyles';
+import {profileStyles} from './profileStyles';
+import {debounce} from 'lodash';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -41,6 +49,9 @@ interface ProfileType {
   avatar: string;
   sex: string;
   majorCategory: string;
+  link: string;
+  address: string;
+  bio: string;
 }
 
 const SetUpProfile = ({navigation}: any) => {
@@ -55,6 +66,9 @@ const SetUpProfile = ({navigation}: any) => {
     avatar: auth.avatar ?? '',
     sex: auth.sex ?? '',
     majorCategory: auth.majorCategory ?? '',
+    address: '',
+    bio: '',
+    link: '',
   };
   const [profile, setProfile] = useState(initialProfile);
   const [visible, setVisible] = useState(false);
@@ -65,7 +79,7 @@ const SetUpProfile = ({navigation}: any) => {
     navigation.navigate('Profile');
   };
   const onchangeProfile = useCallback((key: string, value: string) => {
-    setProfile(prev => ({...prev, [key]: value}));
+    setProfile(prev => ({...prev, [key]: value.trim()}));
     setVisible(false);
     setErrors(prev => ({...prev, [key]: ''}));
   }, []);
@@ -124,6 +138,7 @@ const SetUpProfile = ({navigation}: any) => {
           'Welcome to UMate 👋',
         );
   };
+
   const setUpProfileUser = async () => {
     if (!validateFields()) {
       handleNotification('error');
@@ -134,17 +149,25 @@ const SetUpProfile = ({navigation}: any) => {
       userID: auth.userID,
       name: profile.userName,
     };
-    try {
-      const res = await userServices.updateUsersById(userInfo);
-      if (res.data) {
-        const updatedData = {...res.data, accesstoken: auth.accesstoken};
-        dispatch(addAuth(updatedData));
-        await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
+    // console.log(userInfo);
+    const isChanged = UserInfo.compareObject(initialProfile, userInfo);
+    if (isChanged) {
+      try {
+        const res = await userServices.updateUsersById(userInfo);
+        if (res.data) {
+          const updatedData = {...res.data, accesstoken: auth.accesstoken};
+          dispatch(addAuth(updatedData));
+          await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
+        }
+        handleNotification('sucess');
+        setLoading(false);
+        onNavigation();
+      } catch (error) {
+        console.log('Set up profile failed', error);
+        setLoading(false);
       }
-      handleNotification('sucess');
-      setLoading(false);
-    } catch (error) {
-      console.log('Set up profile failed', error);
+    } else {
+      console.log('Vui lòng thay đổi thông tin');
       setLoading(false);
     }
   };
@@ -186,7 +209,7 @@ const SetUpProfile = ({navigation}: any) => {
     </View>
   );
   return (
-    <ContainerComponent styles={{}} key={refreshKey}>
+    <SafeAreaView style={profileStyles.container} key={refreshKey}>
       <HeaderComponent
         title="Profile"
         iconLeft={
@@ -197,86 +220,139 @@ const SetUpProfile = ({navigation}: any) => {
         }
       />
       <SpaceComponent height={20} />
-      <View style={profileStyles.centered}>
-        <Image
-          source={{uri: profile.avatar}}
-          resizeMode="cover"
-          style={[globalStyles.userImg, {zIndex: -1, width: 160, height: 160}]}
-        />
-        <View style={[globalStyles.overlay, {...globalStyles.imgStyles}]}>
-          <ButtonImagePicker
-            multiple={false}
-            icon={
-              <Camera size={appInfo.sizeIconBold} color={appColors.blueBack} />
-            }
-            onSelect={val => {
-              val.type === 'url'
-                ? onchangeProfile('avatar', val.value.toString().trim())
-                : handleSelected(val.value as ImageOrVideo);
-              handleModal('avatar');
-            }}
+      <ScrollView>
+        <View style={profileStyles.centered}>
+          <Image
+            source={{uri: profile.avatar}}
+            resizeMode="cover"
+            style={[
+              globalStyles.userImg,
+              {zIndex: -1, width: 160, height: 160},
+            ]}
+          />
+          <View style={[globalStyles.overlay, {...globalStyles.imgStyles}]}>
+            <ButtonImagePicker
+              multiple={false}
+              icon={
+                <Camera
+                  size={appInfo.sizeIconBold}
+                  color={appColors.blueBack}
+                />
+              }
+              onSelect={val => {
+                val.type === 'url'
+                  ? onchangeProfile('avatar', val.value.toString().trim())
+                  : handleSelected(val.value as ImageOrVideo);
+                handleModal('avatar');
+              }}
+            />
+          </View>
+        </View>
+        <SpaceComponent height={20} />
+        <View style={profileStyles.content}>
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="UserName" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('userName')}>
+              <TextComponent label={profile.userName} color={appColors.grey} />
+              <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
+            </RowComponent>
+          </RowComponent>
+
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="Sex" styles={globalStyles.label} />
+            <RowComponent styles={profileStyles.genderRow}>
+              {renderGenderButton('men', 'Men', Man)}
+              {renderGenderButton('woman', 'Women', Woman)}
+            </RowComponent>
+          </RowComponent>
+
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="Majoring" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('majoring')}>
+              <TextComponent label={profile.majoring} color={appColors.grey} />
+              <ArrowSquareDown
+                color={errors.majoring ? appColors.red : appColors.blue2}
+                size={appInfo.sizeIconBold}
+              />
+            </RowComponent>
+          </RowComponent>
+          <SpaceComponent height={18} />
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="className" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('className')}>
+              <TextComponent label={profile.className} color={appColors.grey} />
+              <Edit2
+                color={errors.majoring ? appColors.red : appColors.blue2}
+                size={appInfo.sizeIcon}
+              />
+            </RowComponent>
+          </RowComponent>
+          <SpaceComponent height={18} />
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="Address" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('address')}>
+              <TextComponent
+                label={profile.address ? profile.address : '......'}
+                color={appColors.grey}
+              />
+              <Edit2
+                color={errors.majoring ? appColors.red : appColors.blue2}
+                size={appInfo.sizeIcon}
+              />
+            </RowComponent>
+          </RowComponent>
+          <SpaceComponent height={18} />
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="Link" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('link')}>
+              <TextComponent
+                label={profile.link ? profile.link.slice(0, 24) : 'facebook...'}
+                color={appColors.grey}
+              />
+              <Edit2
+                color={errors.majoring ? appColors.red : appColors.blue2}
+                size={appInfo.sizeIcon}
+              />
+            </RowComponent>
+          </RowComponent>
+          <SpaceComponent height={18} />
+          <RowComponent styles={globalStyles.spaceBetween}>
+            <TextComponent label="Bio" styles={globalStyles.label} />
+            <RowComponent
+              styles={globalStyles.inputRow}
+              onPress={() => handleModal('bio')}>
+              <TextComponent
+                label={profile.bio ? profile.bio : 'description'}
+                color={appColors.grey}
+              />
+              <Edit2
+                color={errors.majoring ? appColors.red : appColors.blue2}
+                size={appInfo.sizeIcon}
+              />
+            </RowComponent>
+          </RowComponent>
+          <SpaceComponent height={50} />
+          <ButtonComponent
+            label="Save"
+            styles={{paddingVertical: 6}}
+            onPress={debounce(() => {
+              setLoading(true);
+              setUpProfileUser();
+            }, 1000)}
           />
         </View>
-      </View>
-      <SpaceComponent height={80} />
-      <View style={profileStyles.content}>
-        <RowComponent styles={globalStyles.spaceBetween}>
-          <TextComponent label="UserName" styles={globalStyles.label} />
-          <RowComponent
-            styles={globalStyles.inputRow}
-            onPress={() => handleModal('userName')}>
-            <TextComponent label={profile.userName} color={appColors.grey} />
-            <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
-          </RowComponent>
-        </RowComponent>
-
-        <RowComponent styles={globalStyles.spaceBetween}>
-          <TextComponent label="Sex" styles={globalStyles.label} />
-          <RowComponent styles={profileStyles.genderRow}>
-            {renderGenderButton('men', 'Men', Man)}
-            {renderGenderButton('woman', 'Women', Woman)}
-          </RowComponent>
-        </RowComponent>
-
-        <RowComponent styles={globalStyles.spaceBetween}>
-          <TextComponent label="Majoring" styles={globalStyles.label} />
-          <RowComponent
-            styles={globalStyles.inputRow}
-            onPress={() => handleModal('majoring')}>
-            <TextComponent label={profile.majoring} color={appColors.grey} />
-            <ArrowSquareDown
-              color={errors.majoring ? appColors.red : appColors.blue2}
-              size={appInfo.sizeIconBold}
-            />
-          </RowComponent>
-        </RowComponent>
-        <SpaceComponent height={18} />
-        <RowComponent styles={globalStyles.spaceBetween}>
-          <TextComponent label="className" styles={globalStyles.label} />
-          <RowComponent
-            styles={globalStyles.inputRow}
-            onPress={() => handleModal('className')}>
-            <TextComponent label={profile.className} color={appColors.grey} />
-            <Edit2
-              color={errors.majoring ? appColors.red : appColors.blue2}
-              size={appInfo.sizeIcon}
-            />
-          </RowComponent>
-        </RowComponent>
-        <SpaceComponent height={50} />
-        <ButtonComponent
-          label="Save"
-          styles={{paddingVertical: 6}}
-          onPress={() => {
-            setLoading(true);
-            setTimeout(() => {
-              setUpProfileUser();
-              onNavigation();
-            }, 1000);
-          }}
-          disabled={nameField ? false : true}
-        />
-      </View>
+        <SpaceComponent height={20} />
+      </ScrollView>
 
       {nameField === 'majoring' ? (
         <EditUserModal
@@ -296,9 +372,8 @@ const SetUpProfile = ({navigation}: any) => {
         )
       )}
       <LoadingModal visible={isLoading} />
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 
 export default SetUpProfile;
-

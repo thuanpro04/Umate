@@ -46,7 +46,25 @@ const UpdateInfoModal = (props: Props) => {
       key: 'majorCategory',
       field: 'MajorCategory',
     },
+    {
+      key: 'address',
+      field: 'Address',
+    },
+    {
+      key: 'link',
+      field: 'Link',
+    },
+    {
+      key: 'bio',
+      field: 'Bio',
+    },
   ];
+  const isFacebookURL = (url: string) => {
+    const facebookRegex =
+      /^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9(\.\?)?]/;
+    return facebookRegex.test(url);
+  };
+  
   const getField = () => {
     return optionMenu.find(item => item.key === nameField);
   };
@@ -56,8 +74,10 @@ const UpdateInfoModal = (props: Props) => {
     const messagesErr =
       value.length < 6 && item?.key !== 'description'
         ? 'Please enter at least 6 characters.'
-        : value.length > 25
+        : value.length > 25 && item?.key === 'userName'
         ? 'Please no longer than 25 characters.'
+        : !isFacebookURL(value) && item?.key === 'link'
+        ? 'Invalid URL. Please enter a valid Facebook link.'
         : '';
 
     setMessageError(messagesErr);
@@ -69,6 +89,7 @@ const UpdateInfoModal = (props: Props) => {
       setValue(''); // Clear input after successful save
     }
   };
+
   return (
     <Modal
       transparent={true}
