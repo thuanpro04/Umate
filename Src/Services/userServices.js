@@ -55,15 +55,37 @@ const transformUserData = (users) => {
 };
 
 const updateOneProfileInfo = async (req, res) => {
-  const { userID, name, majoring, majorCategory, avatar, sex, className } =
-    req.body;
+  const {
+    userID,
+    name,
+    majoring,
+    majorCategory,
+    avatar,
+    sex,
+    className,
+    address,
+    bio,
+    link,
+  } = req.body;
+  console.log(req.body);
+
   try {
     const updateUsers = await UserModel.findOneAndUpdate(
       {
         userID: userID,
       },
       {
-        $set: { name, className, majorCategory, majoring, avatar, sex },
+        $set: {
+          name,
+          className,
+          majorCategory,
+          majoring,
+          avatar,
+          sex,
+          address,
+          bio,
+          link,
+        },
       },
       {
         new: true,
@@ -80,7 +102,18 @@ const updateOneProfileInfo = async (req, res) => {
     console.log("updateOneProfileInfo", error);
   }
 };
-
+const handleGetUserInfoById = async (req, res) => {
+  const { userID } = req.query;
+  try {
+    const user = await findUserById(userID);
+    res.status(200).json({
+      message: "Get user info successfully !!",
+      data: user,
+    });
+  } catch (error) {
+    console.log("Fail get user info error", error);
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -88,4 +121,5 @@ module.exports = {
   filterUsers,
   transformUserData,
   updateOneProfileInfo,
+  handleGetUserInfoById,
 };

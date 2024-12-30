@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema({
   majorCategory: {
     type: String,
   },
+  address: {
+    type: String,
+  },
+  link: {
+    type: String,
+  },
+  bio: {
+    type: String,
+  },
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
   friendRequests: [{ type: String, ref: "User" }],

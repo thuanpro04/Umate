@@ -4,6 +4,7 @@ const {
   updateOneProfileInfo,
   filterUsers,
   transformUserData,
+  handleGetUserInfoById,
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
@@ -29,10 +30,14 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Error fetching users" });
   }
 };
-const setUpProfileInfo= async(req, res) =>{
-  updateOneProfileInfo(req, res)
-}
+const setUpProfileInfo = async (req, res) => {
+  updateOneProfileInfo(req, res);
+};
+const getUserInfo =async (req, res) => {
+ handleGetUserInfoById(req,res)
+};
 module.exports = {
   getAllUsers,
-  setUpProfileInfo
+  setUpProfileInfo,
+  getUserInfo,
 };
