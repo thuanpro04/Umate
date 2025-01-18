@@ -67,7 +67,7 @@ const InfomationModal = (props: Props) => {
           : chooseItems.map(item => (
               <React.Fragment key={item.key}>
                 <RowComponent
-                  styles={{justifyContent: 'flex-start'}}
+                  styles={{justifyContent: 'flex-start', paddingVertical:8}}
                   onPress={item.onPress}>
                   {item.icon}
                   <TextComponent label={item.name} title />

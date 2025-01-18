@@ -30,7 +30,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 interface SelectedUser {
   name: string;
   data?: {
-    userID?: any;
+    userId?: any;
     avatar?: string;
     majorCategory?: string;
   };
@@ -77,7 +77,7 @@ const DropdownPicker = (props: Props) => {
         userSelected.length > 0
           ? [
               ...new Map(
-                userSelected.map((item: any) => [item.data.userID, item]),
+                userSelected.map((item: any) => [item.data.userId, item]),
               ).values(),
             ]
           : userSelected,
@@ -86,7 +86,7 @@ const DropdownPicker = (props: Props) => {
       setBackgroundUsers(
         userSelected.length > 0 &&
           userSelected.reduce((acc: any, user: any) => {
-            acc[user.data.userID] = true; // Đánh dấu người dùng đã được chọn
+            acc[user.data.userId] = true; // Đánh dấu người dùng đã được chọn
             return acc;
           }, {}),
       );
@@ -101,7 +101,7 @@ const DropdownPicker = (props: Props) => {
     avatar: any,
     majorCategory: any,
   ) => {
-    const data: any = {userID: key, avatar, majorCategory};
+    const data: any = {userId: key, avatar, majorCategory};
 
     const userSelect = [{name, data}];
     if (isLeader) {
@@ -120,12 +120,12 @@ const DropdownPicker = (props: Props) => {
       }));
 
       const userExists = tempSelectedUsers.find(
-        (user: any) => user.data.userID === key,
+        (user: any) => user.data.userId === key,
       );
       let userSelect = [];
       if (userExists) {
         userSelect = tempSelectedUsers.filter(
-          (x: any) => x.data.userID !== key,
+          (x: any) => x.data.userId !== key,
         );
       } else {
         userSelect = [...tempSelectedUsers, {name, data}];
@@ -145,7 +145,7 @@ const DropdownPicker = (props: Props) => {
             // Loại bỏ các phần tử trùng lặp trước khi lưu
             const uniqueSelectedUsers: any = [
               ...new Map(
-                tempSelectedUsers.map((item: any) => [item.data.userID, item]),
+                tempSelectedUsers.map((item: any) => [item.data.userId, item]),
               ).values(),
             ];
             setSelectedUsers(uniqueSelectedUsers);
@@ -165,7 +165,7 @@ const DropdownPicker = (props: Props) => {
         key={index}
         onPress={() =>
           optionUsers(
-            users.userID,
+            users.userId,
             item.name,
             users.avatar,
             users.majorCategory,
@@ -173,11 +173,11 @@ const DropdownPicker = (props: Props) => {
         }
         styles={{
           justifyContent: 'center',
-          paddingHorizontal: backgroundUsers[item.userID] ? 30 : 8,
+          paddingHorizontal: backgroundUsers[item.userId] ? 30 : 8,
           alignItems: 'center',
           flex: 1,
         }}>
-        {backgroundUsers[item.userID] && (
+        {backgroundUsers[item.userId] && (
           <Entypo
             name="check"
             size={appInfo.sizeIconBold}

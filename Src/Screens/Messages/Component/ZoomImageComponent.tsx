@@ -1,13 +1,5 @@
-import React, {useState} from 'react';
-import {TouchableOpacity, View} from 'react-native';
-import {Image, StyleProp, StyleSheet, ViewProps} from 'react-native';
-import Lightbox from 'react-native-lightbox-v2';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { Image, StyleProp, StyleSheet, TouchableOpacity, ViewProps } from 'react-native';
 import ImageView from 'react-native-image-viewing';
 interface Props {
   url: string;

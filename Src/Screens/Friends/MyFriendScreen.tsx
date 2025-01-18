@@ -18,7 +18,7 @@ const MyFriendScreen = ({navigation}: any) => {
         backgroundColor: appColors.white,
         marginTop: StatusBar.currentHeight,
       }}>
-      <RowComponent styles={{paddingHorizontal: 12}}>
+      <RowComponent styles={{paddingHorizontal: 12,paddingVertical:6}}>
         <RowComponent onPress={() => navigation.openDrawer()}>
           <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
         </RowComponent>

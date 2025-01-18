@@ -29,7 +29,6 @@ export const profileStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: appColors.white,
-    marginBottom: 10,
   },
   majoring: {
     fontSize: 16,

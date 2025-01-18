@@ -5,28 +5,28 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import friendsAPI from '../../apis/friendsApi';
 
 const handlePressRemoveSuggested = async (
-  usersID: string,
-  currentUserID: string,
+  userId: string,
+  currentUserId: string,
 ) => {
   const url = '/remove-suggested';
-  const data = {friendUserID: usersID, currentUserID};
+  const data = {friendUserId: userId, currentUserId};
   const res = await friendsAPI.handleFriendsApi(url, data, 'post');
   console.log(res);
   return res?.data;
 };
-const handleRemoveFriends = async (usersID: string, currentUserID: string) => {
+const handleRemoveFriends = async (userId: string, currentUserId: string) => {
   const url = '/remove';
-  const data = {friendUserID: usersID, currentUserID};
+  const data = {friendUserId: userId, currentUserId};
   const res = await friendsAPI.handleFriendsApi(url, data, 'post');
   return res?.data;
 };
 const handleFriendActionAdd_Cancel = async (
-  friendUserID: string,
+  friendUserId: string,
   action: 'add' | 'cancel',
-  currentUserID: string,
+  currentUserId: string,
 ) => {
   const enpoint = action === 'add' ? '/add' : '/cancel';
-  const data = {friendUserID, currentUserID};
+  const data = {friendUserId, currentUserId};
 
   try {
     const res = await friendsAPI.handleFriendsApi(enpoint, data, 'post');

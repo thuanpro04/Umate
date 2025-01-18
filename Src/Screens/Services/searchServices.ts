@@ -1,11 +1,11 @@
 import searchAPI from '../../apis/searchApi';
 
 const handleSearchFriends = async (
-  currentUserID: string,
+  currentUserId: string,
   keySearch: string,
   titleSearch: string[],
 ) => {
-  const url = `/search?currentUserID=${currentUserID}&searchTerm=${keySearch}&titleSearch=${titleSearch}`;
+  const url = `/search?currentUserId=${currentUserId}&searchTerm=${keySearch}&titleSearch=${titleSearch}`;
   try {
     const res = await searchAPI.handleSearch(url);
     return res;
@@ -14,10 +14,10 @@ const handleSearchFriends = async (
   }
 };
 const searchConversationUsers = async (
-  currentUserID: string,
+  currentUserId: string,
   keySearch: string,
 ) => {
-  const url = `/search-conversations?currentUserID=${currentUserID}&keyWord=${keySearch}`;
+  const url = `/search-conversations?currentUserId=${currentUserId}&keyWord=${keySearch}`;
 
   try {
     const res = await searchAPI.handleSearch(url);

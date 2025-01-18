@@ -1,3 +1,4 @@
+import { LinkPreview } from '@flyerhq/react-native-link-preview'
 import {useFocusEffect} from '@react-navigation/native';
 import React, {memo, useCallback, useMemo, useState} from 'react';
 import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
@@ -9,6 +10,7 @@ import {
   ContainerComponent,
   TextComponent,
 } from '../Components';
+
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
 import {FlatList} from 'react-native';
@@ -36,17 +38,17 @@ const SuggestFriend = React.memo(() => {
     currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
   };
 
-  const handlePressYes = (userID: string) => {
+  const handlePressYes = (userId: string) => {
     setButtonVisibility(prevState => ({
       ...prevState,
-      [userID]: true, // Show button for this specific user
+      [userId]: true, // Show button for this specific user
     }));
   };
 
-  const handlePressCancel = (userID: string) => {
+  const handlePressCancel = (userId: string) => {
     setButtonVisibility(prevState => ({
       ...prevState,
-      [userID]: false, // Hide button for this specific user
+      [userId]: false, // Hide button for this specific user
     }));
   };
   // Chưa xử lí
@@ -55,14 +57,14 @@ const SuggestFriend = React.memo(() => {
     try {
       //console.log('res.data', res.data);
       const allUsers = await userServices.getEquestFriendUsers(
-        auth.userID,
+        auth.userId,
         'suggestfriend',
       );
       if (allUsers) {
         setUsers(allUsers);
         allUsers.forEach((item: any) => {
-          if (item.friendRequests.includes(auth.userID)) {
-            handlePressYes(item.userID);
+          if (item.friendRequests.includes(auth.userId)) {
+            handlePressYes(item.userId);
           }
         });
       } else {
@@ -74,14 +76,14 @@ const SuggestFriend = React.memo(() => {
   };
 
   const handleFriendAction = async (
-    friendUserID: string,
+    friendUserId: string,
     action: 'add' | 'cancel',
   ) => {
     try {
       const res = await friendServices.handleFriendActionAdd_Cancel(
-        friendUserID,
+        friendUserId,
         action,
-        auth.userID,
+        auth.userId,
       );
       console.log(res?.data);
     } catch (error) {
@@ -89,11 +91,11 @@ const SuggestFriend = React.memo(() => {
     }
   };
 
-  const handlePressRemove = debounce(async (usersID: string) => {
+  const handlePressRemove = debounce(async (userId: string) => {
     try {
       const res = await friendServices.handlePressRemoveSuggested(
-        usersID,
-        auth.userID,
+        userId,
+        auth.userId,
       );
       console.log(res);
       getUsers();
@@ -101,33 +103,33 @@ const SuggestFriend = React.memo(() => {
       console.log('handlePressRemove error', error);
     }
   }, 1000);
-  const debounceAddFriend = debounce(async (friendUserID: string) => {
-    handleFriendAction(friendUserID, 'add');
+  const debounceAddFriend = debounce(async (friendUserId: string) => {
+    handleFriendAction(friendUserId, 'add');
   }, 1000);
 
-  const handleCancelFriend = debounce(async (friendUserID: string) => {
-    handleFriendAction(friendUserID, 'cancel');
+  const handleCancelFriend = debounce(async (friendUserId: string) => {
+    handleFriendAction(friendUserId, 'cancel');
   }, 1000);
 
   const renderItems = ({item, index}: any) => {
     return (
       <CarUserComponent
         iconAddCancel={false}
-        key={item.userID}
+        key={item.userId}
         img={item.avatar}
         name={item.name}
         sayYes="Add Friend"
         sayNo="Remove"
-        isShowBtn={buttonVisibility[item.userID]}
+        isShowBtn={buttonVisibility[item.userId]}
         onPressYes={async () => {
-          handlePressYes(item.userID);
-          await debounceAddFriend(item.userID);
+          handlePressYes(item.userId);
+          await debounceAddFriend(item.userId);
         }}
         onPressCancel={() => {
-          handlePressCancel(item.userID);
-          handleCancelFriend(item.userID);
+          handlePressCancel(item.userId);
+          handleCancelFriend(item.userId);
         }}
-        onPressNo={() => handlePressRemove(item.userID)}
+        onPressNo={() => handlePressRemove(item.userId)}
       />
     );
   };
@@ -135,19 +137,20 @@ const SuggestFriend = React.memo(() => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={memoUsers}
+        keyExtractor={(item:any) => item.userId}
         renderItem={renderItems}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
-      
     </SafeAreaView>
   ) : (
     <SafeAreaView
       style={[
         styles.container,
-        {justifyContent: 'center', alignItems: 'center'},
+        {justifyContent: 'center', alignItems: 'center',backgroundColor:'black'},
       ]}>
       <TextComponent label={message} />
+      {/* <LinkPreview text='This link https://www.facebook.com/profile.php?id=100072424793021 can be extracted from the text' /> */}
     </SafeAreaView>
   );
 });

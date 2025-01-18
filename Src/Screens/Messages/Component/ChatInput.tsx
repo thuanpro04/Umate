@@ -21,8 +21,8 @@ interface Props {
   reply: string;
   clearReply: any;
   onScroll: any;
-  groupID?: string;
-  userID?: string | string[];
+  groupId?: string;
+  userId?: string | string[];
   onSendMessage: (val: {
     content?: string;
     imagesUrl?: string[];
@@ -30,7 +30,7 @@ interface Props {
   }) => void;
 }
 const ChatInput = (props: Props) => {
-  const {reply, clearReply, onScroll, groupID, userID, onSendMessage} = props;
+  const {reply, clearReply, onScroll, groupId, userId, onSendMessage} = props;
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const auth = useSelector(authSelector);
@@ -54,37 +54,37 @@ const ChatInput = (props: Props) => {
 
       // Định nghĩa nội dung tin nhắn
       const messageData = {
-        senderID: auth.userID,
+        senderId: auth.userId,
         content: content.trim(),
         imagesUrl: imagesUrl,
-        groupID,
+        groupId,
         reply,
       };
 
       try {
-        if (Array.isArray(userID)) {
-          // Trường hợp gửi cho nhiều userID
+        if (Array.isArray(userId)) {
+          // Trường hợp gửi cho nhiều userId
 
           const data = {
             ...messageData,
-            recipients: userID,
+            recipients: userId,
           };
-          console.log('data', data);
+         
           socket.emit('send_message', data, (response: any) => {
             console.log('Message sent to user:', response);
           });
         } else {
-          // Trường hợp gửi cho một userID
+          // Trường hợp gửi cho một userId
           const data = {
             ...messageData,
-            receiverID: userID,
+            receiverId: userId,
           };
-          console.log('data', data);
+          ;
 
           socket.emit('send_message', data, (response: any) => {
             console.log(
               'Message sent to user:',
-              userID,
+              userId,
               'server response:',
               response,
             );
@@ -103,7 +103,7 @@ const ChatInput = (props: Props) => {
         setIsDisable(false);
       }
     },
-    [content, userID, onSendMessage, socket],
+    [content, userId, onSendMessage, socket],
   );
   const MIN_SEND_INTERVAL = 5000; // Khoảng cách tối thiểu giữa các lần gửi tin nhắn (5 giây)
   let lastSendTime = 0;

@@ -15,6 +15,7 @@ import {
   SpaceComponent,
 } from '../Components';
 import {globalStyles} from '../../Styles/globalStyle';
+import CustormLinkPreview from '../Components/CustormLinkPreview';
 
 const HomeScreen = ({navigation}: any) => {
   const disPath = useDispatch();
@@ -27,10 +28,13 @@ const HomeScreen = ({navigation}: any) => {
   };
   return (
     <SafeAreaView
-      style={[globalStyles.main, {backgroundColor: appColors.white, paddingHorizontal:0}]}>
+      style={[
+        globalStyles.main,
+        {backgroundColor: appColors.white, paddingHorizontal: 0},
+      ]}>
       <HeaderComponent
         iconLeft={
-          <HambergerMenu size={appInfo.sizeIconBold} color={appColors.black} />
+          <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
         }
         iconRight={<Address />}
         onPress1={() => navigation.openDrawer()}

@@ -1,4 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage, {
+  useAsyncStorage,
+} from '@react-native-async-storage/async-storage';
 import storage from '@react-native-firebase/storage';
 import {
   ArrowLeft2,
@@ -70,6 +72,12 @@ const SetUpProfile = ({navigation}: any) => {
     bio: '',
     link: '',
   };
+  const {getItem} = useAsyncStorage('ConvesationInfo');
+  const response = async () => {
+    const res = await getItem();
+    console.log('getItem', res);
+  };
+  response();
   const [profile, setProfile] = useState(initialProfile);
   const [visible, setVisible] = useState(false);
   const [nameField, setNameField] = useState('');
@@ -146,7 +154,7 @@ const SetUpProfile = ({navigation}: any) => {
     }
     const userInfo = {
       ...profile,
-      userID: auth.userID,
+      userId: auth.userId,
       name: profile.userName,
     };
     // console.log(userInfo);

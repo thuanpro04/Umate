@@ -27,23 +27,28 @@ export class UserInfo {
     return num < 10 ? `0${num}` : `${num}`;
   };
   static getIdUsers = (data: any[]) => {
-    const users = data.map(item => item.userID);
+    const users = data.map(item => item.userId);
     return users;
   };
-  static getUserInfo = (userID: string, allUsers: any[]) => {
+  static getUserInfo = (userId: string, allUsers: any[]) => {
     let temp: any = '';
     if (allUsers) {
-      temp = allUsers.filter(user => user.userID === userID)[0].userName;
+      temp = allUsers.filter(user => user.userId === userId)[0].userName;
     }
     return temp;
   };
   static compareObject = (obj: any, obj2: any) => {
-    
     for (let key in obj) {
       if (obj[key] != obj2[key]) {
         return true;
       }
     }
     return false;
+  };
+  static getConversationInfo = async (getItem: any) => {
+    const res = await getItem();
+    if (res) {
+      return JSON.parse(res);
+    }
   };
 }

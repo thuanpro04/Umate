@@ -1,6 +1,6 @@
 import {useRoute} from '@react-navigation/native';
 import {ArrowLeft} from 'iconsax-react-native';
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -25,28 +25,23 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import UpdateInfoModal from '../../Modal/UpdateInfoModal';
 import {UserInfo} from '../../Untils/UserInfo';
 import ZoomImageComponent from './ZoomImageComponent';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 const UserInfoChat = ({navigation}: any) => {
-  const {person, myGroup} = useRoute().params as {
-    person: {
-      userName: string;
-      avatar: string;
-      userID: string;
-    };
-    myGroup: {
-      groupID: string;
-      groupName: string;
-      invitedUsers: any[];
-      leader: any;
-      deputyLeader: any;
-      avatar: string;
-    };
-  };
   const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
   const [statusNotification, setStatusNotification] = useState(false);
+  const [converInfo, setConverInfo] = useState<any>('');
+  const {getItem} = useAsyncStorage('ConversationInfo');
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
+  const getConversationInfo = useCallback(async () => {
+    setConverInfo(await UserInfo.getConversationInfo(getItem));
+  }, []);
+  useEffect(() => {
+    getConversationInfo();
+  });
   const onPressItems = (key: number) => {
     console.log(key);
 
@@ -112,7 +107,9 @@ const UserInfoChat = ({navigation}: any) => {
         setVisible(true);
         break;
       case 'personal':
-        navigation.navigate('PersonalScreen', {userID: person.userID});
+        navigation.navigate('PersonalScreen', {
+          userId: converInfo.type === 'personal' ? converInfo.userId : '',
+        });
         break;
       case 'notification':
         setStatusNotification(!statusNotification);
@@ -136,8 +133,14 @@ const UserInfoChat = ({navigation}: any) => {
       />
       <ScrollView style={{flex: 1}}>
         <View style={styles.container}>
-          {(person && person.avatar) || (myGroup && myGroup.avatar) ? (
-            <ZoomImageComponent url={person ? person.avatar : myGroup.avatar} />
+          {converInfo ? (
+            <ZoomImageComponent
+              url={
+                converInfo.type === 'personal'
+                  ? converInfo.avatar
+                  : converInfo.avatar
+              }
+            />
           ) : (
             <Image
               source={{
@@ -148,7 +151,9 @@ const UserInfoChat = ({navigation}: any) => {
           )}
           <TextComponent
             label={
-              person ? UserInfo.getName(person.userName) : myGroup.groupName
+              converInfo.type === 'personal'
+                ? UserInfo.getName(converInfo.userName)
+                : converInfo.groupName
             }
             title
             size={28}
@@ -161,15 +166,23 @@ const UserInfoChat = ({navigation}: any) => {
                 style={styles.menu}
                 key={index}
                 activeOpacity={0.4}>
-                {item.key === 'notification' && statusNotification ? (
-                  <Ionicons
-                    name="notifications-off-outline"
-                    size={appInfo.sizeIconBold}
-                    color={appColors.cobalt}
-                  />
-                ) : myGroup ? (
-                  <MaterialIcons
-                    name="person-add-alt"
+                {item.key === 'notification' ? (
+                  statusNotification ? (
+                    <Ionicons
+                      name="notifications-outline"
+                      size={appInfo.sizeIconBold}
+                      color={appColors.cobalt}
+                    />
+                  ) : (
+                    <Ionicons
+                      name="notifications-off-outline"
+                      size={appInfo.sizeIconBold}
+                      color={appColors.cobalt}
+                    />
+                  )
+                ) : converInfo.type === 'group' && item.key === 'personal' ? (
+                  <MaterialCommunityIcons
+                    name="account-group"
                     size={appInfo.sizeIconBold}
                     color={appColors.cobalt}
                   />
@@ -178,7 +191,11 @@ const UserInfoChat = ({navigation}: any) => {
                 )}
 
                 <TextComponent
-                  label={item?.name}
+                  label={
+                    converInfo.type === 'group' && item.key === 'personal'
+                      ? 'Thành viên'
+                      : item?.name
+                  }
                   size={12}
                   styles={{fontStyle: 'italic'}}
                 />

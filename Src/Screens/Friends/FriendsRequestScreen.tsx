@@ -23,7 +23,7 @@ const FriendsRequestScreen = () => {
   const getUsers = async () => {
     try {
       const res = await userServices.getEquestFriendUsers(
-        auth.userID,
+        auth.userId,
         'requests',
       );
       if (res) {
@@ -34,10 +34,10 @@ const FriendsRequestScreen = () => {
     }
   };
 
-  const handleAgreeFriend = async (friendUserID: string) => {
+  const handleAgreeFriend = async (friendUserId: string) => {
     const url = `/agree`;
-    const currentUserID = auth.userID;
-    const data = {friendUserID, currentUserID};
+    const currentUserId = auth.userId;
+    const data = {friendUserId, currentUserId};
     try {
       const res = await friendsAPI.handleFriendsApi(url, data, 'post');
       getUsers();
@@ -59,7 +59,7 @@ const FriendsRequestScreen = () => {
         sayYes="Agree"
         sayNo="Remove"
         key={index}
-        onPressYes={() => handleAgreeFriend(item.userID)}
+        onPressYes={() => handleAgreeFriend(item.userId)}
       />
     );
   };
@@ -67,6 +67,7 @@ const FriendsRequestScreen = () => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={memoUser}
+        keyExtractor={(item: any) => item.userId}
         renderItem={renderItems}
         style={styles.container}
         onScroll={handleScroll}

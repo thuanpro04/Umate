@@ -1,19 +1,22 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Message, People, Profile, Ship} from 'iconsax-react-native';
-import React, {ReactNode, useState} from 'react';
-import {Platform} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {CircleComponent, TextComponent} from '../Components/index';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
-  AddGroupScreens,
+  Message,
+  People,
+  Profile
+} from 'iconsax-react-native';
+import React, { ReactNode, useState } from 'react';
+import { Platform } from 'react-native';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { appColors } from '../../Theme/Colors/appColors';
+import { CircleComponent, TextComponent } from '../Components/index';
+import {
   HomeScreen,
   MessageScreen,
   MyFriendScreen,
-  ProfileScreen,
+  ProfileScreen
 } from '../index';
-import PostEvent from '../Events/PostEvent';
+import GeminiChat from '../AiStudioScreen/GeminiChat';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
@@ -43,12 +46,12 @@ const TabNavigator = () => {
             case 'Profile':
               icon = <Profile size={size} color={color} />;
               break;
-            case 'PostEvent':
+            case 'GeminiChat':
               icon = (
                 <CircleComponent
                   size={52}
                   styles={{marginTop: Platform.OS === 'ios' ? -50 : -60}}>
-                  <Ship size={24} color={appColors.white} variant="Bold" />
+                  <Entypo name="github" size={24} color={appColors.white} />
                 </CircleComponent>
               );
               break;
@@ -63,7 +66,7 @@ const TabNavigator = () => {
           return icon;
         },
         tabBarLabel({focused}) {
-          return route.name === 'PostEvent' ? null : (
+          return route.name === 'GeminiChat' ? null : (
             <TextComponent
               label={route.name}
               flex={0}
@@ -79,10 +82,7 @@ const TabNavigator = () => {
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Friends" component={MyFriendScreen} />
-      <Tab.Screen
-        name="PostEvent"
-        children={() => <PostEvent setIsTabBarVisible={setIsTabBarVisible} />}
-      />
+      <Tab.Screen name="GeminiChat" children={() => <GeminiChat />} />
       <Tab.Screen name="Messages" component={MessageScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

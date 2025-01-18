@@ -12,6 +12,8 @@ interface Props {
   title?: string;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
+  iconQR?: ReactNode;
+
   onPress1?: () => void;
   onPress2?: () => void;
   isBcolor?: boolean;
@@ -30,6 +32,7 @@ const HeaderComponent = (props: Props) => {
     styles,
     image,
     iconStyle,
+    iconQR,
   } = props;
   const navigation = useNavigation();
   const goBack = () => {
@@ -48,14 +51,14 @@ const HeaderComponent = (props: Props) => {
         },
         styles,
       ]}>
-      <RowComponent styles={{}}>
+      <RowComponent styles={{paddingVertical: 6}}>
         <ButtonComponent
           onPress={onPress1 ?? goBack}
           iconLeft={iconLeft}
           type="action"
           styles={iconStyle && localStyles.iconStyles}
         />
-        
+
         {image && (
           <>
             {image && <Image source={{uri: image}} style={localStyles.image} />}
@@ -65,7 +68,6 @@ const HeaderComponent = (props: Props) => {
                 fontSize: appInfo.sizeTitle,
                 fontWeight: '500',
                 fontStyle: 'italic',
-              
               }}
             />
           </>
@@ -81,12 +83,21 @@ const HeaderComponent = (props: Props) => {
           }}
         />
       )}
-      <ButtonComponent
-        onPress={onPress2}
-        iconRight={iconRight}
-        type="action"
-        styles={iconStyle && localStyles.iconStyles}
-      />
+      <RowComponent>
+        <ButtonComponent
+          onPress={onPress2}
+          iconRight={iconQR}
+          type="action"
+          styles={iconStyle && localStyles.iconStyles}
+        />
+        <SpaceComponent width={10} />
+        <ButtonComponent
+          onPress={onPress2}
+          iconRight={iconRight}
+          type="action"
+          styles={iconStyle && localStyles.iconStyles}
+        />
+      </RowComponent>
     </RowComponent>
   );
 };
@@ -99,7 +110,7 @@ const localStyles = StyleSheet.create({
   },
   iconStyles: {
     borderWidth: 0.1,
-    borderRadius: 4,
+    borderRadius: 2,
     padding: 4,
   },
 });

@@ -1,28 +1,25 @@
-import React, {useEffect} from 'react';
+import { UserEdit } from 'iconsax-react-native';
+import React from 'react';
 import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
   FlatList,
-  StatusBar,
+  Image,
+  SafeAreaView,
   StyleSheet,
-  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useSelector } from 'react-redux';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { RowComponent, TextComponent } from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {ButtonComponent, TextComponent} from '../Components';
-import {profileStyles} from './profileStyles';
-import {UserEdit} from 'iconsax-react-native';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
-import Orientation from 'react-native-orientation-locker';
+import { UserInfo } from '../Untils/UserInfo';
+import { profileStyles } from './profileStyles';
 const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
- 
-
   const userInfo = {
     avatar: 'https://via.placeholder.com/150',
     name: 'John Doe',
@@ -64,17 +61,30 @@ const ProfileScreen = ({navigation}: any) => {
       <View style={locastyles.header}>
         <ZoomImageComponent url={auth.avatar} styles={profileStyles.avatar} />
         <View style={profileStyles.infoContainer}>
+          <RowComponent>
+            <TextComponent
+              styles={[profileStyles.name, {color: '#333'}]}
+              label={UserInfo.getName(auth.name)}
+            />
+            {/* <TouchableOpacity
+              onPress={() => console.log('Đang quét')}
+              style={{
+                padding: 6,
+                borderWidth: 1,
+                borderColor: appColors.blue,
+                borderRadius: 4,
+              }}>
+              <MaterialCommunityIcons name='qrcode' color={appColors.blue} size={appInfo.sizeIcon} />
+            </TouchableOpacity> */}
+          </RowComponent>
+
           <TextComponent
-            styles={[profileStyles.name, {color: '#333'}]}
-            label={auth.name}
+            styles={[profileStyles.bio, {color: '#555'}]}
+            label={auth.bio ?? 'Tiểu sử'}
           />
           <TextComponent
             styles={[profileStyles.majoring, {color: '#666'}]}
-            label={auth.majoring}
-          />
-          <TextComponent
-            styles={[profileStyles.bio, {color: '#555'}]}
-            label={auth.bio ?? '...'}
+            label={auth.majoring ?? 'Chuyên ngành'}
           />
 
           <TouchableOpacity
@@ -103,7 +113,7 @@ const ProfileScreen = ({navigation}: any) => {
           <Text style={profileStyles.statNumber}>{userInfo.stats.likes}</Text>
           <Text style={profileStyles.statLabel}>Likes</Text>
         </View>
-      </View>
+      </View> 
 
       {/* Recent Posts */}
       <Text style={profileStyles.sectionTitle}>Recent Posts</Text>

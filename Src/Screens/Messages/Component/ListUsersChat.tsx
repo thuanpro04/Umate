@@ -2,25 +2,25 @@ import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {CarUserComponent, ContainerComponent} from '../../Components';
 import CarUserChat from './CarUserChat';
-import {Users} from '../../Services/friendService.';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../../redux/reducers/authReducer';
 import {UserInfo} from '../../Untils/UserInfo';
+import usersAPI from '../../../apis/usersApi';
+import {userServices} from '../../Services/userService';
 
 const ListUsersChat = ({navigation}: any) => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
   const getUsers = async () => {
-    const url = `/get-all?currentUserID=${auth.userID}`;
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const res = await Users.getUsers(url);
+      const res = await userServices.getEquestFriendUsers(auth.userId);
       setUsers(res);
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (error) {
       console.log('ListChat', error);
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -32,6 +32,7 @@ const ListUsersChat = ({navigation}: any) => {
         users.map((item: any, index) => (
           <React.Fragment key={index}>
             <CarUserChat
+              lastMessage=""
               key={index}
               name={UserInfo.getName(item.name)}
               massv="22"
@@ -41,16 +42,17 @@ const ListUsersChat = ({navigation}: any) => {
                   currentUserID: auth.userID,
                   friendID: item.userID,
                 })
-                
               }
             />
             <CarUserChat
+              lastMessage=""
               key={index}
               name={UserInfo.getName(item.name)}
               massv="22"
               image={item.avatar}
             />
             <CarUserChat
+              lastMessage=""
               key={index}
               name={UserInfo.getName(item.name)}
               massv="22"

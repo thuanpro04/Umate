@@ -26,7 +26,7 @@ export class Validate {
   static groupValidation(data: any) {
     const mess: string[] = [];
     Object.keys(data).forEach(key => {
-      if (key !== 'description' && key !== 'authorId' && key !== 'avatar') {
+      if (key !== 'description' && key !== 'authorId' && key !== 'avatar' && key !=='leader') {
         !data[`${key}`] && mess.push(`${key} is required !!!`);
       }
     });
@@ -51,5 +51,14 @@ export class Validate {
     }
 
     return mess;
+  }
+   static validateGroupName(groupName: any) {
+    if (!groupName || groupName.length > 100) {
+      throw new Error('Tên nhóm không hợp lệ');
+    }
+    if (!/^[a-zA-Z0-9 ]+$/.test(groupName)) {
+      throw new Error('Tên nhóm chỉ được chứa chữ và số');
+    }
+    return true;
   }
 }

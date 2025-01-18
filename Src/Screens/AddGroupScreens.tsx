@@ -44,7 +44,7 @@ const AddGroupScreens = ({navigation}: any) => {
   const [messageErrors, setMessageErrors] = useState<any[]>([]);
   const [groupInfo, setGroupInfo] = useState<any>({
     ...initValues,
-    authorId: auth.userID,
+    authorId: auth.userId,
     avatar: getAvatar(),
   });
   console.log('auth', auth);
@@ -59,12 +59,12 @@ const AddGroupScreens = ({navigation}: any) => {
   }, [groupInfo]);
   const getAllUsers = async () => {
     try {
-      const res = await userServices.getEquestFriendUsers(auth.userID, '');
+      const res = await userServices.getEquestFriendUsers(auth.userId, '');
       if (res) {
-        const data = res.map(({name, avatar, userID, majorCategory}: any) => ({
+        const data = res.map(({name, avatar, userId, majorCategory}: any) => ({
           name,
           avatar,
-          userID,
+          userId,
           majorCategory,
         }));
         setUsers(data);
@@ -99,7 +99,7 @@ const AddGroupScreens = ({navigation}: any) => {
       const urlImage = await imageService.uploadImageToFirebase(filePath, path);
       onChangeGroupInfo('avatar', {
         name: urlImage,
-        data: {userID: auth.userID},
+        data: {userId: auth.userId},
       });
     } catch (error) {
       console.log('upload failed', error);
@@ -114,7 +114,7 @@ const AddGroupScreens = ({navigation}: any) => {
     }));
 
     const currentUser = {
-      userID: auth.userID,
+      userId: auth.userId,
       userName: auth.name,
       avatar: auth.avatar,
       majoring: auth.majoring,
@@ -131,12 +131,12 @@ const AddGroupScreens = ({navigation}: any) => {
           : groupInfo.avatar,
       invitedUsers: [...member, currentUser],
       leader: {
-        userID: groupInfo.leader.data.userID,
-        username: groupInfo.leader.name,
+        userId: groupInfo.leader.data
+          ? groupInfo.leader.data.userId
+          : auth.userId,
       },
       deputyLeader: {
-        userID: groupInfo.deputyLeader.userID,
-        username: groupInfo.deputyLeader.name,
+        userId: groupInfo.deputyLeader.data.userId,
       },
       type: 'group',
     };
@@ -150,16 +150,15 @@ const AddGroupScreens = ({navigation}: any) => {
         getDataGroup(),
         'post',
       );
-      console.log(res);
 
-      if (res && res.data) {
-        console.log(res.data);
+      if (res) {
+        navigation.navigate('Messages');
       }
-      navigation.navigate('Messages');
     } catch (error) {
       console.log('handleAddGroupUser', error);
     }
   };
+  console.log('groupInfo', groupInfo);
 
   return (
     <ContainerComponent>
@@ -188,7 +187,7 @@ const AddGroupScreens = ({navigation}: any) => {
                 x.type === 'url'
                   ? onChangeGroupInfo('avatar', {
                       name: x.value.toString().trim(),
-                      data: {userID: auth.userID},
+                      data: {userId: auth.userId},
                     })
                   : handleSelected(x.value as ImageOrVideo);
               }}
@@ -261,9 +260,9 @@ const AddGroupScreens = ({navigation}: any) => {
                 groupInfo.invitedUsers && groupInfo.leader
                   ? groupInfo.invitedUsers.filter(
                       (item: any) =>
-                        item.data.userID != groupInfo.leader.data.userID,
+                        item.data.userId != groupInfo.leader.data.userId,
                     )
-                  : []
+                  : groupInfo.invitedUsers
               }
               onChangeValue={onChangeGroupInfo}
               userSelected={[]}

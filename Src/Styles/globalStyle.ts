@@ -9,7 +9,6 @@ const globalStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
     gap: 10,
     alignItems: 'center',
   },

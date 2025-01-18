@@ -1,5 +1,6 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
 import {
   AddGroupScreens,
   ContactUsScreen,
@@ -7,13 +8,11 @@ import {
   SettingScreen,
 } from '../index';
 import ChatScreen from '../Messages/ChatScreen';
-import DrawerNavigator from './DrawerNavigator';
-import ListUsersChat from '../Messages/Component/ListUsersChat';
-import SetUpProfile from '../Profile/SetUpProfile';
-import ShareScreen from '../ShareScreen';
-import MessageNavigator from './MessageNavigator';
 import UserInfoChat from '../Messages/Component/UserInfoChat';
 import PersonalScreen from '../Profile/PersonalScreen';
+import SetUpProfile from '../Profile/SetUpProfile';
+import ShareScreen from '../ShareScreen';
+import DrawerNavigator from './DrawerNavigator';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -31,6 +30,7 @@ const MainNavigator = () => {
       <Stack.Screen name="ShareScreen" component={ShareScreen} />
       <Stack.Screen name="PersonalScreen" component={PersonalScreen} />
       <Stack.Screen name="EditProfile" component={SetUpProfile} />
+      <Stack.Screen name="FriendsRespond" component={FriendsRespondScreen} />
 
     </Stack.Navigator>
   );

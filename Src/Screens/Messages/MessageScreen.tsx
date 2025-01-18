@@ -1,4 +1,9 @@
-import {ArrowLeft2, More} from 'iconsax-react-native';
+import {
+  ArrowLeft2,
+  HambergerMenu,
+  More,
+  ScanBarcode,
+} from 'iconsax-react-native';
 import React, {useCallback, useMemo, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -13,11 +18,13 @@ import {
 } from '../Components';
 
 import {useFocusEffect} from '@react-navigation/native';
-import {ActivityIndicator, View} from 'react-native';
+import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
 import InfomationModal from '../Modal/InfomationModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
+import {globalStyles} from '../../Styles/globalStyle';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
@@ -26,16 +33,17 @@ const MessageScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const memoizedUsers = useMemo(() => users, [users]);
+
   useFocusEffect(
     useCallback(() => {
       getAllConversation();
     }, []),
   );
 
-  const getAllConversation = async () => {
+  const getAllConversation = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await messageServices.getAllConversationUsers(auth.userID);
+      const res = await messageServices.getAllConversationUsers(auth.userId);
       if (res?.data && res) {
         setUsers(res?.data);
       }
@@ -44,42 +52,10 @@ const MessageScreen = ({navigation}: any) => {
       console.log('ListChat', error);
       setIsLoading(false);
     }
-  };
-  const onNavigationChat = (
-    person?: {
-      name: string;
-      avatar: string;
-      userID: string;
-    },
-    group?: {
-      groupID: string;
-      groupName: string;
-      invitedUsers: any[];
-      leader: any;
-      deputyLeader: any;
-      avatar: string;
-    },
-  ) => {
-    if (person) {
-      navigation.navigate('Chat', {
-        person: {
-          userName: person?.name,
-          avatar: person?.avatar,
-          userID: person?.userID,
-        },
-      });
-    } else if (group) {
-      navigation.navigate('Chat', {
-        myGroup: {
-          groupID: group.groupID,
-          groupName: group?.groupName,
-          invitedUsers: group?.invitedUsers,
-          leader: group?.leader,
-          deputyLeader: group?.deputyLeader,
-          avatar: group.avatar,
-        },
-      });
-    }
+  }, []);
+  const onNavigation = async (item: any) => {
+    await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
+    navigation.navigate('Chat');
   };
   const onCloseModal = () => {
     setIsVisible(false);
@@ -88,19 +64,52 @@ const MessageScreen = ({navigation}: any) => {
     navigation.navigate('AddGroup');
     onCloseModal();
   };
+  const renderCardItems = ({item, index}: any) => {
+    console.log(item.type === 'group' ? item : '');
+
+    return (
+      <CarUserChat
+        key={index}
+        name={item.groupName ?? UserInfo.getName(item.name)}
+        massv={
+          item.type === 'group'
+            ? item.invitedUsers.length
+            : UserInfo.getYearOfbirth(item.email)
+        }
+        image={item.avatar}
+        lastMessage={item.lastMessage}
+        onPress={() => onNavigation(item)}
+      />
+    );
+  };
 
   return (
-    <ContainerComponent>
+    <SafeAreaView style={globalStyles.container}>
       <HeaderComponent
         iconStyle
         styles={{justifyContent: 'space-between'}}
         iconLeft={
-          <ArrowLeft2 color={appColors.black} size={appInfo.sizeIconBold} />
+          <HambergerMenu color={appColors.blue2} size={appInfo.sizeIconBold} />
         }
-        iconRight={<More color={appColors.black} size={appInfo.sizeIconBold} />}
-        title="Messages"
+        iconRight={<More color={appColors.blue2} size={appInfo.sizeIconBold} />}
+        // title="Messages"
+        iconQR={
+          <ScanBarcode color={appColors.blue2} size={appInfo.sizeIconBold} />
+        }
         onPress2={() => setIsVisible(true)}
       />
+      <View style={{paddingLeft: 18}}>
+        <TextComponent
+          label="Messages"
+          styles={{
+            fontSize: 28, // Tăng kích thước chữ một chút để nổi bật
+            fontStyle: 'italic', // Giữ phong cách nghiêng để tạo sự khác biệt
+            fontWeight: '700', // Đặt độ đậm của chữ rõ ràng
+            color: appColors.blueBack, // Thêm màu sắc cho tiêu đề để dễ nhìn
+          }}
+        />
+      </View>
+      <SpaceComponent height={18} />
       <View style={{justifyContent: 'center', alignItems: 'center'}}>
         <SearchFriendsComponent
           styles={{
@@ -113,61 +122,46 @@ const MessageScreen = ({navigation}: any) => {
           }
         />
       </View>
-      <ContainerComponent
-        isScroll
-        styles={{
-          paddingVertical: 0,
-        }}>
-        {isLoading ? (
-          <View
-            style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-            <SpaceComponent height={200} />
-            <ActivityIndicator />
+      {isLoading ? (
+        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+          <ActivityIndicator />
 
-            {memoizedUsers.length === 0 && (
-              <TextComponent
-                label={'Chats not found !!'}
-                color={appColors.grey2}
-                styles={{fontStyle: 'italic', fontWeight: '300'}}
-              />
-            )}
-          </View>
-        ) : memoizedUsers.length > 0 ? (
-          memoizedUsers.map((item: any, index) => (
-            <CarUserChat
-              key={index}
-              name={item.groupName ?? UserInfo.getName(item.name)}
-              massv={UserInfo.getYearOfbirth(item.email)}
-              image={item.avatar}
-              lastMessage={item.lastMessage}
-              onPress={() =>
-                item.type === 'personal'
-                  ? onNavigationChat({
-                      name: UserInfo.getName(item.name),
-                      avatar: item.avatar,
-                      userID: item.userID,
-                    })
-                  : onNavigationChat(undefined, {
-                      groupID: item.groupID,
-                      groupName: item.groupName,
-                      invitedUsers: item.invitedUsers,
-                      leader: item.leader,
-                      deputyLeader: item.deputyLeader,
-                      avatar: item.avatar,
-                    })
-              }
+          {!memoizedUsers && (
+            <TextComponent
+              label={'Chats not found !!'}
+              color={appColors.grey2}
+              styles={{fontStyle: 'italic', fontWeight: '300'}}
             />
-          ))
-        ) : (
-          <></>
-        )}
-      </ContainerComponent>
+          )}
+        </View>
+      ) : memoizedUsers.length > 0 ? (
+        <FlatList
+          data={memoizedUsers}
+          key={'listMessage'}
+          keyExtractor={item =>
+            item.type === 'personal' ? item.conversationId : item.groupId
+          }
+          renderItem={renderCardItems}
+        />
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <TextComponent
+            label={'Chats not found !!'}
+            color={appColors.grey2}
+            styles={{
+              fontStyle: 'italic',
+              fontWeight: '300',
+              color: appColors.black,
+            }}
+          />
+        </View>
+      )}
       <InfomationModal
         visible={isVisible}
         onClose={onCloseModal}
         onPressAddGroud={handleAddGroup}
       />
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 

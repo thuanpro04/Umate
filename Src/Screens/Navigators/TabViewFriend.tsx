@@ -12,13 +12,13 @@ const TabViewFriend = () => {
   const [index, setIndex] = useState(0);
 
   const SuggestRouter = () => {
-    return <SuggestFriend />;
+    return <SuggestFriend key={'SuggestFriend'} />;
   };
   const RequestRouter = () => {
-    return <FriendsRequestScreen />;
+    return <FriendsRequestScreen key={'FriendsRequestScreen'} />;
   };
   const RespondRouter = () => {
-    return <FriendsRespondScreen />;
+    return <FriendsRespondScreen key={'FriendsRespondScreen'} />;
   };
   const renderScene = SceneMap({
     first: SuggestRouter,
@@ -36,9 +36,10 @@ const TabViewFriend = () => {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{width: appInfo.size.WIDTH}}
-      renderTabBar={props => (
+      renderTabBar={(props) => (
         <TabBar
           {...props}
+          key={'tabview'}
           style={{backgroundColor: appColors.white}}
           labelStyle={{
             color: appColors.grey3, // Màu cam đậm

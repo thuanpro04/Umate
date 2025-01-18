@@ -43,7 +43,7 @@ const LoginSreen = () => {
         return null; // Dừng lại nếu email không hợp lệ
       }
       const data = {
-        userID: userInfo?.id,
+        userId: userInfo?.id,
         email: userInfo?.email,
         name: userInfo?.name,
         familyName: userInfo?.familyName,
@@ -84,15 +84,7 @@ const LoginSreen = () => {
     }
   };
   
-  function validateGroupName(groupName: any) {
-    if (!groupName || groupName.length > 100) {
-      throw new Error('Tên nhóm không hợp lệ');
-    }
-    if (!/^[a-zA-Z0-9 ]+$/.test(groupName)) {
-      throw new Error('Tên nhóm chỉ được chứa chữ và số');
-    }
-    return true;
-  }
+ 
 
   return (
     <ContainerComponent>
@@ -167,7 +159,7 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     width: '80%',
-    paddingVertical: 10,
+    paddingVertical: 14,
   },
   hint: {
     fontStyle: 'italic',

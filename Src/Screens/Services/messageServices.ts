@@ -1,32 +1,33 @@
 import chatsAPI from '../../apis/chatApi';
 
-const getAllMessagesUser = async (
-  currentUserID: string,
-  userID?: string,
-  recipients?: string[],
-  groupID?: string,
-  newPage?: number,
-) => {
+const getAllMessagesUser = async (id: any, key: string, page:number) => {
   try {
-    const body = {
-      senderID: currentUserID,
-      receiverID: userID,
-      recipients: recipients,
-      groupID: groupID,
-      page: newPage,
-    };
-
-    const url = `/receive-messages`;
+    const url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
     console.log(url);
-
-    const res = await chatsAPI.handleChats(url, body, 'post');
+    const res = await chatsAPI.handleChats(url);
     return res;
   } catch (error) {
     console.log('getAllMessagesUser', error);
   }
 };
-const getAllConversationUsers = async (currentUserID: string) => {
-  const url = `/get-all-conversation?currentUserID=${currentUserID}`;
+const checkConversation = async (senderId: string, receiverId: string) => {
+  const url = '/new-conversation';
+  let data = {
+    senderId,
+    receiverId,
+  };
+
+  try {
+    const res = await chatsAPI.handleChats(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.error('create conversation fail ', error);
+  }
+};
+const getAllConversationUsers = async (currentUserId: string) => {
+  const url = `/get-all-conversation?currentUserId=${currentUserId}`;
+  // console.log(url);
+
   try {
     const res = await chatsAPI.handleChats(url);
     return res;
@@ -38,4 +39,5 @@ const getAllConversationUsers = async (currentUserID: string) => {
 export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
+  checkConversation,
 };

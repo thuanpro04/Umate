@@ -28,11 +28,12 @@ import {appInfo} from '../../Theme/appInfo';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
 import LoadingModal from '../Modal/LoadingModal';
+import { UserInfo } from '../Untils/UserInfo';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const [userInfo, setUserInfo] = useState<any>(null);
-  const {userID} = useRoute().params as {userID: string};
+  const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
@@ -62,7 +63,7 @@ const PersonalScreen = ({navigation}: any) => {
   };
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: withTiming(isDetail ? '#00968891' : '#009688', {
+      backgroundColor: withTiming(isDetail ? '#009688E0' : '#009688', {
         duration: 900,
       }),
     };
@@ -70,15 +71,15 @@ const PersonalScreen = ({navigation}: any) => {
   useFocusEffect(
     useCallback(() => {
       handleGetUserInfoById();
-    }, [userID]),
+    }, [userId]),
   );
   const handleGetUserInfoById = async () => {
     try {
       setIsLoading(true);
-      const res = await userServices.getUserInfo(userID);
+      const res = await userServices.getUserInfo(userId);
       if (res && res.data) {
         setUserInfo(res.data);
-        console.log(userInfo);
+        console.log('userInfo', userInfo);
       }
       setIsLoading(false);
     } catch (error) {
@@ -88,7 +89,7 @@ const PersonalScreen = ({navigation}: any) => {
   };
   const toggleDetail = () => {
     setDetail(!isDetail);
-    bgColor.value = isDetail ? '#009688' : '#009688C2';
+    bgColor.value = isDetail ? '#009688' : '#009688';
   };
   const renderPost = ({item}: any) => (
     <View style={profileStyles.postContainer}>
@@ -96,6 +97,7 @@ const PersonalScreen = ({navigation}: any) => {
       <Text style={profileStyles.postContent}>{item.content}</Text>
     </View>
   );
+  console.log('userInfo', userInfo);
 
   const renderHeader = () => {
     const dataUser = [
@@ -104,7 +106,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.majoring}
-            label={userInfo?.majoring}
+            label={userInfo?.majoring ?? 'majoring'}
           />
         ),
         icon: <Icon name="school" size={20} color={'#1b4f72'} />,
@@ -133,7 +135,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.majoring}
-            label={userInfo?.address ? userInfo?.address : '...'}
+            label={userInfo?.address ? userInfo?.address : 'address'}
           />
         ),
         icon: <Icon name="location-on" size={20} color={appColors.green2} />,
@@ -152,7 +154,7 @@ const PersonalScreen = ({navigation}: any) => {
             <View style={profileStyles.profileContainer}>
               <TextComponent
                 styles={profileStyles.name}
-                label={userInfo.name}
+                label={userInfo.familyName + ' ' + userInfo.givenName}
               />
               <Animated.View style={[{alignItems: 'flex-start'}]}>
                 {dataUser.map((item, index) => {
@@ -164,7 +166,10 @@ const PersonalScreen = ({navigation}: any) => {
                   );
                 })}
               </Animated.View>
-              <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
+              <TextComponent
+                label={userInfo.bio ?? '...'}
+                styles={profileStyles.bio}
+              />
               <SpaceComponent height={10} />
               <ButtonComponent
                 onPress={toggleDetail}
@@ -189,13 +194,16 @@ const PersonalScreen = ({navigation}: any) => {
               />
               <TextComponent
                 styles={profileStyles.name}
-                label={userInfo.name}
+                label={UserInfo.getName(userInfo.name)}
               />
               <TextComponent
                 styles={profileStyles.majoring}
-                label={userInfo.majoring}
+                label={userInfo.majoring ?? '...'}
               />
-              <TextComponent label={userInfo.bio} styles={profileStyles.bio} />
+              <TextComponent
+                label={userInfo.bio ?? '...'}
+                styles={profileStyles.bio}
+              />
               <SpaceComponent height={10} />
               <ButtonComponent
                 onPress={toggleDetail}
