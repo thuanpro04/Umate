@@ -1,5 +1,5 @@
 const express= require('express');
-const { hanleLoginWithGoogle } = require('../Controller/LoginController');
+const { handleLoginWithGoogle } = require('../Controller/LoginController');
 const appRouters= express();
-appRouters.post('/login', hanleLoginWithGoogle)
+appRouters.post('/login', handleLoginWithGoogle)
 module.exports=appRouters

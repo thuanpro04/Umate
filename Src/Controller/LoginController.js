@@ -12,13 +12,13 @@ const getJsonWebToken = async (email, id) => {
   return token;
 };
 
-const hanleLoginWithGoogle = async (req, res) => {
+const handleLoginWithGoogle = async (req, res) => {
   try {
     const userInfo = req.body;
     console.log(req.body);
 
     // Kiểm tra người dùng có tồn tại không
-    const existingUser = await findUserById(userInfo.userID);
+    const existingUser = await findUserById(userInfo.userId);
     let user;
     if (existingUser) {
       await UserModel.findByIdAndUpdate(existingUser.id, {
@@ -35,13 +35,14 @@ const hanleLoginWithGoogle = async (req, res) => {
     } else {
       // Cập nhật thông tin người dùng hiện tại nếu cần
       const newUser = new UserModel({
-        userID: userInfo.userID,
+        userId: userInfo.userId,
         name: userInfo.name,
         email: userInfo.email,
         familyName: userInfo.familyName,
         givenName: userInfo.givenName,
         avatar: userInfo.avatar,
         access: userInfo.access,
+        online: true,
       });
       console.log(newUser);
 
@@ -63,4 +64,4 @@ const hanleLoginWithGoogle = async (req, res) => {
     res.status(500).json({ message: "Error logging in" });
   }
 };
-module.exports = { hanleLoginWithGoogle };
+module.exports = { handleLoginWithGoogle };

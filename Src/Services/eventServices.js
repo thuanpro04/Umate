@@ -5,8 +5,8 @@ const handlePostEvent = async (req, res) => {
   const data = req.body;
   console.log(data);
   const newEvent = new EventModel({
-    postID: uuidv4(),
-    userID: data.authorId,
+    postId: uuidv4(),
+    userId: data.authorId,
     content: data.content,
     likes: 0,
     comments: [],

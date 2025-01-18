@@ -2,7 +2,7 @@ const { UserModel } = require("../models/usersModel");
 const { updateUserById } = require("./userServices");
 
 const handleFriendRequestAction = async (req, res, action) => {
-  const { friendUserID, currentUserID } = req.body;
+  const { friendUserId, currentUserId } = req.body;
   console.log("add", req.body);
   
   try {
@@ -10,9 +10,9 @@ const handleFriendRequestAction = async (req, res, action) => {
     // Thực hiện hành động thêm hoặc hủy kết bạn
     const updateAction =
       action === "add"
-        ? { $addToSet: { friendRequests: currentUserID } } //thêm ko trùng lập
-        : { $pull: { friendRequests: currentUserID } }; // xóa
-    const result = await updateUserById(friendUserID, updateAction);
+        ? { $addToSet: { friendRequests: currentUserId } } //thêm ko trùng lập
+        : { $pull: { friendRequests: currentUserId } }; // xóa
+    const result = await updateUserById(friendUserId, updateAction);
     if (result.nModified === 0) {
       return res
         .status(404)
@@ -31,25 +31,27 @@ const handleFriendRequestAction = async (req, res, action) => {
 };
 
 const manageFriendship = async (req, res, action) => {
-  const { friendUserID, currentUserID } = req.body;
+  const { friendUserId, currentUserId } = req.body;
+  console.log(req.body);
+  
   const updateActions =
     action === "agree"
       ? [
           {
             updateOne: {
-              filter: { userID: currentUserID },
+              filter: { userId: currentUserId },
               update: {
-                $addToSet: { friends: friendUserID }, // Thêm friendUserID vào danh sách bạn bè của currentUserID
-                $pull: { friendRequests: friendUserID }, // Xóa friendUserID khỏi danh sách yêu cầu kết bạn
+                $addToSet: { friends: friendUserId }, // Thêm friendUserId vào danh sách bạn bè của currentUserId
+                $pull: { friendRequests: friendUserId }, // Xóa friendUserId khỏi danh sách yêu cầu kết bạn
               },
             },
           },
           {
             updateOne: {
-              filter: { userID: friendUserID },
+              filter: { userId: friendUserId },
               update: {
-                $addToSet: { friends: currentUserID }, // Thêm currentUserID vào danh sách bạn bè của friendUserID
-                $pull: { friendRequests: currentUserID }, // Xóa currentUserID khỏi danh sách yêu cầu kết bạn
+                $addToSet: { friends: currentUserId }, // Thêm currentUserId vào danh sách bạn bè của friendUserId
+                $pull: { friendRequests: currentUserId }, // Xóa currentUserId khỏi danh sách yêu cầu kết bạn
               },
             },
           },
@@ -57,20 +59,20 @@ const manageFriendship = async (req, res, action) => {
       : [
           {
             updateOne: {
-              filter: { userID: currentUserID },
+              filter: { userId: currentUserId },
               update: {
-                $pull: { friends: friendUserID, friendRequests: friendUserID }, // Xóa friendUserID khỏi danh sách bạn bè và yêu cầu kết bạn
+                $pull: { friends: friendUserId, friendRequests: friendUserId }, // Xóa friendUserId khỏi danh sách bạn bè và yêu cầu kết bạn
               },
             },
           },
           {
             updateOne: {
-              filter: { userID: friendUserID },
+              filter: { userId: friendUserId },
               update: {
                 $pull: {
-                  friends: currentUserID,
-                  friendRequests: currentUserID,
-                }, // Xóa currentUserID khỏi danh sách bạn bè và yêu cầu kết bạn
+                  friends: currentUserId,
+                  friendRequests: currentUserId,
+                }, // Xóa currentUserId khỏi danh sách bạn bè và yêu cầu kết bạn
               },
             },
           },
@@ -98,12 +100,12 @@ const manageFriendship = async (req, res, action) => {
   }
 };
 const removeFriendSuggestion = async (req, res) => {
-  const { friendUserID, currentUserID } = req.body;
-  const updateAction = { $addToSet: { removeFriends: friendUserID } }; // Thêm friendUserID vào mảng removeFriends
+  const { friendUserId, currentUserId } = req.body;
+  const updateAction = { $addToSet: { removeFriends: friendUserId } }; // Thêm friendUserId vào mảng removeFriends
 
   try {
     // Thực hiện cập nhật
-    const result = await updateUserById(currentUserID, updateAction);
+    const result = await updateUserById(currentUserId, updateAction);
 
     // Kiểm tra xem có sự thay đổi nào không (nếu không thay đổi, result.modifiedCount sẽ là 0)
     if (!result.modifiedCount) {
@@ -122,22 +124,22 @@ const removeFriendSuggestion = async (req, res) => {
   }
 };
 const processRemoveFriendAction = async (req, res) => {
-  const { friendUserID, currentUserID } = req.body;
+  const { friendUserId, currentUserId } = req.body;
   const updateActions = [
     {
       updateOne: {
-        filter: { userID: currentUserID },
+        filter: { UserId: currentUserId },
         update: {
-          $pull: { friends: friendUserID }, // Xóa friendUserID khỏi danh sách bạn bè
-          $addToSet: { removeFriends: friendUserID }, // Thêm friendUserID vào danh sách đã xóa
+          $pull: { friends: friendUserId }, // Xóa friendUserId khỏi danh sách bạn bè
+          $addToSet: { removeFriends: friendUserId }, // Thêm friendUserId vào danh sách đã xóa
         },
       },
     },
     {
       updateOne: {
-        filter: { userID: friendUserID },
+        filter: { UserId: friendUserId },
         update: {
-          $pull: { friends: currentUserID }, // Xóa currentUserID khỏi danh sách bạn bè
+          $pull: { friends: currentUserId }, // Xóa currentUserId khỏi danh sách bạn bè
         },
       },
     },

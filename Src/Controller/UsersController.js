@@ -8,10 +8,10 @@ const {
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
-  const { currentUserID, filter } = req.query;
+  const { currentUserId, filter } = req.query;
   try {
     // Lấy thông tin người dùng hiện tại
-    const existingUser = await findUserById(currentUserID);
+    const existingUser = await findUserById(currentUserId);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found!" });

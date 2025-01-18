@@ -39,10 +39,10 @@ const io = socketIO(server, {
 io.on("connection", (socket) => {
   // console.log(`User connected: ${socket.id}`);
   socket.on("send_message", async (data) => {
-    const messageID =generateUniqueID();
+    const messageId =generateUniqueID();
     const userMessages = {
       ...data,
-      messageID,
+      messageId,
     };
     console.log("userMessages", userMessages);
 

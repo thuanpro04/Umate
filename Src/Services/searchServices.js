@@ -1,9 +1,9 @@
 const { UserModel } = require("../models/usersModel");
 const { transformUserData, findUserById } = require("./userServices");
 
-const handleSearchByName = async (searchTerm, currentUserID, bySearch) => {
+const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
   console.log(bySearch);
-  const user = await findUserById(currentUserID);
+  const user = await findUserById(currentUserId);
   console.log("user", user);
 
   // Khởi tạo mảng điều kiện tìm kiếm
@@ -18,7 +18,7 @@ const handleSearchByName = async (searchTerm, currentUserID, bySearch) => {
     }
     if (bySearch.includes("friends")) {
       if (!user.friends || user.friends.length === 0) return []; // Nếu friends là undefined hoặc rỗng, trả về mảng rỗng
-      searchConditions.push({ userID: { $in: user.friends } });
+      searchConditions.push({ UserId: { $in: user.friends } });
     }
     if (bySearch.includes("majorCategory")) {
       if (!user.majorCategory) return []; // Nếu majorCategory là undefined, trả về mảng rỗng
@@ -33,7 +33,7 @@ const handleSearchByName = async (searchTerm, currentUserID, bySearch) => {
   const users = await UserModel.find({
     $and: [
       ...searchConditions, // Tìm theo các điều kiện đã xác định
-      { userID: { $nin: [currentUserID] } }, // Loại trừ người dùng hiện tại
+      { UserId: { $nin: [currentUserId] } }, // Loại trừ người dùng hiện tại
     ],
   });
 
@@ -46,7 +46,7 @@ const handleSearchByName = async (searchTerm, currentUserID, bySearch) => {
 };
 
 const searchFriendByName = async (req, res) => {
-  const { searchTerm, currentUserID, titleSearch } = req.query;
+  const { searchTerm, currentUserId, titleSearch } = req.query;
 
   const bySearch = titleSearch.split(",");
   //$regex là toán tử để tìm kiếm chuỗi theo biểu thức chính quy (regular expression).
@@ -55,7 +55,7 @@ const searchFriendByName = async (req, res) => {
     if (searchTerm !== "") {
       const data = await handleSearchByName(
         searchTerm,
-        currentUserID,
+        currentUserId,
         bySearch
       );
       console.log(data);
@@ -77,9 +77,9 @@ const searchFriendByName = async (req, res) => {
   }
 };
 const handleSearchConversations = async (req, res) => {
-  const { currentUserID, keyWord } = req.query;
+  const { currentUserId, keyWord } = req.query;
   try {
-    const data = await handleSearchByName(keyWord, currentUserID);
+    const data = await handleSearchByName(keyWord, currentUserId);
     console.log(data);
 
     if (keyWord === "") {

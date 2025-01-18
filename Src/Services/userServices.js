@@ -1,18 +1,18 @@
 const { UserModel } = require("../models/usersModel");
 
-const findUserById = async (userID) => {
-  return await UserModel.findOne({ userID: userID }).lean();
+const findUserById = async (userId) => {
+  return await UserModel.findOne({ userId }).lean();
 };
 const getUsersByIds = async (userFriends) => {
-  users = await UserModel.find({ userID: { $in: userFriends } }).lean();
+  users = await UserModel.find({ userId: { $in: userFriends } }).lean();
   return users;
 };
-const updateUserById = async (userID, updateAction) => {
-  const result = await UserModel.updateOne({ userID: userID }, updateAction);
+const updateUserById = async (userId, updateAction) => {
+  const result = await UserModel.updateOne({ userId: userId }, updateAction);
   return result;
 };
 const filterUsers = async (filter, existingUser) => {
-  const { userID, friends, removeFriends, friendRequests } = existingUser;
+  const { userId, friends, removeFriends, friendRequests } = existingUser;
 
   switch (filter) {
     case "requests":
@@ -24,14 +24,14 @@ const filterUsers = async (filter, existingUser) => {
     case "suggestfriend":
       // Lấy gợi ý bạn bè trừ bạn hiện tại, đã là bạn hoặc đã bị remove
       return await UserModel.find({
-        userID: { $ne: userID, $nin: [...friends, ...removeFriends] },
+        userId: { $ne: userId, $nin: [...friends, ...removeFriends] },
       }).lean();
 
     default:
       // Mặc định trả về danh sách bạn bè
       return friends.length > 0
         ? await UserModel.find({
-            userID: { $in: friends, $nin: removeFriends },
+            userId: { $in: friends, $nin: removeFriends },
           }).lean()
         : null;
   }
@@ -43,7 +43,7 @@ const transformUserData = (users) => {
       email: user.email,
       name: user.name,
       avatar: user.avatar,
-      userID: user.userID,
+      userId: user.userId,
       friendRequests: user.friendRequests,
       friends: user.friends,
       majoring: user.majoring,
@@ -56,7 +56,7 @@ const transformUserData = (users) => {
 
 const updateOneProfileInfo = async (req, res) => {
   const {
-    userID,
+    userId,
     name,
     majoring,
     majorCategory,
@@ -72,7 +72,7 @@ const updateOneProfileInfo = async (req, res) => {
   try {
     const updateUsers = await UserModel.findOneAndUpdate(
       {
-        userID: userID,
+        userId: userId,
       },
       {
         $set: {
@@ -103,9 +103,9 @@ const updateOneProfileInfo = async (req, res) => {
   }
 };
 const handleGetUserInfoById = async (req, res) => {
-  const { userID } = req.query;
+  const { userId } = req.query;
   try {
-    const user = await findUserById(userID);
+    const user = await findUserById(userId);
     res.status(200).json({
       message: "Get user info successfully !!",
       data: user,

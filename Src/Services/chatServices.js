@@ -3,57 +3,57 @@ const { getUsersByIds, transformUserData } = require("./userServices");
 const {
   ConversationModel,
   GroupConversationModel,
+  MessageModel,
 } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/infomationUntils");
 const handleReceiveMessageUsers = async (req, res) => {
-  const {
-    senderID,
-    receiverID,
-    recipients,
-    groupID,
-    page,
-    limit = 20,
-  } = req.body;
-  try {
-    let dataMessages;
+  const { id, page, limit = 20, key } = req.query;
+  console.log(req.query);
 
-    if (receiverID && receiverID !== "undefined") {
+  try {
+    console.log("Page", page, "Limit", limit * page);
+
+    let data, messages;
+
+    if (id !== "undefined" && key === "personal") {
+      const conversation = await ConversationModel.findOne({
+        conversationId: id,
+      });
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
       // Lấy tin nhắn trong cuộc trò chuyện cá nhân
-      dataMessages = await ConversationModel.aggregate([
-        {
-          $match: {
-            participants: { $all: [senderID, receiverID] },
-          },
-        },
-        { $unwind: "$messages" }, // Tách mảng messages thành từng document
-        { $sort: { "messages.timestamp": -1 } }, // Sắp xếp theo thời gian giảm dần
-        { $skip: (page - 1) * limit }, // Bỏ qua các tin nhắn trước đó
-        { $limit: parseInt(limit * page) }, // Giới hạn số lượng tin nhắn
-        { $group: { _id: "$_id", messages: { $push: "$messages" } } }, // Gom lại mảng messages
-      ]);
-    } else if (groupID) {
+      messages = conversation.message
+        .reverse()
+        .slice((page - 1) * limit, page * limit);
+      data = {
+        messages,
+        totalMessages: conversation.message.length,
+        currentPage: page,
+        totalPages: Math.ceil(conversation.message.length / limit),
+      };
+    } else if (id !== "undefined" && key === "group") {
       // Lấy tin nhắn trong nhóm
-      dataMessages = await GroupConversationModel.aggregate([
-        {
-          $match: { groupID },
-        },
-        { $unwind: "$messages" },
-        { $sort: { "messages.timestamp": -1 } },
-        { $skip: (page - 1) * limit },
-        { $limit: parseInt(limit) },
-        { $group: { _id: "$_id", messages: { $push: "$messages" } } },
-      ]);
+      const groupConversation = await GroupConversationModel.findOne({
+        groupId: id,
+      });
+      messages = groupConversation.message
+        .reverse()
+        .slice((page - 1) * limit, page * limit);
+      //0
+      data = {
+        messages,
+        totalMessages: groupConversation.message.length,
+        currentPage: page,
+        totalPages: Math.ceil(groupConversation.message.length / limit),
+      };
     }
 
     // Nếu có dữ liệu tin nhắn
-    if (dataMessages.length > 0) {
-      const sortedMessages = dataMessages[0].messages.reverse(); // Đảo ngược lại để tăng dần thời gian
+    if (data) {
       return res.status(200).json({
         message: "ReceiveMessageUsers successfully!",
-        data: {
-          messagesAll: sortedMessages,
-        },
-        totalMessages: sortedMessages.length,
+        data,
       });
     } else {
       return res.status(200).json({
@@ -75,64 +75,106 @@ const getLastMessages = (data) => {
   }
   return "";
 };
+const findMessageById = async (id) => {
+  const mess = await MessageModel.findOne({ messageId: id });
+  return mess;
+};
+const updateMessageById = async (id, data) => {
+  try {
+    const result = await MessageModel.updateOne({ messageId: id }, data);
+    if (result.nModified === 0) {
+      console.error("No message found with ID: ", id);
+    }
+  } catch (error) {
+    console.error("Error updating message", error);
+  }
+};
+const handleCheckConversation = async (req, res) => {
+  const { senderId, receiverId } = req.body;
+  const conv = await getConversationInfo(senderId, receiverId);
+
+  if (conv) {
+    res.status(200).json({
+      messages: "check conversation successfully ",
+      data: conv.conversationId ?? undefined,
+    });
+  } else {
+    res.send("conversation not found !!!");
+  }
+};
+const getConversationInfo = async (senderId, receiverId) => {
+  const conversation = await ConversationModel.findOne({
+    participants: { $all: [senderId, receiverId] },
+  });
+
+  return conversation;
+};
+const setConversation = async (data) => {
+  const newConversation = new ConversationModel({
+    conversationId: uuidv4(),
+    participants: [data.senderId, data.receiverId],
+    message: [data],
+    lastMessage: getLastMessages(data),
+    updatedAt: new Date(),
+    lastMessageTimestamp: data.timestamp || new Date(),
+  });
+  await newConversation.save();
+  console.log("New conversation created");
+};
 const sendMessageToGroupAndPersonal = async (data) => {
   console.log("dataMessage", data);
 
   try {
-    if (!data.groupID) {
-      if (!data.senderID || !data.receiverID) {
+    if (!data.groupId) {
+      if (!data.senderId || !data.receiverId) {
         console.error("Sender or receiver ID is missing");
         return;
       }
-      const conversation = await ConversationModel.findOne({
-        participants: { $all: [data.senderID, data.receiverID] },
-      });
+      const conversation = await getConversationInfo(
+        data.senderId,
+        data.receiverId
+      );
 
       if (!conversation) {
-        const newConversation = new ConversationModel({
-          conversationID: uuidv4(),
-          participants: [data.senderID, data.receiverID],
-          messages: [data],
-          lastMessage: getLastMessages(data),
-          updatedAt: new Date(),
-          lastMessageTimestamp: data.timestamp || new Date(),
-        });
-        await newConversation.save();
-        console.log("New conversation created");
+        await setConversation(data);
       } else {
-        conversation.messages.push(data);
-        (conversation.lastMessageTimestamp = data.timestamp || new Date()),
-          (conversation.lastMessage = data.content ?? data.imagesUrl);
-        await conversation.save();
-        console.log("Message added to existing conversation");
+        conversation.message.push(data);
+        conversation.lastMessageTimestamp = data.timestamp | new Date();
+        conversation.lastMessage = data.content ?? data.imagesUrl;
+        await conversation.save(),
+          // await Promise.all([
+
+          //   updateMessageById(data.messageId, data),
+          // ]);
+          console.log("Message added to existing conversation");
       }
     } else {
-      if (!data.groupID) {
-        console.error("Group ID is missing");
+      if (!data.groupId) {
+        console.error("Group Id is missing");
         return;
       }
       const groupConversations = await GroupConversationModel.findOne({
-        groupID: data.groupID,
+        groupId: data.groupId,
       });
       if (!groupConversations) {
         return res.status(404).json({ messages: "Group not found" });
       }
       const recipients = groupConversations.invitedUsers.map(
-        (item) => item.userID
+        (item) => item.userId
       );
-      const newMessages = {
-        messageID: generateUniqueID(),
-        senderID: data.senderID,
+      const messages = {
+        messageId: data.messageId,
+        senderId: data.senderId,
         content: data.content,
         imagesUrl: data.imagesUrl,
         recipients,
         timestamp: new Date(),
       };
       try {
-        groupConversations.messages.push(newMessages);
+        groupConversations.message.push(data);
         groupConversations.lastMessage = getLastMessages(data);
         groupConversations.lastMessageTimestamp = new Date();
-        await groupConversations.save();
+        await Promise.all([groupConversations.save(), newMessage.save]);
         console.log("Message saved successfully!");
       } catch (error) {
         console.error("Error saving groupConversations:", error);
@@ -147,31 +189,29 @@ const sendMessageToGroupAndPersonal = async (data) => {
   }
 };
 const handleGetAllConversationUsers = async (req, res) => {
-  const { currentUserID } = req.query;
+  const { currentUserId } = req.query;
 
   try {
     // Lấy tất cả các cuộc trò chuyện cá nhân của người dùng hiện tại
     const personalConversations = await ConversationModel.find({
-      participants: { $in: [currentUserID] },
+      participants: { $in: [currentUserId] },
     })
       .sort({ lastMessageTimestamp: -1 })
       .exec();
-
-    // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
     const groupConversations = await GroupConversationModel.find({
-      "invitedUsers.userID": currentUserID,
+      "invitedUsers.userId": currentUserId,
     }).sort({ lastMessageTimestamp: -1 });
-
     // Kiểm tra nếu cả hai loại cuộc trò chuyện đều rỗng
     if (!personalConversations.length && !groupConversations.length) {
       return res.status(404).json({
         message: "No conversations found!",
+        data: [],
       });
     }
 
     // Lấy danh sách ID của các user từ cuộc trò chuyện cá nhân
     const usersID = personalConversations.map((conv) =>
-      conv.participants.find((userID) => userID !== currentUserID)
+      conv.participants.find((userId) => userId !== currentUserId)
     );
 
     const usersInfo = await getUsersByIds(usersID); // Hàm này lấy thông tin nhiều user
@@ -179,23 +219,27 @@ const handleGetAllConversationUsers = async (req, res) => {
 
     // Chuẩn bị dữ liệu cho các cuộc trò chuyện cá nhân
     const personalConversationsData = personalConversations.map((conv) => {
-      const otherUserID = conv.participants.find(
-        (userID) => userID !== currentUserID
+      const otherUserId = conv.participants.find(
+        (userId) => userId !== currentUserId
       );
-      const user = formatData.find((user) => user.userID === otherUserID);
+      const user = formatData.find((user) => user.userId === otherUserId);
       return {
         type: "personal",
         ...user,
         lastMessage: conv.lastMessage || "",
         lastMessageTimestamp: conv.lastMessageTimestamp,
+        conversationId: conv.conversationId,
       };
     });
+    // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
 
     // Chuẩn bị dữ liệu cho các cuộc trò chuyện nhóm
+    // console.log("groupConversations",groupConversations);
+
     const groupConversationsData = groupConversations.map((group) => ({
       type: "group",
       groupName: group.groupName,
-      groupID: group.groupID,
+      groupId: group.groupId,
       avatar: group.avatar,
       lastMessage: group.lastMessage || "",
       lastMessageTimestamp: group.lastMessageTimestamp,
@@ -234,4 +278,5 @@ module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
   handleGetAllConversationUsers,
+  handleCheckConversation,
 };

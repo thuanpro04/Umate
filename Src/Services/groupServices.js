@@ -2,23 +2,24 @@ const { GroupConversationModel } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/infomationUntils");
 
 const handleNewGroupUser = async (req, res) => {
-  const groupInfo = { groupID: generateUniqueID(), ...req.body };
+  const groupInfo = { groupId: generateUniqueID(), ...req.body };
   console.log("group", groupInfo);
-  
+
   try {
-    const messageID =generateUniqueID();
+    const messageId = generateUniqueID();
     const newGroup = new GroupConversationModel({
       ...groupInfo,
-      messages: [{messageID}], 
-      lastMessage: "", 
+      message:[{messageId}],
+      lastMessage: "",
       lastMessageTimestamp: null,
-      
+      groupId:generateUniqueID()
     });
     await newGroup.save();
-    return res.status(200).json({
-      message: "New group created successfully!",
-      data: newGroup,
-    });
+    if (!res.headersSent) {
+      return res.status(200).json({
+        message: "New group created successfully!",
+      });
+    }
   } catch (error) {
     console.error("handleNewGroupUser", error);
     // Đảm bảo chỉ gửi phản hồi một lần
