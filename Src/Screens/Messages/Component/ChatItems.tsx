@@ -21,7 +21,7 @@ import {LinkPreview} from '@flyerhq/react-native-link-preview';
 
 interface Props {
   currentUserId: string;
-  userId: string | string[];
+  userId?: string | string[];
   urlImages?: any[];
   navigation?: any;
   members?: any[];
@@ -40,7 +40,8 @@ const ChatItems = memo((props: Props) => {
     setReplyOnSwipeOpen,
     item,
   } = props;
-
+  console.log("Props",);
+  
   const [showTimeMessages, setShowTimeMessages] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);

@@ -20,6 +20,7 @@ interface Props {
   styles?: StyleProp<ViewStyle>;
   image?: string;
   iconStyle?: boolean;
+  titleColor?: string;
 }
 const HeaderComponent = (props: Props) => {
   const {
@@ -33,6 +34,7 @@ const HeaderComponent = (props: Props) => {
     image,
     iconStyle,
     iconQR,
+    titleColor,
   } = props;
   const navigation = useNavigation();
   const goBack = () => {
@@ -81,6 +83,7 @@ const HeaderComponent = (props: Props) => {
             fontWeight: '500',
             fontStyle: 'italic',
           }}
+          color={titleColor}
         />
       )}
       <RowComponent>

@@ -54,7 +54,7 @@ const ButtonImagePicker = (props: Props) => {
     return (
       <RowComponent
         key={item.key}
-        styles={{justifyContent: 'flex-start'}}
+        styles={{justifyContent: 'flex-start', paddingVertical: 8}}
         onPress={() => handleChoiceImages(item.key)}>
         {item.icon}
         <SpaceComponent height={30} />
@@ -96,7 +96,7 @@ const ButtonImagePicker = (props: Props) => {
         break;
       default:
         setIsVisibleModalAddUrl(true);
-        
+
         break;
     }
     modalizeRef.current?.close();

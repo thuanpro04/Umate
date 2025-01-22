@@ -20,7 +20,7 @@ import {Send2} from 'iconsax-react-native';
 interface Props {
   reply: string;
   clearReply: any;
-  onScroll: any;
+  onScroll?: any;
   groupId?: string;
   userId?: string | string[];
   onSendMessage: (val: {

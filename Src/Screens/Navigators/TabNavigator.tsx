@@ -1,20 +1,16 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  Message,
-  People,
-  Profile
-} from 'iconsax-react-native';
-import React, { ReactNode, useState } from 'react';
-import { Platform } from 'react-native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Message, People, Profile} from 'iconsax-react-native';
+import React, {ReactNode, useState} from 'react';
+import {Platform} from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { appColors } from '../../Theme/Colors/appColors';
-import { CircleComponent, TextComponent } from '../Components/index';
+import {appColors} from '../../Theme/Colors/appColors';
+import {CircleComponent, TextComponent} from '../Components/index';
 import {
   HomeScreen,
   MessageScreen,
   MyFriendScreen,
-  ProfileScreen
+  ProfileScreen,
 } from '../index';
 import GeminiChat from '../AiStudioScreen/GeminiChat';
 
@@ -23,7 +19,7 @@ const TabNavigator = () => {
   const [isTabBarVisible, setIsTabBarVisible] = useState(true);
   return (
     <Tab.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Home"
       screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: {
@@ -82,7 +78,15 @@ const TabNavigator = () => {
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Friends" component={MyFriendScreen} />
-      <Tab.Screen name="GeminiChat" children={() => <GeminiChat />} />
+      <Tab.Screen
+        name="GeminiChat"
+        children={() => (
+          <GeminiChat
+            onFocus={() => setIsTabBarVisible(false)}
+            onBlur={() => setIsTabBarVisible(true)}
+          />
+        )}
+      />
       <Tab.Screen name="Messages" component={MessageScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
