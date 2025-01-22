@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
+  eventShares: [{ type: String, ref: "event" }],
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
   friendRequests: [{ type: String, ref: "User" }],
@@ -69,14 +70,6 @@ const commentSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-const eventSchema = new mongoose.Schema({
-  postId: { type: String, required: true, unique: true },
-  userId: { type: String, ref: "User", required: true },
-  content: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
-  likes: [{ type: String, ref: "User" }],
-  comments: [commentSchema],
-});
 const messageSchema = new mongoose.Schema({
   messageId: { type: String, required: true, unique: true },
   senderId: { type: String, ref: "User" },
@@ -141,7 +134,7 @@ const GroupConversationModel = mongoose.model(
   "GroupConversation",
   groupConversationSchema
 );
-const EventModel = mongoose.model("Post", eventSchema);
+
 const ConversationModel = mongoose.model("Conversation", conversationSchema);
 ConversationModel.collection.dropIndexes();
 ConversationModel.collection.createIndex({
@@ -152,7 +145,6 @@ ConversationModel.collection.createIndex({
 module.exports = {
   UserModel,
   GroupConversationModel,
-  EventModel,
   ConversationModel,
   MessageModel,
 };
