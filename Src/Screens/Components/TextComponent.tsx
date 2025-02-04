@@ -13,6 +13,7 @@ interface Props {
   styles?: StyleProp<TextStyle>;
   flex?: number;
   numberOfLine?: number;
+  
 }
 const TextComponent = (props: Props) => {
   const {label, size, color, font, title, styles, flex, numberOfLine, label2} =
@@ -31,6 +32,7 @@ const TextComponent = (props: Props) => {
         },
         styles,
       ]}
+      
       numberOfLines={numberOfLine}>
       {props.label}
     </Text>

@@ -1,21 +1,18 @@
-import { LinkPreview } from '@flyerhq/react-native-link-preview'
-import {useFocusEffect} from '@react-navigation/native';
-import React, {memo, useCallback, useMemo, useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   CarUserComponent,
-  ContainerComponent,
-  TextComponent,
+  TextComponent
 } from '../Components';
 
-import {friendServices} from '../Services/friendService.';
-import {userServices} from '../Services/userService';
-import {FlatList} from 'react-native';
-import ActionModal from '../Modal/ActionModal';
-import {debounce} from 'lodash';
+import { debounce } from 'lodash';
+import { FlatList } from 'react-native';
+import { friendServices } from '../Services/friendService.';
+import { userServices } from '../Services/userService';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -150,7 +147,6 @@ const SuggestFriend = React.memo(() => {
         {justifyContent: 'center', alignItems: 'center',backgroundColor:'black'},
       ]}>
       <TextComponent label={message} />
-      {/* <LinkPreview text='This link https://www.facebook.com/profile.php?id=100072424793021 can be extracted from the text' /> */}
     </SafeAreaView>
   );
 });

@@ -24,7 +24,7 @@ const ZoomImageComponent = (props: Props | any) => {
         imageIndex={0}
         visible={visible}
         onRequestClose={() => setVisible(false)}
-        swipeToCloseEnabled={false}
+        swipeToCloseEnabled={true}
         animationType="fade"
       />
     </>

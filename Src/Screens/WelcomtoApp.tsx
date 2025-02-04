@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import {View, Text, StyleSheet, ActivityIndicator, SafeAreaView} from 'react-native';
 import React from 'react';
 import {ContainerComponent, RowComponent, TextComponent} from './Components';
 import {appColors} from '../Theme/Colors/appColors';
@@ -6,7 +6,7 @@ import {Digital, Rocket} from '../assets/svgs/indexSvg';
 import {appInfo} from '../Theme/appInfo';
 const WelcomtoApp = () => {
   return (
-    <ContainerComponent styles={localStyles.conatiner}>
+    <SafeAreaView style={localStyles.conatiner}>
       <View>
         <Digital height={145} width={145} />
         <RowComponent
@@ -18,7 +18,7 @@ const WelcomtoApp = () => {
         </RowComponent>
         <ActivityIndicator />
       </View>
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 
@@ -28,6 +28,7 @@ const localStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#0096FF',
+    flex:1
   },
   text: {
     color: appColors.white,

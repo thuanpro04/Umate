@@ -5,7 +5,14 @@ import React, {
   useState,
   useRef,
 } from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {Modalize} from 'react-native-modalize';
 import {Portal} from 'react-native-portalize';
 import {
@@ -46,7 +53,7 @@ const UserInfoModal = (props: Props) => {
       <Modalize
         ref={modalRef}
         handlePosition="inside"
-        modalHeight={330}
+        adjustToContentHeight
         onClose={onClose}
         modalStyle={styles.modalStyle}>
         <RowComponent styles={styles.content}>
@@ -81,6 +88,7 @@ const UserInfoModal = (props: Props) => {
             />
           </ButtonComponent>
         </RowComponent>
+        <SpaceComponent height={20} />
       </Modalize>
     </Portal>
   );
@@ -97,7 +105,8 @@ const styles = StyleSheet.create({
   modalStyle: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 15,
+    paddingVertical: StatusBar.currentHeight,
+    paddingHorizontal: 12,
   },
   content: {
     justifyContent: 'flex-start',

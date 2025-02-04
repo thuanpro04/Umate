@@ -1,44 +1,41 @@
 import {
-  ArrowLeft2,
   HambergerMenu,
   More,
-  ScanBarcode,
+  ScanBarcode
 } from 'iconsax-react-native';
-import React, {useCallback, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
-import {authSelector} from '../../redux/reducers/authReducer';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { authSelector } from '../../redux/reducers/authReducer';
 import {
-  ContainerComponent,
   HeaderComponent,
   SearchFriendsComponent,
   SpaceComponent,
-  TextComponent,
+  TextComponent
 } from '../Components';
 
-import {useFocusEffect} from '@react-navigation/native';
-import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
-import InfomationModal from '../Modal/InfomationModal';
-import {messageServices} from '../Services/messageServices';
-import {UserInfo} from '../Untils/UserInfo';
-import CarUserChat from './Component/CarUserChat';
-import {globalStyles} from '../../Styles/globalStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator, FlatList, SafeAreaView, View } from 'react-native';
+import { globalStyles } from '../../Styles/globalStyle';
+import InfomationModal from '../Modal/InfomationModal';
+import { messageServices } from '../Services/messageServices';
+import { UserInfo } from '../Untils/UserInfo';
+import CarUserChat from './Component/CarUserChat';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
   const auth = useSelector(authSelector);
   const [isLoading, setIsLoading] = useState(false);
-  const [value, setValue] = useState('');
   const [isVisible, setIsVisible] = useState(false);
-  const memoizedUsers = useMemo(() => users, [users]);
-
-  useFocusEffect(
-    useCallback(() => {
-      getAllConversation();
-    }, []),
-  );
+  const memoizedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+      const dateA = new Date(a.lastMessageTimestamp).getTime();
+      const dateB = new Date(b.lastMessageTimestamp).getTime();
+      return  dateA - dateB;
+    });
+  }, [users]);
 
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
@@ -46,6 +43,7 @@ const MessageScreen = ({navigation}: any) => {
       const res = await messageServices.getAllConversationUsers(auth.userId);
       if (res?.data && res) {
         setUsers(res?.data);
+        console.log(res?.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -64,9 +62,12 @@ const MessageScreen = ({navigation}: any) => {
     navigation.navigate('AddGroup');
     onCloseModal();
   };
+  useFocusEffect(
+    useCallback(() => {
+      getAllConversation();
+    }, []),
+  );
   const renderCardItems = ({item, index}: any) => {
-    console.log(item.type === 'group' ? item : '');
-
     return (
       <CarUserChat
         key={index}

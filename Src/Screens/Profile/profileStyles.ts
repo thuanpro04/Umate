@@ -99,7 +99,8 @@ export const profileStyles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 150,
+    height: 180,
+    resizeMode:'cover'
   },
   postContent: {
     padding: 10,

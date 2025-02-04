@@ -1,29 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {useFocusEffect} from '@react-navigation/native';
 import {HambergerMenu} from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  SafeAreaView,
-  ScrollView,
-  View,
-} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {Address} from '../../assets/svgs/indexSvg';
-import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
-import {
-  CarComponent,
-  ContainerComponent,
-  HeaderComponent,
-  SpaceComponent,
-} from '../Components';
-import {globalStyles} from '../../Styles/globalStyle';
-import CustormLinkPreview from '../Components/CustormLinkPreview';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
-import {useFocusEffect} from '@react-navigation/native';
 
 const HomeScreen = ({navigation}: any) => {
   const [event, setEvent] = useState<any[]>([]);
@@ -63,16 +49,18 @@ const HomeScreen = ({navigation}: any) => {
 
   const renderItemEvents = ({item, index}: any) => {
     return (
-      <View key={index}>
-        <CarComponent
-          countLike={item.likes.length}
-          like={item.likes.includes(auth.userId)}
-          eventId={item.eventId}
-          img={item.image}
-          content={item.content}
-          timeStamp={item.timestamp}
-        />
-      </View>
+      <CarEventComponent
+        key={index}
+        countLike={item.likes.length}
+        like={item.likes.includes(auth.userId)}
+        eventId={item.eventId}
+        img={item.image}
+        content={item.content}
+        timeStamp={item.timestamp}
+        listUsers={item.likes}
+        navigation={navigation}
+        href={item.href}
+      />
     );
   };
   const renderFooter = () => {
@@ -124,3 +112,6 @@ const HomeScreen = ({navigation}: any) => {
 };
 
 export default HomeScreen;
+// Zoom ảnh
+// Xem lượt like
+//Share

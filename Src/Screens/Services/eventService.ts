@@ -1,7 +1,7 @@
 import eventApi from '../../apis/eventApi';
-
+let url;
 const getNewEvent = async (page: number) => {
-  const url = `/new-event?curentPage=${page}&limit=${10}`;
+  url = `/new-event?curentPage=${page}&limit=${10}`;
   console.log(url);
 
   try {
@@ -16,8 +16,31 @@ const updateUserHeartForEvent = async (
   id: string,
   action: 'add' | 'cancel',
 ) => {
-  const url = `/action-heart?userId=${userId}&eventId=${id}&key=${action}`;
+  url = `/action-heart?userId=${userId}&eventId=${id}&key=${action}`;
   const res = eventApi.handleEvent(url);
   return res;
 };
-export const eventSevices = {getNewEvent, updateUserHeartForEvent};
+const shareEventMyApp = async (data: any) => {
+  url = `/share-event`;
+  try {
+    const res = eventApi.handleEvent(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('Share event error: ', error);
+  }
+};
+const getEventShared = async (events: any) => {
+  url = '/get-event';
+  try {
+    const res = await eventApi.handleEvent(url, events, 'post');
+    return res;
+  } catch (error) {
+    console.log('Get event shared error: ', error);
+  }
+};
+export const eventSevices = {
+  getNewEvent,
+  updateUserHeartForEvent,
+  shareEventMyApp,
+  getEventShared,
+};

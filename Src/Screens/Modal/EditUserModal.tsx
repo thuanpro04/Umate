@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {Keyboard, StyleSheet, View} from 'react-native';
+import {FlatList, Keyboard, ScrollView, StyleSheet, View} from 'react-native';
 import {Modalize} from 'react-native-modalize';
 import {
   ButtonComponent,
@@ -67,36 +67,38 @@ const EditUserModal = (props: Props) => {
   };
 
   const modalHeight = nameField === 'majoring' ? 650 : 230;
-
+  const renderMajoring = ({item, index}: any) => {
+    return (
+      <List.Section key={index}>
+        <List.Accordion title={item.title}>
+          {item.data.map((element: any) => (
+            <List.Item
+              key={element}
+              title={element}
+              onPress={() => {
+                onChangeProfile(nameField, element);
+                onChangeProfile('majorCategory', item.title.toString());
+              }}
+            />
+          ))}
+        </List.Accordion>
+      </List.Section>
+    );
+  };
   return (
     <Modalize
       ref={modalizeRef}
       handlePosition="outside"
-      modalHeight={modalHeight}
+      adjustToContentHeight
       onClose={onClose}
       HeaderComponent={
         nameField === 'majoring' && <TextComponent title label="Chuyên Ngành" />
       }
       modalStyle={styles.modalStyle}>
       {nameField === 'majoring' && (
-        <View>
-          {majors.map((item, index) => (
-            <List.Section key={index}>
-              <List.Accordion title={item.title}>
-                {item.data.map((element: any) => (
-                  <List.Item
-                    key={element}
-                    title={element}
-                    onPress={() => {
-                      onChangeProfile(nameField, element);
-                      onChangeProfile('majorCategory', item.title.toString());
-                    }}
-                  />
-                ))}
-              </List.Accordion>
-            </List.Section>
-          ))}
-        </View>
+        <ScrollView style={{maxHeight: 700, flex: 1}}>
+          {majors.map((item, index) => renderMajoring({item, index}))}
+        </ScrollView>
       )}
     </Modalize>
   );

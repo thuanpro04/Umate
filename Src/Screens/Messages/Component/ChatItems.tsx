@@ -40,7 +40,6 @@ const ChatItems = memo((props: Props) => {
     setReplyOnSwipeOpen,
     item,
   } = props;
-  console.log("Props",);
   
   const [showTimeMessages, setShowTimeMessages] = useState(false);
   const [isLoading, setLoading] = useState(true);

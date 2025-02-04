@@ -55,6 +55,7 @@ const globalStyles = StyleSheet.create({
   },
   spaceBetween: {
     justifyContent: 'space-between',
+    marginVertical: 6,
   },
   label: {
     fontWeight: '600',
@@ -74,6 +75,11 @@ const globalStyles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     paddingHorizontal: 8,
+  },
+  actionText: {
+    fontSize: 12,
+    color: appColors.grey,
+    marginLeft: 10,
   },
 });
 export {globalStyles};

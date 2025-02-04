@@ -1,21 +1,20 @@
-import {Message, MessageQuestion, Share} from 'iconsax-react-native';
-import React, {useState} from 'react';
+import {debounce} from 'lodash';
+import React, {useCallback, useRef, useState} from 'react';
 import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Modalize} from 'react-native-modalize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import ActionIconComponent from './ActionIconComponent';
-import {
-  ButtonComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from './index';
 import Foundation from 'react-native-vector-icons/Foundation';
-import {eventSevices} from '../Services/eventService';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {debounce} from 'lodash';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import LikeListModal from '../Modal/LikeListModal';
+import {eventSevices} from '../Services/eventService';
+import {RowComponent, SpaceComponent, TextComponent} from './index';
+import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
+import Share from 'react-native-share';
+import RNBlobUtil from 'react-native-blob-util';
+import ShareEventModal from '../Modal/ShareEventModal';
 interface Props {
   img: string;
   content: string;
@@ -23,13 +22,27 @@ interface Props {
   eventId: string;
   like: boolean;
   countLike: number;
+  listUsers: string[];
+  navigation: any;
+  href: string;
 }
 
 const CarComponent = (props: Props) => {
-  const {img, content, timeStamp, eventId, like, countLike} = props;
+  const {
+    img,
+    content,
+    timeStamp,
+    eventId,
+    like,
+    countLike,
+    listUsers,
+    navigation,
+    href,
+  } = props;
+
   const [isLiked, setLiked] = useState(like);
   const [isProcessing, setProcessing] = useState(false);
-  const [count, setCount] = useState<any>(countLike);
+  const [count, setCount] = useState(countLike);
   const auth = useSelector(authSelector);
   const getTime = () => {
     const timePart: any = timeStamp.split('-')[0].trim();
@@ -42,7 +55,7 @@ const CarComponent = (props: Props) => {
     const formattedTime = `${day}/${month}/${formattedYear} ${hours}:${minutes} ${ampm}`;
     return formattedTime;
   };
-  const updateUserHeartForEvent = debounce(async (action: 'add' | 'cancel') => {
+  const updateUserHeartForEvent = debounce(async (action: any) => {
     try {
       const res = await eventSevices.updateUserHeartForEvent(
         auth.userId,
@@ -60,18 +73,47 @@ const CarComponent = (props: Props) => {
       setProcessing(false); // Kết thúc trạng thái xử lý
     }
   }, 5000);
-  const handleLikeClick = () => {
+  const handleLikeClick = useCallback(() => {
     if (isProcessing) return; // Nếu đang xử lý, không cho phép bấm
 
     setProcessing(true);
-    setLiked(!isLiked);
+    const newLikedState = !isLiked;
+    setLiked(newLikedState);
 
-    const action = isLiked ? 'cancel' : 'add';
-    action === 'add'
-      ? setCount((prev: any) => prev + 1)
-      : setCount((prev: any) => (prev > 0 ? prev - 1 : 0));
+    // Tính toán giá trị mới của count
+    const newCount = newLikedState ? count + 1 : count > 0 ? count - 1 : 0;
+
+    setCount(newCount); // Cập nhật count
+
+    let action = newLikedState ? 'add' : 'cancel';
+    console.log(newLikedState, newCount);
+
     updateUserHeartForEvent(action);
+  }, [count, isLiked, isProcessing]);
+  const fetchImageAsBase64 = async () => {
+    try {
+      const base64Img = await RNBlobUtil.fetch('GET', img).then(res =>
+        res.base64(),
+      );
+      console.log(base64Img);
+      return `data:image/jpeg;base64,${base64Img}`;
+    } catch (error) {
+      console.error('Error fetch image base64 error:', error);
+    }
   };
+  const myCustomShare = async () => {
+    const base64Image = await fetchImageAsBase64();
+    const shareOptions = {
+      url: base64Image,
+    };
+    try {
+      const shareRespond = await Share.open(shareOptions);
+      console.log(JSON.stringify(shareRespond));
+    } catch (error) {
+      console.log('Share event error: ', error);
+    }
+  };
+
   return (
     <View style={localStyles.card}>
       {/* Header */}
@@ -92,14 +134,12 @@ const CarComponent = (props: Props) => {
           styles={localStyles.timestamp}
         />
       </RowComponent>
-
       {/* Content */}
       <View>
         <TextComponent label={content} styles={localStyles.content} size={15} />
         <SpaceComponent height={10} />
-        <Image source={{uri: img}} style={localStyles.postImage} />
+        <ZoomImageComponent url={img} styles={localStyles.postImage} />
       </View>
-
       {/* Actions */}
       <RowComponent styles={localStyles.actionRow}>
         <View
@@ -114,26 +154,27 @@ const CarComponent = (props: Props) => {
               color={isLiked ? appColors.red : appColors.grey}
             />
           </TouchableOpacity>
-          <ButtonComponent
-            type="action"
-            onPress={() => console.log('hiển thị modal!!')}
-            label={count.toString()}
-            textStyle={localStyles.actionText}
+          <LikeListModal
+            title={count.toString()}
+            listUsers={listUsers}
+            navigation={navigation}
           />
         </View>
 
-        <TouchableOpacity style={localStyles.actionButton}>
-          <Foundation
-            name="social-skillshare"
-            size={appInfo.sizeIcon}
-            color={appColors.grey}
-          />
-          <TextComponent
-            label="Share"
-            styles={localStyles.actionText}
-            size={14}
-          />
-        </TouchableOpacity>
+        <ShareEventModal
+          eventId={eventId}
+          styles={localStyles.actionButton}
+          title="Share"
+          urlImg={img}
+          href={href}
+          icon={
+            <Foundation
+              name="social-skillshare"
+              size={appInfo.sizeIcon}
+              color={appColors.grey}
+            />
+          }
+        />
       </RowComponent>
     </View>
   );

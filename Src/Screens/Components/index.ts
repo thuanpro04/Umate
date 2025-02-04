@@ -1,6 +1,6 @@
 import ActionIconComponent from './ActionIconComponent';
 import ButtonComponent from './ButtonComponent';
-import CarComponent from './CarComponent';
+import CarEventComponent from './CarEventComponent';
 import CarfeatureComponent from './CarfeatureComponent';
 import CarUserComponent from './CarUserComponent';
 import CircleComponent from './CircleComponent';
@@ -25,7 +25,7 @@ export {
   OrtherLoginComponent,
   RowComponent,
   HeaderComponent,
-  CarComponent,
+  CarEventComponent,
   ActionIconComponent,
   CircleComponent,
   SearchFriendsComponent,

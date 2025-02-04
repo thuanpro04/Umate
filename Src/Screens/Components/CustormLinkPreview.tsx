@@ -7,13 +7,11 @@ import TextComponent from './TextComponent';
 interface Props {
   txtLink?: string;
 }
-const CustormLinkPreview = memo((props: Props) => {
+const CustormLinkPreview = memo((props: Props)  => {
   const {txtLink} = props;
-  console.log(1);
 
   const renderImage = useCallback(
     (image: any) => {
-      console.log('Rendering image...');
       return (
         image?.url && <Image source={{uri: image.url}} style={styles.image} />
       );
@@ -52,6 +50,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'center',
     resizeMode: 'cover',
+    
   },
   imagePlaceholder: {
     width: appInfo.size.WIDTH * 0.51, // Chiều rộng hình ảnh

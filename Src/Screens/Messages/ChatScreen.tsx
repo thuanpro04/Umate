@@ -72,13 +72,12 @@ const ChatScreen = ({navigation}: any) => {
           page,
         );
         setMembers(res?.data.invitedUsers);
-        if (res?.data) {
+        if (res?.data && res.data.messages) {
           // console.log(res.data.messages);
           setLimitPage(res.data.totalPages);
           console.log('limitPage: ', limitPage, 'page: ', page);
           setMessages(prev => {
             const newMessages = res.data.messages.reverse();
-
             // Kết hợp các tin nhắn mới và cũ
             const allMessages = [...newMessages, ...prev];
 

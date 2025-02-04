@@ -281,7 +281,10 @@ const SetUpProfile = ({navigation}: any) => {
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('majoring')}>
-              <TextComponent label={profile.majoring} color={appColors.grey} />
+              <TextComponent
+                label={profile.majoring.slice(0, 19) + '...'}
+                color={appColors.grey}
+              />
               <ArrowSquareDown
                 color={errors.majoring ? appColors.red : appColors.blue2}
                 size={appInfo.sizeIconBold}
@@ -352,7 +355,7 @@ const SetUpProfile = ({navigation}: any) => {
           <SpaceComponent height={50} />
           <ButtonComponent
             label="Save"
-            styles={{paddingVertical: 6}}
+            styles={{paddingVertical: 14}}
             onPress={debounce(() => {
               setLoading(true);
               setUpProfileUser();

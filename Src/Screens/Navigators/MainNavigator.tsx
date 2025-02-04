@@ -13,6 +13,7 @@ import PersonalScreen from '../Profile/PersonalScreen';
 import SetUpProfile from '../Profile/SetUpProfile';
 import ShareScreen from '../ShareScreen';
 import DrawerNavigator from './DrawerNavigator';
+import DetailEvent from '../Events/DetailEvent';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -31,6 +32,7 @@ const MainNavigator = () => {
       <Stack.Screen name="PersonalScreen" component={PersonalScreen} />
       <Stack.Screen name="EditProfile" component={SetUpProfile} />
       <Stack.Screen name="FriendsRespond" component={FriendsRespondScreen} />
+      <Stack.Screen name="DetailEvent" component={DetailEvent} />
 
     </Stack.Navigator>
   );

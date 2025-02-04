@@ -1,5 +1,5 @@
-import { UserEdit } from 'iconsax-react-native';
-import React from 'react';
+import {UserEdit} from 'iconsax-react-native';
+import React, {useCallback} from 'react';
 import {
   FlatList,
   Image,
@@ -7,17 +7,19 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSelector } from 'react-redux';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { RowComponent, TextComponent } from '../Components';
+import {useSelector} from 'react-redux';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {RowComponent, TextComponent} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import { UserInfo } from '../Untils/UserInfo';
-import { profileStyles } from './profileStyles';
+import {UserInfo} from '../Untils/UserInfo';
+import {profileStyles} from './profileStyles';
+import {eventSevices} from '../Services/eventService';
+import {useFocusEffect} from '@react-navigation/native';
 const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const userInfo = {
@@ -49,12 +51,26 @@ const ProfileScreen = ({navigation}: any) => {
     ],
   };
 
-  const renderPost = ({item}: any) => (
-    <View style={profileStyles.postContainer}>
-      <Image source={{uri: item.image}} style={profileStyles.postImage} />
-      <Text style={profileStyles.postContent}>{item.content}</Text>
-    </View>
-  );
+  const getEventShared = async () => {
+    const res = await eventSevices.getEventShared(auth.eventShares);
+    if (res?.data) {
+      console.log(res.data);
+    }
+  };
+
+  const renderPost = ({item, index}: any) => {
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('DetailEvent')}
+        style={profileStyles.postContainer}
+        key={index}>
+        <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
+        <Text style={profileStyles.postContent}>
+          {item.content ? item.content : '...'}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={profileStyles.container}>
@@ -66,16 +82,6 @@ const ProfileScreen = ({navigation}: any) => {
               styles={[profileStyles.name, {color: '#333'}]}
               label={UserInfo.getName(auth.name)}
             />
-            {/* <TouchableOpacity
-              onPress={() => console.log('Đang quét')}
-              style={{
-                padding: 6,
-                borderWidth: 1,
-                borderColor: appColors.blue,
-                borderRadius: 4,
-              }}>
-              <MaterialCommunityIcons name='qrcode' color={appColors.blue} size={appInfo.sizeIcon} />
-            </TouchableOpacity> */}
           </RowComponent>
 
           <TextComponent
@@ -113,14 +119,14 @@ const ProfileScreen = ({navigation}: any) => {
           <Text style={profileStyles.statNumber}>{userInfo.stats.likes}</Text>
           <Text style={profileStyles.statLabel}>Likes</Text>
         </View>
-      </View> 
+      </View>
 
       {/* Recent Posts */}
-      <Text style={profileStyles.sectionTitle}>Recent Posts</Text>
+      <Text style={profileStyles.sectionTitle}>Recent Share</Text>
       <FlatList
-        data={userInfo.recentPosts}
+        data={auth.eventShares}
         renderItem={renderPost}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
         contentContainerStyle={profileStyles.postList}
       />
     </SafeAreaView>
