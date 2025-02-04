@@ -114,6 +114,28 @@ const handleGetUserInfoById = async (req, res) => {
     console.log("Fail get user info error", error);
   }
 };
+const handleListUserForHeartEvent = async (req, res) => {
+  const listUsers = req.body;
+  try {
+    const userPromises = listUsers.map((userId) => findUserById(userId));
+    const listUserInfo = await Promise.all(userPromises);
+    const validUsers = listUserInfo.filter(
+      (user) => user !== null && user !== undefined
+    );
+    if (validUsers && validUsers.length > 0) {
+      res.status(200).json({
+        message: "get list user info succefully !!!",
+        data: validUsers,
+      });
+    } else {
+      res.status(401).json({
+        message: "get list user info fail.",
+      });
+    }
+  } catch (error) {
+    console.log("handle get list user info error: ", error);
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -122,4 +144,5 @@ module.exports = {
   transformUserData,
   updateOneProfileInfo,
   handleGetUserInfoById,
+  handleListUserForHeartEvent,
 };

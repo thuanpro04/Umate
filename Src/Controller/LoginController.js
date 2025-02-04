@@ -43,6 +43,7 @@ const handleLoginWithGoogle = async (req, res) => {
         avatar: userInfo.avatar,
         access: userInfo.access,
         online: true,
+      
       });
       console.log(newUser);
 
@@ -55,6 +56,7 @@ const handleLoginWithGoogle = async (req, res) => {
       console.log("Create user.");
       // Sau khi cập nhật, trả về phản hồi
     }
+    
     res.status(200).json({
       message: "Login with google successfully!!",
       data: user,

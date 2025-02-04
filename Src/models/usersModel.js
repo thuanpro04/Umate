@@ -47,7 +47,13 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
-  eventShares: [{ type: String, ref: "event" }],
+  eventShares: [
+    {
+      eventId: { type: String, ref: "event" },
+      content: { type: String },
+      urlImage: { type: String },
+    },
+  ],
   friends: [{ type: String, ref: "User" }],
   groups: [{ type: String, ref: "Group" }],
   friendRequests: [{ type: String, ref: "User" }],

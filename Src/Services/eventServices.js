@@ -6,9 +6,9 @@ const url = "https://tdmu.edu.vn/tin-tuc";
 const { generateUniqueID } = require("../untils/infomationUntils");
 const { EventModel } = require("../models/eventModel");
 const { MetaModel } = require("../models/metaModel");
+const { UserModel } = require("../models/usersModel");
 const handlePostEvent = async (req, res) => {
   const data = req.body;
-  console.log(data);
   const newEvent = new EventModel({
     postId: uuidv4(),
     userId: data.authorId,
@@ -98,7 +98,6 @@ const getEvents = async () => {
 };
 const handleGetEvent = async (req, res) => {
   const { curentPage, limit } = req.query;
-  console.log(req.query);
   try {
     const hasNewEvent = await checkForNewEvent();
     if (hasNewEvent) {
@@ -126,7 +125,6 @@ const handleGetEvent = async (req, res) => {
 };
 const handleActionHeartForEvent = async (req, res) => {
   const { userId, eventId, key } = req.query;
-  console.log(req.query);
 
   try {
     const event = await EventModel.findOne({ eventId });
@@ -161,8 +159,50 @@ const handleActionHeartForEvent = async (req, res) => {
     console.log("handle add heart fail error: ", error);
   }
 };
+const handleShareEventMyApp = async (req, res) => {
+  const data = req.body;
+  console.log(data);
+
+  try {
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { userId: data.userId },
+      {
+        $addToSet: {
+          eventShares: {
+            eventId: data.userId,
+            content: data.content,
+            urlImage: data.urlImg,
+          },
+        },
+      },
+      { new: true } // Trả về tài liệu đã cập nhật
+    );
+
+    if (!updatedUser) {
+      console.log(`Không tìm thấy người dùng với userId: ${userId}`);
+      return null;
+    }
+
+    console.log("Người dùng đã được cập nhật:", updatedUser);
+    res.status(200).json({
+      data: {
+        message: "Share event successfully !!!!",
+      },
+    });
+  } catch (error) {
+    console.log("Share event error: ", error);
+  }
+};
+const handleGetEventShared = async (req, res) => {
+  const event = req.body;
+  console.log(req.body);
+
+  res.send("hello");
+};
 module.exports = {
   handlePostEvent,
   handleGetEvent,
   handleActionHeartForEvent,
+  handleShareEventMyApp,
+  handleGetEventShared,
 };
