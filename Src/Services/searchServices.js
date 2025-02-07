@@ -2,9 +2,8 @@ const { UserModel } = require("../models/usersModel");
 const { transformUserData, findUserById } = require("./userServices");
 
 const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
-  console.log(bySearch);
+ 
   const user = await findUserById(currentUserId);
-  console.log("user", user);
 
   // Khởi tạo mảng điều kiện tìm kiếm
   let searchConditions = [{ name: { $regex: searchTerm, $options: "i" } }];
@@ -25,7 +24,7 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
       searchConditions.push({ majorCategory: user.majorCategory });
     }
   }
-  console.log("searchConditions", searchConditions);
+  //console.log("searchConditions", searchConditions);
   // Nếu không có điều kiện nào, trả về mảng rỗng
    if (searchConditions.length === 0 && bySearch.length > 0) return [];
 
@@ -33,9 +32,10 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
   const users = await UserModel.find({
     $and: [
       ...searchConditions, // Tìm theo các điều kiện đã xác định
-      { UserId: { $nin: [currentUserId] } }, // Loại trừ người dùng hiện tại
+      { userId: { $nin: [currentUserId] } }, // Loại trừ người dùng hiện tại
     ],
   });
+// console.log(users,currentUserId);
 
   // Nếu không có tìm kiếm, trả về danh sách người dùng
   if (searchTerm === "") {
@@ -47,6 +47,7 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
 
 const searchFriendByName = async (req, res) => {
   const { searchTerm, currentUserId, titleSearch } = req.query;
+console.log(req.query);
 
   const bySearch = titleSearch.split(",");
   //$regex là toán tử để tìm kiếm chuỗi theo biểu thức chính quy (regular expression).

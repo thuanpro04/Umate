@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema({
       eventId: { type: String, ref: "event" },
       content: { type: String },
       urlImage: { type: String },
+      href: { type: String },
     },
   ],
   friends: [{ type: String, ref: "User" }],

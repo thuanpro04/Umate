@@ -1,10 +1,10 @@
 const { UserModel } = require("../models/usersModel");
-const { updateUserById } = require("./userServices");
+const { updateUserById, findUserById } = require("./userServices");
 
 const handleFriendRequestAction = async (req, res, action) => {
   const { friendUserId, currentUserId } = req.body;
   console.log("add", req.body);
-  
+
   try {
     // Tìm thông tin người dùng
     // Thực hiện hành động thêm hoặc hủy kết bạn
@@ -33,7 +33,7 @@ const handleFriendRequestAction = async (req, res, action) => {
 const manageFriendship = async (req, res, action) => {
   const { friendUserId, currentUserId } = req.body;
   console.log(req.body);
-  
+
   const updateActions =
     action === "agree"
       ? [
@@ -125,10 +125,12 @@ const removeFriendSuggestion = async (req, res) => {
 };
 const processRemoveFriendAction = async (req, res) => {
   const { friendUserId, currentUserId } = req.body;
+  console.log(friendUserId, currentUserId);
+
   const updateActions = [
     {
       updateOne: {
-        filter: { UserId: currentUserId },
+        filter: { userId: currentUserId },
         update: {
           $pull: { friends: friendUserId }, // Xóa friendUserId khỏi danh sách bạn bè
           $addToSet: { removeFriends: friendUserId }, // Thêm friendUserId vào danh sách đã xóa
@@ -137,7 +139,7 @@ const processRemoveFriendAction = async (req, res) => {
     },
     {
       updateOne: {
-        filter: { UserId: friendUserId },
+        filter: { userId: friendUserId },
         update: {
           $pull: { friends: currentUserId }, // Xóa currentUserId khỏi danh sách bạn bè
         },
@@ -148,9 +150,10 @@ const processRemoveFriendAction = async (req, res) => {
     // Thực hiện cập nhật đồng thời cho cả hai người dùng
     const bulkResult = await UserModel.bulkWrite(updateActions);
     // Kiểm tra kết quả để đảm bảo rằng cả hai đều đã được cập nhật
-    const totalModified = bulkResult.modifiedCount;
+    // const totalModified = bulkResult.modifiedCount;
+    console.log("Bulk Result:", bulkResult);
 
-    if (totalModified < 2) {
+    if (bulkResult.modifiedCount < 2) {
       return res.status(400).json({ message: "Update failed!" });
     }
 
@@ -164,9 +167,28 @@ const processRemoveFriendAction = async (req, res) => {
     });
   }
 };
+const removeFriendRequest = async (req, res) => {
+  const { friendUserId, currentUserId } = req.body;
+
+  try {
+    const result = await UserModel.updateOne(
+      { userId: currentUserId },
+      { $pull: { friendRequests: friendUserId } }
+    );
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ message: "Update failed!" });
+    }
+    return res.status(200).json({
+      message: "Delete friend request successfully!!!",
+    });
+  } catch (error) {
+    console.log("removeFriendRequest error: ", error);
+  }
+};
 module.exports = {
   removeFriendSuggestion,
   handleFriendRequestAction,
   manageFriendship,
   processRemoveFriendAction,
+  removeFriendRequest,
 };

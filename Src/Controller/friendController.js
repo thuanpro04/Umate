@@ -2,7 +2,8 @@ const {
   handleFriendRequestAction,
   processRemoveFriendAction,
   manageFriendship,
-  removeFriendSuggestion
+  removeFriendSuggestion,
+  removeFriendRequest
 } = require("../Services/friendServices");
 const handleAddFriends = (req, res) => {
   handleFriendRequestAction(req, res, "add");
@@ -20,13 +21,18 @@ const handlePressRemoveSuggest = async (req, res) => {
 };
 
 const handleRemoveFriends = async (req, res) => {
+  console.log(req.body);
+
   processRemoveFriendAction(req, res);
 };
-
+const handleRemoveRequestFriend = (req, res) => {
+  removeFriendRequest(req, res);
+};
 module.exports = {
   handleAddFriends,
   handleCancelFriend,
   handleAgreeFriend,
   handlePressRemoveSuggest,
   handleRemoveFriends,
+  handleRemoveRequestFriend,
 };

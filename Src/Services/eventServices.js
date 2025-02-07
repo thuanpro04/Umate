@@ -14,35 +14,13 @@ const handlePostEvent = async (req, res) => {
     userId: data.authorId,
     content: data.content,
     likes: 0,
-    comments: [],
+    href: data.href,
   });
   await newEvent.save();
   return res.status(200).json({
     messages: "post event successfully !!",
     data: newEvent,
   });
-};
-const checkForNewEvent = async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url, {
-    waitUntil: "domcontentloaded",
-  });
-  const firstEvent = await page.evaluate(() => {
-    const article = document.querySelector(".tintuc815.for_count.new_item");
-    const time = article.querySelector(".new_item_time");
-    return { time: time ? new Date(time.textContent.trim()) : null };
-  });
-  await browser.close();
-  if (!firstEvent) {
-    return false;
-  }
-  const meta = await MetaModel.findOne();
-  if (!meta || !meta.lastScrapeTime) {
-    // Nếu chưa có dữ liệu, xem như có tin mới
-    return true;
-  }
-  return firstEvent.time > meta.lastScrapeTime;
 };
 const getEvents = async () => {
   const browser = await puppeteer.launch();
@@ -73,10 +51,10 @@ const getEvents = async () => {
       const img = article.querySelector("img.new_item_img");
       const time = article.querySelector(".new_item_time");
       const content = article.querySelector(".new_item_desc");
-      const eventId = crypto.randomUUID();
+      // const eventId = crypto.randomUUID();
 
       return {
-        eventId,
+        // eventId,
         title: titleElement ? titleElement.getAttribute("title").trim() : null,
         image: img ? img.src : null, // URL hình ảnh
         href: titleElement ? titleElement.getAttribute("href") : null,
@@ -86,28 +64,51 @@ const getEvents = async () => {
     });
   });
   await browser.close();
-  const newEvent = [];
-  for (const event of scrapedData) {
-    const existingEvent = await EventModel.findOne({ eventId: event.eventId });
-    if (!existingEvent) {
-      const saveEvent = await EventModel.create(event);
-      newEvent.push(saveEvent);
-    }
+  //const newEvent = [];
+  const existtingTitles = await EventModel.find({
+    title: { $in: scrapedData.map((e) => e.title) },
+  });
+  const newEvents = scrapedData.filter(
+    (event) => !existtingTitles.includes(event.title)
+  );
+  if (newEvents.length > 0) {
+    await EventModel.insertMany(newEvents); // Thêm tất cả bài mới một lần
+    console.log(`Đã lưu ${newEvents.length} bài viết mới.`);
+  } else {
+    console.log("Không có bài viết mới nào.");
   }
-  return scrapedData;
+  return newEvents;
 };
+const checkForNewEvent = async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url, {
+    waitUntil: "domcontentloaded",
+  });
+  const firstEvent = await page.evaluate(() => {
+    const article = document.querySelector(".tintuc815.for_count.new_item");
+    const time = article.querySelector(".new_item_time");
+    return { time: time ? new Date(time.textContent.trim()) : null };
+  });
+  await browser.close();
+  if (!firstEvent) {
+    return false;
+  }
+  const meta = await MetaModel.findOne();
+  if (!meta || !meta.lastScrapeTime) {
+    // Nếu chưa có dữ liệu, xem như có tin mới
+    return true;
+  }
+  return firstEvent.time > meta.lastScrapeTime;
+};
+
 const handleGetEvent = async (req, res) => {
   const { curentPage, limit } = req.query;
   try {
-    const hasNewEvent = await checkForNewEvent();
-    if (hasNewEvent) {
-      console.log("New event detected, scraping data...");
-      await getEvents();
-      const now = new Date();
-      await MetaModel.updateOne({}, { lastScrapeTime: now }, { upsert: true });
-    } else {
-      console.log("No new event detected, skipping scrape.");
-    }
+    // const hasNewEvent = await checkForNewEvent();
+    await getEvents();
+    const now = new Date();
+    await MetaModel.updateOne({}, { lastScrapeTime: now }, { upsert: true });
     const totalEvents = await EventModel.countDocuments();
     const events = await EventModel.find({})
       .skip((curentPage - 1) * limit)
@@ -161,7 +162,6 @@ const handleActionHeartForEvent = async (req, res) => {
 };
 const handleShareEventMyApp = async (req, res) => {
   const data = req.body;
-  console.log(data);
 
   try {
     const updatedUser = await UserModel.findOneAndUpdate(
@@ -172,6 +172,7 @@ const handleShareEventMyApp = async (req, res) => {
             eventId: data.userId,
             content: data.content,
             urlImage: data.urlImg,
+            href: data.href,
           },
         },
       },
@@ -185,9 +186,8 @@ const handleShareEventMyApp = async (req, res) => {
 
     console.log("Người dùng đã được cập nhật:", updatedUser);
     res.status(200).json({
-      data: {
-        message: "Share event successfully !!!!",
-      },
+      message: "Share event successfully !!!!",
+      data: updatedUser,
     });
   } catch (error) {
     console.log("Share event error: ", error);

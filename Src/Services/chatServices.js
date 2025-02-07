@@ -11,7 +11,7 @@ const handleReceiveMessageUsers = async (req, res) => {
   console.log(req.query);
 
   try {
-    console.log("Page", page, "Limit", limit * page);
+    // console.log("Page", page, "Limit", limit * page);
 
     let data, messages;
 
@@ -122,8 +122,7 @@ const setConversation = async (data) => {
   console.log("New conversation created");
 };
 const sendMessageToGroupAndPersonal = async (data) => {
-  console.log("dataMessage", data);
-
+  // console.log("dataMessage", data);
   try {
     if (!data.groupId) {
       if (!data.senderId || !data.receiverId) {
@@ -142,10 +141,6 @@ const sendMessageToGroupAndPersonal = async (data) => {
         conversation.lastMessageTimestamp = data.timestamp | new Date();
         conversation.lastMessage = data.content ?? data.imagesUrl;
         await conversation.save(),
-          // await Promise.all([
-
-          //   updateMessageById(data.messageId, data),
-          // ]);
           console.log("Message added to existing conversation");
       }
     } else {
@@ -208,7 +203,6 @@ const handleGetAllConversationUsers = async (req, res) => {
         data: [],
       });
     }
-
     // Lấy danh sách ID của các user từ cuộc trò chuyện cá nhân
     const usersID = personalConversations.map((conv) =>
       conv.participants.find((userId) => userId !== currentUserId)

@@ -114,6 +114,7 @@ const handleGetUserInfoById = async (req, res) => {
     console.log("Fail get user info error", error);
   }
 };
+
 const handleListUserForHeartEvent = async (req, res) => {
   const listUsers = req.body;
   try {
