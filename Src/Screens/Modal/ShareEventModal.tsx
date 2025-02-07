@@ -13,9 +13,9 @@ import {
 import {Modalize} from 'react-native-modalize';
 import {Portal} from 'react-native-portalize';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Icon library
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import io from 'socket.io-client';
-import {authSelector} from '../../redux/reducers/authReducer';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -23,6 +23,7 @@ import {SpaceComponent, TextComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import {eventSevices} from '../Services/eventService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   title: string;
@@ -30,17 +31,19 @@ interface Props {
   styles?: StyleProp<ViewStyle>;
   href: string;
   eventId: string;
-  urlImg:string
+  urlImg: string;
 }
 
 const ShareEventModal = (props: Props) => {
-  const {title, icon, styles, href, eventId,urlImg} = props;
+  const {title, icon, styles, href, eventId, urlImg} = props;
   const [value, setValue] = useState('');
   const modalizeRef = useRef<Modalize>();
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
   const socket = io(appInfo.BASE_URL);
+  const url = `https://tdmu.edu.vn${href}`;
+  const dispatch = useDispatch();
   const onOpenModal = () => {
     modalizeRef.current?.open();
     getAllConversation();
@@ -50,7 +53,6 @@ const ShareEventModal = (props: Props) => {
     modalizeRef.current?.close();
   };
   const handleSendEventForUser = async (key: string, Id: string | string[]) => {
-    const url = `https://tdmu.edu.vn${href}`;
     const messageData = {
       senderId: auth.userId,
       content: url,
@@ -62,7 +64,7 @@ const ShareEventModal = (props: Props) => {
           ...messageData,
           receiverId: Id,
         };
-        console.log(data);
+        // console.log(data);
 
         socket.emit('send_message', data, (response: any) => {
           console.log(
@@ -94,17 +96,24 @@ const ShareEventModal = (props: Props) => {
 
     // socket.emit('send event ', href);
   };
+
   const handlePostEventMyApp = async () => {
     try {
       const data = {
         userId: auth.userId,
         eventId,
         content: value,
-        urlImg
+        urlImg,
+        href: url,
       };
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
-        console.log(res.data.message);
+        const eventShares = res.data.eventShares;
+    
+        
+        dispatch(addAuth({...auth,eventShares}));
+        // await AsyncStorage.setItem('auth', JSON.stringify(res.data));
+        // console.log('res.data', res.data);
       }
     } catch (error) {
       console.log('share event my app error: ', error);
@@ -129,7 +138,7 @@ const ShareEventModal = (props: Props) => {
       const res = await messageServices.getAllConversationUsers(auth.userId);
       if (res?.data && res) {
         setUsers(res?.data);
-        console.log(res.data, 1234);
+        // console.log(res.data, 1234);
       }
       setIsLoading(false);
     } catch (error) {
@@ -140,13 +149,13 @@ const ShareEventModal = (props: Props) => {
   const renderUserItems = ({item, index}: any) => {
     return (
       <TouchableOpacity
+        key={item.userId}
         onPress={async () =>
           await handleSendEventForUser(
             item.type,
             item.userId ? item.userId : item.groupId,
           )
         }
-        key={item.userId}
         style={{marginRight: 12, alignItems: 'center'}}>
         <Image source={{uri: item.avatar}} style={globalStyles.userImg} />
         <TextComponent
@@ -188,6 +197,7 @@ const ShareEventModal = (props: Props) => {
             <View>
               <TextComponent label="Gửi message" styles={modalStyles.title} />
               <FlatList
+              
                 data={users}
                 horizontal
                 keyExtractor={item => item.userId}

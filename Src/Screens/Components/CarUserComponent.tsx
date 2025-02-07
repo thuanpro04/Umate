@@ -39,7 +39,7 @@ interface Props {
   onPressEllipsis?: () => void;
   iconM?: boolean;
   onPressMessages?: () => void;
-  userID?: string;
+  userId?: string;
   isFriend?: boolean;
   isRequestFriend?: boolean;
 }
@@ -62,7 +62,7 @@ const CarUserComponent = (props: Props) => {
     majoring,
     onPressEllipsis,
     iconM,
-    userID,
+    userId,
     isFriend,
     isRequestFriend,
   } = props;
@@ -70,14 +70,14 @@ const CarUserComponent = (props: Props) => {
   const auth = useSelector(authSelector);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handleAdd_CancelFriends = async () => {
-    if (userID) {
+    if (userId) {
       try {
         setIsShowIcon(!isShowIcon);
         const action = !isShowIcon ? 'add' : 'cancel';
         const res = await friendServices.handleFriendActionAdd_Cancel(
-          userID,
+          userId,
           action,
-          auth.userID,
+          auth.userId,
         );
 
         if (res) {
@@ -102,7 +102,7 @@ const CarUserComponent = (props: Props) => {
     <RowComponent
       styles={[
         iconAddCancel && localStyle.container,
-        {paddingHorizontal: 10, paddingVertical: 10},
+       
         styles,
       ]}>
       <Image
@@ -175,10 +175,10 @@ const CarUserComponent = (props: Props) => {
           <ActivityIndicator style={globalStyles.userImg} />
         )}
       </TouchableOpacity>
-      <View style={{alignItems: 'flex-start'}}>
+      <View style={{alignItems: 'flex-start',marginVertical:6}}>
         <TextComponent label={name} title />
         <RowComponent styles={{gap: 20, paddingVertical: 0}}>
-          <RowComponent styles={{gap: 0}}>
+          <RowComponent styles={[localStyle.card, {gap: 0}]}>
             <Image
               source={{
                 uri:
@@ -196,7 +196,7 @@ const CarUserComponent = (props: Props) => {
           </RowComponent>
           <TextComponent label="7 ban chung" />
         </RowComponent>
-        <RowComponent styles={{}}>
+        <RowComponent styles={localStyle.card}>
           {!isShowBtn ? (
             <>
               <ButtonComponent
@@ -252,5 +252,8 @@ const localStyle = StyleSheet.create({
     borderRadius: 100,
     padding: 7,
     backgroundColor: appColors.blue,
+  },
+  card: {
+    marginVertical: 6,
   },
 });

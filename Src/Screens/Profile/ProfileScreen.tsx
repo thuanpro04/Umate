@@ -14,12 +14,13 @@ import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {RowComponent, TextComponent} from '../Components';
+import {ButtonComponent, RowComponent, TextComponent} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {UserInfo} from '../Untils/UserInfo';
 import {profileStyles} from './profileStyles';
 import {eventSevices} from '../Services/eventService';
 import {useFocusEffect} from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const userInfo = {
@@ -59,9 +60,11 @@ const ProfileScreen = ({navigation}: any) => {
   };
 
   const renderPost = ({item, index}: any) => {
+    // console.log(item);
+
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('DetailEvent')}
+        onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
         style={profileStyles.postContainer}
         key={index}>
         <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
@@ -71,6 +74,7 @@ const ProfileScreen = ({navigation}: any) => {
       </TouchableOpacity>
     );
   };
+  console.log(auth.eventShares[0]);
 
   return (
     <SafeAreaView style={profileStyles.container}>
@@ -93,15 +97,27 @@ const ProfileScreen = ({navigation}: any) => {
             label={auth.majoring ?? 'Chuyên ngành'}
           />
 
-          <TouchableOpacity
-            style={locastyles.editButton}
-            onPress={() => navigation.navigate('EditProfile')}>
-            <UserEdit color={appColors.white} size={appInfo.sizeIcon} />
-            <TextComponent
-              styles={profileStyles.editButtonText}
-              label="Edit Profile"
-            />
-          </TouchableOpacity>
+          <RowComponent>
+            <TouchableOpacity
+              style={locastyles.editButton}
+              onPress={() => navigation.navigate('EditProfile')}>
+              <UserEdit color={appColors.white} size={appInfo.sizeIcon} />
+              <TextComponent
+                styles={profileStyles.editButtonText}
+                label="Edit Profile"
+              />
+            </TouchableOpacity>
+            <ButtonComponent
+              type="action"
+              onPress={() => navigation.navigate('UserQRCode')}
+              styles={{borderWidth: 0.5, padding: 6, borderRadius: 6}}>
+              <MaterialIcons
+                name="qr-code-scanner"
+                size={appInfo.sizeIconBold}
+                color={appColors.blue}
+              />
+            </ButtonComponent>
+          </RowComponent>
         </View>
       </View>
 
@@ -126,6 +142,7 @@ const ProfileScreen = ({navigation}: any) => {
       <FlatList
         data={auth.eventShares}
         renderItem={renderPost}
+        inverted
         keyExtractor={item => item._id}
         contentContainerStyle={profileStyles.postList}
       />

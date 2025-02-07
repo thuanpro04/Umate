@@ -1,4 +1,4 @@
-import {useRoute} from '@react-navigation/native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {ArrowLeft} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -33,15 +33,20 @@ const UserInfoChat = ({navigation}: any) => {
   const [statusNotification, setStatusNotification] = useState(false);
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
+
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
+    console.log(converInfo);
   }, []);
-  useEffect(() => {
-    getConversationInfo();
-  });
+
+  useFocusEffect(
+    useCallback(() => {
+      getConversationInfo();
+    }, []),
+  );
   const onPressItems = (key: number) => {
     console.log(key);
 
@@ -114,8 +119,16 @@ const UserInfoChat = ({navigation}: any) => {
       case 'notification':
         setStatusNotification(!statusNotification);
         break;
+      case 'member':
+        navigation.navigate('MemberGroup', {
+          invitedUsers: converInfo.invitedUsers,
+          leader: converInfo.leader,
+          deputyLeader: converInfo.deputyLeader,
+        });
+        break;
     }
   };
+
   return (
     <SafeAreaView style={globalStyles.main}>
       <HeaderComponent
@@ -162,7 +175,13 @@ const UserInfoChat = ({navigation}: any) => {
           <RowComponent styles={{gap: 20}}>
             {ChoiceItems.map((item, index) => (
               <TouchableOpacity
-                onPress={() => handleChoiceItems(item.key)}
+                onPress={() =>
+                  handleChoiceItems(
+                    converInfo.type === 'group' && item.key === 'personal'
+                      ? 'member'
+                      : item.key,
+                  )
+                }
                 style={styles.menu}
                 key={index}
                 activeOpacity={0.4}>

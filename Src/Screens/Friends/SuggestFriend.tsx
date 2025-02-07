@@ -21,7 +21,6 @@ const SuggestFriend = React.memo(() => {
   const [buttonVisibility, setButtonVisibility] = useState<{
     [key: string]: boolean;
   }>({});
-  const [listRemove, setlistRemove] = useState<String[]>([]);
   const memoUsers = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
   useFocusEffect(
@@ -144,13 +143,13 @@ const SuggestFriend = React.memo(() => {
     <SafeAreaView
       style={[
         styles.container,
-        {justifyContent: 'center', alignItems: 'center',backgroundColor:'black'},
+        {justifyContent: 'center', alignItems: 'center'},
       ]}>
       <TextComponent label={message} />
     </SafeAreaView>
   );
 });
-
+ 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: appColors.background,

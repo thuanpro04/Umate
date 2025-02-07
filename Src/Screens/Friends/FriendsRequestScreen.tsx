@@ -9,6 +9,7 @@ import {CarUserComponent} from '../Components';
 import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import friendsAPI from '../../apis/friendsApi';
+import {friendServices} from '../Services/friendService.';
 
 const FriendsRequestScreen = () => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -45,7 +46,17 @@ const FriendsRequestScreen = () => {
       console.log('FriendsRequestScreen', error);
     }
   };
-
+  const handleRemoveFriend = async (userId: string) => {
+    try {
+      const res = await friendServices.handlePressRemoveRequest(
+        userId,
+        auth.userId,
+      );
+      getUsers();
+    } catch (error) {
+      console.log('Request remove friend fail: ', error);
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       getUsers();
@@ -60,6 +71,7 @@ const FriendsRequestScreen = () => {
         sayNo="Remove"
         key={index}
         onPressYes={() => handleAgreeFriend(item.userId)}
+        onPressNo={() => handleRemoveFriend(item.userId)}
       />
     );
   };

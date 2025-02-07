@@ -28,7 +28,7 @@ import {appInfo} from '../../Theme/appInfo';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
 import LoadingModal from '../Modal/LoadingModal';
-import { UserInfo } from '../Untils/UserInfo';
+import {UserInfo} from '../Untils/UserInfo';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -37,29 +37,15 @@ const PersonalScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
+  console.log('userId', userId);
+
   const infoUser = {
     stats: {
-      friends: 120,
-      shares: 45,
-      likes: 230,
+      friends: userInfo && userInfo.friends ? userInfo.friends.length : 0,
+      shares:
+        userInfo && userInfo.eventShares ? userInfo.eventShares.length : 0,
+      likes: 0,
     },
-    recentPosts: [
-      {
-        id: '1',
-        content: 'Had an amazing day!',
-        image: require('../../assets/images/image1.png'),
-      },
-      {
-        id: '2',
-        content: 'Exploring new places.',
-        image: require('../../assets/images/image2.png'),
-      },
-      {
-        id: '3',
-        content: 'React Native is awesome!',
-        image: require('../../assets/images/image3.png'),
-      },
-    ],
   };
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -79,7 +65,9 @@ const PersonalScreen = ({navigation}: any) => {
       const res = await userServices.getUserInfo(userId);
       if (res && res.data) {
         setUserInfo(res.data);
-        console.log('userInfo', userInfo);
+        console.log(userInfo.online);
+
+        // console.log('userInfo', userInfo);
       }
       setIsLoading(false);
     } catch (error) {
@@ -87,17 +75,20 @@ const PersonalScreen = ({navigation}: any) => {
       setIsLoading(false);
     }
   };
+
   const toggleDetail = () => {
     setDetail(!isDetail);
     bgColor.value = isDetail ? '#009688' : '#009688';
   };
-  const renderPost = ({item}: any) => (
-    <View style={profileStyles.postContainer}>
-      <Image source={item.image} style={profileStyles.postImage} />
-      <Text style={profileStyles.postContent}>{item.content}</Text>
-    </View>
-  );
-  console.log('userInfo', userInfo);
+  const renderPost = ({item}: any) => {
+    return (
+      <View style={profileStyles.postContainer} key={item._id}>
+        <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
+        <Text style={profileStyles.postContent}>{item.content}</Text>
+      </View>
+    );
+  };
+  // console.log('userInfo', userInfo);
 
   const renderHeader = () => {
     const dataUser = [
@@ -106,7 +97,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.majoring}
-            label={userInfo?.majoring ?? 'majoring'}
+            label={userInfo?.majoring ?? 'Chuyên ngành'}
           />
         ),
         icon: <Icon name="school" size={20} color={'#1b4f72'} />,
@@ -116,7 +107,9 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.link}
-            label={userInfo?.link ? userInfo?.link.slice(0, 24) + '...' : '...'}
+            label={
+              userInfo?.link ? userInfo?.link.slice(0, 24) + '...' : 'Link'
+            }
           />
         ),
         icon: <Icon name="link" size={20} color={appColors.blue} />,
@@ -135,7 +128,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.majoring}
-            label={userInfo?.address ? userInfo?.address : 'address'}
+            label={userInfo?.address ? userInfo?.address : 'Địa chỉ'}
           />
         ),
         icon: <Icon name="location-on" size={20} color={appColors.green2} />,
@@ -156,20 +149,22 @@ const PersonalScreen = ({navigation}: any) => {
                 styles={profileStyles.name}
                 label={userInfo.familyName + ' ' + userInfo.givenName}
               />
+              <SpaceComponent height={8} />
               <Animated.View style={[{alignItems: 'flex-start'}]}>
                 {dataUser.map((item, index) => {
                   return (
-                    <RowComponent key={index}>
+                    <RowComponent key={index} styles={{marginBottom: 12}}>
                       {item.icon}
                       {item.content}
                     </RowComponent>
                   );
                 })}
-              </Animated.View>
+                
               <TextComponent
-                label={userInfo.bio ?? '...'}
+                label={userInfo.bio ?? 'bio'}
                 styles={profileStyles.bio}
               />
+              </Animated.View>
               <SpaceComponent height={10} />
               <ButtonComponent
                 onPress={toggleDetail}
@@ -181,6 +176,8 @@ const PersonalScreen = ({navigation}: any) => {
                 ]}
                 styles={{}}
               />
+              
+
             </View>
           ) : (
             <View style={profileStyles.profileContainer}>
@@ -196,12 +193,14 @@ const PersonalScreen = ({navigation}: any) => {
                 styles={profileStyles.name}
                 label={UserInfo.getName(userInfo.name)}
               />
+              <SpaceComponent height={6} />
               <TextComponent
                 styles={profileStyles.majoring}
-                label={userInfo.majoring ?? '...'}
+                label={userInfo.majoring ?? 'Chuyên ngành'}
               />
+
               <TextComponent
-                label={userInfo.bio ?? '...'}
+                label={userInfo.bio ?? 'bio'}
                 styles={profileStyles.bio}
               />
               <SpaceComponent height={10} />
@@ -239,12 +238,15 @@ const PersonalScreen = ({navigation}: any) => {
 
       {/* Recent Posts */}
       <Text style={profileStyles.sectionTitle}>Shared recently</Text>
-      <FlatList
-        data={infoUser.recentPosts}
-        renderItem={renderPost}
-        keyExtractor={item => item.id}
-        contentContainerStyle={profileStyles.postList}
-      />
+      {userInfo && userInfo.eventShares && (
+        <FlatList
+          inverted
+          data={userInfo.eventShares}
+          renderItem={renderPost}
+          keyExtractor={item => item.id}
+          contentContainerStyle={profileStyles.postList}
+        />
+      )}
     </SafeAreaView>
   ) : (
     <LoadingModal visible={isLoading} />

@@ -63,7 +63,9 @@ const ButtonComponent = (props: Props) => {
       {iconLeft}
       {iconRight}
       {children}
-      {label && <TextComponent label={label} styles={textStyle} />}
+      {label && (
+        <TextComponent label={label} styles={textStyle} color={labelColor} />
+      )}
     </TouchableOpacity>
   ) : (
     <View
@@ -85,7 +87,7 @@ const ButtonComponent = (props: Props) => {
         ]}
         disabled={disabled}
         onPress={onPress}>
-        <RowComponent styles={{}}>
+        <RowComponent styles={{marginVertical: 4}}>
           {iconLeft && iconLeft}
           <TextComponent
             label={label ?? ''}

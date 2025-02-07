@@ -58,7 +58,7 @@ const InfomationModal = (props: Props) => {
       <Modalize
         ref={modalizeRef}
         onClose={onClose}
-        modalHeight={250}
+        adjustToContentHeight
         modalStyle={{paddingHorizontal: 12, paddingTop: 18}}>
         {listUser
           ? listUser.map(item => {

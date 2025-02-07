@@ -45,7 +45,7 @@ const HeaderComponent = (props: Props) => {
     <RowComponent
       styles={[
         {
-          paddingHorizontal: image ? 8 : 10,
+          paddingHorizontal: image ? 8 : 16,
           borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
           borderBottomWidth: isBcolor ? 0.2 : 0,
           paddingVertical: image ? 4 : 13,
@@ -115,6 +115,7 @@ const localStyles = StyleSheet.create({
     borderWidth: 0.1,
     borderRadius: 2,
     padding: 4,
+    borderColor: appColors.blue,
   },
 });
 export default HeaderComponent;

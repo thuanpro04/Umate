@@ -52,6 +52,8 @@ const MessageScreen = ({navigation}: any) => {
     }
   }, []);
   const onNavigation = async (item: any) => {
+    // console.log(item,124);
+    
     await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
     navigation.navigate('Chat');
   };
@@ -89,9 +91,7 @@ const MessageScreen = ({navigation}: any) => {
       <HeaderComponent
         iconStyle
         styles={{justifyContent: 'space-between'}}
-        iconLeft={
-          <HambergerMenu color={appColors.blue2} size={appInfo.sizeIconBold} />
-        }
+        
         iconRight={<More color={appColors.blue2} size={appInfo.sizeIconBold} />}
         // title="Messages"
         iconQR={

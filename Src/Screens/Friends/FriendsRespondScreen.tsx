@@ -43,6 +43,7 @@ const FriendsRespondScreen = () => {
       fetchUserFriends();
     }, []),
   );
+  // console.log(users);
 
   const fetchUserFriends = async () => {
     try {
@@ -57,23 +58,26 @@ const FriendsRespondScreen = () => {
 
   const handleRemoveFriend = async (userId: string) => {
     try {
+      console.log('userId', userId);
+
       const res = await friendServices.handleRemoveFriends(userId, auth.userId);
       //xử lí thêm xóa trong friend và update người friend người bị xóa
       setIsModal(false);
       fetchUserFriends();
     } catch (error) {
       console.log('handleRemoveFriends error', error);
+      setIsModal(false);
     }
   };
 
   const handleCloseModal = () => {
     setIsModal(false);
-    setSelectedUser(initialUser);
   };
 
   const handleOpenModal = (user: any) => {
     setIsModal(true);
     setSelectedUser(user);
+    console.log('initialUser ', user);
   };
   const onNavigation = async (item: any) => {
     try {
@@ -101,6 +105,7 @@ const FriendsRespondScreen = () => {
     return (
       <React.Fragment key={index}>
         <CarUserComponent
+          majoring={item.majoring}
           key={item.userId}
           img={item.avatar}
           name={UserInfo.getName(item.name)}

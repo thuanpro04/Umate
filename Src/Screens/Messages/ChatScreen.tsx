@@ -45,6 +45,7 @@ const ChatScreen = ({navigation}: any) => {
       try {
         const info = await UserInfo.getConversationInfo(getItem);
         setConverInfo(info); // Cập nhật thông tin hội thoại
+        console.log('converInfo', converInfo);
       } catch (error) {
         console.error('Error fetching conversation info:', error);
       }
@@ -232,7 +233,7 @@ const ChatScreen = ({navigation}: any) => {
           iconRight={
             <Setting size={appInfo.sizeIconBold} color={appColors.black} />
           }
-          onPress2={() => navigation.navigate('UserInfoChat')}
+          onPress2={() => navigation.navigate('MessageNavigator')}
         />
 
         {messages ? (

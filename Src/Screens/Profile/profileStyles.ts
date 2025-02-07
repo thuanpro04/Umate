@@ -17,6 +17,7 @@ export const profileStyles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     height: '32%',
+   
   },
   avatar: {
     height: 100,

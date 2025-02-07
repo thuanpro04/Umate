@@ -30,7 +30,7 @@ const HomeScreen = ({navigation}: any) => {
           // Lọc ra các sự kiện duy nhất dựa trên 'id'
           const uniqueEvents = mergedEvents.filter(
             (event, index, self) =>
-              index === self.findIndex(e => e.eventId === event.eventId),
+              index === self.findIndex(e => e._id === event._id),
           );
 
           // Cập nhật state chỉ với các sự kiện duy nhất
@@ -70,11 +70,15 @@ const HomeScreen = ({navigation}: any) => {
 
     return null;
   };
+  const renderHeader = () => {
+    return <ActivityIndicator size={22} />;
+  };
   useFocusEffect(
     useCallback(() => {
       getNewEvent();
     }, []),
   );
+
   return (
     <SafeAreaView
       style={[
@@ -89,18 +93,17 @@ const HomeScreen = ({navigation}: any) => {
           <Address color={appColors.blueBack} fontSize={appInfo.sizeIconBold} />
         }
         onPress1={() => navigation.openDrawer()}
+        onPress2={() => navigation.navigate('GoongMapScreen')}
       />
       {event.length > 0 ? (
         <FlatList
           onEndReachedThreshold={0.1}
-          keyExtractor={(item, index): any => item.eventId.toString()}
+          keyExtractor={(item, index): any => item._id.toString()}
           data={event}
           onEndReached={page < limitPage && !isLoading ? getNewEvent : () => {}}
           renderItem={renderItemEvents}
-          onScroll={({nativeEvent}) => {
-            const yOffSet = nativeEvent.contentOffset.y;
-          }}
           ListFooterComponent={page < limitPage ? renderFooter : <></>}
+          // ListHeaderComponent={renderHeader}
         />
       ) : (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

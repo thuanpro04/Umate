@@ -21,6 +21,7 @@ import {
 import CarUserChat from '../Messages/Component/CarUserChat';
 import {searchServices} from '../Services/searchServices';
 import {UserInfo} from '../Untils/UserInfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -80,7 +81,7 @@ const SearchScreen = ({navigation}: any) => {
 
     try {
       const res = await searchServices.handleSearchFriends(
-        auth.userID,
+        auth.userId,
         keySearch,
         titleSearch,
       );
@@ -95,7 +96,7 @@ const SearchScreen = ({navigation}: any) => {
   const handleSearchConversations = async (keySearch: string) => {
     try {
       const res = await searchServices.searchConversationUsers(
-        auth.userID,
+        auth.userId,
         keySearch,
       );
       if (res && res.data) {
@@ -116,14 +117,14 @@ const SearchScreen = ({navigation}: any) => {
     };
   }, [value]);
   const renderCarUsers = (item: any, index: number) => {
-    const isShowIconAddCancel = item.friends.includes(auth.userID);
-    const isShowRequest = item.friendRequests.includes(auth.userID);
+    const isShowIconAddCancel = item.friends.includes(auth.userId);
+    const isShowRequest = item.friendRequests.includes(auth.userId);
 
     return (
       <View key={index}>
         <SpaceComponent height={20} />
         <CarUserComponent
-          userID={item.userID}
+          userId={item.userId}
           isFind
           name={UserInfo.getName(item?.name)}
           iconAddCancel
@@ -135,30 +136,22 @@ const SearchScreen = ({navigation}: any) => {
       </View>
     );
   };
-  const onNavigationChat = (name: string, avatar: string, userID: string) => {
-    navigation.navigate('Chat', {
-      userName: name,
-      avatar: avatar,
-      currentUserID: auth.userID,
-      userID: userID,
-    });
+  const onNavigationChat = async (item: any) => {
+    console.log(item);
+    
+    await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
+    navigation.navigate('Chat');
   };
 
   const renderItemsConversation = (item: any, index: number) => {
     return (
       <CarUserChat
-        key={item.userID}
+        key={item.userId}
         name={UserInfo.getName(item.name)}
         massv={UserInfo.getYearOfbirth(item.email)}
         image={item.avatar}
         lastMessage={item.lastMessage}
-        onPress={() =>
-          onNavigationChat(
-            UserInfo.getName(item.name),
-            item.avatar,
-            item.userID,
-          )
-        }
+        onPress={() => onNavigationChat(item)}
       />
     );
   };
@@ -244,7 +237,7 @@ const SearchScreen = ({navigation}: any) => {
                       borderTopLeftRadius: 10,
                       borderTopRightRadius: 10,
                     },
-                    index === optionsKey.length -1 && {
+                    index === optionsKey.length - 1 && {
                       borderBottomLeftRadius: 10,
                       borderBottomRightRadius: 10,
                       borderBottomColor: appColors.white,
