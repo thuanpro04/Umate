@@ -109,9 +109,7 @@ const ShareEventModal = (props: Props) => {
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
         const eventShares = res.data.eventShares;
-    
-        
-        dispatch(addAuth({...auth,eventShares}));
+        dispatch(addAuth({...auth, eventShares}));
         // await AsyncStorage.setItem('auth', JSON.stringify(res.data));
         // console.log('res.data', res.data);
       }
@@ -120,8 +118,6 @@ const ShareEventModal = (props: Props) => {
     }
   };
   const handleShare = async (platform: string) => {
-    console.log(platform);
-
     switch (platform) {
       case 'In-App':
         await handlePostEventMyApp();
@@ -149,7 +145,7 @@ const ShareEventModal = (props: Props) => {
   const renderUserItems = ({item, index}: any) => {
     return (
       <TouchableOpacity
-        key={item.userId}
+        key={item.type === 'personal' ? item.userId : item.groupId}
         onPress={async () =>
           await handleSendEventForUser(
             item.type,
@@ -158,6 +154,7 @@ const ShareEventModal = (props: Props) => {
         }
         style={{marginRight: 12, alignItems: 'center'}}>
         <Image source={{uri: item.avatar}} style={globalStyles.userImg} />
+        <SpaceComponent height={6} />
         <TextComponent
           label={
             item.name
@@ -197,10 +194,12 @@ const ShareEventModal = (props: Props) => {
             <View>
               <TextComponent label="Gửi message" styles={modalStyles.title} />
               <FlatList
-              
-                data={users}
+                data={users.slice(0, 10).reverse()}
                 horizontal
-                keyExtractor={item => item.userId}
+                keyExtractor={item =>
+                  item.type === 'personal' ? item.userId : item.groupId
+                }
+                style={{flex: 1}}
                 renderItem={renderUserItems}
               />
             </View>

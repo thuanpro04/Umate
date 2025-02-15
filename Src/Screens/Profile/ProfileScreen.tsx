@@ -14,13 +14,19 @@ import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {ButtonComponent, RowComponent, TextComponent} from '../Components';
+import {
+  ButtonComponent,
+  RowComponent,
+  SpaceComponent,
+  TextComponent,
+} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {UserInfo} from '../Untils/UserInfo';
 import {profileStyles} from './profileStyles';
 import {eventSevices} from '../Services/eventService';
 import {useFocusEffect} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {globalStyles} from '../../Styles/globalStyle';
 const ProfileScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const userInfo = {
@@ -60,8 +66,6 @@ const ProfileScreen = ({navigation}: any) => {
   };
 
   const renderPost = ({item, index}: any) => {
-    // console.log(item);
-
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
@@ -74,29 +78,38 @@ const ProfileScreen = ({navigation}: any) => {
       </TouchableOpacity>
     );
   };
-  console.log(auth.eventShares[0]);
 
   return (
     <SafeAreaView style={profileStyles.container}>
       <View style={locastyles.header}>
         <ZoomImageComponent url={auth.avatar} styles={profileStyles.avatar} />
         <View style={profileStyles.infoContainer}>
-          <RowComponent>
+          
             <TextComponent
               styles={[profileStyles.name, {color: '#333'}]}
               label={UserInfo.getName(auth.name)}
             />
-          </RowComponent>
+          <SpaceComponent height={6} />
 
           <TextComponent
-            styles={[profileStyles.bio, {color: '#555'}]}
-            label={auth.bio ?? 'Tiểu sử'}
-          />
-          <TextComponent
-            styles={[profileStyles.majoring, {color: '#666'}]}
+            styles={[profileStyles.majoring, {color: '#333', marginLeft: 4}]}
             label={auth.majoring ?? 'Chuyên ngành'}
           />
-
+          <SpaceComponent height={6} />
+          <RowComponent>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/18499/18499153.png',
+              }}
+              style={[globalStyles.iconImage]}
+            />
+            <TextComponent
+              styles={[profileStyles.bio, {color: '#888', flex: 1}]}
+              label={auth.bio ?? 'Tiểu sử'}
+              numberOfLine={5}
+            />
+          </RowComponent>
+          <SpaceComponent height={6} />
           <RowComponent>
             <TouchableOpacity
               style={locastyles.editButton}

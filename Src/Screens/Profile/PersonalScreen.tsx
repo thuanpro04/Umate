@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
+  Alert,
   FlatList,
   Image,
   SafeAreaView,
@@ -29,6 +30,8 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
 import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
+import {globalStyles} from '../../Styles/globalStyle';
+import {Linking} from 'react-native';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -37,7 +40,7 @@ const PersonalScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
-  console.log('userId', userId);
+  
 
   const infoUser = {
     stats: {
@@ -105,12 +108,22 @@ const PersonalScreen = ({navigation}: any) => {
       {
         key: 'link',
         content: (
-          <TextComponent
-            styles={profileStyles.link}
-            label={
-              userInfo?.link ? userInfo?.link.slice(0, 24) + '...' : 'Link'
-            }
-          />
+          <ButtonComponent
+            type="action"
+            onPress={() => {
+              if (userInfo?.link) {
+                Linking.openURL(userInfo.link).catch(err =>
+                  Alert.alert('Lỗi', 'Không thể mở liên kết'),
+                );
+              }
+            }}>
+            <TextComponent
+              styles={profileStyles.link}
+              label={
+                userInfo?.link ? userInfo?.link.slice(0, 24) + '...' : 'Link'
+              }
+            />
+          </ButtonComponent>
         ),
         icon: <Icon name="link" size={20} color={appColors.blue} />,
       },
@@ -147,7 +160,7 @@ const PersonalScreen = ({navigation}: any) => {
             <View style={profileStyles.profileContainer}>
               <TextComponent
                 styles={profileStyles.name}
-                label={userInfo.familyName + ' ' + userInfo.givenName}
+                label={UserInfo.getName(userInfo.name)}
               />
               <SpaceComponent height={8} />
               <Animated.View style={[{alignItems: 'flex-start'}]}>
@@ -159,11 +172,18 @@ const PersonalScreen = ({navigation}: any) => {
                     </RowComponent>
                   );
                 })}
-                
-              <TextComponent
-                label={userInfo.bio ?? 'bio'}
-                styles={profileStyles.bio}
-              />
+                <RowComponent>
+                  <Image
+                    source={{
+                      uri: 'https://cdn-icons-png.flaticon.com/128/18438/18438783.png',
+                    }}
+                    style={globalStyles.iconImage}
+                  />
+                  <TextComponent
+                    label={userInfo.bio ?? 'bio'}
+                    styles={profileStyles.bio}
+                  />
+                </RowComponent>
               </Animated.View>
               <SpaceComponent height={10} />
               <ButtonComponent
@@ -176,19 +196,31 @@ const PersonalScreen = ({navigation}: any) => {
                 ]}
                 styles={{}}
               />
-              
-
             </View>
           ) : (
             <View style={profileStyles.profileContainer}>
-              <Image
-                source={{
-                  uri: userInfo.avatar
-                    ? userInfo.avatar
-                    : 'https://via.placeholder.com/150',
-                }}
-                style={profileStyles.avatar}
-              />
+              <RowComponent>
+                <Image
+                  source={{
+                    uri: userInfo.avatar
+                      ? userInfo.avatar
+                      : 'https://via.placeholder.com/150',
+                  }}
+                  style={profileStyles.avatar}
+                />
+                {userInfo.online && (
+                  <View
+                    style={{
+                      backgroundColor: 'green',
+                      padding: 6,
+                      borderRadius: 50,
+                      position: 'absolute',
+                      top: 0,
+                      right: 20,
+                    }}
+                  />
+                )}
+              </RowComponent>
               <TextComponent
                 styles={profileStyles.name}
                 label={UserInfo.getName(userInfo.name)}
@@ -198,11 +230,19 @@ const PersonalScreen = ({navigation}: any) => {
                 styles={profileStyles.majoring}
                 label={userInfo.majoring ?? 'Chuyên ngành'}
               />
-
-              <TextComponent
-                label={userInfo.bio ?? 'bio'}
-                styles={profileStyles.bio}
-              />
+              <SpaceComponent height={8} />
+              <RowComponent>
+                <Image
+                  source={{
+                    uri: 'https://cdn-icons-png.flaticon.com/128/18438/18438783.png',
+                  }}
+                  style={globalStyles.iconImage}
+                />
+                <TextComponent
+                  label={userInfo.bio ?? 'bio'}
+                  styles={profileStyles.bio}
+                />
+              </RowComponent>
               <SpaceComponent height={10} />
               <ButtonComponent
                 onPress={toggleDetail}
@@ -243,7 +283,7 @@ const PersonalScreen = ({navigation}: any) => {
           inverted
           data={userInfo.eventShares}
           renderItem={renderPost}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item._id}
           contentContainerStyle={profileStyles.postList}
         />
       )}

@@ -2,7 +2,7 @@ import eventApi from '../../apis/eventApi';
 let url;
 const getNewEvent = async (page: number) => {
   url = `/new-event?curentPage=${page}&limit=${10}`;
-  console.log(url);
+
 
   try {
     const response = await eventApi.handleEvent(url);

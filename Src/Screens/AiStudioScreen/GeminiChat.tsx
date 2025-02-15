@@ -1,34 +1,22 @@
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {ArrowLeft} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
 import {
-  Button,
   KeyboardAvoidingView,
   SafeAreaView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
-import axios from 'axios';
-import {generateAIResponse} from '../Services/generateAiService';
+import {useSelector} from 'react-redux';
 import {globalStyles} from '../../Styles/globalStyle';
-import {HeaderComponent} from '../Components';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {ArrowLeft} from 'iconsax-react-native';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
-import LinearGradient from 'react-native-linear-gradient';
-import ChatInput from '../Messages/Component/ChatInput';
-import ChatItems from '../Messages/Component/ChatItems';
-import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {HeaderComponent} from '../Components';
+import {generateAIResponse} from '../Services/generateAiService';
 import ChatBox from './ChatBox';
 import InputGenimi from './InputGenimi';
-interface Root {
-  content: string;
-  reply: any;
-  imagesUrl: any[];
-  timestamp: string;
-}
+import {StatusBar} from 'react-native';
 
 const GeminiChat = ({
   onFocus,
@@ -38,31 +26,21 @@ const GeminiChat = ({
   onBlur: () => void;
 }) => {
   const [userInput, setUserInput] = useState('');
-  const [aiResponse, setAIResponse] = useState<any>('');
   const [messageInfo, setMessageInfo] = useState<any[]>([]);
-  const navigation = useNavigation();
   const [isDisable, setDisable] = useState(false);
+  const navigation = useNavigation();
   const auth = useSelector(authSelector);
+
   useFocusEffect(
     useCallback(() => {
-      if (onFocus) {
-        onFocus();
-      }
-      return () => {
-        if (onBlur) {
-          onBlur();
-        }
-      };
+      onFocus?.();
+      return () => onBlur?.();
     }, [onBlur, onFocus]),
   );
 
-  const onChangeContent = (value: string) => {
-    setUserInput(value);
-  };
   const handleGenerateResponse = async () => {
-    if (!userInput) {
-      return;
-    }
+    if (!userInput) return;
+
     const userMessage = {
       id: Date.now(),
       content: userInput,
@@ -74,11 +52,9 @@ const GeminiChat = ({
 
     setMessageInfo(prev => [...prev, userMessage]);
     setDisable(true);
-    console.log(userInput);
 
     try {
       const aiResponse = await generateAIResponse(userInput);
-      // Thêm phản hồi AI vào danh sách
       const aiMessage = {
         id: Date.now() + 1,
         content: aiResponse,
@@ -88,33 +64,34 @@ const GeminiChat = ({
       };
       setMessageInfo(prev => [...prev, aiMessage]);
     } catch (error) {
-      setAIResponse('Failed to fetch response. Please try again.');
+      console.log('Error:', error);
     }
+
     setDisable(false);
     setUserInput('');
   };
 
   return (
     <KeyboardAvoidingView style={{flex: 1}}>
-      <SafeAreaView
-        style={[
-          globalStyles.container,
-          {
-            paddingBottom: 10,
-            paddingHorizontal: 12,
-          },
-        ]}>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
         <HeaderComponent
-          title="Genimi chat"
-          titleColor={appColors.blueBack}
+          title="Gemini Chat"
+          titleColor={appColors.white}
           iconLeft={
-            <ArrowLeft size={appInfo.sizeIconBold} color={appColors.blueBack} />
+            <ArrowLeft size={appInfo.sizeIconBold} color={appColors.white} />
           }
           onPress1={() => navigation.goBack()}
         />
-        <ChatBox messbox={messageInfo} />
+
+        {/* Chat Box */}
+        <View style={styles.chatContainer}>
+          <ChatBox messbox={messageInfo} />
+        </View>
+
+        {/* Input */}
         <InputGenimi
-          onChangeValue={onChangeContent}
+          onChangeValue={setUserInput}
           isDisable={isDisable}
           value={userInput}
           onPress={handleGenerateResponse}
@@ -126,20 +103,24 @@ const GeminiChat = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#121212', // Màu nền chính
+    paddingBottom: 10,
+    paddingHorizontal: 12,
+    marginTop: StatusBar.currentHeight,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    color: 'black',
+  chatContainer: {
+    flex: 1,
+    backgroundColor: '#1E1E1EFA',
+    borderRadius: 16,
+    padding: 10,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  response: {marginTop: 20, fontSize: 16, color: 'coral'},
 });
 
 export default GeminiChat;

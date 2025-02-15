@@ -8,6 +8,8 @@ interface Props {
 }
 
 const LoadingModal = ({visible}: Props) => {
+  console.log(visible);
+  
   return (
     <Modal visible={visible} transparent statusBarTranslucent>
       <View style={styles.overlay}>

@@ -44,6 +44,8 @@ import {imageService} from '../Services/imageService';
 import UpdateInfoModal from '../Modal/UpdateInfoModal';
 import {profileStyles} from './profileStyles';
 import {debounce} from 'lodash';
+import {majors} from '../../data/majoring';
+import {address} from '../../data/address';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -228,7 +230,7 @@ const SetUpProfile = ({navigation}: any) => {
         }
       />
       <SpaceComponent height={20} />
-      <ScrollView>
+      <ScrollView >
         <View style={profileStyles.centered}>
           <Image
             source={{uri: profile.avatar}}
@@ -251,7 +253,6 @@ const SetUpProfile = ({navigation}: any) => {
                 val.type === 'url'
                   ? onchangeProfile('avatar', val.value.toString().trim())
                   : handleSelected(val.value as ImageOrVideo);
-                handleModal('avatar');
               }}
             />
           </View>
@@ -311,12 +312,17 @@ const SetUpProfile = ({navigation}: any) => {
               styles={globalStyles.inputRow}
               onPress={() => handleModal('address')}>
               <TextComponent
-                label={profile.address ? profile.address : '......'}
+                label={
+                  profile.address
+                    ? profile.address
+                    : '...'
+                }
                 color={appColors.grey}
               />
-              <Edit2
+
+              <ArrowSquareDown
                 color={errors.majoring ? appColors.red : appColors.blue2}
-                size={appInfo.sizeIcon}
+                size={appInfo.sizeIconBold}
               />
             </RowComponent>
           </RowComponent>
@@ -367,6 +373,15 @@ const SetUpProfile = ({navigation}: any) => {
 
       {nameField === 'majoring' ? (
         <EditUserModal
+          data={majors}
+          nameField={nameField}
+          onChangeProfile={onchangeProfile}
+          isVisible={visible}
+          onClose={onCloseModal}
+        />
+      ) : nameField === 'address' ? (
+        <EditUserModal
+          data={address}
           nameField={nameField}
           onChangeProfile={onchangeProfile}
           isVisible={visible}

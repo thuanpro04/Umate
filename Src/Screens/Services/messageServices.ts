@@ -1,9 +1,9 @@
 import chatsAPI from '../../apis/chatApi';
 
-const getAllMessagesUser = async (id: any, key: string, page:number) => {
+const getAllMessagesUser = async (id: any, key: string, page: number) => {
   try {
     const url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
-    console.log(url);
+   
     const res = await chatsAPI.handleChats(url);
     return res;
   } catch (error) {
@@ -40,4 +40,5 @@ export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
   checkConversation,
+  
 };

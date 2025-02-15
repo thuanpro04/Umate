@@ -20,6 +20,8 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
+import {userServices} from '../Services/userService';
+import {HandleNotification} from '../Untils/HandleNotification';
 
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,27 +36,42 @@ const DrawerCustomsMenu = ({navigation}: any) => {
 
   const handleSignOutWithGoogle = async () => {
     try {
+      const fcmToken = await AsyncStorage.getItem('fcmtoken');
+      if (fcmToken) {
+        if (user.fcmTokens && user.fcmTokens.length > 0) {
+          const items = [...user.fcmTokens];
+          // console.log(items);
+          const index = items.findIndex((element: any) => element === fcmToken);
+
+          if (index !== -1) {
+            items.splice(index, 1);
+          }
+          // console.log('items', items);
+
+          await HandleNotification.update(items, user.userId);
+        }
+      }
+
       await GoogleSignin.signOut();
       disPathch(removeAuth());
       await AsyncStorage.removeItem('auth');
+      const res = await userServices.updateUserStatus(user.userId, false);
+      setIsLoading(false);
     } catch (error) {
       console.log('Sign out', error);
+      setIsLoading(false);
     }
   };
   const handleShowItemMenu = async (key: string) => {
     switch (key) {
       case 'profile':
         navigation.closeDrawer();
-        navigation.navigate('Profile', {
-          screen: 'profile',
-        });
+        navigation.navigate('PersonalScreen', {userId: user.userId});
         break;
 
-      case 'message':
+      case 'friends':
         navigation.closeDrawer();
-        navigation.navigate('Message', {
-          screen: 'message',
-        });
+        navigation.navigate('FriendScreens');
         break;
       case 'settings':
         navigation.closeDrawer();

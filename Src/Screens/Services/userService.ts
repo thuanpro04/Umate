@@ -15,7 +15,7 @@ const getUserInfo = async (userId: string) => {
   url = `/get-user?userId=${userId}`;
   try {
     const res = await usersAPI.handleUsers(url);
-    console.log(url);
+   
 
     return res;
   } catch (error) {
@@ -27,9 +27,25 @@ const getListUserInfo = async (listUsers: string[]) => {
   const res = await usersAPI.handleUsers(url, listUsers, 'post');
   return res;
 };
+const updateUserStatus = async (userId: string, status: Boolean) => {
+  url = `/update-status?id=${userId}&status=${status}`;
+  const res = await usersAPI.handleUsers(url);
+  return res;
+};
+const updateBlockUser = async (userId: string, userFriendId: string) => {
+  const data = {
+    userId,
+    userFriendId,
+  };
+  const url = '/block-user';
+  const res = await usersAPI.handleUsers(url, data, 'post');
+  return res;
+};
 export const userServices = {
   getEquestFriendUsers,
   updateUsersById,
   getUserInfo,
-  getListUserInfo
+  getListUserInfo,
+  updateUserStatus,
+  updateBlockUser,
 };

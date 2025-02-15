@@ -1,30 +1,30 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {FlatList, Keyboard, ScrollView, StyleSheet, View} from 'react-native';
-import {Modalize} from 'react-native-modalize';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  ButtonComponent,
-  InputComponent,
-  SpaceComponent,
-  TextComponent,
-} from '../Components';
-import {appColors} from '../../Theme/Colors/appColors';
-import {Save2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {Validate} from '../Untils/Validate';
-import {majors} from '../../data/majoring';
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import {Modalize} from 'react-native-modalize';
 import {List} from 'react-native-paper';
-import {useFocusEffect} from '@react-navigation/native';
+import {TextComponent} from '../Components';
+import SearchComponent from '../Search/components/SearchComponent';
+import {Validate} from '../Untils/Validate';
+import {add} from 'lodash';
 
 interface Props {
   onChangeProfile: (key: string, value: string) => void;
   nameField: string;
   isVisible: boolean;
   onClose: () => void;
+  data: any[];
 }
 
 const EditUserModal = (props: Props) => {
-  const {onChangeProfile, nameField, isVisible, onClose} = props;
+  const {onChangeProfile, nameField, isVisible, onClose, data} = props;
   const [value, setValue] = useState('');
+  const [address, setAddress] = useState<any[]>(data);
   const modalizeRef = useRef<Modalize>(null);
   const [messageError, setMessageError] = useState('');
 
@@ -65,6 +65,20 @@ const EditUserModal = (props: Props) => {
       setValue(''); // Clear input after successful save
     }
   };
+  const onChangeText = (e: string) => {
+    setValue(e);
+    if (e.trim() === '') {
+      setAddress(data);
+    } else {
+      const filterData = data.filter(item =>
+        item.name.toLowerCase().includes(e.toLowerCase().trim()),
+      );
+
+      console.log(filterData);
+
+      setAddress(filterData);
+    }
+  };
 
   const modalHeight = nameField === 'majoring' ? 650 : 230;
   const renderMajoring = ({item, index}: any) => {
@@ -85,6 +99,18 @@ const EditUserModal = (props: Props) => {
       </List.Section>
     );
   };
+  const renderItemAddress = ({item, index}: any) => {
+    return (
+      <TouchableOpacity
+        key={index}
+        style={styles.main}
+        onPress={() => {
+          onChangeProfile('address', item.name)
+        }}>
+        <TextComponent label={index + 1 + '. ' + item.name} />
+      </TouchableOpacity>
+    );
+  };
   return (
     <Modalize
       ref={modalizeRef}
@@ -95,10 +121,17 @@ const EditUserModal = (props: Props) => {
         nameField === 'majoring' && <TextComponent title label="Chuyên Ngành" />
       }
       modalStyle={styles.modalStyle}>
-      {nameField === 'majoring' && (
+      {nameField === 'majoring' ? (
         <ScrollView style={{maxHeight: 700, flex: 1}}>
-          {majors.map((item, index) => renderMajoring({item, index}))}
+          {data.map((item, index) => renderMajoring({item, index}))}
         </ScrollView>
+      ) : (
+        <KeyboardAvoidingView style={styles.container}>
+          <SearchComponent onChangeText={onChangeText} text={value} />
+          <ScrollView style={{maxHeight: 660}}>
+            {address.map((item, index) => renderItemAddress({item, index}))}
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </Modalize>
   );
@@ -111,6 +144,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 15,
+    flex: 1,
+  },
+  main: {
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+  container: {
     flex: 1,
   },
 });

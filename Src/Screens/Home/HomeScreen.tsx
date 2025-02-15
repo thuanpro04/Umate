@@ -1,20 +1,28 @@
 import {useFocusEffect} from '@react-navigation/native';
 import {HambergerMenu} from 'iconsax-react-native';
-import React, {useCallback, useState} from 'react';
-import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
-import {useSelector} from 'react-redux';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  AppState,
+  FlatList,
+  SafeAreaView,
+  View,
+} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {Address} from '../../assets/svgs/indexSvg';
-import {authSelector} from '../../redux/reducers/authReducer';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
 import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
-
+import {userServices} from '../Services/userService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const HomeScreen = ({navigation}: any) => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
   const auth = useSelector(authSelector);
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const getNewEvent = async () => {
@@ -50,6 +58,7 @@ const HomeScreen = ({navigation}: any) => {
   const renderItemEvents = ({item, index}: any) => {
     return (
       <CarEventComponent
+        title={item.title}
         key={index}
         countLike={item.likes.length}
         like={item.likes.includes(auth.userId)}
@@ -63,6 +72,7 @@ const HomeScreen = ({navigation}: any) => {
       />
     );
   };
+
   const renderFooter = () => {
     if (isLoading) {
       return <ActivityIndicator style={{marginBottom: 15}} size={30} />;
@@ -71,11 +81,22 @@ const HomeScreen = ({navigation}: any) => {
     return null;
   };
   const renderHeader = () => {
-    return <ActivityIndicator size={22} />;
+    if (isLoading) {
+      return <ActivityIndicator style={{marginBottom: 15}} size={18} />;
+    }
+    return null;
   };
+
   useFocusEffect(
     useCallback(() => {
       getNewEvent();
+      const setOnline = async () => {
+        await userServices.updateUserStatus(auth.userId, true);
+        const fcmToken = await AsyncStorage.getItem('fcmtoken');
+        dispatch(addAuth({...auth, fcmTokens: fcmToken}));
+      };
+
+      setOnline();
     }, []),
   );
 
@@ -100,10 +121,11 @@ const HomeScreen = ({navigation}: any) => {
           onEndReachedThreshold={0.1}
           keyExtractor={(item, index): any => item._id.toString()}
           data={event}
-          onEndReached={page < limitPage && !isLoading ? getNewEvent : () => {}}
+          onEndReached={
+            page <= limitPage && !isLoading ? getNewEvent : () => {}
+          }
           renderItem={renderItemEvents}
           ListFooterComponent={page < limitPage ? renderFooter : <></>}
-          // ListHeaderComponent={renderHeader}
         />
       ) : (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

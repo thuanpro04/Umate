@@ -17,7 +17,6 @@ export const profileStyles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     height: '32%',
-   
   },
   avatar: {
     height: 100,
@@ -48,8 +47,9 @@ export const profileStyles = StyleSheet.create({
   },
   bio: {
     fontSize: 14,
-    color: appColors.grey2,
-    marginTop: 10,
+    fontStyle: 'italic',
+    color: '#fff',
+
   },
   statsContainer: {
     flexDirection: 'row',
@@ -101,7 +101,7 @@ export const profileStyles = StyleSheet.create({
   postImage: {
     width: '100%',
     height: 180,
-    resizeMode:'cover'
+    resizeMode: 'cover',
   },
   postContent: {
     padding: 10,
@@ -120,7 +120,6 @@ export const profileStyles = StyleSheet.create({
   infoContainer: {
     marginLeft: 20,
     flex: 1,
-    
   },
   editButton: {
     marginTop: 10,

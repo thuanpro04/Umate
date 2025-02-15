@@ -20,13 +20,19 @@ const ChatBox = (props: Props) => {
             style={[
               styles.container,
               {
-                backgroundColor: item.isUser ? 'coral' : appColors.linearFocus100_purple,
+                backgroundColor: item.isUser ? '#C8E6C9' : '#37474F',
                 alignSelf: item.isUser ? 'flex-end' : 'flex-start',
                 borderBottomLeftRadius: item.isUser ? 20 : 0,
                 borderBottomRightRadius: item.isUser ? 20 : 0,
               },
             ]}>
-            <TextComponent label={item.content} styles={styles.contentStyles} />
+            <TextComponent
+              label={item.content}
+              styles={[
+                styles.contentStyles,
+                {color: item.isUser ? appColors.blueBack : appColors.white},
+              ]}
+            />
           </View>
         )}
       </View>
@@ -56,6 +62,5 @@ const styles = StyleSheet.create({
   },
   contentStyles: {
     fontSize: 14,
-    color: 'white',
   },
 });

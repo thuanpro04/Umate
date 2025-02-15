@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import LoginSreen from './Src/Screens/Auth/LoginSreen';
 import {Provider} from 'react-redux';
 import {StatusBar} from 'react-native';
@@ -12,9 +12,11 @@ import Toast from 'react-native-toast-message';
 import ToastConfig from './Src/Screens/Components/ToastConfig';
 import {Host} from 'react-native-portalize';
 import Orientation from 'react-native-orientation-locker';
+import {HandleNotification} from './Src/Screens/Untils/HandleNotification';
 const App = () => {
   useEffect(() => {
     Orientation.lockToPortrait();
+    HandleNotification.checkNotificationPertion();
   }, []);
   return (
     <GestureHandlerRootView style={{flex: 1}}>

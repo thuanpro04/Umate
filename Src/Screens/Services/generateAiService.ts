@@ -4,7 +4,7 @@ const BASE_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const API_KEY = 'AIzaSyAbxfbD6MeuGrKqvbJmWOvNJCEXNfFAWdM';
 export const generateAIResponse = async (textInput: string) => {
-  console.log(textInput);
+  
 
   try {
     const response = await axios.post(

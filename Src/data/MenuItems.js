@@ -13,6 +13,7 @@ import {
   User,
   Video,
   Image,
+  People,
 } from 'iconsax-react-native';
 import {appInfo} from '../Theme/appInfo';
 import {appColors} from '../Theme/Colors/appColors';
@@ -30,15 +31,11 @@ const MenuItems = [
     icon: <User size={size} color={color} variant="Bulk" />,
   },
   {
-    key: 'message',
-    title: 'Message',
-    icon: <Message size={size} color={color} variant="Bulk" />,
+    key: 'friends',
+    title: 'Friends',
+    icon: <People size={size} color={color} variant="Bulk" />,
   },
-  {
-    key: 'group',
-    title: 'My Group',
-    icon: <Heart size={size} color={color} variant="Bulk" />,
-  },
+
   {
     key: 'settings',
     title: 'Settings',
@@ -159,7 +156,6 @@ const ChoiceItems = [
       />
     ),
   },
- 
 ];
 
 export {MenuItems, Categorys, ChoiceItems};

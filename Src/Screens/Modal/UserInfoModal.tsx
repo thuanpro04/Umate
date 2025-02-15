@@ -33,10 +33,21 @@ interface Props {
   onClose: () => void;
   handleNavigation: () => void;
   handleUnFriend: () => void;
+  handleBlockUser: (userId: string) => void;
+  isBlock: Boolean;
 }
 
 const UserInfoModal = (props: Props) => {
-  const {img, name, onClose, visible, handleNavigation, handleUnFriend} = props;
+  const {
+    img,
+    name,
+    onClose,
+    visible,
+    handleNavigation,
+    handleUnFriend,
+    handleBlockUser,
+    isBlock,
+  } = props;
   const modalRef = useRef<Modalize>(null);
   useEffect(() => {
     if (visible) {
@@ -67,13 +78,17 @@ const UserInfoModal = (props: Props) => {
           <TextComponent label={`Message with ${getFirstName(name)}`} title />
         </RowComponent>
         <SpaceComponent height={18} />
-        <RowComponent styles={styles.content}>
+        <RowComponent styles={styles.content} onPress={handleBlockUser}>
           <AntDesign
             name="tool"
             size={appInfo.sizeIconBold}
             color={appColors.blueBack}
           />
-          <TextComponent label={`Block ${getFirstName(name)}`} title />
+          {!isBlock ? (
+            <TextComponent label={`Block ${getFirstName(name)}`} title />
+          ) : (
+            <TextComponent label={`unblock ${getFirstName(name)}`} title />
+          )}
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content}>

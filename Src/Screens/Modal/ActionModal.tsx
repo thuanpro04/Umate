@@ -27,7 +27,7 @@ const ActionModal = (props: Props) => {
             <SpaceComponent height={5} />
             {descriptions && <TextComponent label={descriptions} />}
           </View>
-
+          <SpaceComponent height={8} />
           <RowComponent styles={localStyles.btnStyles}>
             <ButtonComponent
               label="cancel"
@@ -45,6 +45,8 @@ const ActionModal = (props: Props) => {
               onPress={onPressYes}
             />
           </RowComponent>
+          <SpaceComponent height={8} />
+
         </View>
       </View>
     </Modal>
@@ -63,7 +65,7 @@ const localStyles = StyleSheet.create({
   },
   container: {
     backgroundColor: '#fffffff0',
-    height: 160,
+    height: 180,
     width: 300,
     borderRadius: 12,
     paddingBottom: 6,

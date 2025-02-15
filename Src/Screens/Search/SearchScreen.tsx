@@ -1,6 +1,6 @@
 import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -22,6 +22,7 @@ import CarUserChat from '../Messages/Component/CarUserChat';
 import {searchServices} from '../Services/searchServices';
 import {UserInfo} from '../Untils/UserInfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {globalStyles} from '../../Styles/globalStyle';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -106,6 +107,7 @@ const SearchScreen = ({navigation}: any) => {
       console.log('handleSearchConversations', error);
     }
   };
+
   const debouncedFetchUsers =
     key === 'searchFriends'
       ? debounce(handleSearchFriends, 300)
@@ -138,7 +140,7 @@ const SearchScreen = ({navigation}: any) => {
   };
   const onNavigationChat = async (item: any) => {
     console.log(item);
-    
+
     await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
     navigation.navigate('Chat');
   };
@@ -147,8 +149,12 @@ const SearchScreen = ({navigation}: any) => {
     return (
       <CarUserChat
         key={item.userId}
-        name={UserInfo.getName(item.name)}
-        massv={UserInfo.getYearOfbirth(item.email)}
+        name={item.groupName ?? UserInfo.getName(item.name)}
+        massv={
+          item.type === 'group'
+            ? item.invitedUsers.length
+            : UserInfo.getYearOfbirth(item.email)
+        }
         image={item.avatar}
         lastMessage={item.lastMessage}
         onPress={() => onNavigationChat(item)}
@@ -156,7 +162,7 @@ const SearchScreen = ({navigation}: any) => {
     );
   };
   return (
-    <ContainerComponent isScroll styles={[{paddingHorizontal: 12}]}>
+    <SafeAreaView style={[globalStyles.container, {paddingHorizontal: 12}]}>
       <SpaceComponent height={10} />
       <RowComponent styles={{justifyContent: 'center', alignItems: 'center'}}>
         <ArrowLeft2
@@ -184,11 +190,13 @@ const SearchScreen = ({navigation}: any) => {
           multiline
           numberOfLines={2}
           subffix={
-            <AntDesign
-              name="filter"
-              size={appInfo.sizeIconBold}
-              color={appColors.blue}
-            />
+            key !== 'searchConversations' && (
+              <AntDesign
+                name="filter"
+                size={appInfo.sizeIconBold}
+                color={appColors.blue}
+              />
+            )
           }
           onPressFilter={() => setShowFilter(true)}
         />
@@ -262,7 +270,7 @@ const SearchScreen = ({navigation}: any) => {
         users &&
         users.map((item: any, index) => renderItemsConversation(item, index))}
       <SpaceComponent height={40} />
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 

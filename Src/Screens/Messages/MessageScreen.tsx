@@ -1,27 +1,23 @@
-import {
-  HambergerMenu,
-  More,
-  ScanBarcode
-} from 'iconsax-react-native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
-import { authSelector } from '../../redux/reducers/authReducer';
+import {HambergerMenu, More, ScanBarcode} from 'iconsax-react-native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {
   HeaderComponent,
   SearchFriendsComponent,
   SpaceComponent,
-  TextComponent
+  TextComponent,
 } from '../Components';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, FlatList, SafeAreaView, View } from 'react-native';
-import { globalStyles } from '../../Styles/globalStyle';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
+import {globalStyles} from '../../Styles/globalStyle';
 import InfomationModal from '../Modal/InfomationModal';
-import { messageServices } from '../Services/messageServices';
-import { UserInfo } from '../Untils/UserInfo';
+import {messageServices} from '../Services/messageServices';
+import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
 
 const MessageScreen = ({navigation}: any) => {
@@ -33,7 +29,7 @@ const MessageScreen = ({navigation}: any) => {
     return [...users].sort((a, b) => {
       const dateA = new Date(a.lastMessageTimestamp).getTime();
       const dateB = new Date(b.lastMessageTimestamp).getTime();
-      return  dateA - dateB;
+      return dateA - dateB;
     });
   }, [users]);
 
@@ -53,7 +49,7 @@ const MessageScreen = ({navigation}: any) => {
   }, []);
   const onNavigation = async (item: any) => {
     // console.log(item,124);
-    
+
     await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
     navigation.navigate('Chat');
   };
@@ -91,7 +87,6 @@ const MessageScreen = ({navigation}: any) => {
       <HeaderComponent
         iconStyle
         styles={{justifyContent: 'space-between'}}
-        
         iconRight={<More color={appColors.blue2} size={appInfo.sizeIconBold} />}
         // title="Messages"
         iconQR={

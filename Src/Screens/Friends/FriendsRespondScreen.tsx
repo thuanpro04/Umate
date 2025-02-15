@@ -7,10 +7,10 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {CarUserComponent} from '../Components';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {CarUserComponent, SpaceComponent} from '../Components';
 import UserInfoModal from '../Modal/UserInfoModal';
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
@@ -19,6 +19,8 @@ import ActionModal from '../Modal/ActionModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {messageServices} from '../Services/messageServices';
 import {Item} from 'react-native-paper/lib/typescript/components/List/List';
+import LoadingModal from '../Modal/LoadingModal';
+import {add, isArray} from 'lodash';
 
 const initialUser = {
   avatar: '',
@@ -34,9 +36,12 @@ const FriendsRespondScreen = () => {
   const [selectedUser, setSelectedUser] = useState(initialUser);
   const memoUsers = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
-  const [isShowActionModal, setShowActionModal] = useState(false);
+  const [isShowUnfriendModal, setShowUnfriendModal] = useState(false);
+  const [isShowBlockdModal, setShowBlockModal] = useState(false);
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [isModal, setIsModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // Reload dữ liệu mỗi khi trang được focus
   useFocusEffect(
     useCallback(() => {
@@ -77,7 +82,6 @@ const FriendsRespondScreen = () => {
   const handleOpenModal = (user: any) => {
     setIsModal(true);
     setSelectedUser(user);
-    console.log('initialUser ', user);
   };
   const onNavigation = async (item: any) => {
     try {
@@ -96,16 +100,39 @@ const FriendsRespondScreen = () => {
       } else {
         await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
       }
+      setIsModal(false);
       navigation.navigate('Chat');
     } catch (error) {
       console.error('Respond save user error ', error);
     }
   };
+  const handleBlockUser = async (userId: string) => {
+    setShowBlockModal(true);
+    setIsModal(false);
+  };
+  const actionBlockUser = async (userId: string, userFriendId: string) => {
+    try {
+      setIsLoading(true);
+      const res = await userServices.updateBlockUser(userId, userFriendId);
+      if (res) {
+        console.log('Block successfully !!!');
+        const updateAuth = {...auth, block: undefined};
+        dispatch(addAuth({...updateAuth, block: res.data}));
+      }
+      setIsLoading(false);
+      setShowBlockModal(false);
+    } catch (error) {
+      console.log('handle block user fail: ', error);
+      setIsLoading(false);
+      setShowBlockModal(false);
+    }
+  };
   const renderItems = ({item, index}: any) => {
     return (
       <React.Fragment key={index}>
+        <SpaceComponent height={14} />
         <CarUserComponent
-          majoring={item.majoring}
+          majoring={item.majoring ?? 'Chuyên ngành'}
           key={item.userId}
           img={item.avatar}
           name={UserInfo.getName(item.name)}
@@ -119,7 +146,7 @@ const FriendsRespondScreen = () => {
         />
 
         <ActionModal
-          visible={isShowActionModal}
+          visible={isShowUnfriendModal}
           onPressNo={() => {
             closeModalAction();
           }}
@@ -135,28 +162,47 @@ const FriendsRespondScreen = () => {
     handleCloseModal();
   };
   function closeModalAction() {
-    setShowActionModal(false);
+    setShowUnfriendModal(false);
   }
   function openModalAction() {
-    setShowActionModal(true);
-    console.log(isShowActionModal);
+    setShowUnfriendModal(true);
   }
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={memoUsers}
         renderItem={renderItems}
         scrollEventThrottle={16}
+        style={{marginHorizontal: 6}}
         keyExtractor={(item: any) => item.userId}
       />
 
       <UserInfoModal
+        isBlock={auth.block ? auth.block.includes(selectedUser.userId) : false}
         visible={isModal}
         img={selectedUser.avatar}
         name={UserInfo.getName(selectedUser.name)}
         onClose={handleCloseModal}
-        handleNavigation={() => navigation.navigation('Message')}
+        handleNavigation={async () => {
+          await onNavigation({...selectedUser, type: 'personal'});
+        }}
         handleUnFriend={() => actionUnFriend()}
+        handleBlockUser={async () => await handleBlockUser(selectedUser.userId)}
+      />
+      <LoadingModal visible={isLoading} />
+      <ActionModal
+        visible={isShowBlockdModal}
+        onPressNo={() => setShowBlockModal(false)}
+        onPressYes={async () =>
+          await actionBlockUser(auth.userId, selectedUser.userId)
+        }
+        descriptions={`Do you really want to ${
+          auth.block && auth.block.includes(selectedUser.userId) ? ' un' : ''
+        }block this friend?`}
+        title={`Bạn có thực sự muốn${
+          auth.block && auth.block.includes(selectedUser.userId) ? ' bỏ' : ''
+        } chặn ${UserInfo.getName(selectedUser.name)} không`}
       />
     </SafeAreaView>
   );

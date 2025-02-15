@@ -10,11 +10,18 @@ import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import LikeListModal from '../Modal/LikeListModal';
 import {eventSevices} from '../Services/eventService';
-import {RowComponent, SpaceComponent, TextComponent} from './index';
+import {
+  ButtonComponent,
+  RowComponent,
+  SpaceComponent,
+  TextComponent,
+} from './index';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import Share from 'react-native-share';
 import RNBlobUtil from 'react-native-blob-util';
 import ShareEventModal from '../Modal/ShareEventModal';
+import {globalStyles} from '../../Styles/globalStyle';
+import {DirectRight} from 'iconsax-react-native';
 interface Props {
   img: string;
   content: string;
@@ -25,6 +32,7 @@ interface Props {
   listUsers: string[];
   navigation: any;
   href: string;
+  title: string;
 }
 
 const CarComponent = (props: Props) => {
@@ -38,12 +46,15 @@ const CarComponent = (props: Props) => {
     listUsers,
     navigation,
     href,
+    title,
   } = props;
 
   const [isLiked, setLiked] = useState(like);
   const [isProcessing, setProcessing] = useState(false);
+  const [isShowContent, setIsShowContent] = useState(false);
   const [count, setCount] = useState(countLike);
   const auth = useSelector(authSelector);
+
   const getTime = () => {
     const timePart: any = timeStamp.split('-')[0].trim();
     const [date, time, ampm] = timePart.split(' ');
@@ -101,18 +112,6 @@ const CarComponent = (props: Props) => {
       console.error('Error fetch image base64 error:', error);
     }
   };
-  const myCustomShare = async () => {
-    const base64Image = await fetchImageAsBase64();
-    const shareOptions = {
-      url: base64Image,
-    };
-    try {
-      const shareRespond = await Share.open(shareOptions);
-      console.log(JSON.stringify(shareRespond));
-    } catch (error) {
-      console.log('Share event error: ', error);
-    }
-  };
 
   return (
     <View style={localStyles.card}>
@@ -136,7 +135,48 @@ const CarComponent = (props: Props) => {
       </RowComponent>
       {/* Content */}
       <View>
-        <TextComponent label={content} styles={localStyles.content} size={15} />
+        <TextComponent label={title} styles={localStyles.title} size={18} />
+        <SpaceComponent height={4} />
+        {isShowContent ? (
+          <TouchableOpacity onPress={() => setIsShowContent(!isShowContent)}>
+            <TextComponent
+              label="Ẩn đi"
+              styles={globalStyles.actionText}
+              size={22}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => setIsShowContent(!isShowContent)}>
+            <TextComponent
+              label="Xem thêm"
+              styles={globalStyles.actionText}
+              size={22}
+            />
+          </TouchableOpacity>
+        )}
+        {isShowContent && (
+          <View>
+            <TextComponent
+              label={content}
+              styles={localStyles.content}
+              size={15}
+            />
+            <RowComponent
+              styles={{justifyContent: 'flex-end'}}
+              onPress={() =>
+                navigation.navigate('DetailEvent', {
+                  href: 'https://tdmu.edu.vn' + href,
+                })
+              }>
+              <TextComponent
+                label={'Đi đến'}
+                styles={localStyles.link}
+                size={15}
+              />
+              <DirectRight color={appColors.blue} size={appInfo.sizeIcon} />
+            </RowComponent>
+          </View>
+        )}
         <SpaceComponent height={10} />
         <ZoomImageComponent url={img} styles={localStyles.postImage} />
       </View>
@@ -219,6 +259,15 @@ const localStyles = StyleSheet.create({
   content: {
     color: '#333333',
     lineHeight: 22,
+  },
+  link: {
+    color: appColors.blue,
+    fontStyle: 'italic',
+  },
+  title: {
+    lineHeight: 22,
+    color: appColors.black,
+    fontWeight: '500',
   },
   postImage: {
     width: '100%',

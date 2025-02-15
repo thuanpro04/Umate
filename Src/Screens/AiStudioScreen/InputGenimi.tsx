@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
   inputStyles: {
     borderBottomColor: 'grey',
     flex: 1,
-    color: 'black',
+    color:appColors.white
   },
 });

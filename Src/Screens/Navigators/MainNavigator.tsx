@@ -17,6 +17,7 @@ import DetailEvent from '../Events/DetailEvent';
 import GoongMapScreen from '../map/GoongMapScreen';
 import MessageNavigator from './MessageNavigator';
 import UserQRCode from '../QRCode/UserQRCode';
+import FriendScreens from '../Friends/FriendScreens';
 
 
 const MainNavigator = () => {
@@ -40,6 +41,8 @@ const MainNavigator = () => {
       <Stack.Screen name="DetailEvent" component={DetailEvent} />
       <Stack.Screen name="GoongMapScreen" component={GoongMapScreen} />
       <Stack.Screen name="UserQRCode" component={UserQRCode} />
+      <Stack.Screen name="FriendScreens" component={FriendScreens} />
+
 
 
     </Stack.Navigator>
