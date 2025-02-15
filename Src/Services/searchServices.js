@@ -1,13 +1,15 @@
-const { UserModel } = require("../models/usersModel");
+const {
+  UserModel,
+  ConversationModel,
+  GroupConversationModel,
+} = require("../models/usersModel");
 const { transformUserData, findUserById } = require("./userServices");
 
 const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
- 
   const user = await findUserById(currentUserId);
 
   // Khởi tạo mảng điều kiện tìm kiếm
   let searchConditions = [{ name: { $regex: searchTerm, $options: "i" } }];
-
   // Nếu có điều kiện tìm kiếm
   if (bySearch && bySearch.length > 0) {
     // Thêm các điều kiện vào searchConditions
@@ -24,9 +26,8 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
       searchConditions.push({ majorCategory: user.majorCategory });
     }
   }
-  //console.log("searchConditions", searchConditions);
   // Nếu không có điều kiện nào, trả về mảng rỗng
-   if (searchConditions.length === 0 && bySearch.length > 0) return [];
+  if (searchConditions.length === 0 && bySearch.length > 0) return [];
 
   // Thực hiện truy vấn MongoDB với điều kiện tìm kiếm
   const users = await UserModel.find({
@@ -35,7 +36,7 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
       { userId: { $nin: [currentUserId] } }, // Loại trừ người dùng hiện tại
     ],
   });
-// console.log(users,currentUserId);
+  // console.log(users,currentUserId);
 
   // Nếu không có tìm kiếm, trả về danh sách người dùng
   if (searchTerm === "") {
@@ -47,9 +48,9 @@ const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
 
 const searchFriendByName = async (req, res) => {
   const { searchTerm, currentUserId, titleSearch } = req.query;
-console.log(req.query);
-
+  // console.log(req.query);
   const bySearch = titleSearch.split(",");
+
   //$regex là toán tử để tìm kiếm chuỗi theo biểu thức chính quy (regular expression).
   //$options: "i" cho phép tìm kiếm không phân biệt chữ hoa chữ thường (case-insensitive).
   try {
@@ -65,6 +66,7 @@ console.log(req.query);
           message: "User not found !!!",
         });
       }
+
       return res.status(200).json({
         message: "Search users successlly!!!",
         data,
@@ -77,12 +79,27 @@ console.log(req.query);
     });
   }
 };
+const handleSearchKeyWordGroup = async (currentUserId, keyWord) => {
+  try {
+    const converUser = await GroupConversationModel.find({
+      "invitedUsers.userId": currentUserId, // Lọc theo userId trong invitedUsers
+      groupName: { $regex: keyWord, $options: "i" },
+    });
+    return converUser;
+  } catch (error) {
+    console.error("Lỗi handleSearchConversation:", error);
+    return [];
+  }
+};
 const handleSearchConversations = async (req, res) => {
   const { currentUserId, keyWord } = req.query;
   try {
-    const data = await handleSearchByName(keyWord, currentUserId);
-    console.log(data);
-
+    const searchByNameUser = await handleSearchByName(keyWord, currentUserId);
+    const searchByGroupName = await handleSearchKeyWordGroup(
+      currentUserId,
+      keyWord
+    );
+    const data = [...searchByNameUser, ...searchByGroupName];
     if (keyWord === "") {
       const userSuggests = data.slice(0, 3);
       return res.status(200).json({
@@ -98,6 +115,7 @@ const handleSearchConversations = async (req, res) => {
     console.log("handleSearchConversation", error);
   }
 };
+
 module.exports = {
   searchFriendByName,
   handleSearchByName,

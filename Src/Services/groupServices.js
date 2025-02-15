@@ -1,5 +1,5 @@
 const { GroupConversationModel } = require("../models/usersModel");
-const { generateUniqueID } = require("../untils/infomationUntils");
+const { generateUniqueID } = require("../untils/informationUntils");
 
 const handleNewGroupUser = async (req, res) => {
   const groupInfo = { groupId: generateUniqueID(), ...req.body };

@@ -15,8 +15,6 @@ const getJsonWebToken = async (email, id) => {
 const handleLoginWithGoogle = async (req, res) => {
   try {
     const userInfo = req.body;
-    console.log(req.body);
-
     // Kiểm tra người dùng có tồn tại không
     const existingUser = await findUserById(userInfo.userId);
     let user;
@@ -28,8 +26,8 @@ const handleLoginWithGoogle = async (req, res) => {
       user = {
         ...existingUser,
         accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
+        fcmTokens: existingUser.fcmTokens ?? [],
       };
-
       console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
     } else {
@@ -43,7 +41,6 @@ const handleLoginWithGoogle = async (req, res) => {
         avatar: userInfo.avatar,
         access: userInfo.access,
         online: true,
-      
       });
       console.log(newUser);
 
@@ -56,7 +53,7 @@ const handleLoginWithGoogle = async (req, res) => {
       console.log("Create user.");
       // Sau khi cập nhật, trả về phản hồi
     }
-    
+
     res.status(200).json({
       message: "Login with google successfully!!",
       data: user,

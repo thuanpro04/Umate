@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const cron = require("node-cron");
 const url = "https://tdmu.edu.vn/tin-tuc";
 //npm install node-cron gọi event định kì
-const { generateUniqueID } = require("../untils/infomationUntils");
+const { generateUniqueID } = require("../untils/informationUntils");
 const { EventModel } = require("../models/eventModel");
 const { MetaModel } = require("../models/metaModel");
 const { UserModel } = require("../models/usersModel");
@@ -52,7 +52,6 @@ const getEvents = async () => {
       const time = article.querySelector(".new_item_time");
       const content = article.querySelector(".new_item_desc");
       // const eventId = crypto.randomUUID();
-
       return {
         // eventId,
         title: titleElement ? titleElement.getAttribute("title").trim() : null,
@@ -65,12 +64,21 @@ const getEvents = async () => {
   });
   await browser.close();
   //const newEvent = [];
-  const existtingTitles = await EventModel.find({
-    title: { $in: scrapedData.map((e) => e.title) },
-  });
+
+  const scrapedTitles = scrapedData.map((e) => e.title);
+  // console.log("Checking titles in DB:", scrapedTitles);
+
+  const existingEvents = await EventModel.find({
+    title: { $in: scrapedTitles },
+  }).lean();
+
+
   const newEvents = scrapedData.filter(
-    (event) => !existtingTitles.includes(event.title)
+    (event) => !existingEvents.includes(event.title)
   );
+  //console.log("newEvents",newEvents, newEvents.length);
+  // console.log("scrapedData", newEvents[0]);
+
   if (newEvents.length > 0) {
     await EventModel.insertMany(newEvents); // Thêm tất cả bài mới một lần
     console.log(`Đã lưu ${newEvents.length} bài viết mới.`);
@@ -79,45 +87,30 @@ const getEvents = async () => {
   }
   return newEvents;
 };
-const checkForNewEvent = async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url, {
-    waitUntil: "domcontentloaded",
-  });
-  const firstEvent = await page.evaluate(() => {
-    const article = document.querySelector(".tintuc815.for_count.new_item");
-    const time = article.querySelector(".new_item_time");
-    return { time: time ? new Date(time.textContent.trim()) : null };
-  });
-  await browser.close();
-  if (!firstEvent) {
-    return false;
-  }
-  const meta = await MetaModel.findOne();
-  if (!meta || !meta.lastScrapeTime) {
-    // Nếu chưa có dữ liệu, xem như có tin mới
-    return true;
-  }
-  return firstEvent.time > meta.lastScrapeTime;
-};
 
 const handleGetEvent = async (req, res) => {
   const { curentPage, limit } = req.query;
   try {
     // const hasNewEvent = await checkForNewEvent();
-    await getEvents();
+    const eventPage = await getEvents();
     const now = new Date();
     await MetaModel.updateOne({}, { lastScrapeTime: now }, { upsert: true });
     const totalEvents = await EventModel.countDocuments();
     const events = await EventModel.find({})
       .skip((curentPage - 1) * limit)
       .limit(Number(limit));
+
+    // events.forEach((element) => {
+    //   console.log(element.title);
+    // });
+
+    // console.log(Math.ceil(eventPage.length / limit));
+
     res.status(200).json({
       message: "Get events successfully!",
       data: {
         events,
-        totalPages: Math.ceil(totalEvents / limit),
+        totalPages: Math.ceil(eventPage.length / limit),
       },
     });
   } catch (error) {

@@ -5,7 +5,7 @@ const {
   GroupConversationModel,
   MessageModel,
 } = require("../models/usersModel");
-const { generateUniqueID } = require("../untils/infomationUntils");
+const { generateUniqueID } = require("../untils/informationUntils");
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
   console.log(req.query);
@@ -104,7 +104,7 @@ const handleCheckConversation = async (req, res) => {
 };
 const getConversationInfo = async (senderId, receiverId) => {
   const conversation = await ConversationModel.findOne({
-    participants: { $all: [senderId, receiverId] },
+    participants: { $all: [senderId, receiverId], $size: 2 },
   });
 
   return conversation;
@@ -273,4 +273,5 @@ module.exports = {
   sendMessageToGroupAndPersonal,
   handleGetAllConversationUsers,
   handleCheckConversation,
+ 
 };

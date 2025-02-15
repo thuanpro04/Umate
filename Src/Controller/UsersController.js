@@ -1,19 +1,19 @@
-const { UserModel } = require("../models/usersModel");
 const {
   findUserById,
   updateOneProfileInfo,
   filterUsers,
   transformUserData,
   handleGetUserInfoById,
-  handleListUserForHeartEvent
+  handleListUserForHeartEvent,
+  handleUpdateStatusUser,
+  handleActionBlockUser,
+  handleUpdateFcmTokenForUser,
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
   const { currentUserId, filter } = req.query;
   try {
-    // Lấy thông tin người dùng hiện tại
     const existingUser = await findUserById(currentUserId);
-
     if (!existingUser) {
       return res.status(404).json({ message: "User not found!" });
     }
@@ -22,6 +22,7 @@ const getAllUsers = async (req, res) => {
     // Định dạng dữ liệu người dùng trước khi trả về
     const formattedData = transformUserData(filteredUsers);
     // Trả về dữ liệu thành công
+
     res.status(200).json({
       message: "Get users successfully!!!",
       data: formattedData,
@@ -31,18 +32,31 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Error fetching users" });
   }
 };
+const updateStatusUser = (req, res) => {
+  handleUpdateStatusUser(req, res);
+};
 const setUpProfileInfo = async (req, res) => {
   updateOneProfileInfo(req, res);
 };
 const getUserInfo = async (req, res) => {
   handleGetUserInfoById(req, res);
 };
+
 const getListUserForHeartEvent = (req, res) => {
   handleListUserForHeartEvent(req, res);
+};
+const actionBlockUser = (req, res) => {
+  handleActionBlockUser(req, res);
+};
+const updateFcmTokenForUser = (req, res) => {
+  handleUpdateFcmTokenForUser(req, res);
 };
 module.exports = {
   getAllUsers,
   setUpProfileInfo,
   getUserInfo,
   getListUserForHeartEvent,
+  updateStatusUser,
+  actionBlockUser,
+  updateFcmTokenForUser,
 };

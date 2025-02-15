@@ -68,6 +68,8 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   },
   online: { type: Boolean },
+  block: [{ type: String, ref: "User" }],
+  fcmTokens: { type: [String] },
 });
 
 const commentSchema = new mongoose.Schema({
@@ -127,6 +129,7 @@ const conversationSchema = new mongoose.Schema(
     conversationId: { type: String, required: true, unique: true },
     participants: [{ type: String, ref: "User", required: true }],
     message: [messageSchema],
+    block: { type: Boolean, default: false },
     lastMessage: { type: String, default: "" }, // Tin nhắn mới nhất
     lastMessageTimestamp: { type: Date, default: Date.now },
   },

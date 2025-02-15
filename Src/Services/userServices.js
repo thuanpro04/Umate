@@ -11,6 +11,17 @@ const updateUserById = async (userId, updateAction) => {
   const result = await UserModel.updateOne({ userId: userId }, updateAction);
   return result;
 };
+const cleanData = (data) => {
+  const sanitizedData = {};
+  Object.keys(data).forEach((key) => {
+    if (typeof data[key] === "string") {
+      sanitizedData[key] = data[key].normalize("NFC"); // Chuẩn hóa UTF-8
+    } else {
+      sanitizedData[key] = data[key];
+    }
+  });
+  return sanitizedData;
+};
 const filterUsers = async (filter, existingUser) => {
   const { userId, friends, removeFriends, friendRequests } = existingUser;
 
@@ -68,24 +79,24 @@ const updateOneProfileInfo = async (req, res) => {
     link,
   } = req.body;
   console.log(req.body);
-
+  const sanitizedData = cleanData({
+    name,
+    className,
+    majorCategory,
+    majoring,
+    avatar,
+    sex,
+    address,
+    bio,
+    link,
+  });
   try {
     const updateUsers = await UserModel.findOneAndUpdate(
       {
         userId: userId,
       },
       {
-        $set: {
-          name,
-          className,
-          majorCategory,
-          majoring,
-          avatar,
-          sex,
-          address,
-          bio,
-          link,
-        },
+        $set: sanitizedData,
       },
       {
         new: true,
@@ -137,6 +148,77 @@ const handleListUserForHeartEvent = async (req, res) => {
     console.log("handle get list user info error: ", error);
   }
 };
+const handleUpdateStatusUser = async (req, res) => {
+  const { id, status } = req.query;
+  const booleanStatus = status === "true";
+
+  try {
+    const result = await UserModel.updateOne(
+      { userId: id },
+      { $set: { online: booleanStatus } }
+    );
+    // if (result.modifiedCount === 0) {
+    //   return res.status(400).json({
+    //     message: "Update status fail !!",
+    //   });
+    // }
+    res.status(200).json({
+      message: "Update status user successfully !!!",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+const handleActionBlockUser = async (req, res) => {
+  const { userId, userFriendId } = req.body;
+  let result;
+  try {
+    const userInfo = await findUserById(userId);
+    if (userInfo.block.includes(userFriendId)) {
+      result = await UserModel.updateOne(
+        { userId },
+        { $pull: { block: userFriendId } }
+      );
+    } else {
+      result = await UserModel.updateOne(
+        { userId: userId },
+        { $push: { block: userFriendId } }
+      );
+    }
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({
+        message: "update block user conversation fail.",
+      });
+    }
+    res.status(200).json({
+      message: "update block user successfully !!",
+      data: userInfo.block,
+    });
+  } catch (error) {
+    console.log("Block user fail ", error);
+  }
+};
+const handleUpdateFcmTokenForUser = async (req, res) => {
+  const { userId, fcmTokens } = req.body;
+  console.log(req.body);
+
+  try {
+    const result = await UserModel.updateOne(
+      { userId },
+      { $addToSet: { fcmTokens: { $each: fcmTokens } } }
+    );
+
+    res.status(200).json({
+      message: "Update fcmtoken successfully !!",
+      data: [],
+    });
+  } catch (error) {
+    console.log("update fcmtoken fail ", error);
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -146,4 +228,7 @@ module.exports = {
   updateOneProfileInfo,
   handleGetUserInfoById,
   handleListUserForHeartEvent,
+  handleUpdateStatusUser,
+  handleActionBlockUser,
+  handleUpdateFcmTokenForUser,
 };
