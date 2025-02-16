@@ -7,6 +7,7 @@ const { generateUniqueID } = require("../untils/informationUntils");
 const { EventModel } = require("../models/eventModel");
 const { MetaModel } = require("../models/metaModel");
 const { UserModel } = require("../models/usersModel");
+const { handleSendNotification } = require("./notificationServices");
 const handlePostEvent = async (req, res) => {
   const data = req.body;
   const newEvent = new EventModel({
@@ -72,7 +73,6 @@ const getEvents = async () => {
     title: { $in: scrapedTitles },
   }).lean();
 
-
   const newEvents = scrapedData.filter(
     (event) => !existingEvents.includes(event.title)
   );
@@ -100,11 +100,7 @@ const handleGetEvent = async (req, res) => {
       .skip((curentPage - 1) * limit)
       .limit(Number(limit));
 
-    // events.forEach((element) => {
-    //   console.log(element.title);
-    // });
-
-    // console.log(Math.ceil(eventPage.length / limit));
+    // handleSendNotification();
 
     res.status(200).json({
       message: "Get events successfully!",

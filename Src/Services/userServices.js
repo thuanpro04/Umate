@@ -172,6 +172,7 @@ const handleUpdateStatusUser = async (req, res) => {
   }
 };
 
+
 const handleActionBlockUser = async (req, res) => {
   const { userId, userFriendId } = req.body;
   let result;
@@ -201,16 +202,17 @@ const handleActionBlockUser = async (req, res) => {
     console.log("Block user fail ", error);
   }
 };
+const updateFcmToken = async (userId, fcmTokens) => {
+  const result = await UserModel.updateOne(
+    { userId },
+    { $addToSet: { fcmTokens: { $each: fcmTokens } } }
+  );
+};
 const handleUpdateFcmTokenForUser = async (req, res) => {
   const { userId, fcmTokens } = req.body;
-  console.log(req.body);
 
   try {
-    const result = await UserModel.updateOne(
-      { userId },
-      { $addToSet: { fcmTokens: { $each: fcmTokens } } }
-    );
-
+    await updateFcmToken(userId, fcmTokens);
     res.status(200).json({
       message: "Update fcmtoken successfully !!",
       data: [],
@@ -231,4 +233,5 @@ module.exports = {
   handleUpdateStatusUser,
   handleActionBlockUser,
   handleUpdateFcmTokenForUser,
+  updateFcmToken
 };

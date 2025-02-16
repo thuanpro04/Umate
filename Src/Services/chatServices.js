@@ -6,9 +6,10 @@ const {
   MessageModel,
 } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/informationUntils");
+const { handleSendNotification } = require("./notificationServices");
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
-  console.log(req.query);
+  // console.log(req.query);
 
   try {
     // console.log("Page", page, "Limit", limit * page);
@@ -143,6 +144,19 @@ const sendMessageToGroupAndPersonal = async (data) => {
         await conversation.save(),
           console.log("Message added to existing conversation");
       }
+
+      const mess = conversation.message[conversation.message.length - 1];
+      if (
+        mess.status === "sent" &&
+        !conversation.notification.includes(mess.receiverId)
+      ) {
+        handleSendNotification(
+          mess.receiverId,
+          mess.content,
+          "personal",
+          mess.senderId
+        );
+      }
     } else {
       if (!data.groupId) {
         console.error("Group Id is missing");
@@ -169,8 +183,21 @@ const sendMessageToGroupAndPersonal = async (data) => {
         groupConversations.message.push(data);
         groupConversations.lastMessage = getLastMessages(data);
         groupConversations.lastMessageTimestamp = new Date();
-        await Promise.all([groupConversations.save(), newMessage.save]);
+        await groupConversations.save();
         console.log("Message saved successfully!");
+        const mess =
+          groupConversations.message[groupConversations.message.length - 1];
+        if (
+          mess.status === "sent" &&
+          !groupConversations.notification.includes(mess.receiverId)
+        ) {
+          handleSendNotification(
+            mess.recipients,
+            mess.content,
+            "group",
+            mess.senderId
+          );
+        }
       } catch (error) {
         console.error("Error saving groupConversations:", error);
         return res
@@ -196,6 +223,7 @@ const handleGetAllConversationUsers = async (req, res) => {
     const groupConversations = await GroupConversationModel.find({
       "invitedUsers.userId": currentUserId,
     }).sort({ lastMessageTimestamp: -1 });
+
     // Kiểm tra nếu cả hai loại cuộc trò chuyện đều rỗng
     if (!personalConversations.length && !groupConversations.length) {
       return res.status(404).json({
@@ -217,12 +245,17 @@ const handleGetAllConversationUsers = async (req, res) => {
         (userId) => userId !== currentUserId
       );
       const user = formatData.find((user) => user.userId === otherUserId);
+
       return {
         type: "personal",
         ...user,
         lastMessage: conv.lastMessage || "",
         lastMessageTimestamp: conv.lastMessageTimestamp,
         conversationId: conv.conversationId,
+        statusLastMessage:
+          conv.message[conv.message.length - 1].receiverId === currentUserId &&
+          conv.message[conv.message.length - 1].status === "sent",
+        notification: conv.notification,
       };
     });
     // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
@@ -243,6 +276,9 @@ const handleGetAllConversationUsers = async (req, res) => {
       lastMessage: group.lastMessage,
       messages: group.messages,
       type: group.type,
+      notification: group.notification,
+      statusLastMessage:
+        !group.message[group.message.length - 1].senderId === currentUserId,
     }));
 
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
@@ -268,10 +304,59 @@ const handleGetAllConversationUsers = async (req, res) => {
   }
 };
 
+const handleUpdateStatusMessage = async (req, res) => {
+  const { userId, id, key } = req.body;
+  try {
+    let isUpdate;
+    if (key === "personal") {
+      const conversation = await ConversationModel.findOne({
+        conversationId: id,
+      });
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      conversation.message.forEach((e) => {
+        if (e.receiverId === userId && e.status !== "read") {
+          e.status = "read";
+          if (!e.readBy.includes(userId)) {
+            e.readBy.push(userId);
+          }
+          isUpdate = true;
+        }
+      });
+      if (isUpdate) {
+        await conversation.save();
+      }
+    } else {
+      const groupConversation = await GroupConversationModel.findOne({
+        groupId: id,
+      });
+      groupConversation.message.forEach((e) => {
+        if (e.senderId !== userId && e.status !== "read") {
+          e.status = "read";
+          if (!e.readBy.includes(userId)) {
+            e.readBy.push(userId);
+          }
+          isUpdate = true;
+        }
+      });
+      if (isUpdate) {
+        await groupConversation.save();
+      }
+      console.log(groupConversation.message);
+    }
+    res.status(200).json({
+      message: "update status message successfully!!",
+      data: [],
+    });
+  } catch (error) {
+    console.log("update status message fail: ", error);
+  }
+};
 module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
   handleGetAllConversationUsers,
   handleCheckConversation,
- 
+  handleUpdateStatusMessage,
 };
