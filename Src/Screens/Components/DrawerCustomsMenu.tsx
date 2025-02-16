@@ -39,16 +39,15 @@ const DrawerCustomsMenu = ({navigation}: any) => {
       const fcmToken = await AsyncStorage.getItem('fcmtoken');
       if (fcmToken) {
         if (user.fcmTokens && user.fcmTokens.length > 0) {
-          const items = [...user.fcmTokens];
           // console.log(items);
-          const index = items.findIndex((element: any) => element === fcmToken);
+          let items = [user.fcmTokens]; // Copy mảng gốc
+          const index = items.findIndex(e => e === fcmToken);
 
           if (index !== -1) {
             items.splice(index, 1);
           }
-          // console.log('items', items);
 
-          await HandleNotification.update(items, user.userId);
+          // await HandleNotification.update(items, user.userId);
         }
       }
 

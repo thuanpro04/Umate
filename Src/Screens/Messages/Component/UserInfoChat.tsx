@@ -27,26 +27,47 @@ import {UserInfo} from '../../Untils/UserInfo';
 import ZoomImageComponent from './ZoomImageComponent';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
+import {notificationServices} from '../../Services/notificationServices';
+import {useSelector} from 'react-redux';
+import {authReducer, authSelector} from '../../../redux/reducers/authReducer';
 const UserInfoChat = ({navigation}: any) => {
   const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
-  const [statusNotification, setStatusNotification] = useState(false);
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
+  const auth = useSelector(authSelector);
+  const [statusNotification, setStatusNotification] = useState(false);
+  console.log(statusNotification);
 
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
-    console.log(converInfo);
+    setStatusNotification(
+      converInfo && converInfo.notification.includes(auth.userId),
+    );
+    // console.log("converInfo",converInfo);
   }, []);
-
+  const handleActionNotification = async () => {
+    try {
+      const res = await notificationServices.actionNotificationUser(
+        auth.userId,
+        converInfo.type === 'personal'
+          ? converInfo.conversationId
+          : converInfo.groupId,
+        converInfo.type,
+      );
+    } catch (error) {
+      console.log('Action notification fail error: ', error);
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       getConversationInfo();
     }, []),
   );
+
   const onPressItems = (key: number) => {
     console.log(key);
 
@@ -118,6 +139,7 @@ const UserInfoChat = ({navigation}: any) => {
         break;
       case 'notification':
         setStatusNotification(!statusNotification);
+        handleActionNotification();
         break;
       case 'member':
         navigation.navigate('MemberGroup', {
@@ -128,6 +150,7 @@ const UserInfoChat = ({navigation}: any) => {
         break;
     }
   };
+  console.log(converInfo);
 
   return (
     <SafeAreaView style={globalStyles.main}>
@@ -147,12 +170,14 @@ const UserInfoChat = ({navigation}: any) => {
       <ScrollView style={{flex: 1}}>
         <View style={styles.container}>
           {converInfo ? (
-            <ZoomImageComponent
-              url={
-                converInfo.type === 'personal'
-                  ? converInfo.avatar
-                  : converInfo.avatar
-              }
+            <Image
+              source={{
+                uri:
+                  converInfo.type === 'personal'
+                    ? converInfo.avatar
+                    : converInfo.avatar,
+              }}
+              style={styles.avatar}
             />
           ) : (
             <Image
@@ -260,5 +285,10 @@ const styles = StyleSheet.create({
   },
   showItemStyle: {
     paddingHorizontal: 18,
+  },
+  avatar: {
+    height: 85,
+    width: 85,
+    borderRadius: 8,
   },
 });

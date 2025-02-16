@@ -18,6 +18,7 @@ import {UserInfo} from '../../Untils/UserInfo';
 import CustomFootImages from './CustomFootImages';
 import CustormLinkPreview from '../../Components/CustormLinkPreview';
 import {LinkPreview} from '@flyerhq/react-native-link-preview';
+import {userServices} from '../../Services/userService';
 
 interface Props {
   currentUserId: string;
@@ -40,15 +41,26 @@ const ChatItems = memo((props: Props) => {
     setReplyOnSwipeOpen,
     item,
   } = props;
-  
+
   const [showTimeMessages, setShowTimeMessages] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [showTime, setShowTime] = useState<any[]>([]);
+  const [user, setUser] = useState<any>('');
   const isNextMyMessage = true;
   const isUser = props?.item.senderId === props?.currentUserId;
+  const getUserSenderId = async (senderId: string) => {
+    try {
+      const res = await userServices.getUserInfo(senderId);
+      if (res && res?.data) {
+        setUser(res.data);
+      }
+    } catch (error) {
+      console.log('get user sender id error: ', error);
+    }
+  };
   const onChangeImageIndex = (index: number) => {
     setTimeout(() => {
       setImageIndex(index);
@@ -178,33 +190,41 @@ const ChatItems = memo((props: Props) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   const Message = memo(({item, index}: any) => {
-    const isUser = item.senderId === currentUserId ? false : true;
     const isLink = urlRegex.test(item.content);
     return (
       <View key={index} style={{flex: 1}}>
-        <RowComponent styles={{justifyContent: 'flex-end'}}>
+        <View
+          style={{
+            alignSelf: isUser ? 'flex-end' : 'flex-start',
+            marginVertical: 4,
+          }}>
           {showTime[index] && (
-            <View style={{alignItems: isUser ? 'flex-start' : 'flex-end'}}>
+            <View style={{alignSelf: 'center'}}>
               <TextComponent
                 label={UserInfo.getTimePresent(props.item.timestamp)}
                 color={appColors.grey2}
-                size={12}
+                size={8}
               />
             </View>
           )}
           <TouchableOpacity
             activeOpacity={0.5}
-            onPress={() => onChangeShowTime(index)}
+            onPress={() => {
+              item.recipients &&
+                item.recipients.length > 0 &&
+                getUserSenderId(item.senderId);
+              onChangeShowTime(index);
+            }}
             style={[
               styles.container,
               {
                 backgroundColor: isUser
                   ? 'rgba(121,178,243,0.3)'
                   : 'rgba(116,208,103,0.3)',
-                alignSelf: isUser ? 'flex-start' : 'flex-end',
-                borderBottomLeftRadius: !isUser ? 20 : 0,
+
+                borderBottomLeftRadius: !isUser ? 0 : 20,
                 paddingTop: item?.reply ? 2 : 8,
-                borderBottomRightRadius: isUser ? 20 : 0,
+                borderBottomRightRadius: !isUser ? 20 : 0,
                 paddingHorizontal: item?.reply ? 2 : 8,
               },
             ]}>
@@ -225,7 +245,9 @@ const ChatItems = memo((props: Props) => {
               </View>
             )}
             {isLink ? (
-              <CustormLinkPreview txtLink={item.content} />
+              <View style={{height: 240}}>
+                <CustormLinkPreview txtLink={item.content} />
+              </View>
             ) : (
               <TextComponent
                 key={index}
@@ -237,16 +259,28 @@ const ChatItems = memo((props: Props) => {
               />
             )}
           </TouchableOpacity>
-        </RowComponent>
-        {showTime[index] && (
-          <View style={{alignItems: isUser ? 'flex-start' : 'flex-end'}}>
-            <TextComponent
-              label={props.item.status}
-              color={appColors.grey2}
-              size={12}
-            />
-          </View>
-        )}
+        </View>
+        {isUser
+          ? showTime[index] && (
+              <View style={{alignSelf: isUser ? 'flex-end' : 'flex-start'}}>
+                <TextComponent
+                  label={props.item.status}
+                  color={appColors.grey2}
+                  size={12}
+                />
+              </View>
+            )
+          : showTime[index] && (
+              <View style={{marginLeft: 12}}>
+                {user && user.name && (
+                  <TextComponent
+                    label={UserInfo.getName(user ? user.name : '')}
+                    color={appColors.grey2}
+                    size={8}
+                  />
+                )}
+              </View>
+            )}
       </View>
     );
   });

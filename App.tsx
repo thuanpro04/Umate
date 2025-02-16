@@ -13,10 +13,21 @@ import ToastConfig from './Src/Screens/Components/ToastConfig';
 import {Host} from 'react-native-portalize';
 import Orientation from 'react-native-orientation-locker';
 import {HandleNotification} from './Src/Screens/Untils/HandleNotification';
+import messaging from '@react-native-firebase/messaging';
+import {Notification} from './Src/Screens/Untils/Notification';
 const App = () => {
   useEffect(() => {
     Orientation.lockToPortrait();
     HandleNotification.checkNotificationPertion();
+  }, []);
+  useEffect(() => {
+    messaging().onMessage(async mess => {
+      Notification.showToast(
+        'info',
+        mess.notification?.title ?? '',
+        mess.notification?.body ?? '',
+      );
+    });
   }, []);
   return (
     <GestureHandlerRootView style={{flex: 1}}>

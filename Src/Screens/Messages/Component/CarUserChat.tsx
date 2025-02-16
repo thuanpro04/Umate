@@ -8,7 +8,7 @@ import {
 } from '../../Components';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
-import { appColors } from '../../../Theme/Colors/appColors';
+import {appColors} from '../../../Theme/Colors/appColors';
 interface Props {
   name: string;
   massv?: string;
@@ -16,10 +16,20 @@ interface Props {
   onPress?: () => void;
   lastMessage: string;
   isBtnSend?: boolean;
-  onPressSend?:() => void
+  onPressSend?: () => void;
+  lastMessageColor?: string;
 }
 const CarUserChat = (props: Props) => {
-  const {name, massv, image, onPress, lastMessage, isBtnSend, onPressSend} = props;
+  const {
+    name,
+    massv,
+    image,
+    onPress,
+    lastMessage,
+    isBtnSend,
+    onPressSend,
+    lastMessageColor,
+  } = props;
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.5}>
@@ -34,12 +44,17 @@ const CarUserChat = (props: Props) => {
 
         <View style={{flex: 1}}>
           <RowComponent>
-            <TextComponent label={name} />
+            <TextComponent label={name} styles={{fontWeight: '500'}} />
             {!isBtnSend && <TextComponent label={`@${massv}`} />}
           </RowComponent>
-          <TextComponent label={lastMessage} numberOfLine={1} color={appColors.grey} />
+          <TextComponent
+            label={lastMessage}
+            numberOfLine={1}
+            color={lastMessageColor ?? appColors.grey}
+            styles={{fontSize: 14, fontWeight: 'bold', marginLeft: 12}}
+          />
         </View>
-        {isBtnSend && <ButtonComponent label="Send" onPress={onPressSend}/>}
+        {isBtnSend && <ButtonComponent label="Send" onPress={onPressSend} />}
       </RowComponent>
     </TouchableOpacity>
   );

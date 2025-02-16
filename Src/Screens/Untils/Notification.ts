@@ -12,7 +12,11 @@ export class Notification {
       },
     });
   };
-  static showToast = (type: any, text1: string, text2: string) => {
+  static showToast = (
+    type: 'success' | 'error' | 'info',
+    text1: string,
+    text2: string,
+  ) => {
     Toast.show({
       type,
       text1,

@@ -25,13 +25,6 @@ const MessageScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const memoizedUsers = useMemo(() => {
-    return [...users].sort((a, b) => {
-      const dateA = new Date(a.lastMessageTimestamp).getTime();
-      const dateB = new Date(b.lastMessageTimestamp).getTime();
-      return dateA - dateB;
-    });
-  }, [users]);
 
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
@@ -39,7 +32,7 @@ const MessageScreen = ({navigation}: any) => {
       const res = await messageServices.getAllConversationUsers(auth.userId);
       if (res?.data && res) {
         setUsers(res?.data);
-        console.log(res?.data);
+        // console.log(res?.data);
       }
       setIsLoading(false);
     } catch (error) {
@@ -48,8 +41,6 @@ const MessageScreen = ({navigation}: any) => {
     }
   }, []);
   const onNavigation = async (item: any) => {
-    // console.log(item,124);
-
     await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
     navigation.navigate('Chat');
   };
@@ -66,6 +57,8 @@ const MessageScreen = ({navigation}: any) => {
     }, []),
   );
   const renderCardItems = ({item, index}: any) => {
+    console.log(item);
+
     return (
       <CarUserChat
         key={index}
@@ -78,6 +71,9 @@ const MessageScreen = ({navigation}: any) => {
         image={item.avatar}
         lastMessage={item.lastMessage}
         onPress={() => onNavigation(item)}
+        lastMessageColor={
+          item.statusLastMessage ? appColors.blueBack : appColors.grey
+        }
       />
     );
   };
@@ -86,12 +82,16 @@ const MessageScreen = ({navigation}: any) => {
     <SafeAreaView style={globalStyles.container}>
       <HeaderComponent
         iconStyle
+        iconLeft={
+          <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
+        }
         styles={{justifyContent: 'space-between'}}
         iconRight={<More color={appColors.blue2} size={appInfo.sizeIconBold} />}
         // title="Messages"
         iconQR={
           <ScanBarcode color={appColors.blue2} size={appInfo.sizeIconBold} />
         }
+        onPress1={() => navigation.openDrawer()}
         onPress2={() => setIsVisible(true)}
       />
       <View style={{paddingLeft: 18}}>
@@ -122,7 +122,7 @@ const MessageScreen = ({navigation}: any) => {
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
           <ActivityIndicator />
 
-          {!memoizedUsers && (
+          {!users && (
             <TextComponent
               label={'Chats not found !!'}
               color={appColors.grey2}
@@ -130,9 +130,9 @@ const MessageScreen = ({navigation}: any) => {
             />
           )}
         </View>
-      ) : memoizedUsers.length > 0 ? (
+      ) : users.length > 0 ? (
         <FlatList
-          data={memoizedUsers}
+          data={users}
           key={'listMessage'}
           keyExtractor={item =>
             item.type === 'personal' ? item.conversationId : item.groupId

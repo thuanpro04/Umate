@@ -1,5 +1,5 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React, {memo, useCallback} from 'react';
+import React, {memo, useCallback, useState} from 'react';
 import {LinkPreview} from '@flyerhq/react-native-link-preview';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -7,23 +7,30 @@ import TextComponent from './TextComponent';
 interface Props {
   txtLink?: string;
 }
-const CustormLinkPreview = memo((props: Props)  => {
+const CustormLinkPreview = memo((props: Props) => {
   const {txtLink} = props;
-
+  const [imageLoaded, setImageLoaded] = useState(false);
   const renderImage = useCallback(
     (image: any) => {
+      if (!image?.url) return <View style={styles.imagePlaceholder} />; // Hiển thị placeholder nếu không có ảnh
+
       return (
-        image?.url && <Image source={{uri: image.url}} style={styles.image} />
+        <Image
+          source={{uri: image.url}}
+          style={styles.image}
+          onLoad={() => setImageLoaded(true)} // Khi ảnh tải xong, đánh dấu là đã load
+          onError={() => setImageLoaded(false)} // Nếu lỗi, ẩn ảnh
+        />
       );
     },
-    [] // Không phụ thuộc vào bất kỳ giá trị nào
+    [txtLink],
   );
 
   return (
     txtLink && (
       <LinkPreview
         text={txtLink}
-        containerStyle={{flex: 1}}
+        containerStyle={{flex: 1, minHeight: appInfo.size.HEIGHT * 0.02}}
         renderText={text => (
           <TextComponent
             label={text}
@@ -45,12 +52,11 @@ const CustormLinkPreview = memo((props: Props)  => {
 const styles = StyleSheet.create({
   image: {
     width: appInfo.size.WIDTH * 0.51, // Chiều rộng hình ảnh
-    height: appInfo.size.HEIGHT * 0.23, // Chiều cao hình ảnh
+    height: appInfo.size.HEIGHT * 0.2, // Chiều cao hình ảnh
     borderRadius: 8,
     marginBottom: 10,
     alignSelf: 'center',
-    resizeMode: 'cover',
-    
+    resizeMode: 'contain',
   },
   imagePlaceholder: {
     width: appInfo.size.WIDTH * 0.51, // Chiều rộng hình ảnh

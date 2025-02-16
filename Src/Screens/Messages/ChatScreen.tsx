@@ -22,6 +22,7 @@ import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
+import chatsAPI from '../../apis/chatApi';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -45,7 +46,6 @@ const ChatScreen = ({navigation}: any) => {
       try {
         const info = await UserInfo.getConversationInfo(getItem);
         setConverInfo(info); // Cập nhật thông tin hội thoại
-        console.log('converInfo', converInfo);
       } catch (error) {
         console.error('Error fetching conversation info:', error);
       }
@@ -56,10 +56,27 @@ const ChatScreen = ({navigation}: any) => {
   useEffect(() => {
     if (converInfo) {
       handleLoadMoreMessages();
+      handleUpdateStatusMessage();
     }
     //  scrollViewToEnd()
   }, [converInfo]);
+  const handleUpdateStatusMessage = async () => {
+    try {
+      const res = await messageServices.updateStatusMessage(
+        auth.userId,
+        converInfo.type === 'personal'
+          ? converInfo.conversationId
+          : converInfo.groupId,
+        converInfo.type,
+      );
 
+      if (res) {
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log('update status message fail: ', error);
+    }
+  };
   const handleLoadMoreMessages = useCallback(async () => {
     if (loading) return;
     setLoading(true);
@@ -76,7 +93,7 @@ const ChatScreen = ({navigation}: any) => {
         if (res?.data && res.data.messages) {
           // console.log(res.data.messages);
           setLimitPage(res.data.totalPages);
-          console.log('limitPage: ', limitPage, 'page: ', page);
+          // console.log('limitPage: ', limitPage, 'page: ', page);
           setMessages(prev => {
             const newMessages = res.data.messages.reverse();
             // Kết hợp các tin nhắn mới và cũ
@@ -105,7 +122,6 @@ const ChatScreen = ({navigation}: any) => {
       }
     }
   }, [converInfo, page, loading]);
-  // console.log("converInfo.groupId",converInfo);
 
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]; reply?: string}) => {
@@ -180,31 +196,34 @@ const ChatScreen = ({navigation}: any) => {
   const keyExtractor = (item: any, index: number) =>
     item.id?.toString() || index.toString();
 
-  const renderItemMessages = (props: any) => {
-    const allUrlImages = messages
-      .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
-      .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
-      .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
+  const renderItemMessages = useCallback(
+    (props: any) => {
+      const allUrlImages = messages
+        .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
+        .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
+        .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
 
-    return (
-      <ChatItems
-        updateRowRef={updateRowRef}
-        navigation={navigation}
-        currentUserId={currentUserId}
-        userId={
-          converInfo.type === 'personal'
-            ? converInfo.userId
-            : converInfo
-            ? converInfo.invitedUsers
-            : ''
-        }
-        {...props}
-        members={members}
-        urlImages={allUrlImages}
-        setReplyOnSwipeOpen={setReplyMessage}
-      />
-    );
-  };
+      return (
+        <ChatItems
+          updateRowRef={updateRowRef}
+          navigation={navigation}
+          currentUserId={currentUserId}
+          userId={
+            converInfo.type === 'personal'
+              ? converInfo.userId
+              : converInfo
+              ? converInfo.invitedUsers
+              : ''
+          }
+          {...props}
+          members={members}
+          urlImages={allUrlImages}
+          setReplyOnSwipeOpen={setReplyMessage}
+        />
+      );
+    },
+    [messages],
+  );
   // console.log(messages);
 
   const ListHeader = () => {
@@ -257,9 +276,7 @@ const ChatScreen = ({navigation}: any) => {
               const yOffSet = nativeEvent.contentOffset.y;
               const contentHeight = nativeEvent.contentSize.height;
               // console.log(contentHeight, ' ', yOffSet);
-
               yOffSet < 10 && page <= limitPage ? handleLoadMoreMessages() : '';
-
               const layoutHeight = nativeEvent.layoutMeasurement.height;
               yOffSet + layoutHeight < contentHeight - 100
                 ? setShowScrollToBottom(true)

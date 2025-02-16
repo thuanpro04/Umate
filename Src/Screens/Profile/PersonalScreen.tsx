@@ -32,6 +32,7 @@ import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
 import {globalStyles} from '../../Styles/globalStyle';
 import {Linking} from 'react-native';
+import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -40,7 +41,6 @@ const PersonalScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
-  
 
   const infoUser = {
     stats: {
@@ -200,13 +200,13 @@ const PersonalScreen = ({navigation}: any) => {
           ) : (
             <View style={profileStyles.profileContainer}>
               <RowComponent>
-                <Image
-                  source={{
-                    uri: userInfo.avatar
+                <ZoomImageComponent
+                  url={
+                    userInfo.avatar
                       ? userInfo.avatar
-                      : 'https://via.placeholder.com/150',
-                  }}
-                  style={profileStyles.avatar}
+                      : 'https://via.placeholder.com/150'
+                  }
+                  styles={profileStyles.avatar}
                 />
                 {userInfo.online && (
                   <View

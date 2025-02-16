@@ -1,11 +1,12 @@
 import {useFocusEffect} from '@react-navigation/native';
-import {HambergerMenu} from 'iconsax-react-native';
+import {HambergerMenu, Notification} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   AppState,
   FlatList,
   SafeAreaView,
+  StyleSheet,
   View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
@@ -18,6 +19,7 @@ import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
 import {userServices} from '../Services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const HomeScreen = ({navigation}: any) => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -111,10 +113,16 @@ const HomeScreen = ({navigation}: any) => {
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
         }
         iconRight={
-          <Address color={appColors.blueBack} fontSize={appInfo.sizeIconBold} />
+          <View>
+            <Notification
+              color={appColors.blueBack}
+              fontSize={appInfo.sizeIconBold}
+            />
+            <View style={localStyles.notification} />
+          </View>
         }
         onPress1={() => navigation.openDrawer()}
-        onPress2={() => navigation.navigate('GoongMapScreen')}
+        // onPress2={() => navigation.navigate('GoongMapScreen')}
       />
       {event.length > 0 ? (
         <FlatList
@@ -137,6 +145,17 @@ const HomeScreen = ({navigation}: any) => {
 };
 
 export default HomeScreen;
+const localStyles = StyleSheet.create({
+  notification: {
+    backgroundColor: appColors.green,
+    height: 8,
+    width: 8,
+    borderRadius: 50,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+});
 // Zoom ảnh
 // Xem lượt like
 //Share

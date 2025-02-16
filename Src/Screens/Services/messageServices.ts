@@ -3,7 +3,7 @@ import chatsAPI from '../../apis/chatApi';
 const getAllMessagesUser = async (id: any, key: string, page: number) => {
   try {
     const url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
-   
+
     const res = await chatsAPI.handleChats(url);
     return res;
   } catch (error) {
@@ -35,10 +35,19 @@ const getAllConversationUsers = async (currentUserId: string) => {
     console.log('getAllConversationUsers', error);
   }
 };
-
+const updateStatusMessage = async (userId: string, id: string, key: string) => {
+  const url = `/update-status-message?userId=${userId}&&id=${id}`;
+  const data = {
+    userId,
+    id,
+    key,
+  };
+  const res = await chatsAPI.handleChats(url,data,'post');
+  return res;
+};
 export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
   checkConversation,
-  
+  updateStatusMessage,
 };
