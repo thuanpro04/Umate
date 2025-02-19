@@ -115,9 +115,35 @@ const handleSearchConversations = async (req, res) => {
     console.log("handleSearchConversation", error);
   }
 };
+const handleFindFrienForUser = async (req, res) => {
+  const { userId, keyWord } = req.query;
+  // console.log(userId, keyWord);
 
+  try {
+    const currentUser = await findUserById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const friends = currentUser.friends;
+    const filter = {
+      userId: { $in: friends },
+    };
+    if (keyWord) {
+      filter.name = { $regex: keyWord, $options: "i" };
+    }
+    const user = await UserModel.find(filter);
+    console.log("dday", user, 125656);
+    res.status(200).json({
+      message: "find user successfully!!",
+      data: user,
+    });
+  } catch (error) {
+    console.log("handle find friend user fail error: ", error);
+  }
+};
 module.exports = {
   searchFriendByName,
   handleSearchByName,
   handleSearchConversations,
+  handleFindFrienForUser,
 };

@@ -3,16 +3,19 @@ const { generateUniqueID } = require("../untils/informationUntils");
 
 const handleNewGroupUser = async (req, res) => {
   const groupInfo = { groupId: generateUniqueID(), ...req.body };
-  console.log("group", groupInfo);
+  // console.log("group", groupInfo);
+  const invitedUsers = groupInfo.invitedUsers.flatMap((user) => user.userId);
+  console.log("invitedUsers", invitedUsers);
 
   try {
     const messageId = generateUniqueID();
     const newGroup = new GroupConversationModel({
       ...groupInfo,
-      message:[{messageId}],
+      invitedUsers,
+      message: [{ messageId }],
       lastMessage: "",
       lastMessageTimestamp: null,
-      groupId:generateUniqueID()
+      groupId: generateUniqueID(),
     });
     await newGroup.save();
     if (!res.headersSent) {

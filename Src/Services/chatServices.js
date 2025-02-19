@@ -168,6 +168,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
       if (!groupConversations) {
         return res.status(404).json({ messages: "Group not found" });
       }
+
       const recipients = groupConversations.invitedUsers.map(
         (item) => item.userId
       );
@@ -221,7 +222,7 @@ const handleGetAllConversationUsers = async (req, res) => {
       .sort({ lastMessageTimestamp: -1 })
       .exec();
     const groupConversations = await GroupConversationModel.find({
-      "invitedUsers.userId": currentUserId,
+      invitedUsers: { $in: [currentUserId] },
     }).sort({ lastMessageTimestamp: -1 });
 
     // Kiểm tra nếu cả hai loại cuộc trò chuyện đều rỗng

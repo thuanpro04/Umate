@@ -5,6 +5,7 @@ const {
   ConversationModel,
   GroupConversationModel,
 } = require("../models/usersModel");
+const { notificationModel } = require("../models/notificationModel");
 
 adminfirebase.initializeApp({
   credential: adminfirebase.credential.cert(serviceAccount),
@@ -102,4 +103,69 @@ const handleActionNotification = async (req, res) => {
     console.log("Action notification fail error: ", error);
   }
 };
-module.exports = { handleSendNotification, handleActionNotification };
+const addNotificationForUser = async (currentUserId, userId, content, type) => {
+  const user = await findUserById(currentUserId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  const userIds = Array.isArray(userId) ? userId : [userId];
+  const notifications = userIds.map((receiverId) => ({
+    senderId: currentUserId,
+    receiverId,
+    title: user.name,
+    content,
+    type,
+  }));
+  await notificationModel.insertMany(notifications);
+  console.log("Notified for user !!");
+};
+const handleActionInviteToGroup = async (req, res) => {
+  const { currentUserId, userId, content } = req.body;
+  try {
+    await addNotificationForUser(currentUserId, userId, content, "groupInvite");
+    res.status(200).json({
+      message: "Invite to group successfully",
+      data: [],
+    });
+
+    console.log("Invite to group successfully");
+  } catch (error) {
+    console.log("Invite to group error: ", error);
+  }
+};
+const handleGetNotifications = async (req, res) => {
+  const { userId } = req.query;
+  try {
+    const result = await notificationModel.find({ receiverId: userId });
+    res.status(200).json({
+      message: "Notification successfully !!",
+      data: result,
+    });
+  } catch (error) {
+    console.log("get notification error: ", error);
+  }
+};
+const handleActionDeleteNotification = async (req, res) => {
+  const { id } = req.query;
+  try {
+    console.log(id);
+
+    const result = await notificationModel.findByIdAndDelete(id);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Không tìm thấy thông báo để xóa." });
+    }
+
+    res.status(200).json({ message: "Xóa thông báo thành công!" });
+  } catch (error) {
+    console.log("Delete notification fail error: ", error);
+  }
+};
+module.exports = {
+  handleSendNotification,
+  handleActionNotification,
+  handleActionInviteToGroup,
+  handleGetNotifications,
+  addNotificationForUser,
+  handleActionDeleteNotification,
+};

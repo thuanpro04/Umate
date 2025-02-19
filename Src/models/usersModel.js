@@ -105,11 +105,7 @@ const groupConversationSchema = new mongoose.Schema(
     groupName: { type: String, required: true },
     message: [messageSchema],
     description: { type: String },
-    invitedUsers: [
-      {
-        userId: { type: String, ref: "User" },
-      },
-    ],
+    invitedUsers: [{ type: String, ref: "User" }],
     leader: {
       userId: { type: String, required: true, ref: "User" },
     },

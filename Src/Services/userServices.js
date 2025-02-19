@@ -61,6 +61,7 @@ const transformUserData = (users) => {
       sex: user.sex,
       majorCategory: user.majorCategory,
       className: user.className,
+      block: user.block,
     })) || []
   );
 };
@@ -172,7 +173,6 @@ const handleUpdateStatusUser = async (req, res) => {
   }
 };
 
-
 const handleActionBlockUser = async (req, res) => {
   const { userId, userFriendId } = req.body;
   let result;
@@ -194,9 +194,11 @@ const handleActionBlockUser = async (req, res) => {
         message: "update block user conversation fail.",
       });
     }
+
+    const updatedUser = await findUserById(userId);
     res.status(200).json({
       message: "update block user successfully !!",
-      data: userInfo.block,
+      data: updatedUser.block,
     });
   } catch (error) {
     console.log("Block user fail ", error);
@@ -233,5 +235,5 @@ module.exports = {
   handleUpdateStatusUser,
   handleActionBlockUser,
   handleUpdateFcmTokenForUser,
-  updateFcmToken
+  updateFcmToken,
 };
