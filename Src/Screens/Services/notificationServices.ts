@@ -1,23 +1,42 @@
 import notificationAPI from '../../apis/notificationApi';
-
+let url;
 const actionNotificationUser = async (
   userId: string,
   converId: string,
   key: string,
 ) => {
-  const url = `/action-notifi`;
+  url = `/action-notifi`;
   const data = {userId, converId, key};
   const res = await notificationAPI.handleNotification(url, data, 'post');
   return res;
 };
-const inviteToGroup = async (userId: string[], currentUserId: string, groupName:string) => {
-  const url = '/invite-group';
+const inviteToGroup = async (
+  userId: string[],
+  currentUserId: string,
+  groupName: string,
+) => {
+  url = '/invite-group';
   const data = {
     currentUserId,
     userId,
-    content:`Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ${groupName}cùng trải nghiệm nhé!🔥`
+    content: `Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ${groupName}cùng trải nghiệm nhé!🔥`,
   };
   const res = await notificationAPI.handleNotification(url, data, 'post');
   return res;
 };
-export const notificationServices = {actionNotificationUser, inviteToGroup};
+const getNotifications = async (userId: string) => {
+  url = `/get-notifi?userId=${userId}`;
+  const res = await notificationAPI.handleNotification(url);
+  return res;
+};
+const handleDeleteNotification = async (id: string) => {
+  url = `/delete?id=${id}`;
+  const res = await notificationAPI.handleNotification(url);
+  return res;
+};
+export const notificationServices = {
+  actionNotificationUser,
+  inviteToGroup,
+  getNotifications,
+  handleDeleteNotification,
+};

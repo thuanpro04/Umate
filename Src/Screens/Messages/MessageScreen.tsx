@@ -57,14 +57,15 @@ const MessageScreen = ({navigation}: any) => {
     }, []),
   );
   const renderCardItems = ({item, index}: any) => {
+    const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
+   
+    
     return (
       <CarUserChat
         key={index}
         name={item.groupName ?? UserInfo.getName(item.name)}
         massv={
-          item.type === 'group'
-            ? item.invitedUsers.length
-            : UserInfo.getYearOfbirth(item.email)
+          item.type === 'group' ? sumUsers : UserInfo.getYearOfbirth(item.email)
         }
         image={item.avatar}
         lastMessage={item.lastMessage}
@@ -128,7 +129,7 @@ const MessageScreen = ({navigation}: any) => {
             />
           )}
         </View>
-      ) : users.length > 0 ? (
+      ) : users && users.length > 0 ? (
         <FlatList
           data={users}
           key={'listMessage'}

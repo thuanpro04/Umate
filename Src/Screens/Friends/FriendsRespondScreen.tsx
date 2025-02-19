@@ -182,7 +182,7 @@ const FriendsRespondScreen = () => {
       />
 
       <UserInfoModal
-        isBlock={auth.block.includes(selectedUser.userId)}
+        isBlock={auth && auth.block && auth.block.includes(selectedUser.userId)}
         visible={isModal}
         img={selectedUser.avatar}
         name={UserInfo.getName(selectedUser.name)}

@@ -54,9 +54,7 @@ const MemberGroup = ({navigation}: any) => {
 
   const fetchUserInfos = async () => {
     try {
-      const listUser = converInfo.invitedUsers.map((item: any) => item.userId);
-      // console.log('listUser', listUser);
-      const res = await userServices.getListUserInfo(listUser);
+      const res = await userServices.getListUserInfo(converInfo.invitedUsers);
       if (res && res.data) {
         setUserInfo(res.data);
       }
@@ -91,7 +89,6 @@ const MemberGroup = ({navigation}: any) => {
   };
 
   const renderUserInfo = ({item, index}: any) => {
-    // console.log(item);
 
     return (
       <CarUserComponent
@@ -113,7 +110,6 @@ const MemberGroup = ({navigation}: any) => {
       />
     );
   };
-  // console.log(converInfo);
 
   const handleInviteToGroup = async (selectUser: string[]) => {
     try {
@@ -135,14 +131,13 @@ const MemberGroup = ({navigation}: any) => {
       fetchUserInfos();
     }
   }, [converInfo]);
-  // console.log(userInfo[0]);
 
   return (
     <KeyboardAvoidingView style={[globalStyles.container]}>
       <HeaderComponent
         iconStyle
         iconLeft={
-          <ArrowLeft size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.blueBack} />
         }
         iconQR={
           <MaterialIcons

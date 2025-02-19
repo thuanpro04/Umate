@@ -69,7 +69,7 @@ const HeaderComponent = (props: Props) => {
               label={title ?? ''}
               styles={{
                 fontSize: appInfo.sizeTitle,
-                fontWeight: '500',
+                fontWeight: 'bold',
                 fontStyle: 'italic',
               }}
             />

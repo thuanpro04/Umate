@@ -56,7 +56,6 @@ const AddGroupScreens = ({navigation}: any) => {
     authorId: auth.userId,
     avatar: getAvatar(),
   });
- 
 
   useFocusEffect(
     useCallback(() => {
@@ -70,12 +69,14 @@ const AddGroupScreens = ({navigation}: any) => {
     try {
       const res = await userServices.getEquestFriendUsers(auth.userId, '');
       if (res) {
-        const data = res.map(({name, avatar, userId, majorCategory}: any) => ({
-          name,
-          avatar,
-          userId,
-          majorCategory,
-        }));
+        const data = res.data.map(
+          ({name, avatar, userId, majorCategory}: any) => ({
+            name,
+            avatar,
+            userId,
+            majorCategory,
+          }),
+        );
         setUsers(data);
       }
     } catch (error) {
@@ -114,7 +115,6 @@ const AddGroupScreens = ({navigation}: any) => {
       console.log('upload failed', error);
     }
   };
-  console.log(groupInfo.avatar.name);
 
   function getDataGroup() {
     const member = groupInfo.invitedUsers.map((item: any) => ({
@@ -149,12 +149,14 @@ const AddGroupScreens = ({navigation}: any) => {
       },
       type: 'group',
     };
-    console.log('data ne', dataGroup);
+    // console.log('data ne', dataGroup);
 
     return dataGroup;
   }
   const handleAddGroupUser = async () => {
     try {
+      console.log(getDataGroup().invitedUsers, 123);
+
       const res = await groupServices.handelNewGroupUser(
         getDataGroup(),
         'post',
@@ -167,7 +169,7 @@ const AddGroupScreens = ({navigation}: any) => {
       console.log('handleAddGroupUser', error);
     }
   };
-  console.log('groupInfo', groupInfo);
+  // console.log('groupInfo', groupInfo);
 
   return (
     <ScrollView style={localStyles.container}>
@@ -299,8 +301,9 @@ const AddGroupScreens = ({navigation}: any) => {
             type="primary"
             onPress={() => messageErrors.length === 0 && handleAddGroupUser()}
             label="Add Group"
-            styles={{paddingVertical: 8}}
+            styles={{paddingVertical: 6}}
           />
+          <SpaceComponent height={30} />
         </View>
       </ScrollView>
       {visible && (

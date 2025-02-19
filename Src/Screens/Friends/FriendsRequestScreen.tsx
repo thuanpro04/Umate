@@ -36,11 +36,14 @@ const FriendsRequestScreen = () => {
   };
 
   const handleAgreeFriend = async (friendUserId: string) => {
-    const url = `/agree`;
-    const currentUserId = auth.userId;
-    const data = {friendUserId, currentUserId};
     try {
-      const res = await friendsAPI.handleFriendsApi(url, data, 'post');
+      const res = await friendServices.handleAgreeFriendShip(
+        auth.userId,
+        friendUserId,
+      );
+      if (res) {
+        console.log('Agree friend successfully !!!');
+      }
       getUsers();
     } catch (error) {
       console.log('FriendsRequestScreen', error);

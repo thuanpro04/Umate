@@ -88,8 +88,9 @@ const AddFriendModal = (props: Props) => {
     return existingUser.some(item => item.userId === userId);
   };
   const renderItemUser = ({item, index}: any) => {
-    return index < 7 && checkExistingUser(item.userId) ? (
+    return index < 7 && !checkExistingUser(item.userId) ? (
       <CarUserComponent
+        authori={item.majoring ?? 'chuyên ngành ?'}
         key={index}
         onPress={() => onChangeBgUser(item.userId)}
         onPressAdd={() => {}}

@@ -16,13 +16,19 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
-import {ButtonComponent, HeaderComponent, TextComponent} from '../Components';
+import {
+  ButtonComponent,
+  HeaderComponent,
+  SpaceComponent,
+  TextComponent,
+} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import chatsAPI from '../../apis/chatApi';
+import {Text} from 'react-native-svg';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -225,7 +231,6 @@ const ChatScreen = ({navigation}: any) => {
     [messages],
   );
   // console.log(messages);
-
   const ListHeader = () => {
     return loading ? <ActivityIndicator /> : <></>;
   };
@@ -321,7 +326,22 @@ const ChatScreen = ({navigation}: any) => {
             />
           </ButtonComponent>
         )}
-
+      </SafeAreaView>
+      {converInfo &&
+      converInfo.type === 'personal' &&
+      converInfo.block.includes(auth.userId) ? (
+        <View style={styles.block}>
+          <TextComponent
+            label={`Bạn đã bị block bởi ${UserInfo.getName(
+              converInfo.name,
+            )} liu liu !!!`}
+            styles={{fontWeight: '500', fontStyle: 'italic'}}
+            color={appColors.white}
+          />
+          <SpaceComponent height={8} />
+          <TextComponent label="😜" size={28} />
+        </View>
+      ) : (
         <ChatInput
           onSendMessage={onSendMessages}
           onScroll={() => scrollViewToEnd()}
@@ -336,7 +356,7 @@ const ChatScreen = ({navigation}: any) => {
           }
           groupId={converInfo ? converInfo.groupId : undefined}
         />
-      </SafeAreaView>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -354,5 +374,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
 
     width: '10%',
+  },
+  block: {
+    backgroundColor: '#81C784',
+    height: 120,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+
+    justifyContent: 'center',
   },
 });

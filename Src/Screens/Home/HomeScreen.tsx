@@ -114,7 +114,8 @@ const HomeScreen = ({navigation}: any) => {
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
         }
         iconRight={
-          <TouchableOpacity onPress={() =>{}}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('NotificationScreen')}>
             <Notification
               color={appColors.blueBack}
               fontSize={appInfo.sizeIconBold}

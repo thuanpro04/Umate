@@ -23,17 +23,32 @@ export class Validate {
     });
     return capitalizedParts.join(' ');
   }
+  static getKeyToGroup = (key: string) => {
+    if (key === 'groupName') {
+      return 'group name';
+    } else if (key === 'deputyLeader') {
+      return 'deputy leader';
+    } else {
+      return 'invited';
+    }
+  };
   static groupValidation(data: any) {
     const mess: string[] = [];
     Object.keys(data).forEach(key => {
-      if (key !== 'description' && key !== 'authorId' && key !== 'avatar' && key !=='leader') {
-        !data[`${key}`] && mess.push(`${key} is required !!!`);
+      if (
+        key !== 'description' &&
+        key !== 'authorId' &&
+        key !== 'avatar' &&
+        key !== 'leader'
+      ) {
+        !data[`${key}`] &&
+          mess.push(`${this.getKeyToGroup(key)} is required !!!`);
       }
     });
     if (data.invitedUsers.length < 2) {
-      mess.push('invitedUsers must be greater than two !!!');
+      mess.push('invited must be greater than two !!!');
     }
-    return mess
+    return mess;
   }
   static eventValidation(data: any) {
     const mess: string[] = [];
@@ -52,7 +67,7 @@ export class Validate {
 
     return mess;
   }
-   static validateGroupName(groupName: any) {
+  static validateGroupName(groupName: any) {
     if (!groupName || groupName.length > 100) {
       throw new Error('Tên nhóm không hợp lệ');
     }

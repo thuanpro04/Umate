@@ -139,7 +139,13 @@ const DropdownPicker = (props: Props) => {
   };
   const renderFooter = () => {
     return (
-      <View style={{paddingHorizontal: 20, paddingBottom: 30}}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingVertical: 22,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
         <ButtonComponent
           type="primary"
           onPress={() => {
@@ -154,7 +160,7 @@ const DropdownPicker = (props: Props) => {
             onCloseModalize();
           }}
           label="Agree"
-          styles={{paddingVertical: 6}}
+          styles={{paddingVertical: 4, width: '90%'}}
         />
       </View>
     );
@@ -203,11 +209,8 @@ const DropdownPicker = (props: Props) => {
           affix={<SearchNormal1 size={22} color={appColors.grey} />}
           placehold="Search..."
         />
-        <ButtonComponent
-          label="Cancel"
-          onPress={onCloseModalize}
-          styles={{paddingVertical: 6}}
-        />
+        <ButtonComponent label="Cancel" onPress={onCloseModalize} styles={{}} />
+       
       </RowComponent>
     );
   };
@@ -272,6 +275,8 @@ const localStyles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom:22
+    
   },
   card: {
     justifyContent: 'center',

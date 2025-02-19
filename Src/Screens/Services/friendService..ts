@@ -11,7 +11,7 @@ const handlePressRemoveSuggested = async (
   const url = '/remove-suggested';
   const data = {friendUserId: userId, currentUserId};
   const res = await friendsAPI.handleFriendsApi(url, data, 'post');
- 
+
   return res?.data;
 };
 const handlePressRemoveRequest = async (
@@ -21,7 +21,7 @@ const handlePressRemoveRequest = async (
   const url = '/remove-request';
   const data = {friendUserId: userId, currentUserId};
   const res = await friendsAPI.handleFriendsApi(url, data, 'post');
- 
+
   return res?.data;
 };
 const handleRemoveFriends = async (userId: string, currentUserId: string) => {
@@ -45,9 +45,19 @@ const handleFriendActionAdd_Cancel = async (
     console.log('HandleFriendActionAdd_Cancel', error);
   }
 };
+const handleAgreeFriendShip = async (
+  currentUserId: string,
+  friendUserId: string,
+) => {
+  const url = `/agree`;
+  const data = {currentUserId, friendUserId};
+  const res = await friendsAPI.handleFriendsApi(url, data, 'post');
+  return res;
+};
 export const friendServices = {
   handlePressRemoveSuggested,
   handleRemoveFriends,
   handleFriendActionAdd_Cancel,
-  handlePressRemoveRequest
+  handlePressRemoveRequest,
+  handleAgreeFriendShip,
 };
