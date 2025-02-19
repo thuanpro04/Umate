@@ -1,12 +1,13 @@
 import {
   FlatList,
+  KeyboardAvoidingView,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   HeaderComponent,
   RowComponent,
@@ -26,23 +27,34 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../../Services/userService';
 import {UserInfo} from '../../Untils/UserInfo';
 import CarUserComponent from '../../Friends/Components/CarUserComponent';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../../redux/reducers/authReducer';
+import {useDispatch, useSelector} from 'react-redux';
+import {addAuth, authSelector} from '../../../redux/reducers/authReducer';
 import {friendServices} from '../../Services/friendService.';
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AddFriendModal from '../../Modal/AddFriendModal';
+import DropdownPicker from '../../Components/DropdownPicker';
+import {notificationServices} from '../../Services/notificationServices';
+import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 const MemberGroup = ({navigation}: any) => {
-  const {invitedUsers, leader, deputyLeader} = useRoute().params as {
-    invitedUsers: any[];
-    leader: any;
-    deputyLeader: any;
-  };
   const auth = useSelector(authSelector);
   const [userInfo, setUserInfo] = useState<any[]>([]);
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
+  const [converInfo, setConverInfo] = useState<any>('');
+  const {getItem} = useAsyncStorage('ConversationInfo');
+  const dispatch = useDispatch();
+  const getConversationInfo = useCallback(async () => {
+    setConverInfo(await UserInfo.getConversationInfo(getItem));
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getConversationInfo();
+    }, []),
+  );
 
   const fetchUserInfos = async () => {
     try {
-      const listUser = invitedUsers.map(item => item.userId);
+      const listUser = converInfo.invitedUsers.map((item: any) => item.userId);
       // console.log('listUser', listUser);
       const res = await userServices.getListUserInfo(listUser);
       if (res && res.data) {
@@ -65,7 +77,6 @@ const MemberGroup = ({navigation}: any) => {
       console.log('handleFriendAction', error);
     }
   };
-
   const shouldShowAddFriendIcon = (userId: string) => {
     return (
       !auth.friends.includes(userId) &&
@@ -74,53 +85,80 @@ const MemberGroup = ({navigation}: any) => {
     );
   };
   const onPressCarUser = (item: any) => {
-    console.log(item.userId);
-
     navigation.navigate('PersonalScreen', {
-      userId:  item.userId 
+      userId: item.userId,
     });
   };
+
   const renderUserInfo = ({item, index}: any) => {
+    // console.log(item);
+
     return (
       <CarUserComponent
         authori={
-          item.userId === leader.userId
+          item.userId === converInfo.leader.userId
             ? 'Trưởng nhóm'
-            : item.userId === deputyLeader.userId
+            : item.userId === converInfo.deputyLeader.userId
             ? 'Phó nhóm'
             : 'Thành viên'
         }
         url={item.avatar}
-        addFriend={shouldShowAddFriendIcon(item.userId)}
+        addFriend={
+          !item.friendRequests.includes(auth.userId) &&
+          shouldShowAddFriendIcon(item.userId)
+        }
         userName={UserInfo.getName(item.name)}
         onPress={() => onPressCarUser(item)}
         onPressAdd={() => handleAddFriend(item.userId)}
       />
     );
   };
-  useFocusEffect(
-    useCallback(() => {
+  // console.log(converInfo);
+
+  const handleInviteToGroup = async (selectUser: string[]) => {
+    try {
+      const res = await notificationServices.inviteToGroup(
+        selectUser,
+        auth.userId,
+        converInfo.groupName,
+      );
+      if (res && res.data) {
+        console.log(res.data);
+      }
+    } catch (error) {
+      console.log('Invite to group error: ', error);
+    }
+  };
+
+  useEffect(() => {
+    if (converInfo) {
       fetchUserInfos();
-    }, []),
-  );
+    }
+  }, [converInfo]);
   // console.log(userInfo[0]);
 
   return (
-    <SafeAreaView style={[globalStyles.container]}>
+    <KeyboardAvoidingView style={[globalStyles.container]}>
       <HeaderComponent
         iconStyle
         iconLeft={
           <ArrowLeft size={appInfo.sizeIconBold} color={appColors.blueBack} />
         }
         iconQR={
-          <UserAdd size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <MaterialIcons
+            name="add-reaction"
+            size={appInfo.sizeIconBold}
+            color={appColors.blue3}
+          />
         }
+        onPressQR={() => setIsVisible(true)}
         iconRight={
           <SearchFavorite1
             size={appInfo.sizeIconBold}
             color={appColors.blueBack}
           />
         }
+        onPress2={() => navigation.navigate('SearchFriends', {users: userInfo})}
       />
       <View style={{marginHorizontal: 12}}>
         <TextComponent label="Thành viên" color="black" title />
@@ -131,7 +169,15 @@ const MemberGroup = ({navigation}: any) => {
           renderItem={renderUserInfo}
         />
       </View>
-    </SafeAreaView>
+
+      <AddFriendModal
+        userId={auth.userId}
+        visible={isVisible}
+        onPressInviteToGroup={handleInviteToGroup}
+        existingUser={converInfo.invitedUsers}
+        onClose={() => setIsVisible(false)}
+      />
+    </KeyboardAvoidingView>
   );
 };
 

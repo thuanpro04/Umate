@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleProp,
   ViewStyle,
+  StatusBar,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {SelectedModel} from '../models/SelectModel';
@@ -171,12 +172,10 @@ const DropdownPicker = (props: Props) => {
             users.majorCategory,
           )
         }
-        styles={{
-          justifyContent: 'center',
-          paddingHorizontal: backgroundUsers[item.userId] ? 30 : 8,
-          alignItems: 'center',
-          flex: 1,
-        }}>
+        styles={[
+          localStyles.card,
+          {paddingHorizontal: backgroundUsers[item.userId] ? 30 : 8},
+        ]}>
         {backgroundUsers[item.userId] && (
           <Entypo
             name="check"
@@ -200,7 +199,7 @@ const DropdownPicker = (props: Props) => {
         <InputComponent
           value={value}
           onChange={e => setValue(e)}
-          styles={{width: '90%', paddingVertical: 6}}
+          styles={{width: '90%'}}
           affix={<SearchNormal1 size={22} color={appColors.grey} />}
           placehold="Search..."
         />
@@ -245,7 +244,8 @@ const DropdownPicker = (props: Props) => {
       <Portal>
         <Modalize
           ref={modalizeRef}
-          modalHeight={650}
+          handlePosition="inside"
+          adjustToContentHeight
           HeaderComponent={renderHearder()}
           FooterComponent={!(isDeputyLeader || isLeader) && renderFooter()}>
           {users.map((item: any, index: number) => renderUsers(item, index))}
@@ -269,8 +269,14 @@ const localStyles = StyleSheet.create({
   },
   containerHeader: {
     paddingHorizontal: 32,
-    marginTop: 12,
+    marginTop: StatusBar.currentHeight,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  card: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    marginVertical: 12,
   },
 });

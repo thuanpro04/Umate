@@ -24,7 +24,7 @@ import {
   TextComponent,
 } from '../Components';
 import {profileStyles} from './profileStyles';
-import {ArrowLeft, ArrowLeft2} from 'iconsax-react-native';
+import {Android, ArrowLeft, ArrowLeft2, UserAdd} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
@@ -33,6 +33,8 @@ import {UserInfo} from '../Untils/UserInfo';
 import {globalStyles} from '../../Styles/globalStyle';
 import {Linking} from 'react-native';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
+import {friendServices} from '../Services/friendService.';
+import {Notification} from '../Untils/Notification';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -68,7 +70,6 @@ const PersonalScreen = ({navigation}: any) => {
       const res = await userServices.getUserInfo(userId);
       if (res && res.data) {
         setUserInfo(res.data);
-        console.log(userInfo.online);
 
         // console.log('userInfo', userInfo);
       }
@@ -91,7 +92,18 @@ const PersonalScreen = ({navigation}: any) => {
       </View>
     );
   };
-  // console.log('userInfo', userInfo);
+  const handleAddFriend = async (friendUserId: string) => {
+    try {
+      
+      const res = await friendServices.handleFriendActionAdd_Cancel(
+        friendUserId,
+        'add',
+        auth.userId,
+      );
+    } catch (error) {
+      console.log('handleFriendAction', error);
+    }
+  };
 
   const renderHeader = () => {
     const dataUser = [
@@ -155,6 +167,14 @@ const PersonalScreen = ({navigation}: any) => {
           color={appColors.white}
           style={{position: 'absolute', left: '5%', top: '5%'}}
         />
+        {!auth.friends.includes(userId) && (
+          <UserAdd
+            onPress={() => handleAddFriend(userId)}
+            size={appInfo.sizeIconBold}
+            color={appColors.white}
+            style={{position: 'absolute', right: '5%', top: '5%'}}
+          />
+        )}
         {userInfo ? (
           isDetail ? (
             <View style={profileStyles.profileContainer}>

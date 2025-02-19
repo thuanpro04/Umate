@@ -13,7 +13,7 @@ interface Props {
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
   iconQR?: ReactNode;
-
+  onPressQR?: () => void;
   onPress1?: () => void;
   onPress2?: () => void;
   isBcolor?: boolean;
@@ -35,6 +35,7 @@ const HeaderComponent = (props: Props) => {
     iconStyle,
     iconQR,
     titleColor,
+    onPressQR,
   } = props;
   const navigation = useNavigation();
   const goBack = () => {
@@ -88,7 +89,7 @@ const HeaderComponent = (props: Props) => {
       )}
       <RowComponent>
         <ButtonComponent
-          onPress={onPress2}
+          onPress={onPressQR}
           iconRight={iconQR}
           type="action"
           styles={iconStyle && localStyles.iconStyles}

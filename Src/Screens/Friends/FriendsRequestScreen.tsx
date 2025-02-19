@@ -27,8 +27,8 @@ const FriendsRequestScreen = () => {
         auth.userId,
         'requests',
       );
-      if (res) {
-        setUsers(res);
+      if (res && res.data) {
+        setUsers(res.data);
       }
     } catch (error) {
       console.log('Get users api:', error);

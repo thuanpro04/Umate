@@ -40,7 +40,7 @@ export class HandleNotification {
     }
   };
   static update = async (fcmTokens: string[], userId: string) => {
-    console.log('Sending to API:', {userId, fcmTokens});
+    // console.log('Sending to API:', {userId, fcmTokens});
     const response = await usersAPI.handleUsers(
       '/update-fcmtoken',
       {
@@ -49,6 +49,6 @@ export class HandleNotification {
       },
       'post',
     );
-    console.log('response', response);
+    // console.log('response', response);
   };
 }

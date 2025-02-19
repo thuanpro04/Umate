@@ -11,18 +11,28 @@ interface Props {
   addFriend?: Boolean;
   onPress: () => void;
   onPressAdd: () => void;
+  bgColor?: string;
 }
 const CarUserComponent = (props: Props) => {
-  const {userName, authori, url, addFriend, onPress, onPressAdd} = props;
+  const {userName, authori, url, addFriend, onPress, onPressAdd, bgColor} =
+    props;
+console.log(authori);
 
   return (
-    <RowComponent styles={styles.card}>
+    <RowComponent
+      styles={[
+        styles.card,
+        {backgroundColor: bgColor ? bgColor : 'transparent'},
+      ]}>
       <RowComponent onPress={onPress} styles={{marginHorizontal: 8}}>
         <Image source={{uri: props.url}} style={globalStyles.userImg} />
         <View style={styles.main}>
           <TextComponent label={userName} styles={globalStyles.label} />
           <SpaceComponent height={6} />
-          <TextComponent label={authori} styles={globalStyles.actionText} />
+          <TextComponent
+            label={authori }
+            styles={globalStyles.actionText}
+          />
         </View>
         {addFriend && (
           <UserAdd
@@ -40,10 +50,12 @@ export default CarUserComponent;
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 12,
+    marginVertical: 8,
     justifyContent: 'flex-start',
     alignItems: 'center',
     flex: 1,
+    borderRadius: 8,
+    paddingVertical: 6,
   },
   main: {
     flex: 1,

@@ -1,18 +1,15 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appColors } from '../../Theme/Colors/appColors';
-import {
-  CarUserComponent,
-  TextComponent
-} from '../Components';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {SafeAreaView, StyleSheet} from 'react-native';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appColors} from '../../Theme/Colors/appColors';
+import {CarUserComponent, TextComponent} from '../Components';
 
-import { debounce } from 'lodash';
-import { FlatList } from 'react-native';
-import { friendServices } from '../Services/friendService.';
-import { userServices } from '../Services/userService';
+import {debounce} from 'lodash';
+import {FlatList} from 'react-native';
+import {friendServices} from '../Services/friendService.';
+import {userServices} from '../Services/userService';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -52,10 +49,11 @@ const SuggestFriend = React.memo(() => {
   const getUsers = async () => {
     try {
       //console.log('res.data', res.data);
-      const allUsers = await userServices.getEquestFriendUsers(
+      const res = await userServices.getEquestFriendUsers(
         auth.userId,
         'suggestfriend',
       );
+      const allUsers = res && res.data;
       if (allUsers) {
         setUsers(allUsers);
         allUsers.forEach((item: any) => {
@@ -133,7 +131,7 @@ const SuggestFriend = React.memo(() => {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={memoUsers}
-        keyExtractor={(item:any) => item.userId}
+        keyExtractor={(item: any) => item.userId}
         renderItem={renderItems}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -149,7 +147,7 @@ const SuggestFriend = React.memo(() => {
     </SafeAreaView>
   );
 });
- 
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: appColors.background,

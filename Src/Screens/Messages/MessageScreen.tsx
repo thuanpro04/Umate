@@ -10,7 +10,7 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
@@ -57,8 +57,6 @@ const MessageScreen = ({navigation}: any) => {
     }, []),
   );
   const renderCardItems = ({item, index}: any) => {
-    console.log(item);
-
     return (
       <CarUserChat
         key={index}

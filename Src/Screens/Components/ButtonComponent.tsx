@@ -87,7 +87,7 @@ const ButtonComponent = (props: Props) => {
         ]}
         disabled={disabled}
         onPress={onPress}>
-        <RowComponent styles={{marginVertical: 4}}>
+        <RowComponent styles={{marginVertical: 8}}>
           {iconLeft && iconLeft}
           <TextComponent
             label={label ?? ''}

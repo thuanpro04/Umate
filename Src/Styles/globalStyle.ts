@@ -25,6 +25,7 @@ const globalStyles = StyleSheet.create({
     height: 60,
     borderRadius: 100,
     backgroundColor: 'rgba(0,0,0,0.3)',
+    resizeMode: 'cover',
   },
   overlay: {
     justifyContent: 'center',

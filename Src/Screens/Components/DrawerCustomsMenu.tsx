@@ -47,7 +47,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
             items.splice(index, 1);
           }
 
-          // await HandleNotification.update(items, user.userId);
+          await HandleNotification.update(items, user.userId);
         }
       }
 

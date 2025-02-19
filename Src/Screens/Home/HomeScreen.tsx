@@ -7,6 +7,7 @@ import {
   FlatList,
   SafeAreaView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
@@ -113,13 +114,13 @@ const HomeScreen = ({navigation}: any) => {
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
         }
         iconRight={
-          <View>
+          <TouchableOpacity onPress={() =>{}}>
             <Notification
               color={appColors.blueBack}
               fontSize={appInfo.sizeIconBold}
             />
             <View style={localStyles.notification} />
-          </View>
+          </TouchableOpacity>
         }
         onPress1={() => navigation.openDrawer()}
         // onPress2={() => navigation.navigate('GoongMapScreen')}

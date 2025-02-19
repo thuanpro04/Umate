@@ -37,7 +37,6 @@ const UserInfoChat = ({navigation}: any) => {
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
   const [statusNotification, setStatusNotification] = useState(false);
-  console.log(statusNotification);
 
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
@@ -142,15 +141,10 @@ const UserInfoChat = ({navigation}: any) => {
         handleActionNotification();
         break;
       case 'member':
-        navigation.navigate('MemberGroup', {
-          invitedUsers: converInfo.invitedUsers,
-          leader: converInfo.leader,
-          deputyLeader: converInfo.deputyLeader,
-        });
+        navigation.navigate('MemberGroup');
         break;
     }
   };
-  console.log(converInfo);
 
   return (
     <SafeAreaView style={globalStyles.main}>

@@ -225,9 +225,7 @@ const SetUpProfile = ({navigation}: any) => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.blueBack} />
         }
-        iconRight={
-          <More size={appInfo.sizeIconBold} color={appColors.blueBack} />
-        }
+        
       />
       <SpaceComponent height={20} />
       <ScrollView >

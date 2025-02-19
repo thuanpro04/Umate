@@ -4,7 +4,7 @@ const getEquestFriendUsers = async (currentUserId: string, filter?: string) => {
   url = `/get-all?currentUserId=${currentUserId}&filter=${filter}`;
 
   const res = await usersAPI.handleUsers(url);
-  return res?.data;
+  return res;
 };
 const updateUsersById = async (userInfo: any) => {
   url = `/update-users`;

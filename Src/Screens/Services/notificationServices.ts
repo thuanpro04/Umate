@@ -10,4 +10,14 @@ const actionNotificationUser = async (
   const res = await notificationAPI.handleNotification(url, data, 'post');
   return res;
 };
-export const notificationServices = {actionNotificationUser};
+const inviteToGroup = async (userId: string[], currentUserId: string, groupName:string) => {
+  const url = '/invite-group';
+  const data = {
+    currentUserId,
+    userId,
+    content:`Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ${groupName}cùng trải nghiệm nhé!🔥`
+  };
+  const res = await notificationAPI.handleNotification(url, data, 'post');
+  return res;
+};
+export const notificationServices = {actionNotificationUser, inviteToGroup};

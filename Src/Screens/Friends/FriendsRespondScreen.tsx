@@ -39,6 +39,7 @@ const FriendsRespondScreen = () => {
   const [isShowUnfriendModal, setShowUnfriendModal] = useState(false);
   const [isShowBlockdModal, setShowBlockModal] = useState(false);
   const dispatch = useDispatch();
+  const [useBlock, setUseBlock] = useState<any[]>([]);
   const navigation = useNavigation();
   const [isModal, setIsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +55,7 @@ const FriendsRespondScreen = () => {
     try {
       const res = await userServices.getEquestFriendUsers(auth.userId, '');
       if (res) {
-        setUsers(res);
+        setUsers(res.data);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -115,12 +116,13 @@ const FriendsRespondScreen = () => {
       setIsLoading(true);
       const res = await userServices.updateBlockUser(userId, userFriendId);
       if (res) {
-        console.log('Block successfully !!!');
-        const updateAuth = {...auth, block: undefined};
-        dispatch(addAuth({...updateAuth, block: res.data}));
+        console.log('Block successfully !!!', res.data);
+        dispatch(addAuth({...auth, block: res.data}));
+        console.log('Sau khi cập nhật:', auth.block);
       }
       setIsLoading(false);
       setShowBlockModal(false);
+      console.log('auth', auth.block);
     } catch (error) {
       console.log('handle block user fail: ', error);
       setIsLoading(false);
@@ -167,6 +169,7 @@ const FriendsRespondScreen = () => {
   function openModalAction() {
     setShowUnfriendModal(true);
   }
+  // console.log(auth.block);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,7 +182,7 @@ const FriendsRespondScreen = () => {
       />
 
       <UserInfoModal
-        isBlock={auth.block ? auth.block.includes(selectedUser.userId) : false}
+        isBlock={auth.block.includes(selectedUser.userId)}
         visible={isModal}
         img={selectedUser.avatar}
         name={UserInfo.getName(selectedUser.name)}
