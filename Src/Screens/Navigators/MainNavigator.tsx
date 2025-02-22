@@ -19,6 +19,7 @@ import MessageNavigator from './MessageNavigator';
 import UserQRCode from '../QRCode/UserQRCode';
 import FriendScreens from '../Friends/FriendScreens';
 import NotificationScreen from '../notification/NotificationScreen';
+import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 
 
 const MainNavigator = () => {
@@ -39,6 +40,7 @@ const MainNavigator = () => {
       <Stack.Screen name="PersonalScreen" component={PersonalScreen} />
       <Stack.Screen name="EditProfile" component={SetUpProfile} />
       <Stack.Screen name="FriendsRespond" component={FriendsRespondScreen} />
+      <Stack.Screen name="FriendsRequestScreen" component={FriendsRequestScreen} />
       <Stack.Screen name="DetailEvent" component={DetailEvent} />
       <Stack.Screen name="GoongMapScreen" component={GoongMapScreen} />
       <Stack.Screen name="UserQRCode" component={UserQRCode} />

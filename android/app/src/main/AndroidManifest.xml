@@ -29,7 +29,10 @@
         </intent-filter>
       </activity>
       <meta-data
-    android:name="com.google.android.geo.API_KEY"
-    android:value="HngCPGYXHR5AK1Oo4nau7Y9qbmF4hgRXanqb0cau"/>
+        android:name="com.mapbox.mapboxsdk.token"
+        android:value="PYn4enDdHKFzvFbIHOiPiusKLPZylaRoj2FQU1CH" />
+      <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="PYn4enDdHKFzvFbIHOiPiusKLPZylaRoj2FQU1CH"/>
     </application>
 </manifest>

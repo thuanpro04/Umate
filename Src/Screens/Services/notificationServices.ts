@@ -11,12 +11,14 @@ const actionNotificationUser = async (
   return res;
 };
 const inviteToGroup = async (
+  id: any,
   userId: string[],
   currentUserId: string,
   groupName: string,
 ) => {
   url = '/invite-group';
   const data = {
+    id,
     currentUserId,
     userId,
     content: `Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ${groupName}cùng trải nghiệm nhé!🔥`,
@@ -34,9 +36,18 @@ const handleDeleteNotification = async (id: string) => {
   const res = await notificationAPI.handleNotification(url);
   return res;
 };
+const handleSendEmail = async (data: any) => {
+  const res = await notificationAPI.handleNotification(
+    '/send-email',
+    data,
+    'post',
+  );
+  return res;
+};
 export const notificationServices = {
   actionNotificationUser,
   inviteToGroup,
   getNotifications,
   handleDeleteNotification,
+  handleSendEmail,
 };

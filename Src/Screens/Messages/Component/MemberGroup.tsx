@@ -35,11 +35,13 @@ import AddFriendModal from '../../Modal/AddFriendModal';
 import DropdownPicker from '../../Components/DropdownPicker';
 import {notificationServices} from '../../Services/notificationServices';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
+import LoadingModal from '../../Modal/LoadingModal';
 const MemberGroup = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const [userInfo, setUserInfo] = useState<any[]>([]);
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
   const dispatch = useDispatch();
@@ -65,14 +67,17 @@ const MemberGroup = ({navigation}: any) => {
 
   const handleAddFriend = async (friendUserId: string) => {
     try {
+      setIsLoading(true);
       const res = await friendServices.handleFriendActionAdd_Cancel(
         friendUserId,
         'add',
         auth.userId,
       );
       setAddedFriends(prev => [...prev, friendUserId]);
+      setIsLoading(false);
     } catch (error) {
       console.log('handleFriendAction', error);
+      setIsLoading(false);
     }
   };
   const shouldShowAddFriendIcon = (userId: string) => {
@@ -89,7 +94,6 @@ const MemberGroup = ({navigation}: any) => {
   };
 
   const renderUserInfo = ({item, index}: any) => {
-
     return (
       <CarUserComponent
         authori={
@@ -113,7 +117,9 @@ const MemberGroup = ({navigation}: any) => {
 
   const handleInviteToGroup = async (selectUser: string[]) => {
     try {
-      const res = await notificationServices.inviteToGroup(
+      setIsLoading(true);
+
+      const res = await notificationServices.inviteToGroup(converInfo.groupId,
         selectUser,
         auth.userId,
         converInfo.groupName,
@@ -121,8 +127,10 @@ const MemberGroup = ({navigation}: any) => {
       if (res && res.data) {
         console.log(res.data);
       }
+      setIsLoading(false);
     } catch (error) {
       console.log('Invite to group error: ', error);
+      setIsLoading(false);
     }
   };
 
@@ -172,6 +180,7 @@ const MemberGroup = ({navigation}: any) => {
         existingUser={converInfo.invitedUsers}
         onClose={() => setIsVisible(false)}
       />
+      <LoadingModal visible={isLoading} />
     </KeyboardAvoidingView>
   );
 };

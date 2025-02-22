@@ -16,7 +16,7 @@ interface Props {
 const CarUserComponent = (props: Props) => {
   const {userName, authori, url, addFriend, onPress, onPressAdd, bgColor} =
     props;
-console.log(authori);
+
 
   return (
     <RowComponent

@@ -84,7 +84,10 @@ const FriendsRespondScreen = () => {
     setIsModal(true);
     setSelectedUser(user);
   };
-  const onNavigation = async (item: any) => {
+  const onNavigationaProfile = (userId: any) => {
+    navigation.navigate('PersonalScreen', {userId});
+  };
+  const onNavigationMessage = async (item: any) => {
     try {
       const res = await messageServices.checkConversation(
         auth.userId,
@@ -141,9 +144,7 @@ const FriendsRespondScreen = () => {
           isFind
           iconM
           styles={{borderWidth: 0}}
-          onPressMessages={async () =>
-            await onNavigation({...item, type: 'personal'})
-          }
+          onPressPersonal={ () => onNavigationaProfile(item.userId)}
           onPressEllipsis={() => handleOpenModal(item)}
         />
 
@@ -188,7 +189,7 @@ const FriendsRespondScreen = () => {
         name={UserInfo.getName(selectedUser.name)}
         onClose={handleCloseModal}
         handleNavigation={async () => {
-          await onNavigation({...selectedUser, type: 'personal'});
+          await onNavigationMessage({...selectedUser, type: 'personal'});
         }}
         handleUnFriend={() => actionUnFriend()}
         handleBlockUser={async () => await handleBlockUser(selectedUser.userId)}

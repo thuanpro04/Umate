@@ -1,5 +1,5 @@
 import groupAPI from '../../apis/groupApi';
-
+let url;
 const handelNewGroupUser = async (
   data: any,
   method?: 'get' | 'post' | 'put',
@@ -12,4 +12,14 @@ const handelNewGroupUser = async (
   }
   return null;
 };
-export const groupServices = {handelNewGroupUser};
+const handleAgreeOnGroup = async (userId: string, id: string, groupId?:string) => {
+  url = '/agree';
+  const data = {
+    userId,
+    id,
+    groupId
+  };
+  const res = await groupAPI.handleGroup(url, data, 'post');
+  return res
+};
+export const groupServices = {handelNewGroupUser, handleAgreeOnGroup};

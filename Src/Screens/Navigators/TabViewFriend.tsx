@@ -21,14 +21,14 @@ const TabViewFriend = () => {
     return <FriendsRespondScreen key={'FriendsRespondScreen'} />;
   };
   const renderScene = SceneMap({
-    first: SuggestRouter,
-    second: RequestRouter,
-    third: RespondRouter,
+    first: RequestRouter,
+    second: RespondRouter,
+    third: SuggestRouter,
   });
   const routes = [
-    {key: 'first', title: 'Suggestions'},
-    {key: 'second', title: 'Request'},
-    {key: 'third', title: 'Friends'},
+    {key: 'first', title: ' Request'},
+    {key: 'second', title: 'Friends'},
+    {key: 'third', title: ' Suggestions'},
   ];
   return (
     <TabView
@@ -36,7 +36,7 @@ const TabViewFriend = () => {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{width: appInfo.size.WIDTH}}
-      renderTabBar={(props) => (
+      renderTabBar={props => (
         <TabBar
           {...props}
           key={'tabview'}

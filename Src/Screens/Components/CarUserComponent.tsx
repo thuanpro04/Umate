@@ -38,7 +38,7 @@ interface Props {
   majoring?: string;
   onPressEllipsis?: () => void;
   iconM?: boolean;
-  onPressMessages?: () => void;
+  onPressPersonal?: () => void;
   userId?: string;
   isFriend?: boolean;
   isRequestFriend?: boolean;
@@ -46,7 +46,7 @@ interface Props {
 
 const CarUserComponent = (props: Props) => {
   const {
-    onPressMessages,
+    onPressPersonal,
     img,
     name,
     onPressYes,
@@ -99,12 +99,7 @@ const CarUserComponent = (props: Props) => {
     }
   };
   return isFind ? (
-    <RowComponent
-      styles={[
-        iconAddCancel && localStyle.container,
-       
-        styles,
-      ]}>
+    <RowComponent styles={[iconAddCancel && localStyle.container, styles]}>
       <Image
         source={{
           uri: img,
@@ -114,7 +109,7 @@ const CarUserComponent = (props: Props) => {
       <View style={{flex: 1}}>
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
-        <TextComponent label={majoring ?? '...'} />
+        <TextComponent label={majoring ?? '...'} styles={globalStyles.actionText}/>
       </View>
       {!isFriend && iconAddCancel && (
         <TouchableOpacity
@@ -141,16 +136,21 @@ const CarUserComponent = (props: Props) => {
           <ButtonComponent
             type="action"
             iconLeft={
-              <Messenger size={appInfo.sizeIconBold} color={appColors.grey} />
+              <AntDesign
+                name="contacts"
+                size={appInfo.sizeIconBold}
+                color={appColors.blue2}
+              />
             }
-            onPress={onPressMessages}
+            onPress={onPressPersonal}
           />
+          <SpaceComponent width={5} />
           <ButtonComponent
             type="action"
             iconRight={
               <AntDesign
                 size={appInfo.sizeIconBold}
-                color={appColors.grey}
+                color={appColors.blue2}
                 name="ellipsis1"
               />
             }
@@ -175,7 +175,7 @@ const CarUserComponent = (props: Props) => {
           <ActivityIndicator style={globalStyles.userImg} />
         )}
       </TouchableOpacity>
-      <View style={{alignItems: 'flex-start',marginVertical:6}}>
+      <View style={{alignItems: 'flex-start', marginVertical: 6}}>
         <TextComponent label={name} title />
         <RowComponent styles={{gap: 20, paddingVertical: 0}}>
           <RowComponent styles={[localStyle.card, {gap: 0}]}>

@@ -26,6 +26,12 @@ export class UserInfo {
   static numberToString = (num: number) => {
     return num < 10 ? `0${num}` : `${num}`;
   };
+  static getDay = (timestamp: string) => {
+    const vietnamDate = new Date(timestamp).toLocaleDateString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+    });
+    return vietnamDate;
+  };
   static getIdUsers = (data: any[]) => {
     const users = data.map(item => item.userId);
     return users;

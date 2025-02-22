@@ -22,6 +22,7 @@ import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
 import {userServices} from '../Services/userService';
 import {HandleNotification} from '../Untils/HandleNotification';
+import SpaceComponent from './SpaceComponent';
 
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +104,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
           });
         }}>
         {user.avatar ? (
-          <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
+          <Image source={{uri: user.avatar}} style={globalStyles.userImg} />
         ) : (
           <Image
             source={require('../../assets/images/User-Icon.jpg')}
@@ -112,6 +113,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
         )}
         <TextComponent label={UserInfo.getName(user.name)} title size={28} />
       </TouchableOpacity>
+      <SpaceComponent height={22} />
       <FlatList
         showsVerticalScrollIndicator={false}
         data={MenuItems}
@@ -144,7 +146,7 @@ const localStyle = StyleSheet.create({
     backgroundColor: appColors.background,
   },
   listItem: {
-    paddingVertical: 12,
+    paddingBottom: 26,
     justifyContent: 'flex-start',
   },
   listItemText: {

@@ -22,6 +22,7 @@ interface Props {
   onChange: (val: string) => void;
   affix?: ReactNode;
   placehold?: string;
+  placeholdColor?: string;
   subffix?: ReactNode;
   isPass?: boolean;
   allowClear?: boolean;
@@ -57,6 +58,7 @@ const InputComponent = (props: Props) => {
     inputRef,
     onFocus,
     onBlur,
+    placeholdColor,
   } = props;
 
   const [isShowPass, setIsShowPass] = useState(isPass ?? false);
@@ -82,7 +84,7 @@ const InputComponent = (props: Props) => {
           keyboardType={type ?? 'default'}
           autoCapitalize="none"
           style={{flex: 1, color: appColors.black, paddingVertical: 8}}
-          placeholderTextColor={appColors.grey}
+          placeholderTextColor={placeholdColor ?? appColors.grey}
         />
         <TouchableOpacity onPress={() => onChange('')}>
           {value && value.length > 0 && props.allowClear && (

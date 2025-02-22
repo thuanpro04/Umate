@@ -141,11 +141,12 @@ const ChatScreen = ({navigation}: any) => {
           reply: val.reply ?? '',
         };
         let updatedMessages = [...messages];
+
         if (converInfo.type === 'group') {
           const groupMessages = {
             ...newMessage,
             groupName: converInfo.groupName,
-            recipients: getuserIdGroup(),
+            recipients: getUserIdGroup(),
             type: 'group',
           };
           const isMessageExist = updatedMessages.some(
@@ -182,11 +183,11 @@ const ChatScreen = ({navigation}: any) => {
     scrollViewRef.current?.scrollToEnd();
   };
 
-  const getuserIdGroup = () => {
+  const getUserIdGroup = () => {
     return converInfo.type === 'group'
-      ? converInfo.invitedUsers
-          .filter((item: any) => item.userId !== currentUserId)
-          .map((item: any) => item.userId)
+      ? converInfo.invitedUsers.filter(
+          (item: any) => item.userId !== currentUserId,
+        )
       : '';
   };
   const updateRowRef = useCallback((ref: any) => {
@@ -260,7 +261,7 @@ const ChatScreen = ({navigation}: any) => {
           onPress2={() => navigation.navigate('MessageNavigator')}
         />
 
-        {messages ? (
+        {messages && messages.length > 0 ? (
           <FlatList
             ref={scrollViewRef}
             data={messages}
@@ -329,6 +330,7 @@ const ChatScreen = ({navigation}: any) => {
       </SafeAreaView>
       {converInfo &&
       converInfo.type === 'personal' &&
+      converInfo.block &&
       converInfo.block.includes(auth.userId) ? (
         <View style={styles.block}>
           <TextComponent
@@ -351,7 +353,7 @@ const ChatScreen = ({navigation}: any) => {
             converInfo.type === 'personal'
               ? converInfo?.userId
               : converInfo.type === 'group'
-              ? getuserIdGroup()
+              ? getUserIdGroup()
               : ''
           }
           groupId={converInfo ? converInfo.groupId : undefined}

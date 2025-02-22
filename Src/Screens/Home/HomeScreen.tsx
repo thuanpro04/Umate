@@ -32,7 +32,6 @@ const HomeScreen = ({navigation}: any) => {
     if (isLoading || page > limitPage) return; // Ngăn chặn gọi API khi đang tải hoặc hết trang.
     try {
       setIsLoading(true);
-
       const res = await eventSevices.getNewEvent(page);
       if (res?.data) {
         setEvent(prevEvent => {
@@ -58,6 +57,7 @@ const HomeScreen = ({navigation}: any) => {
     }
   };
 
+  
   const renderItemEvents = ({item, index}: any) => {
     return (
       <CarEventComponent
@@ -114,8 +114,9 @@ const HomeScreen = ({navigation}: any) => {
           <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
         }
         iconRight={
+          // NotificationScreen
           <TouchableOpacity
-            onPress={() => navigation.navigate('NotificationScreen')}>
+            onPress={() => navigation.navigate('GoongMapScreen')}>
             <Notification
               color={appColors.blueBack}
               fontSize={appInfo.sizeIconBold}

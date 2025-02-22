@@ -84,11 +84,8 @@ const AddFriendModal = (props: Props) => {
   };
   const debounceFindFriends = debounce(searchFriends, 300);
 
-  const checkExistingUser = (userId: any) => {
-    return existingUser.some(item => item.userId === userId);
-  };
   const renderItemUser = ({item, index}: any) => {
-    return index < 7 && !checkExistingUser(item.userId) ? (
+    return index < 7 && !existingUser.includes(item.userId) ? (
       <CarUserComponent
         authori={item.majoring ?? 'chuyên ngành ?'}
         key={index}
@@ -107,6 +104,7 @@ const AddFriendModal = (props: Props) => {
     debounceFindFriends(text);
     return () => debounceFindFriends.cancel();
   }, [text]);
+
   return (
     <Portal>
       <Modalize
@@ -128,16 +126,16 @@ const AddFriendModal = (props: Props) => {
               <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
             }
           />
-          <SpaceComponent height={14} />
+          <SpaceComponent height={6} />
           {allUsers.map((item, index) => renderItemUser({item, index}))}
           <ButtonComponent
             label="Mời vào nhóm"
             onPress={() => {
-              onPressInviteToGroup &&
-                selectUser.length > 0 &&
+              if (onPressInviteToGroup && selectUser.length > 0) {
                 onPressInviteToGroup(selectUser);
-              onCloseModal();
-              setSelectUser([]);
+                onCloseModal();
+                setSelectUser([]);
+              }
             }}
           />
           <SpaceComponent height={6} />

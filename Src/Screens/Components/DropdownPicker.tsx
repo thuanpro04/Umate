@@ -192,7 +192,7 @@ const DropdownPicker = (props: Props) => {
         <CarUserComponent
           name={item.name}
           isFind
-          majoring={users.majorCategory}
+          majoring={users.majorCategory??'chuyên ngành'}
           styles={{borderWidth: 0, gap: 20}}
           img={users.avatar}
         />

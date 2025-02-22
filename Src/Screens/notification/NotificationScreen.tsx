@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import {globalStyles} from '../../Styles/globalStyle';
-import {HeaderComponent, TextComponent} from '../Components';
+import {HeaderComponent, RowComponent, TextComponent} from '../Components';
 import {ArrowLeft2} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {Message} from 'iconsax-react-native';
@@ -23,44 +23,33 @@ import LoadingModal from '../Modal/LoadingModal';
 import {appColors} from '../../Theme/Colors/appColors';
 import friendsAPI from '../../apis/friendsApi';
 import {friendServices} from '../Services/friendService.';
-const notifications = [
-  {
-    _id: '67b4a80287f716b3dc31319a',
-    senderId: '106468530278878536164',
-    receiverId: '106064896936382491093',
-    title: 'Thuận Phan',
-    content:
-      'Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ngay và cùng trải nghiệm nhé! 🔥',
-    type: 'groupInvite',
-  },
-  {
-    _id: '67b4a80287f716b3dc31319b',
-    senderId: '106468530278878536165',
-    receiverId: '106064896936382491093',
-    title: 'Ngọc Trần',
-    content: '📩 Bạn có một lời mời kết bạn mới. Kết nối ngay nào!',
-    type: 'friendRequest',
-  },
-];
+import {UserInfo} from '../Untils/UserInfo';
+import {groupServices} from '../Services/groupServices';
 
-const NotificationScreen = () => {
+const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
-  const handleActionFriend = async (action: 'add' | 'cancel', id: string) => {
+
+  const handleActionFriend = async (
+    action: 'agree' | 'cancel',
+    id: string,
+    groupId?: string,
+  ) => {
     try {
       const res =
-        action === 'add'
-          ? await friendServices.handleAgreeFriendShip(auth.userId, id)
+        action === 'agree'
+          ? await groupServices.handleAgreeOnGroup(auth.userId, id, groupId)
           : await notificationServices.handleDeleteNotification(id);
       if (res) {
         fetchNotification();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log('action friend error: ', error);
+    }
   };
   const RenderNotificationItem = ({item}: any) => {
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
-
     const handlePress = () => {
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -74,9 +63,8 @@ const NotificationScreen = () => {
           useNativeDriver: true,
         }),
       ]).start();
+      navigation.navigate('Friends');
     };
-    console.log(item);
-
     return (
       <Animated.View style={{transform: [{scale: scaleAnim}]}}>
         <TouchableOpacity style={styles.notificationCard} onPress={handlePress}>
@@ -96,13 +84,25 @@ const NotificationScreen = () => {
             )}
           </View>
           <View style={styles.textContainer}>
-            <TextComponent label={item.title} styles={styles.title} />
+            <RowComponent>
+              <TextComponent label={item.title} styles={styles.title} />
+
+              <TextComponent
+                label={UserInfo.getDay(item.timestamp)}
+                styles={[
+                  globalStyles.actionText,
+                  {alignItems: 'flex-end', justifyContent: 'flex-end'},
+                ]}
+              />
+            </RowComponent>
             <TextComponent label={item.content} styles={styles.content} />
-            {item.type !== 'groupInvite' && (
+            {item.type === 'groupInvite' && (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={styles.acceptButton}
-                  onPress={() => handleActionFriend('add', item.senderId)}>
+                  onPress={() =>
+                    handleActionFriend('agree', item._id, item.groupId)
+                  }>
                   <TextComponent
                     label={'Chấp nhận'}
                     styles={styles.buttonText}
