@@ -17,6 +17,8 @@ const handleLoginWithGoogle = async (req, res) => {
     const userInfo = req.body;
     // Kiểm tra người dùng có tồn tại không
     const existingUser = await findUserById(userInfo.userId);
+    console.log("existingUser", existingUser);
+
     let user;
     if (existingUser) {
       await UserModel.findByIdAndUpdate(existingUser.id, {
@@ -24,10 +26,36 @@ const handleLoginWithGoogle = async (req, res) => {
         updateAt: Date.now(),
       });
       user = {
-        ...existingUser,
-        accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
-        fcmTokens: existingUser.fcmTokens ?? [],
+        authSlice: {
+          userId: existingUser.userId,
+          online: existingUser.online,
+          theme: existingUser.theme,
+          accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
+          fcmTokens: existingUser.fcmTokens ?? [],
+        },
+        profileSlice: {
+          name: existingUser.name,
+          email: existingUser.email,
+          avatar: existingUser.avatar,
+          bio: existingUser.bio,
+          sex: existingUser.sex,
+          address: existingUser.address,
+          link: existingUser.link,
+          className: existingUser.className,
+          majoring: existingUser.majoring,
+          majorCategory: existingUser.majorCategory,
+        },
+        friendSlice: {
+          friends: existingUser.friends,
+          friendRequests: existingUser.friendRequests,
+          removeFriends: existingUser.removeFriends,
+          block: existingUser.block,
+        },
+        eventSlice: {
+          eventShares: existingUser.eventShares,
+        },
       };
+      
       console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
     } else {
@@ -41,15 +69,15 @@ const handleLoginWithGoogle = async (req, res) => {
         avatar: userInfo.avatar,
         access: userInfo.access,
         online: true,
+        theme,
       });
-      console.log(newUser);
+      console.log("newUser", newUser);
 
       await newUser.save();
       user = {
         ...newUser._doc,
         accesstoken: await getJsonWebToken(userInfo.email, newUser.id),
       };
-      console.log("newUser", user.accesstoken);
       console.log("Create user.");
       // Sau khi cập nhật, trả về phản hồi
     }

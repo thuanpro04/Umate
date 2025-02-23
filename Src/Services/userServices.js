@@ -8,7 +8,7 @@ const getUsersByIds = async (userFriends) => {
   return users;
 };
 const updateUserById = async (userId, updateAction) => {
-  const result = await UserModel.updateOne({ userId: userId }, updateAction);
+  const result = await UserModel.updateOne({ userId }, updateAction);
   return result;
 };
 const cleanData = (data) => {
@@ -207,20 +207,42 @@ const handleActionBlockUser = async (req, res) => {
 const updateFcmToken = async (userId, fcmTokens) => {
   const result = await UserModel.updateOne(
     { userId },
-    { $addToSet: { fcmTokens: { $each: fcmTokens } } }
+    { $set: { fcmTokens: fcmTokens } }
   );
+  return result;
 };
+
 const handleUpdateFcmTokenForUser = async (req, res) => {
   const { userId, fcmTokens } = req.body;
 
   try {
-    await updateFcmToken(userId, fcmTokens);
+    const result = await updateFcmToken(userId, fcmTokens);
+
     res.status(200).json({
       message: "Update fcmtoken successfully !!",
       data: [],
     });
   } catch (error) {
     console.log("update fcmtoken fail ", error);
+  }
+};
+const handleUpdateThemeForUser = async (req, res) => {
+  const { userId, theme } = req.body;
+  try {
+    const result = await UserModel.updateOne({ userId }, { $set: { theme } });
+    if (result.modifiedCount === 0) {
+      return res.status(401).json({ message: "update theme fail !!" });
+    }
+
+
+    console.log("update theme successfully!!", userId, theme);
+
+    res.status(200).json({
+      message: "Update theme successfully !!",
+      data: theme,
+    });
+  } catch (error) {
+    console.log("update theme error: ", error);
   }
 };
 module.exports = {
@@ -236,4 +258,5 @@ module.exports = {
   handleActionBlockUser,
   handleUpdateFcmTokenForUser,
   updateFcmToken,
+  handleUpdateThemeForUser,
 };

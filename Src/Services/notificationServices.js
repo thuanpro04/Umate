@@ -1,4 +1,5 @@
 const adminfirebase = require("firebase-admin");
+const nodemailer = require("nodemailer");
 const serviceAccount = require("./../untils/umatefirebase.json");
 const { findUserById, updateFcmToken } = require("./userServices");
 const {
@@ -6,6 +7,7 @@ const {
   GroupConversationModel,
 } = require("../models/usersModel");
 const { notificationModel } = require("../models/notificationModel");
+const { text } = require("body-parser");
 
 adminfirebase.initializeApp({
   credential: adminfirebase.credential.cert(serviceAccount),
@@ -16,6 +18,7 @@ async function getAccessToken() {
     .getAccessToken();
   return token.access_token;
 }
+
 const getFcmTokenForUser = async (userId) => {
   const user = await findUserById(userId);
   return user;
@@ -55,6 +58,7 @@ const handleSendNotification = async (userId, content, key, currentUserId) => {
     console.log("No FCM tokens found for user:", userId);
   }
 };
+
 const updateNotificationGroup = async (userId, converId) => {
   const groupConv = await GroupConversationModel.findOne({
     groupId: converId,
@@ -103,13 +107,20 @@ const handleActionNotification = async (req, res) => {
     console.log("Action notification fail error: ", error);
   }
 };
-const addNotificationForUser = async (currentUserId, userId, content, type) => {
+const addNotificationForUser = async (
+  id,
+  currentUserId,
+  userId,
+  content,
+  type
+) => {
   const user = await findUserById(currentUserId);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
   const userIds = Array.isArray(userId) ? userId : [userId];
   const notifications = userIds.map((receiverId) => ({
+    groupId: id,
     senderId: currentUserId,
     receiverId,
     title: user.name,
@@ -120,15 +131,19 @@ const addNotificationForUser = async (currentUserId, userId, content, type) => {
   console.log("Notified for user !!");
 };
 const handleActionInviteToGroup = async (req, res) => {
-  const { currentUserId, userId, content } = req.body;
+  const { id, currentUserId, userId, content } = req.body;
   try {
-    await addNotificationForUser(currentUserId, userId, content, "groupInvite");
+    await addNotificationForUser(
+      id,
+      currentUserId,
+      userId,
+      content,
+      "groupInvite"
+    );
     res.status(200).json({
       message: "Invite to group successfully",
       data: [],
     });
-
-    console.log("Invite to group successfully");
   } catch (error) {
     console.log("Invite to group error: ", error);
   }
@@ -139,26 +154,58 @@ const handleGetNotifications = async (req, res) => {
     const result = await notificationModel.find({ receiverId: userId });
     res.status(200).json({
       message: "Notification successfully !!",
-      data: result,
+      data: result.reverse(),
     });
   } catch (error) {
     console.log("get notification error: ", error);
   }
 };
+const deletedNotification = async (id) => {
+  return await notificationModel.findByIdAndDelete(id);
+};
 const handleActionDeleteNotification = async (req, res) => {
   const { id } = req.query;
   try {
-    console.log(id);
-
-    const result = await notificationModel.findByIdAndDelete(id);
+    const result = await deletedNotification(id);
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Không tìm thấy thông báo để xóa." });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy thông báo để xóa." });
     }
 
     res.status(200).json({ message: "Xóa thông báo thành công!" });
   } catch (error) {
     console.log("Delete notification fail error: ", error);
+  }
+};
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.USERNAME_EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+const handleActionSendEmail = async (req, res) => {
+  const { name, email, message } = req.body;
+  const emailOptions = {
+    from: `📩 Xin chào từ ứng dụng của bạn> ${process.env.USERNAME_EMAIL} `,
+    to: email,
+    subject: name,
+    text: message,
+  };
+
+  try {
+    await transporter.sendMail(emailOptions, (error, info) => {
+      if (error) {
+        console.log("❌ Lỗi khi gửi email:", error);
+      } else {
+        console.log("✅ Email đã được gửi thành công:", info.response);
+      }
+    });
+    res.status(200).json({ message: "Send email successfully!!" });
+  } catch (error) {
+    console.log("Action send email fail error: ", error);
   }
 };
 module.exports = {
@@ -168,4 +215,6 @@ module.exports = {
   handleGetNotifications,
   addNotificationForUser,
   handleActionDeleteNotification,
+  deletedNotification,
+  handleActionSendEmail,
 };

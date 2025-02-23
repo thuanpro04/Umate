@@ -1,7 +1,8 @@
 const {
   handleActionNotification,
   handleActionInviteToGroup,
-  handleGetNotifications,handleActionDeleteNotification
+  handleGetNotifications,
+  handleActionDeleteNotification,handleActionSendEmail
 } = require("../Services/notificationServices");
 
 const actionNotification = (req, res) => {
@@ -13,7 +14,15 @@ const actionInviteToGroup = (req, res) => {
 const getNotifications = (req, res) => {
   handleGetNotifications(req, res);
 };
-const actionDeleteNotification=(req,res)=>{
-  handleActionDeleteNotification(req,res)
-}
-module.exports = { actionNotification, actionInviteToGroup, getNotifications ,actionDeleteNotification};
+const actionDeleteNotification = (req, res) => {
+  handleActionDeleteNotification(req, res);
+};
+const actionSendEmail = (req, res) => {
+  handleActionSendEmail(req, res);
+};
+module.exports = {
+  actionNotification,
+  actionInviteToGroup,
+  getNotifications,
+  actionDeleteNotification,actionSendEmail
+};

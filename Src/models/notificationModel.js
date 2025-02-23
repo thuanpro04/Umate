@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
+  groupId: { type: String, ref: "GroupConversation" },
   senderId: { type: String, require: true },
   receiverId: { type: String, require: true },
   title: { type: String, require: true },
@@ -10,3 +11,4 @@ const notificationSchema = new mongoose.Schema({
 });
 const notificationModel = mongoose.model("notification", notificationSchema);
 module.exports = { notificationModel };
+

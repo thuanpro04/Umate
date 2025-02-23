@@ -23,6 +23,7 @@ const handlePostEvent = async (req, res) => {
     data: newEvent,
   });
 };
+
 const getEvents = async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();

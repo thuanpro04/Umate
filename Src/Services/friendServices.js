@@ -19,11 +19,12 @@ const handleFriendRequestAction = async (req, res, action) => {
         .status(404)
         .json({ message: "User not found or no change made!" });
     }
+
     action === "add" &&
       (await addNotificationForUser(
         currentUserId,
         friendUserId,
-        "📩 Bạn có một lời mời kết bạn mới. Kết nối ngay nào!",
+        "Đã gửi một lời mời kết bạn đến bạn. Kết nối ngay nào!📩",
         "friendRequest"
       ));
     res.status(200).json({

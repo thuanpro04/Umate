@@ -70,6 +70,8 @@ const userSchema = new mongoose.Schema({
   online: { type: Boolean },
   block: [{ type: String, ref: "User" }],
   fcmTokens: { type: [String] },
+  theme: { type: String, default: "light" },
+  language: { type: String },
 });
 
 const commentSchema = new mongoose.Schema({
