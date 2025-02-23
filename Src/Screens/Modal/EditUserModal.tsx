@@ -11,7 +11,9 @@ import {List} from 'react-native-paper';
 import {TextComponent} from '../Components';
 import SearchComponent from '../Search/components/SearchComponent';
 import {Validate} from '../Untils/Validate';
-import {add} from 'lodash';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {appColors} from '../../Theme/Colors/appColors';
 
 interface Props {
   onChangeProfile: (key: string, value: string) => void;
@@ -27,7 +29,8 @@ const EditUserModal = (props: Props) => {
   const [address, setAddress] = useState<any[]>(data);
   const modalizeRef = useRef<Modalize>(null);
   const [messageError, setMessageError] = useState('');
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useEffect(() => {
     if (isVisible) {
       onOpenModal();
@@ -105,7 +108,7 @@ const EditUserModal = (props: Props) => {
         key={index}
         style={styles.main}
         onPress={() => {
-          onChangeProfile('address', item.name)
+          onChangeProfile('address', item.name);
         }}>
         <TextComponent label={index + 1 + '. ' + item.name} />
       </TouchableOpacity>
@@ -120,13 +123,13 @@ const EditUserModal = (props: Props) => {
       HeaderComponent={
         nameField === 'majoring' && <TextComponent title label="Chuyên Ngành" />
       }
-      modalStyle={styles.modalStyle}>
+      modalStyle={[styles.modalStyle, {backgroundColor: colors.background}]}>
       {nameField === 'majoring' ? (
         <ScrollView style={{maxHeight: 700, flex: 1}}>
           {data.map((item, index) => renderMajoring({item, index}))}
         </ScrollView>
       ) : (
-        <KeyboardAvoidingView style={styles.container}>
+        <KeyboardAvoidingView style={[styles.container,{backgroundColor: colors.background}]}>
           <SearchComponent onChangeText={onChangeText} text={value} />
           <ScrollView style={{maxHeight: 660}}>
             {address.map((item, index) => renderItemAddress({item, index}))}

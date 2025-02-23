@@ -26,6 +26,8 @@ import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {Loss} from '../../assets/svgs/indexSvg';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   img: string;
   name: string;
@@ -49,6 +51,8 @@ const UserInfoModal = (props: Props) => {
     isBlock,
   } = props;
   const modalRef = useRef<Modalize>(null);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useEffect(() => {
     if (visible) {
       modalRef.current?.open(); // Open the modal if visible
@@ -66,7 +70,7 @@ const UserInfoModal = (props: Props) => {
         handlePosition="inside"
         adjustToContentHeight
         onClose={onClose}
-        modalStyle={styles.modalStyle}>
+        modalStyle={[styles.modalStyle, {backgroundColor: colors.background}]}>
         <RowComponent styles={styles.content}>
           {img && <Image source={{uri: img}} style={styles.image} />}
 
@@ -74,7 +78,7 @@ const UserInfoModal = (props: Props) => {
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content} onPress={handleNavigation}>
-          <Messenger size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <Messenger size={appInfo.sizeIconBold} color={colors.icon} />
           <TextComponent label={`Message with ${getFirstName(name)}`} title />
         </RowComponent>
         <SpaceComponent height={18} />
@@ -82,7 +86,7 @@ const UserInfoModal = (props: Props) => {
           <AntDesign
             name="tool"
             size={appInfo.sizeIconBold}
-            color={appColors.blueBack}
+            color={colors.icon}
           />
           {!isBlock ? (
             <TextComponent label={`Block ${getFirstName(name)}`} title />
@@ -94,7 +98,7 @@ const UserInfoModal = (props: Props) => {
         <RowComponent styles={styles.content}>
           <ProfileDelete
             size={appInfo.sizeIconBold}
-            color={appColors.blueBack}
+            color={colors.icon}
           />
           <ButtonComponent type="action" onPress={handleUnFriend}>
             <TextComponent label={`Unfriend ${getFirstName(name)}`} title />

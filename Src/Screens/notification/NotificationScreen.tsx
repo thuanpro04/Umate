@@ -25,12 +25,14 @@ import friendsAPI from '../../apis/friendsApi';
 import {friendServices} from '../Services/friendService.';
 import {UserInfo} from '../Untils/UserInfo';
 import {groupServices} from '../Services/groupServices';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const handleActionFriend = async (
     action: 'agree' | 'cancel',
     id: string,
@@ -67,7 +69,9 @@ const NotificationScreen = ({navigation}: any) => {
     };
     return (
       <Animated.View style={{transform: [{scale: scaleAnim}]}}>
-        <TouchableOpacity style={styles.notificationCard} onPress={handlePress}>
+        <TouchableOpacity
+          style={[styles.notificationCard, {backgroundColor: colors.card}]}
+          onPress={handlePress}>
           <View style={styles.iconContainer}>
             {item.type === 'groupInvite' ? (
               <MaterialCommunityIcons
@@ -126,7 +130,7 @@ const NotificationScreen = ({navigation}: any) => {
       const res = await notificationServices.getNotifications(auth.userId);
       if (res && res.data) {
         setDataNotifi(res.data);
-        console.log('DataNotifi ', res.data.length);
+        
       }
       setIsLoading(false);
     } catch (error) {
@@ -140,9 +144,12 @@ const NotificationScreen = ({navigation}: any) => {
     }, []),
   );
   return (
-    <SafeAreaView style={globalStyles.container}>
+    <SafeAreaView
+      style={[globalStyles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
-        iconLeft={<ArrowLeft2 size={appInfo.sizeIconBold} color="#007BFF" />}
+        iconLeft={
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
+        }
         title="Thông báo"
       />
       {dataNotifi && dataNotifi.length > 0 ? (
@@ -155,7 +162,7 @@ const NotificationScreen = ({navigation}: any) => {
         />
       ) : (
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <TextComponent label="Rỗng" title color={appColors.grey} />
+          <TextComponent label="Rỗng" title />
         </View>
       )}
       <LoadingModal visible={isLoading} />
@@ -171,7 +178,7 @@ const styles = StyleSheet.create({
   },
   notificationCard: {
     flexDirection: 'row',
-    backgroundColor: '#E3F2FD', // light blue
+
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,

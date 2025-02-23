@@ -2,9 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, View} from 'react-native';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
-import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
+import {
+  addAuth,
+  authSelector,
+  removeAuth,
+} from '../../redux/reducers/authReducer';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {
@@ -18,8 +22,13 @@ import LoadingModal from '../Modal/LoadingModal';
 import {Auth} from '../Services/authService.';
 import {Notification} from '../Untils/Notification';
 import {Validate} from '../Untils/Validate';
+import {setTheme, toggleTheme} from '../../redux/reducers/themeSlice';
+import {addProfile} from '../../redux/reducers/profileSlice';
+import {addFriend} from '../../redux/reducers/friendSlice';
+import {addEvent} from '../../redux/reducers/eventSlice';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const auth = useSelector(authSelector);
   const dispatch = useDispatch();
   useEffect(() => {
     GoogleSignin.configure({
@@ -67,8 +76,13 @@ const LoginSreen = () => {
     }
     try {
       const res = await Auth.loginWithGoogle(data);
-      dispatch(addAuth(res?.data));
-      await AsyncStorage.setItem('auth', JSON.stringify(res?.data));
+      dispatch(addAuth(res?.data.authSlice));
+      dispatch(addProfile(res.data.profileSlice));
+      dispatch(addFriend(res.data.friendSlice));
+      dispatch(addEvent(res.data.eventSlice));
+      dispatch(setTheme(res.data.authSlice.theme));
+      
+      await AsyncStorage.setItem('auth', JSON.stringify(res?.data.authSlice));
       Notification.showToast('success', 'Login Success', 'Welcome to UMate 👋');
     } catch (error) {
       console.error('Login error:', error);
@@ -83,9 +97,6 @@ const LoginSreen = () => {
       setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
-  
- 
-
   return (
     <ContainerComponent>
       <LoadingModal visible={isLoading} />

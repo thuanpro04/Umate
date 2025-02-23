@@ -15,7 +15,6 @@ const getUserInfo = async (userId: string) => {
   url = `/get-user?userId=${userId}`;
   try {
     const res = await usersAPI.handleUsers(url);
-   
 
     return res;
   } catch (error) {
@@ -37,9 +36,18 @@ const updateBlockUser = async (userId: string, userFriendId: string) => {
     userId,
     userFriendId,
   };
-  const url = '/block-user';
+  url = '/block-user';
   const res = await usersAPI.handleUsers(url, data, 'post');
   return res;
+};
+const updateThemeforUser = async (userId: string, theme: string) => {
+  url = '/update-theme';
+  const data = {
+    userId,
+    theme,
+  };
+  const res = await usersAPI.handleUsers(url, data, 'post');
+  return res
 };
 export const userServices = {
   getEquestFriendUsers,
@@ -48,4 +56,5 @@ export const userServices = {
   getListUserInfo,
   updateUserStatus,
   updateBlockUser,
+  updateThemeforUser,
 };

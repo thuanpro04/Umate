@@ -20,7 +20,7 @@ interface Props {
 }
 const CarUserLikeComponent = (props: Props) => {
   const {item, navigation, onCloseModal} = props;
-  console.log('props', props);
+ 
 
   return (
     <RowComponent

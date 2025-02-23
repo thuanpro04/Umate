@@ -18,22 +18,22 @@ import {
   TextComponent,
 } from '../Components';
 import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {notificationServices} from '../Services/notificationServices';
 import {Notification} from '../Untils/Notification';
+import { profileSelector } from '../../redux/reducers/profileSlice';
 const ContactUsScreen = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
   const handleSend = async () => {
     if (message.length > 10) {
       setIsLoading(true);
       const data = {
-        name: auth.name,
-        email: auth.email,
+        name: profile.name,
+        email: profile.email,
         message,
       };
       try {
@@ -76,7 +76,7 @@ const ContactUsScreen = ({navigation}: any) => {
           <Text style={styles.label}>👤 Họ tên</Text>
           <TextInput
             style={styles.input}
-            placeholder={auth.name ?? 'Nhập tên của bạn'}
+            placeholder={profile.name ?? 'Nhập tên của bạn'}
             placeholderTextColor="#B0B0B0"
             value={name}
             onChangeText={setName}
@@ -86,7 +86,7 @@ const ContactUsScreen = ({navigation}: any) => {
           <Text style={styles.label}>📧 Email</Text>
           <TextInput
             style={styles.input}
-            placeholder={auth.email ?? 'Nhập email'}
+            placeholder={profile.email ?? 'Nhập email'}
             placeholderTextColor="#B0B0B0"
             value={email}
             onChangeText={setEmail}

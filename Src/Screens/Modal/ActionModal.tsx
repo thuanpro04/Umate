@@ -7,6 +7,8 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   title: string;
   descriptions?: string;
@@ -17,15 +19,19 @@ interface Props {
 }
 const ActionModal = (props: Props) => {
   const {title, onPressYes, onPressNo, visible, descriptions, styles} = props;
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   return (
-    <Modal visible={visible} transparent>
+    <Modal visible={visible} transparent style={{}}>
       <View style={localStyles.overlay}>
-        <View style={localStyles.container}>
+        <View
+          style={[localStyles.container, {backgroundColor: colors.background}]}>
           <View style={[localStyles.titleStyles, styles]}>
             <TextComponent label={title} title />
             <SpaceComponent height={5} />
-            {descriptions && <TextComponent label={descriptions} />}
+            {descriptions && (
+              <TextComponent label={descriptions} styles={{marginLeft: 4}} />
+            )}
           </View>
           <SpaceComponent height={8} />
           <RowComponent styles={localStyles.btnStyles}>
@@ -33,11 +39,11 @@ const ActionModal = (props: Props) => {
               label="cancel"
               onPress={onPressNo}
               styles={{
-                backgroundColor: appColors.background,
+                backgroundColor: colors.card,
                 borderWidth: 1,
-                borderColor: appColors.grey,
+                borderColor: colors.border,
               }}
-              labelColor={appColors.blueBack}
+              
             />
             <ButtonComponent
               label="Comfirm"
@@ -46,7 +52,6 @@ const ActionModal = (props: Props) => {
             />
           </RowComponent>
           <SpaceComponent height={8} />
-
         </View>
       </View>
     </Modal>
@@ -64,7 +69,6 @@ const localStyles = StyleSheet.create({
     zIndex: 1,
   },
   container: {
-    backgroundColor: '#fffffff0',
     height: 180,
     width: 300,
     borderRadius: 12,

@@ -9,6 +9,8 @@ import {
 import {globalStyles} from '../../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
 import {appColors} from '../../../Theme/Colors/appColors';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
 interface Props {
   name: string;
   massv?: string;
@@ -18,6 +20,7 @@ interface Props {
   isBtnSend?: boolean;
   onPressSend?: () => void;
   lastMessageColor?: string;
+  majoring?: string;
 }
 const CarUserChat = (props: Props) => {
   const {
@@ -28,11 +31,21 @@ const CarUserChat = (props: Props) => {
     lastMessage,
     isBtnSend,
     onPressSend,
-    lastMessageColor,
+    lastMessageColor,majoring
   } = props;
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.5}>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.5}
+      style={{
+        borderRadius: 12,
+        marginHorizontal: 12,
+        marginVertical: 8,
+        borderWidth: 0.3,
+        borderColor: colors.border,
+      }}>
       <RowComponent
         styles={{
           justifyContent: 'flex-start',

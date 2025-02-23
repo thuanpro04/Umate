@@ -4,7 +4,6 @@ import {appColors} from '../../Theme/Colors/appColors';
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
     marginTop: StatusBar.currentHeight,
   },
   header: {
@@ -48,7 +47,7 @@ export const profileStyles = StyleSheet.create({
   bio: {
     fontSize: 14,
     fontStyle: 'italic',
-    color: '#fff',
+    
 
   },
   statsContainer: {
@@ -58,10 +57,10 @@ export const profileStyles = StyleSheet.create({
   },
   stat: {
     alignItems: 'center',
-    backgroundColor: '#fff',
+  
     padding: 15,
     borderRadius: 15,
-    shadowColor: '#000',
+    
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -80,7 +79,7 @@ export const profileStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    
     marginHorizontal: 20,
     marginBottom: 10,
   },
@@ -88,7 +87,6 @@ export const profileStyles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   postContainer: {
-    backgroundColor: '#fff',
     borderRadius: 15,
     marginBottom: 15,
     overflow: 'hidden',
@@ -106,7 +104,6 @@ export const profileStyles = StyleSheet.create({
   postContent: {
     padding: 10,
     fontSize: 14,
-    color: '#333',
   },
   btn_Detail: {
     color: appColors.grey2,

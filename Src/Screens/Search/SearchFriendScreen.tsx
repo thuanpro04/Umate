@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {InputComponent} from '../Components';
+import {InputComponent, SpaceComponent} from '../Components';
 import {SearchFavorite} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -21,6 +21,8 @@ import {debounce} from 'lodash';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {friendServices} from '../Services/friendService.';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const SearchFriendScreen = ({navigation}: any) => {
   const [text, setText] = useState('');
@@ -30,7 +32,9 @@ const SearchFriendScreen = ({navigation}: any) => {
   const [userInfo, setUserInfo] = useState<any[]>(users);
   const auth = useSelector(authSelector);
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
+  const friendData = useSelector(friendSelector);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -91,7 +95,7 @@ const SearchFriendScreen = ({navigation}: any) => {
   }, [text]);
   const shouldShowAddFriendIcon = (userId: string) => {
     return (
-      !auth.friends.includes(userId) &&
+      !friendData.friends.includes(userId) &&
       auth.userId !== userId &&
       !addedFriends.includes(userId)
     );
@@ -103,14 +107,10 @@ const SearchFriendScreen = ({navigation}: any) => {
   };
 
   const renderItemUsers = ({item, index}: any) => {
-    console.log(item);
-    
     return item.userId !== auth.userId ? (
       <CarUserComponent
         key={index}
-        authori={
-          item.majoring ?? "chuyên ngành ?"
-        }
+        authori={item.majoring ?? 'chuyên ngành ?'}
         addFriend={
           !item.friendRequests.includes(auth.userId) &&
           shouldShowAddFriendIcon(item.userId)
@@ -124,18 +124,22 @@ const SearchFriendScreen = ({navigation}: any) => {
       <></>
     );
   };
+
   return (
-    <KeyboardAvoidingView style={styles.container}>
+    <KeyboardAvoidingView
+      style={[styles.container, {backgroundColor: colors.background}]}>
+      <SpaceComponent height={12} />
       <InputComponent
         value={text}
         onChange={setText}
         allowClear
-        placehold="search friend"
+        placehold="search friend...."
         affix={
           <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
         }
         styles={{borderRadius: 20, paddingVertical: 4}}
       />
+      <SpaceComponent height={22}/>
       {userInfo && (
         <FlatList
           data={userInfo}
@@ -153,5 +157,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: StatusBar.currentHeight,
     alignItems: 'center',
+    flex: 1,
+    paddingHorizontal:12
   },
 });

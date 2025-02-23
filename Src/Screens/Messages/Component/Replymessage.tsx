@@ -10,6 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import {TextComponent} from '../../Components';
 import {appColors} from '../../../Theme/Colors/appColors';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {UserInfo} from '../../Untils/UserInfo';
 interface Props {
   clearReply: any;
   message: any;
@@ -17,7 +19,9 @@ interface Props {
 const Replymessage = (props: Props) => {
   const {clearReply, message} = props;
   const auth = useSelector(authSelector);
-  const isUser = message?.receiverID !== auth.userID;
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
+  const isUser = message?.receiverId !== auth.userId;
   const boxHeight = useSharedValue(0);
   const urlImg = message?.imagesUrl
     ? message.imagesUrl[message?.imagesUrl.length - 1]
@@ -56,7 +60,13 @@ const Replymessage = (props: Props) => {
     toggleBox(message !== null);
   }, [message]);
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View
+      style={[
+        styles.container,
+        animatedStyle,
+        ,
+        {backgroundColor: colors.background},
+      ]}>
       <Animated.View style={[styles.replyImageContainer, animatedColor]}>
         <Animated.Image
           source={{
@@ -74,7 +84,19 @@ const Replymessage = (props: Props) => {
       </Animated.View>
       <View style={styles.messageContainer}>
         {message?.content ? (
-          <TextComponent label={message?.content} color={appColors.blueBack} />
+          <View>
+            <TextComponent
+              label={`Trả lời ${
+                isUser ? 'chính mình' : UserInfo.getName(message.name)
+              }`}
+              styles={{fontStyle: 'italic'}}
+            />
+            <TextComponent
+              label={message?.content}
+              color={colors.text2}
+              styles={{marginLeft: 12}}
+            />
+          </View>
         ) : (
           urlImg && <Image source={{uri: urlImg}} style={styles.imageReply} />
         )}

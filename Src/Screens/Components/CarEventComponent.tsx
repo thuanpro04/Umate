@@ -1,27 +1,24 @@
-import {debounce} from 'lodash';
-import React, {useCallback, useRef, useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {Modalize} from 'react-native-modalize';
+import { DirectRight } from 'iconsax-react-native';
+import { debounce } from 'lodash';
+import React, { useCallback, useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Foundation from 'react-native-vector-icons/Foundation';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import LikeListModal from '../Modal/LikeListModal';
-import {eventSevices} from '../Services/eventService';
+import ShareEventModal from '../Modal/ShareEventModal';
+import { eventSevices } from '../Services/eventService';
 import {
-  ButtonComponent,
   RowComponent,
   SpaceComponent,
-  TextComponent,
+  TextComponent
 } from './index';
-import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import Share from 'react-native-share';
-import RNBlobUtil from 'react-native-blob-util';
-import ShareEventModal from '../Modal/ShareEventModal';
-import {globalStyles} from '../../Styles/globalStyle';
-import {DirectRight} from 'iconsax-react-native';
 interface Props {
   img: string;
   content: string;
@@ -54,6 +51,8 @@ const CarComponent = (props: Props) => {
   const [isShowContent, setIsShowContent] = useState(false);
   const [count, setCount] = useState(countLike);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
 
   const getTime = () => {
     const timePart: any = timeStamp.split('-')[0].trim();
@@ -101,20 +100,13 @@ const CarComponent = (props: Props) => {
 
     updateUserHeartForEvent(action);
   }, [count, isLiked, isProcessing]);
-  const fetchImageAsBase64 = async () => {
-    try {
-      const base64Img = await RNBlobUtil.fetch('GET', img).then(res =>
-        res.base64(),
-      );
-      console.log(base64Img);
-      return `data:image/jpeg;base64,${base64Img}`;
-    } catch (error) {
-      console.error('Error fetch image base64 error:', error);
-    }
-  };
 
   return (
-    <View style={localStyles.card}>
+    <View
+      style={[
+        localStyles.card,
+        {backgroundColor: colors.background, shadowColor: colors.shadow},
+      ]}>
       {/* Header */}
       <RowComponent styles={localStyles.header}>
         <RowComponent>
@@ -173,7 +165,7 @@ const CarComponent = (props: Props) => {
                 styles={localStyles.link}
                 size={15}
               />
-              <DirectRight color={appColors.blue} size={appInfo.sizeIcon} />
+              <DirectRight color={colors.icon} size={appInfo.sizeIcon} />
             </RowComponent>
           </View>
         )}
@@ -186,6 +178,7 @@ const CarComponent = (props: Props) => {
           style={[
             localStyles.actionButton,
             isLiked && localStyles.activeButton,
+            {borderColor: colors.border, borderWidth: 1},
           ]}>
           <TouchableOpacity onPress={handleLikeClick}>
             <AntDesign
@@ -203,7 +196,10 @@ const CarComponent = (props: Props) => {
 
         <ShareEventModal
           eventId={eventId}
-          styles={localStyles.actionButton}
+          styles={[
+            localStyles.actionButton,
+            {borderColor: colors.border, borderWidth: 1},
+          ]}
           title="Share"
           urlImg={img}
           href={href}
@@ -211,7 +207,7 @@ const CarComponent = (props: Props) => {
             <Foundation
               name="social-skillshare"
               size={appInfo.sizeIcon}
-              color={appColors.grey}
+              color={colors.icon}
             />
           }
         />
@@ -220,15 +216,11 @@ const CarComponent = (props: Props) => {
   );
 };
 
-export default CarComponent;
-
 const localStyles = StyleSheet.create({
   card: {
     margin: 10,
     padding: 15,
     borderRadius: 15,
-    backgroundColor: appColors.white,
-    shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -249,7 +241,6 @@ const localStyles = StyleSheet.create({
   },
   username: {
     marginLeft: 10,
-    color: '#333333',
     fontWeight: '600',
   },
   timestamp: {
@@ -257,7 +248,6 @@ const localStyles = StyleSheet.create({
     fontSize: 12,
   },
   content: {
-    color: '#333333',
     lineHeight: 22,
   },
   link: {
@@ -266,7 +256,6 @@ const localStyles = StyleSheet.create({
   },
   title: {
     lineHeight: 22,
-    color: appColors.black,
     fontWeight: '500',
   },
   postImage: {
@@ -286,7 +275,6 @@ const localStyles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 18,
     borderRadius: 25,
-    backgroundColor: appColors.bgIcon,
   },
   activeButton: {
     backgroundColor: '#FFCDD2',
@@ -296,3 +284,4 @@ const localStyles = StyleSheet.create({
     color: appColors.grey,
   },
 });
+export default CarComponent;

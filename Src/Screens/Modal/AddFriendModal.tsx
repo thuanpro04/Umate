@@ -20,6 +20,8 @@ import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import {searchServices} from '../Services/searchServices';
 import {debounce} from 'lodash';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { useSelector } from 'react-redux';
 interface Props {
   userId: string;
   visible: Boolean;
@@ -34,6 +36,8 @@ const AddFriendModal = (props: Props) => {
   const [bgUser, setBgUser] = useState<{[key: string]: Boolean}>({});
   const [selectUser, setSelectUser] = useState<string[]>([]);
   const modalizeRef = useRef<Modalize>(null);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useEffect(() => {
     if (visible) {
       getFriendForUser();
@@ -115,6 +119,7 @@ const AddFriendModal = (props: Props) => {
         modalStyle={{
           paddingHorizontal: 12,
           paddingTop: StatusBar.currentHeight,
+          backgroundColor:colors.background
         }}>
         <View style={{flex: 1, alignItems: 'center'}}>
           <InputComponent
@@ -123,7 +128,7 @@ const AddFriendModal = (props: Props) => {
             allowClear
             placehold="search friend"
             affix={
-              <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
+              <SearchFavorite size={appInfo.sizeIconBold} color={colors.icon} />
             }
           />
           <SpaceComponent height={6} />

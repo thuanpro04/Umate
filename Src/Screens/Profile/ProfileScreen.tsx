@@ -13,7 +13,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
-import {authSelector} from '../../redux/reducers/authReducer';
 import {
   ButtonComponent,
   RowComponent,
@@ -27,8 +26,14 @@ import {eventSevices} from '../Services/eventService';
 import {useFocusEffect} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {globalStyles} from '../../Styles/globalStyle';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {eventSelector} from '../../redux/reducers/eventSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 const ProfileScreen = ({navigation}: any) => {
-  const auth = useSelector(authSelector);
+  const userData = useSelector(profileSelector);
+  const eventData = useSelector(eventSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const userInfo = {
     avatar: 'https://via.placeholder.com/150',
     name: 'John Doe',
@@ -57,9 +62,10 @@ const ProfileScreen = ({navigation}: any) => {
       },
     ],
   };
+  console.log(eventData.eventShares);
 
   const getEventShared = async () => {
-    const res = await eventSevices.getEventShared(auth.eventShares);
+    const res = await eventSevices.getEventShared(eventData.eventShares);
     if (res?.data) {
       console.log(res.data);
     }
@@ -69,31 +75,38 @@ const ProfileScreen = ({navigation}: any) => {
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
-        style={profileStyles.postContainer}
+        style={[
+          profileStyles.postContainer,
+          {backgroundColor: colors.background},
+        ]}
         key={index}>
         <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
-        <Text style={profileStyles.postContent}>
-          {item.content ? item.content : '...'}
-        </Text>
+        <TextComponent
+          styles={profileStyles.postContent}
+          label={item.content ? item.content : '...'}
+        />
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={profileStyles.container}>
-      <View style={locastyles.header}>
-        <ZoomImageComponent url={auth.avatar} styles={profileStyles.avatar} />
-        <View style={profileStyles.infoContainer}>
-          
-            <TextComponent
-              styles={[profileStyles.name, {color: '#333'}]}
-              label={UserInfo.getName(auth.name)}
-            />
+    <SafeAreaView
+      style={[profileStyles.container, {backgroundColor: colors.background}]}>
+      <View style={[locastyles.header, {backgroundColor: colors.background}]}>
+        <ZoomImageComponent
+          url={userData.avatar}
+          styles={profileStyles.avatar}
+        />
+        <View style={[profileStyles.infoContainer]}>
+          <TextComponent
+            styles={[profileStyles.name]}
+            label={UserInfo.getName(userData.name)}
+          />
           <SpaceComponent height={6} />
 
           <TextComponent
-            styles={[profileStyles.majoring, {color: '#333', marginLeft: 4}]}
-            label={auth.majoring ?? 'Chuyên ngành'}
+            styles={[profileStyles.majoring, {marginLeft: 4}]}
+            label={userData.majoring ?? 'Chuyên ngành'}
           />
           <SpaceComponent height={6} />
           <RowComponent>
@@ -105,7 +118,7 @@ const ProfileScreen = ({navigation}: any) => {
             />
             <TextComponent
               styles={[profileStyles.bio, {color: '#888', flex: 1}]}
-              label={auth.bio ?? 'Tiểu sử'}
+              label={userData.bio ?? 'Tiểu sử'}
               numberOfLine={5}
             />
           </RowComponent>
@@ -123,7 +136,12 @@ const ProfileScreen = ({navigation}: any) => {
             <ButtonComponent
               type="action"
               onPress={() => navigation.navigate('UserQRCode')}
-              styles={{borderWidth: 0.5, padding: 6, borderRadius: 6}}>
+              styles={{
+                borderWidth: 0.5,
+                padding: 6,
+                borderRadius: 6,
+                borderColor: colors.border,
+              }}>
               <MaterialIcons
                 name="qr-code-scanner"
                 size={appInfo.sizeIconBold}
@@ -136,24 +154,24 @@ const ProfileScreen = ({navigation}: any) => {
 
       {/* Stats */}
       <View style={profileStyles.statsContainer}>
-        <View style={profileStyles.stat}>
+        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
           <Text style={profileStyles.statNumber}>{userInfo.stats.friends}</Text>
           <Text style={profileStyles.statLabel}>Friends</Text>
         </View>
-        <View style={profileStyles.stat}>
+        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
           <Text style={profileStyles.statNumber}>{userInfo.stats.posts}</Text>
           <Text style={profileStyles.statLabel}>Shares</Text>
         </View>
-        <View style={profileStyles.stat}>
+        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
           <Text style={profileStyles.statNumber}>{userInfo.stats.likes}</Text>
           <Text style={profileStyles.statLabel}>Likes</Text>
         </View>
       </View>
 
       {/* Recent Posts */}
-      <Text style={profileStyles.sectionTitle}>Recent Share</Text>
+      <TextComponent styles={profileStyles.sectionTitle} label="Recent Share" />
       <FlatList
-        data={auth.eventShares}
+        data={eventData.eventShares}
         renderItem={renderPost}
         inverted
         keyExtractor={item => item._id}
@@ -167,7 +185,7 @@ const locastyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 20,
-    backgroundColor: '#fff',
+
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',

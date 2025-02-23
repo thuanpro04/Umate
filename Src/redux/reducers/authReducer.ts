@@ -1,14 +1,18 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 interface authState {
-  id: string;
-  email: string;
+  userId: string;
+  theme: string;
   accesstoken: string;
+  fcmTokens: string[];
+  online: boolean;
 }
 const initialState: authState = {
-  id: '',
-  email: '',
+  userId: '',
+  theme: '',
   accesstoken: '',
+  fcmTokens: [],
+  online: false,
 };
 const authSlice = createSlice({
   name: 'auth',
@@ -19,7 +23,7 @@ const authSlice = createSlice({
     addAuth: (state, action) => {
       state.authData = action.payload;
     },
-    removeAuth: (state) => {
+    removeAuth: state => {
       state.authData = initialState;
     },
   },

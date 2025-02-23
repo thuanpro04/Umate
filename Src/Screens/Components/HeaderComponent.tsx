@@ -8,6 +8,8 @@ import {appInfo} from '../../Theme/appInfo';
 import {Image, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import {globalStyles} from '../../Styles/globalStyle';
 import SpaceComponent from './SpaceComponent';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useSelector} from 'react-redux';
 interface Props {
   title?: string;
   iconLeft?: ReactNode;
@@ -38,6 +40,8 @@ const HeaderComponent = (props: Props) => {
     onPressQR,
   } = props;
   const navigation = useNavigation();
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const goBack = () => {
     navigation.goBack();
   };
@@ -47,7 +51,7 @@ const HeaderComponent = (props: Props) => {
       styles={[
         {
           paddingHorizontal: image ? 8 : 16,
-          borderBottomColor: isBcolor ? appColors.grey2 : 'tranparent',
+          borderBottomColor: isBcolor ? colors.card : 'tranparent',
           borderBottomWidth: isBcolor ? 0.2 : 0,
           paddingVertical: image ? 4 : 13,
           gap: 0,

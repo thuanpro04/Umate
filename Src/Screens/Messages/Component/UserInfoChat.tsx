@@ -1,5 +1,11 @@
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {ArrowLeft} from 'iconsax-react-native';
+import {
+  ArrowLeft,
+  Designtools,
+  HuobiToken,
+  Link21,
+  SecurityUser,
+} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Image,
@@ -10,7 +16,9 @@ import {
   View,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {Categorys, ChoiceItems} from '../../../data/MenuItems';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Octicons from 'react-native-vector-icons/Octicons';
+import {ChoiceItems} from '../../../data/MenuItems';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {appInfo} from '../../../Theme/appInfo';
 import {appColors} from '../../../Theme/Colors/appColors';
@@ -30,6 +38,8 @@ import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {notificationServices} from '../../Services/notificationServices';
 import {useSelector} from 'react-redux';
 import {authReducer, authSelector} from '../../../redux/reducers/authReducer';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {ImageIcon} from 'lucide-react-native';
 const UserInfoChat = ({navigation}: any) => {
   const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
@@ -37,10 +47,88 @@ const UserInfoChat = ({navigation}: any) => {
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
   const [statusNotification, setStatusNotification] = useState(false);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
+  const Categorys = [
+    {
+      key: 1,
+      title: 'Tùy chỉnh đoạn chat',
+      icon: <Designtools color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 1,
+          label: 'Đổi chủ đề',
+          icon: (
+            <MaterialCommunityIcons
+              name="cookie-edit-outline"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+        {
+          id: 2,
+          label: 'Thay đổi biệt danh',
+          icon: (
+            <MaterialCommunityIcons
+              name="human-edit"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+      ],
+    },
+    {
+      key: 2,
+      title: 'Xem ảnh và link',
+      icon: <HuobiToken color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 3,
+          label: 'Your Images',
+          icon: <ImageIcon color={colors.icon} size={appInfo.sizeIcon} />,
+        },
+        {
+          id: 4,
+          label: 'Link liên kết',
+          icon: <Link21 color={colors.icon} size={appInfo.sizeIcon} />,
+        },
+      ],
+    },
+    {
+      key: 3,
+      title: 'Quyền riêng tư && hỗ trợ',
+      icon: <SecurityUser color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 5,
+          label: 'Block',
+          icon: (
+            <FontAwesome6
+              name="user-xmark"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+        {
+          id: 6,
+          label: 'Báo cáo',
+          icon: (
+            <Octicons
+              name="report"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+      ],
+    },
+  ];
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
     setStatusNotification(
@@ -106,13 +194,21 @@ const UserInfoChat = ({navigation}: any) => {
 
   const renderCategory = () => {
     return Categorys.map((item, index) => (
-      <View key={index}>
+      <View
+        key={index}
+        style={{
+          backgroundColor: colors.card,
+          borderTopLeftRadius: index === 0 ? 12 : 0,
+          borderTopRightRadius: index === 0 ? 12 : 0,
+          borderBottomLeftRadius: index === Categorys.length - 1 ? 12 : 0,
+          borderBottomRightRadius: index === Categorys.length - 1 ? 12 : 0,
+        }}>
         <CarfeatureComponent
           label={item.title}
           icon={item.icon}
           styles={{
             backgroundColor: showItems[item.key]
-              ? appColors.lightGrey
+              ? colors.border
               : 'transparent',
             borderRadius: 12,
           }}
@@ -147,19 +243,11 @@ const UserInfoChat = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={globalStyles.main}>
+    <SafeAreaView
+      style={[globalStyles.main, {backgroundColor: colors.background}]}>
       <HeaderComponent
-        iconLeft={
-          <ArrowLeft size={appInfo.sizeIconBold} color={appColors.black} />
-        }
+        iconLeft={<ArrowLeft size={appInfo.sizeIconBold} color={colors.icon} />}
         onPress1={() => navigation.goBack()}
-        iconRight={
-          <MaterialIcons
-            name="unfold-more-double"
-            color={appColors.black}
-            size={appInfo.sizeIconBold}
-          />
-        }
       />
       <ScrollView style={{flex: 1}}>
         <View style={styles.container}>
@@ -184,7 +272,7 @@ const UserInfoChat = ({navigation}: any) => {
           <TextComponent
             label={
               converInfo.type === 'personal'
-                ? UserInfo.getName(converInfo.userName)
+                ? UserInfo.getName(converInfo.name)
                 : converInfo.groupName
             }
             title

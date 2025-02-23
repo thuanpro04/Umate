@@ -3,7 +3,6 @@ import {appColors} from '../Theme/Colors/appColors';
 const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: appColors.white,
     paddingVertical: Platform.OS === 'android' ? StatusBar.currentHeight : 48,
   },
   row: {
@@ -33,6 +32,7 @@ const globalStyles = StyleSheet.create({
     zIndex: 1,
     position: 'absolute',
     backgroundColor: 'rgba(0,0,0,0.3)',
+    top:'-0.2 %'
   },
   timeText: {
     fontSize: 11.5,
@@ -60,11 +60,10 @@ const globalStyles = StyleSheet.create({
   },
   label: {
     fontWeight: '600',
-    color: appColors.blueBack,
   },
   inputRow: {
     borderBottomWidth: 0.2,
-    borderColor: appColors.blue3,
+   
   },
   imgStyles: {
     width: 160,
@@ -79,7 +78,7 @@ const globalStyles = StyleSheet.create({
   },
   actionText: {
     fontSize: 12,
-    color: appColors.grey,
+    
     marginLeft: 10,
   },
 });

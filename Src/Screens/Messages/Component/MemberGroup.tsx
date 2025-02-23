@@ -36,8 +36,11 @@ import DropdownPicker from '../../Components/DropdownPicker';
 import {notificationServices} from '../../Services/notificationServices';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import LoadingModal from '../../Modal/LoadingModal';
+import {friendSelector} from '../../../redux/reducers/friendSlice';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
 const MemberGroup = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+  const friendData = useSelector(friendSelector);
   const [userInfo, setUserInfo] = useState<any[]>([]);
   const [addedFriends, setAddedFriends] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(false);
@@ -45,6 +48,8 @@ const MemberGroup = ({navigation}: any) => {
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
   const dispatch = useDispatch();
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
   }, []);
@@ -82,7 +87,7 @@ const MemberGroup = ({navigation}: any) => {
   };
   const shouldShowAddFriendIcon = (userId: string) => {
     return (
-      !auth.friends.includes(userId) &&
+      !friendData.friends.includes(userId) &&
       auth.userId !== userId &&
       !addedFriends.includes(userId)
     );
@@ -119,7 +124,8 @@ const MemberGroup = ({navigation}: any) => {
     try {
       setIsLoading(true);
 
-      const res = await notificationServices.inviteToGroup(converInfo.groupId,
+      const res = await notificationServices.inviteToGroup(
+        converInfo.groupId,
         selectUser,
         auth.userId,
         converInfo.groupName,
@@ -141,30 +147,28 @@ const MemberGroup = ({navigation}: any) => {
   }, [converInfo]);
 
   return (
-    <KeyboardAvoidingView style={[globalStyles.container]}>
+    <KeyboardAvoidingView
+      style={[globalStyles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
         iconStyle
         iconLeft={
-          <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         iconQR={
           <MaterialIcons
             name="add-reaction"
             size={appInfo.sizeIconBold}
-            color={appColors.blue3}
+            color={colors.icon}
           />
         }
         onPressQR={() => setIsVisible(true)}
         iconRight={
-          <SearchFavorite1
-            size={appInfo.sizeIconBold}
-            color={appColors.blueBack}
-          />
+          <SearchFavorite1 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         onPress2={() => navigation.navigate('SearchFriends', {users: userInfo})}
       />
       <View style={{marginHorizontal: 12}}>
-        <TextComponent label="Thành viên" color="black" title />
+        <TextComponent label="Thành viên" title />
         <SpaceComponent height={18} />
         <FlatList
           data={userInfo}

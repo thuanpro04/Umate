@@ -22,6 +22,7 @@ import {globalStyles} from '../../Styles/globalStyle';
 import {friendServices} from '../Services/friendService.';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   img?: any;
   name: string;
@@ -68,6 +69,8 @@ const CarUserComponent = (props: Props) => {
   } = props;
   const [isShowIcon, setIsShowIcon] = useState(isRequestFriend ?? false);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handleAdd_CancelFriends = async () => {
     if (userId) {
@@ -99,7 +102,12 @@ const CarUserComponent = (props: Props) => {
     }
   };
   return isFind ? (
-    <RowComponent styles={[iconAddCancel && localStyle.container, styles]}>
+    <RowComponent
+      styles={[
+        iconAddCancel && localStyle.container,
+        {borderColor: colors.border},
+        styles,
+      ]}>
       <Image
         source={{
           uri: img,
@@ -109,24 +117,30 @@ const CarUserComponent = (props: Props) => {
       <View style={{flex: 1}}>
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
-        <TextComponent label={majoring ?? '...'} styles={globalStyles.actionText}/>
+        <TextComponent
+          label={majoring ?? '...'}
+          styles={globalStyles.actionText}
+        />
       </View>
       {!isFriend && iconAddCancel && (
         <TouchableOpacity
           onPress={handleAdd_CancelFriends}
           activeOpacity={0.7}
-          style={[localStyle.buttonStyles, {transform: [{scale: scaleAnim}]}]}>
+          style={[
+            localStyle.buttonStyles,
+            {transform: [{scale: scaleAnim}], },
+          ]}>
           {isShowIcon ? (
             <AntDesign
               name="check"
               size={appInfo.sizeIconBold}
-              color={appColors.white}
+              color={colors.icon}
             />
           ) : (
             <AntDesign
               name="adduser"
               size={appInfo.sizeIconBold}
-              color={appColors.white}
+              color={colors.icon}
             />
           )}
         </TouchableOpacity>
@@ -139,7 +153,7 @@ const CarUserComponent = (props: Props) => {
               <AntDesign
                 name="contacts"
                 size={appInfo.sizeIconBold}
-                color={appColors.blue2}
+                color={colors.icon}
               />
             }
             onPress={onPressPersonal}
@@ -150,7 +164,7 @@ const CarUserComponent = (props: Props) => {
             iconRight={
               <AntDesign
                 size={appInfo.sizeIconBold}
-                color={appColors.blue2}
+                color={colors.icon}
                 name="ellipsis1"
               />
             }
@@ -201,15 +215,14 @@ const CarUserComponent = (props: Props) => {
             <>
               <ButtonComponent
                 label={sayYes}
-                styles={{backgroundColor: appColors.blue, width: '40%'}}
-                textStyle={{color: appColors.white}}
+                styles={{width: '40%'}}
                 onPress={onPressYes}
               />
               <ButtonComponent
                 label={sayNo}
                 styles={{
-                  backgroundColor: appColors.grey2,
                   width: '40%',
+                  backgroundColor: colors.icon,
                   paddingVertical: 1,
                 }}
                 onPress={onPressNo}
@@ -219,7 +232,7 @@ const CarUserComponent = (props: Props) => {
             <ButtonComponent
               label={'Cancel'}
               styles={{
-                backgroundColor: appColors.grey2,
+                backgroundColor: colors.icon,
                 width: '80%',
                 paddingVertical: 5,
               }}
@@ -237,9 +250,11 @@ const localStyle = StyleSheet.create({
   container: {
     justifyContent: 'flex-start',
     borderWidth: 1,
-    borderColor: appColors.grey2,
+
     borderRadius: 10,
     width: '90%',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   imgHint: {
     width: 25,
@@ -251,7 +266,6 @@ const localStyle = StyleSheet.create({
   buttonStyles: {
     borderRadius: 100,
     padding: 7,
-    backgroundColor: appColors.blue,
   },
   card: {
     marginVertical: 6,

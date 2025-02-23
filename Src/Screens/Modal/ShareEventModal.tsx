@@ -24,6 +24,7 @@ import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import {eventSevices} from '../Services/eventService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 interface Props {
   title: string;
@@ -41,6 +42,8 @@ const ShareEventModal = (props: Props) => {
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const socket = io(appInfo.BASE_URL);
   const url = `https://tdmu.edu.vn${href}`;
   const dispatch = useDispatch();
@@ -167,10 +170,10 @@ const ShareEventModal = (props: Props) => {
     );
   };
   return (
-    <View>
+    <View style={{}}>
       <TouchableOpacity onPress={() => onOpenModal()} style={styles}>
         {icon && icon}
-        <Text style={globalStyles.actionText}>{title}</Text>
+        <TextComponent styles={globalStyles.actionText} label={title} />
       </TouchableOpacity>
       <Portal>
         <Modalize
@@ -178,15 +181,21 @@ const ShareEventModal = (props: Props) => {
           handlePosition="inside"
           closeSnapPointStraightEnabled
           adjustToContentHeight
-          modalStyle={modalStyles.modal}>
+          modalStyle={[
+            modalStyles.modal,
+            {backgroundColor: colors.background},
+          ]}>
           <View style={modalStyles.container}>
             <TextComponent styles={modalStyles.title} label="Share Event" />
             <TextInput
               value={value}
               onChangeText={setValue}
-              style={modalStyles.input}
+              style={[
+                modalStyles.input,
+                {borderColor: colors.border, color: colors.text,backgroundColor:colors.border},
+              ]}
               placeholder="Add a comment..."
-              placeholderTextColor={appColors.grey}
+              placeholderTextColor={colors.placeholderTextColor}
               multiline
               numberOfLines={4}
               maxLength={300}
@@ -206,22 +215,31 @@ const ShareEventModal = (props: Props) => {
             <SpaceComponent height={12} />
             <View style={modalStyles.shareOptions}>
               <TouchableOpacity
-                style={modalStyles.shareButton}
+                style={[
+                  modalStyles.shareButton,
+                  {
+                    borderColor: colors.border,
+                  },
+                ]}
                 onPress={() => handleShare('Facebook')}>
-                <Icon name="facebook" size={24} color={appColors.blue} />
-                <Text style={modalStyles.buttonText}>Facebook</Text>
+                <Icon name="facebook" size={24} color={colors.facebook} />
+                <TextComponent
+                  styles={modalStyles.buttonText}
+                  label="Facebook"
+                />
               </TouchableOpacity>
               <TouchableOpacity
-                style={modalStyles.shareButton}
+                style={[modalStyles.shareButton, {borderColor: colors.border}]}
                 onPress={() => handleShare('Email')}>
-                <Icon name="email" size={24} color={'#FFCA28'} />
-                <Text style={modalStyles.buttonText}>Email</Text>
+                <Icon name="email" size={24} color={colors.email} />
+                <TextComponent label="Email" styles={modalStyles.buttonText} />
               </TouchableOpacity>
+
               <TouchableOpacity
-                style={modalStyles.shareButton}
+                style={[modalStyles.shareButton, {borderColor: colors.border}]}
                 onPress={async () => await handleShare('In-App')}>
-                <Icon name="send" size={24} color={appColors.orange2} />
-                <Text style={modalStyles.buttonText}>In-App</Text>
+                <Icon name="send" size={24} color={colors.inApp} />
+                <TextComponent label="In-App" styles={modalStyles.buttonText} />
               </TouchableOpacity>
             </View>
           </View>
@@ -235,7 +253,6 @@ export default ShareEventModal;
 
 const modalStyles = StyleSheet.create({
   modal: {
-    backgroundColor: appColors.white,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
@@ -245,16 +262,12 @@ const modalStyles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: appColors.black,
     marginBottom: 12,
   },
   input: {
-    backgroundColor: appColors.background,
     borderWidth: 0.2,
-    borderColor: appColors.grey,
     borderRadius: 8,
     padding: 12,
-    color: appColors.black,
     marginBottom: 16,
     textAlignVertical: 'top',
   },
@@ -264,10 +277,13 @@ const modalStyles = StyleSheet.create({
   },
   shareButton: {
     alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: 'center',
+    padding: 10,
   },
   buttonText: {
     fontSize: 12,
-    color: appColors.black,
     marginTop: 4,
   },
 });

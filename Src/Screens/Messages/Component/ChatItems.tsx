@@ -19,6 +19,8 @@ import CustomFootImages from './CustomFootImages';
 import CustormLinkPreview from '../../Components/CustormLinkPreview';
 import {LinkPreview} from '@flyerhq/react-native-link-preview';
 import {userServices} from '../../Services/userService';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
 
 interface Props {
   currentUserId: string;
@@ -29,6 +31,7 @@ interface Props {
   updateRowRef: any;
   setReplyOnSwipeOpen: any;
   item?: any;
+  name: string;
 }
 const ChatItems = memo((props: Props) => {
   const {
@@ -40,6 +43,7 @@ const ChatItems = memo((props: Props) => {
     updateRowRef,
     setReplyOnSwipeOpen,
     item,
+    name,
   } = props;
 
   const [showTimeMessages, setShowTimeMessages] = useState(false);
@@ -49,6 +53,8 @@ const ChatItems = memo((props: Props) => {
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [showTime, setShowTime] = useState<any[]>([]);
   const [user, setUser] = useState<any>('');
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const isNextMyMessage = true;
   const isUser = props?.item.senderId === props?.currentUserId;
   const getUserSenderId = async (senderId: string) => {
@@ -136,7 +142,7 @@ const ChatItems = memo((props: Props) => {
   };
   const onSwipeableOpenAction = () => {
     if (props.item) {
-      setReplyOnSwipeOpen({...props.item});
+      setReplyOnSwipeOpen({...props.item, name});
     }
     updateRowRef.current = null;
   };
@@ -168,7 +174,7 @@ const ChatItems = memo((props: Props) => {
           <Image
             width={20}
             height={20}
-            tintColor={'black'}
+            tintColor={colors.icon}
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/2958/2958791.png',
             }}
@@ -218,9 +224,7 @@ const ChatItems = memo((props: Props) => {
             style={[
               styles.container,
               {
-                backgroundColor: isUser
-                  ? 'rgba(121,178,243,0.3)'
-                  : 'rgba(116,208,103,0.3)',
+                backgroundColor: isUser ? colors.bgItem : colors.bgItem2,
 
                 borderBottomLeftRadius: !isUser ? 0 : 20,
                 paddingTop: item?.reply ? 2 : 8,
@@ -234,14 +238,15 @@ const ChatItems = memo((props: Props) => {
                   styles.replyStyles,
                   {
                     borderLeftColor:
-                      item?.reply?.senderID === currentUserId
+                      item?.reply?.senderId === currentUserId
                         ? '#2196f3'
                         : 'green',
                   },
                 ]}>
-                <Text style={{fontSize: 14, color: 'black'}}>
-                  {item?.reply?.content}
-                </Text>
+                <TextComponent
+                  styles={{fontSize: 14}}
+                  label={item?.reply?.content}
+                />
               </View>
             )}
             {isLink ? (
@@ -301,7 +306,7 @@ const ChatItems = memo((props: Props) => {
             style={[
               {
                 alignItems:
-                  props?.item.senderID === currentUserId
+                  props?.item.senderId === currentUserId
                     ? 'flex-end'
                     : 'flex-start',
                 marginBottom:
@@ -314,7 +319,7 @@ const ChatItems = memo((props: Props) => {
             {props?.item.imagesUrl &&
               renderImage(
                 props?.item.imagesUrl,
-                props?.item.senderID === currentUserId,
+                props?.item.senderId === currentUserId,
               )}
           </View>
         )}
@@ -350,7 +355,7 @@ const styles = StyleSheet.create({
   },
   contentStyles: {
     fontSize: 14,
-    color: 'black',
+
     paddingTop: 4,
   },
   replyStyles: {

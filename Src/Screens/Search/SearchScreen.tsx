@@ -23,6 +23,7 @@ import {searchServices} from '../Services/searchServices';
 import {UserInfo} from '../Untils/UserInfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../../Styles/globalStyle';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -34,7 +35,8 @@ const SearchScreen = ({navigation}: any) => {
 
   const [backgroundItem, setBackgroundItem] = useState<any[]>([]);
   const auth = useSelector(authSelector);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const optionsKey = [
     {
       key: 'friends',
@@ -133,7 +135,7 @@ const SearchScreen = ({navigation}: any) => {
           isFriend={isShowIconAddCancel}
           img={item?.avatar}
           isRequestFriend={isShowRequest}
-          majoring={item.majoring ?? '....'}
+          majoring={item.majoring ?? 'chuyên ngành'}
         />
       </View>
     );
@@ -158,16 +160,21 @@ const SearchScreen = ({navigation}: any) => {
         image={item.avatar}
         lastMessage={item.lastMessage}
         onPress={() => onNavigationChat(item)}
+        
       />
     );
   };
   return (
-    <SafeAreaView style={[globalStyles.container, {paddingHorizontal: 12}]}>
+    <SafeAreaView
+      style={[
+        globalStyles.container,
+        {paddingHorizontal: 12, backgroundColor: colors.background},
+      ]}>
       <SpaceComponent height={10} />
       <RowComponent styles={{justifyContent: 'center', alignItems: 'center'}}>
         <ArrowLeft2
           size={appInfo.sizeIconBold}
-          color={appColors.blue}
+          color={colors.icon}
           onPress={() => navigation.goBack()}
         />
         <InputComponent
@@ -180,7 +187,7 @@ const SearchScreen = ({navigation}: any) => {
           affix={
             <SearchNormal
               size={appInfo.sizeIcon}
-              color={appColors.blue}
+              color={colors.icon}
               variant="Broken"
             />
           }
@@ -194,7 +201,7 @@ const SearchScreen = ({navigation}: any) => {
               <AntDesign
                 name="filter"
                 size={appInfo.sizeIconBold}
-                color={appColors.blue}
+                color={colors.icon}
               />
             )
           }
@@ -211,7 +218,7 @@ const SearchScreen = ({navigation}: any) => {
 
       <View
         style={{
-          borderTopColor: appColors.grey2,
+          borderTopColor: colors.border,
           borderTopWidth: 0.2,
         }}
       />
@@ -248,12 +255,12 @@ const SearchScreen = ({navigation}: any) => {
                     index === optionsKey.length - 1 && {
                       borderBottomLeftRadius: 10,
                       borderBottomRightRadius: 10,
-                      borderBottomColor: appColors.white,
+                      borderBottomColor: colors.border,
                     },
                     {
                       backgroundColor: backgroundItem[item.key.toString()]
                         ? appColors.blue
-                        : appColors.white,
+                        : colors.background,
                     },
                   ]}
                   labelColor={

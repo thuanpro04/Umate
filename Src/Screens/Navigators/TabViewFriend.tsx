@@ -7,10 +7,13 @@ import SuggestFriend from '../Friends/SuggestFriend';
 import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 import {appColors} from '../../Theme/Colors/appColors';
 import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const TabViewFriend = () => {
   const [index, setIndex] = useState(0);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const SuggestRouter = () => {
     return <SuggestFriend key={'SuggestFriend'} />;
   };
@@ -40,7 +43,7 @@ const TabViewFriend = () => {
         <TabBar
           {...props}
           key={'tabview'}
-          style={{backgroundColor: appColors.white}}
+          style={{backgroundColor: colors.background}}
           labelStyle={{
             color: appColors.grey3, // Màu cam đậm
             fontWeight: '500',

@@ -17,6 +17,8 @@ import {Portal} from 'react-native-portalize';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { themeSelector } from '../../../redux/reducers/themeSlice';
+import { useSelector } from 'react-redux';
 interface Props {
   onSelect: (val: {
     type: 'url' | 'file';
@@ -31,23 +33,25 @@ const ButtonImagePicker = (props: Props) => {
   const modalizeRef = useRef<Modalize>();
   const [imageUrl, setImageUrl] = useState('');
   const [isVisibleModalAddUrl, setIsVisibleModalAddUrl] = useState(false);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const choiceImages = [
     {
       key: 'camera',
       title: 'Take a picture.',
-      icon: <Camera size={appInfo.sizeIcon} color={appColors.grey} />,
+      icon: <Camera size={appInfo.sizeIcon} color={colors.icon} />,
     },
     {
       key: 'library',
       title: 'From library.',
       icon: (
-        <Feather name="image" size={appInfo.sizeIcon} color={appColors.grey} />
+        <Feather name="image" size={appInfo.sizeIcon} color={colors.icon} />
       ),
     },
     {
       key: 'url',
       title: 'From url.',
-      icon: <Link size={appInfo.sizeIcon} color={appColors.grey} />,
+      icon: <Link size={appInfo.sizeIcon} color={colors.icon} />,
     },
   ];
   const renderItems = (item: {icon: ReactNode; key: string; title: string}) => {
@@ -108,12 +112,13 @@ const ButtonImagePicker = (props: Props) => {
         type="action"
         iconLeft={icon}
         onPress={() => modalizeRef.current?.open()}>
-        {<TextComponent label={title ?? ''} color={appColors.blue} />}
+        {<TextComponent label={title ?? ''}  />}
       </ButtonComponent>
       <Portal>
         <Modalize
           adjustToContentHeight
           ref={modalizeRef}
+          modalStyle={{backgroundColor:colors.background}}
           handlePosition="inside">
           <View style={{marginVertical: 30, paddingHorizontal: 20}}>
             {choiceImages.map(element => renderItems(element))}
@@ -123,7 +128,7 @@ const ButtonImagePicker = (props: Props) => {
 
       <Modal
         visible={isVisibleModalAddUrl}
-        style={{flex: 1}}
+        style={{flex: 1, backgroundColor:colors.background}}
         statusBarTranslucent
         transparent
         animationType="slide">
@@ -140,7 +145,7 @@ const ButtonImagePicker = (props: Props) => {
             style={[
               {
                 borderRadius: 12,
-                backgroundColor: appColors.white,
+                backgroundColor: colors.background,
                 width: '90%',
                 padding: 20,
               },
@@ -151,7 +156,7 @@ const ButtonImagePicker = (props: Props) => {
                   setIsVisibleModalAddUrl(false);
                   setImageUrl('');
                 }}>
-                <AntDesign name="close" size={24} color={appColors.grey} />
+                <AntDesign name="close" size={24} color={colors.icon} />
               </TouchableOpacity>
             </RowComponent>
             <TextComponent label="Image Url" title size={18} />
@@ -162,7 +167,7 @@ const ButtonImagePicker = (props: Props) => {
               allowClear
               styles={{width: '100%', marginTop: 8, paddingVertical: 6}}
             />
-            <SpaceComponent height={10} />
+            <SpaceComponent height={16} />
             <RowComponent styles={{justifyContent: 'flex-end'}}>
               <ButtonComponent
                 label="Agree"
@@ -171,11 +176,11 @@ const ButtonImagePicker = (props: Props) => {
                   onSelect({type: 'url', value: imageUrl});
                   setImageUrl('');
                 }}
-                labelColor={appColors.white}
+                
                 styles={{
-                  backgroundColor: appColors.blue,
+                  
                   paddingHorizontal: 10,
-                  paddingVertical: 4,
+                  paddingVertical: 2,
                 }}
               />
             </RowComponent>

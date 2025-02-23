@@ -18,7 +18,7 @@ const InputGenimi = (props: Props) => {
  
   return (
     <View style={styles.inputContainer}>
-      <ButtonImagePicker
+      {/* <ButtonImagePicker
         icon={
           <MaterialCommunityIcons
             name="image-multiple-outline"
@@ -32,7 +32,7 @@ const InputGenimi = (props: Props) => {
           //   ? handleSendMessageAndImage(val.value.toString().trim())
           //   : handleSelected(val.value as ImageOrVideo);
         }}
-      />
+      /> */}
       <TextInput
         style={styles.inputStyles}
         value={value}

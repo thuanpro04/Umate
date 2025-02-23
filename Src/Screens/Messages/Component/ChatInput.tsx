@@ -17,6 +17,8 @@ import {ImageOrVideo} from 'react-native-image-crop-picker';
 import {imageService} from '../../Services/imageService';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Send2} from 'iconsax-react-native';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {appColors} from '../../../Theme/Colors/appColors';
 interface Props {
   reply: string;
   clearReply: any;
@@ -34,6 +36,8 @@ const ChatInput = (props: Props) => {
   const [content, setContent] = useState('');
   const [isDisable, setIsDisable] = useState(false);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const socket = io(appInfo.BASE_URL);
   function onPressScroll() {
     if (onScroll) {
@@ -69,7 +73,7 @@ const ChatInput = (props: Props) => {
             ...messageData,
             recipients: userId,
           };
-         
+
           socket.emit('send_message', data, (response: any) => {
             console.log('Message sent to user:', response);
           });
@@ -79,8 +83,6 @@ const ChatInput = (props: Props) => {
             ...messageData,
             receiverId: userId,
           };
-          ;
-
           socket.emit('send_message', data, (response: any) => {
             console.log(
               'Message sent to user:',
@@ -162,13 +164,13 @@ const ChatInput = (props: Props) => {
   return (
     <View>
       <Replymessage clearReply={clearReply} message={reply} />
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, {borderTopColor: colors.border}]}>
         <ButtonImagePicker
           icon={
             <MaterialCommunityIcons
               name="image-multiple-outline"
               size={appInfo.sizeIcon}
-              color={'green'}
+              color={colors.icon}
             />
           }
           multiple
@@ -179,7 +181,7 @@ const ChatInput = (props: Props) => {
           }}
         />
         <TextInput
-          style={styles.inputStyles}
+          style={[styles.inputStyles, {color: colors.text}]}
           value={content}
           onChangeText={setContent}
           placeholder="Type Message ..."
@@ -194,7 +196,7 @@ const ChatInput = (props: Props) => {
             onSendMessage({content, imagesUrl: [], reply});
             onActionSendMessages();
           }}>
-          <Send2 size={appInfo.sizeIcon} color="green" />
+          <Send2 size={appInfo.sizeIcon} color={colors.icon} />
         </TouchableOpacity>
       </View>
     </View>
@@ -205,7 +207,6 @@ export default ChatInput;
 
 const styles = StyleSheet.create({
   inputContainer: {
-    borderTopColor: '#dcdcdc',
     borderTopWidth: 1,
     paddingVertical: 4,
     paddingHorizontal: 15,
@@ -220,8 +221,6 @@ const styles = StyleSheet.create({
     tintColor: 'green',
   },
   inputStyles: {
-    borderBottomColor: 'grey',
     flex: 1,
-    color: 'black',
   },
 });

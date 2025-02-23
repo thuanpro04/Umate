@@ -13,10 +13,16 @@ import {
   ProfileScreen,
 } from '../index';
 import GeminiChat from '../AiStudioScreen/GeminiChat';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const [isTabBarVisible, setIsTabBarVisible] = useState(true);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -26,9 +32,9 @@ const TabNavigator = () => {
           height: Platform.OS === 'ios' ? 88 : 68,
           justifyContent: 'center',
           alignItems: 'center',
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-          backgroundColor: appColors.white,
+          borderTopLeftRadius: theme === 'light' ? 12 : 0,
+          borderTopRightRadius: theme === 'light' ? 12 : 0,
+          backgroundColor: colors.background,
           display: isTabBarVisible ? 'flex' : 'none',
         },
         tabBarIcon: ({focused, color, size}) => {

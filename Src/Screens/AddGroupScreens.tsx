@@ -36,6 +36,7 @@ import {Validate} from './Untils/Validate';
 import {UserInfo} from './Untils/UserInfo';
 import UpdateInfoModal from './Modal/UpdateInfoModal';
 import {groupServices} from './Services/groupServices';
+import {themeSelector} from '../redux/reducers/themeSlice';
 const initValues = {
   groupName: '',
   description: '',
@@ -51,6 +52,8 @@ const AddGroupScreens = ({navigation}: any) => {
   const [nameField, setNameField] = useState('');
   const [users, setUsers] = useState<any>([]);
   const [messageErrors, setMessageErrors] = useState<any[]>([]);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const [groupInfo, setGroupInfo] = useState<any>({
     ...initValues,
     authorId: auth.userId,
@@ -172,10 +175,11 @@ const AddGroupScreens = ({navigation}: any) => {
   // console.log('groupInfo', groupInfo);
 
   return (
-    <ScrollView style={localStyles.container}>
+    <ScrollView
+      style={[localStyles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
         iconLeft={
-          <ArrowLeft2 color={appColors.blueBack} size={appInfo.sizeIconBold} />
+          <ArrowLeft2 color={colors.icon} size={appInfo.sizeIconBold} />
         }
         title="Add Group"
       />
@@ -188,12 +192,11 @@ const AddGroupScreens = ({navigation}: any) => {
             resizeMode="cover"
             style={[localStyles.imgStyles, {zIndex: -1}]}
           />
+          <SpaceComponent height={12} />
           <View style={[globalStyles.overlay, {...localStyles.imgStyles}]}>
             <ButtonImagePicker
               multiple={false}
-              icon={
-                <Camera size={appInfo.sizeIconBold} color={appColors.grey} />
-              }
+              icon={<Camera size={appInfo.sizeIconBold} color={colors.icon} />}
               onSelect={x => {
                 x.type === 'url'
                   ? onChangeGroupInfo('avatar', {
@@ -209,13 +212,10 @@ const AddGroupScreens = ({navigation}: any) => {
           <RowComponent styles={globalStyles.spaceBetween}>
             <TextComponent label="Group Name" styles={globalStyles.label} />
             <RowComponent
-              styles={globalStyles.inputRow}
+              styles={[globalStyles.inputRow, {borderColor: colors.border}]}
               onPress={() => handleModal('groupName')}>
-              <TextComponent
-                label={groupInfo.groupName}
-                color={appColors.grey}
-              />
-              <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
+              <TextComponent label={groupInfo.groupName} color={colors.text2} />
+              <Edit2 color={colors.icon} size={appInfo.sizeIcon} />
             </RowComponent>
           </RowComponent>
           <SpaceComponent height={20} />
@@ -226,9 +226,9 @@ const AddGroupScreens = ({navigation}: any) => {
               onPress={() => handleModal('description')}>
               <TextComponent
                 label={groupInfo.description}
-                color={appColors.grey}
+                color={colors.text2}
               />
-              <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
+              <Edit2 color={colors.icon} size={appInfo.sizeIcon} />
             </RowComponent>
           </RowComponent>
           <SpaceComponent height={20} />

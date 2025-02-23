@@ -4,6 +4,9 @@ import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {UserAdd} from 'iconsax-react-native';
 import {appInfo} from '../../../Theme/appInfo';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {appColors} from '../../../Theme/Colors/appColors';
 interface Props {
   userName: string;
   authori: string;
@@ -16,28 +19,31 @@ interface Props {
 const CarUserComponent = (props: Props) => {
   const {userName, authori, url, addFriend, onPress, onPressAdd, bgColor} =
     props;
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
 
   return (
     <RowComponent
       styles={[
         styles.card,
-        {backgroundColor: bgColor ? bgColor : 'transparent'},
+        {
+          backgroundColor: bgColor ? bgColor : 'transparent',
+          borderColor: colors.border,
+          borderWidth: 1,
+          borderRadius: 12,
+        },
       ]}>
       <RowComponent onPress={onPress} styles={{marginHorizontal: 8}}>
         <Image source={{uri: props.url}} style={globalStyles.userImg} />
         <View style={styles.main}>
           <TextComponent label={userName} styles={globalStyles.label} />
           <SpaceComponent height={6} />
-          <TextComponent
-            label={authori }
-            styles={globalStyles.actionText}
-          />
+          <TextComponent label={authori} styles={globalStyles.actionText} />
         </View>
         {addFriend && (
           <UserAdd
             size={appInfo.sizeIconBold}
-            color="black"
+            color={colors.icon}
             onPress={onPressAdd}
           />
         )}

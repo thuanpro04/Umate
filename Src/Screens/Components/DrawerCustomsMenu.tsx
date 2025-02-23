@@ -23,11 +23,21 @@ import {UserInfo} from '../Untils/UserInfo';
 import {userServices} from '../Services/userService';
 import {HandleNotification} from '../Untils/HandleNotification';
 import SpaceComponent from './SpaceComponent';
+import {
+  profileSelector,
+  removeProfile,
+} from '../../redux/reducers/profileSlice';
+import {removeEvent} from '../../redux/reducers/eventSlice';
+import {removeFriend} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const disPathch = useDispatch();
-  const user = useSelector(authSelector);
+  const user = useSelector(profileSelector);
+  const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useEffect(() => {
     GoogleSignin.configure({
       webClientId:
@@ -48,14 +58,17 @@ const DrawerCustomsMenu = ({navigation}: any) => {
             items.splice(index, 1);
           }
 
-          await HandleNotification.update(items, user.userId);
+          await HandleNotification.update(items, auth.userId);
         }
       }
 
       await GoogleSignin.signOut();
       disPathch(removeAuth());
+      disPathch(removeEvent());
+      disPathch(removeFriend());
+      disPathch(removeProfile());
       await AsyncStorage.removeItem('auth');
-      const res = await userServices.updateUserStatus(user.userId, false);
+      const res = await userServices.updateUserStatus(auth.userId, false);
       setIsLoading(false);
     } catch (error) {
       console.log('Sign out', error);
@@ -66,7 +79,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     switch (key) {
       case 'profile':
         navigation.closeDrawer();
-        navigation.navigate('PersonalScreen', {userId: user.userId});
+        navigation.navigate('PersonalScreen', {userId: auth.userId});
         break;
 
       case 'friends':
@@ -94,8 +107,9 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     setIsLoading(false);
   };
   return (
-    <View style={localStyle.container}>
+    <View style={[localStyle.container, {backgroundColor: colors.background}]}>
       <StatusBar backgroundColor={appColors.background} />
+      <SpaceComponent height={12} />
       <TouchableOpacity
         onPress={() => {
           navigation.closeDrawer();
@@ -104,7 +118,10 @@ const DrawerCustomsMenu = ({navigation}: any) => {
           });
         }}>
         {user.avatar ? (
-          <Image source={{uri: user.avatar}} style={globalStyles.userImg} />
+          <Image
+            source={{uri: user.avatar}}
+            style={[globalStyles.userImg, {width: 100, height: 100}]}
+          />
         ) : (
           <Image
             source={require('../../assets/images/User-Icon.jpg')}
@@ -143,7 +160,6 @@ const localStyle = StyleSheet.create({
     padding: 18,
     paddingVertical: Platform.OS === 'android' ? StatusBar.currentHeight : 48,
     flex: 1,
-    backgroundColor: appColors.background,
   },
   listItem: {
     paddingBottom: 26,

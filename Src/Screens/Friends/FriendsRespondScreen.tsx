@@ -21,6 +21,8 @@ import {messageServices} from '../Services/messageServices';
 import {Item} from 'react-native-paper/lib/typescript/components/List/List';
 import LoadingModal from '../Modal/LoadingModal';
 import {add, isArray} from 'lodash';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {friendSelector} from '../../redux/reducers/friendSlice';
 
 const initialUser = {
   avatar: '',
@@ -34,13 +36,16 @@ const initialUser = {
 const FriendsRespondScreen = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState(initialUser);
-  const memoUsers = useMemo(() => users, [users]);
-  const auth = useSelector(authSelector);
   const [isShowUnfriendModal, setShowUnfriendModal] = useState(false);
   const [isShowBlockdModal, setShowBlockModal] = useState(false);
+  const memoUsers = useMemo(() => users, [users]);
+  const auth = useSelector(authSelector);
+  const friendData = useSelector(friendSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
   const [useBlock, setUseBlock] = useState<any[]>([]);
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [isModal, setIsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // Reload dữ liệu mỗi khi trang được focus
@@ -120,12 +125,12 @@ const FriendsRespondScreen = () => {
       const res = await userServices.updateBlockUser(userId, userFriendId);
       if (res) {
         console.log('Block successfully !!!', res.data);
-        dispatch(addAuth({...auth, block: res.data}));
-        console.log('Sau khi cập nhật:', auth.block);
+        dispatch(addAuth({...friendData, block: res.data}));
+        console.log('Sau khi cập nhật:', friendData.block);
       }
       setIsLoading(false);
       setShowBlockModal(false);
-      console.log('auth', auth.block);
+      console.log('auth', friendData.block);
     } catch (error) {
       console.log('handle block user fail: ', error);
       setIsLoading(false);
@@ -144,7 +149,7 @@ const FriendsRespondScreen = () => {
           isFind
           iconM
           styles={{borderWidth: 0}}
-          onPressPersonal={ () => onNavigationaProfile(item.userId)}
+          onPressPersonal={() => onNavigationaProfile(item.userId)}
           onPressEllipsis={() => handleOpenModal(item)}
         />
 
@@ -173,7 +178,8 @@ const FriendsRespondScreen = () => {
   // console.log(auth.block);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: colors.background}]}>
       <FlatList
         data={memoUsers}
         renderItem={renderItems}
@@ -183,7 +189,11 @@ const FriendsRespondScreen = () => {
       />
 
       <UserInfoModal
-        isBlock={auth && auth.block && auth.block.includes(selectedUser.userId)}
+        isBlock={
+          friendData &&
+          friendData.block &&
+          friendData.block.includes(selectedUser.userId)
+        }
         visible={isModal}
         img={selectedUser.avatar}
         name={UserInfo.getName(selectedUser.name)}
@@ -202,10 +212,14 @@ const FriendsRespondScreen = () => {
           await actionBlockUser(auth.userId, selectedUser.userId)
         }
         descriptions={`Do you really want to ${
-          auth.block && auth.block.includes(selectedUser.userId) ? ' un' : ''
+          friendData.block && friendData.block.includes(selectedUser.userId)
+            ? ' un'
+            : ''
         }block this friend?`}
         title={`Bạn có thực sự muốn${
-          auth.block && auth.block.includes(selectedUser.userId) ? ' bỏ' : ''
+          friendData.block && friendData.block.includes(selectedUser.userId)
+            ? ' bỏ'
+            : ''
         } chặn ${UserInfo.getName(selectedUser.name)} không`}
       />
     </SafeAreaView>
@@ -214,7 +228,6 @@ const FriendsRespondScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: appColors.background,
     flex: 1,
     paddingHorizontal: 10,
   },

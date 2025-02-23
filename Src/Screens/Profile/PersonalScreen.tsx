@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   StatusBar,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import Animated, {
@@ -35,15 +36,19 @@ import {Linking} from 'react-native';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {friendServices} from '../Services/friendService.';
 import {Notification} from '../Untils/Notification';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+  const friendData = useSelector(friendSelector);
   const [userInfo, setUserInfo] = useState<any>(null);
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const bgColor = useSharedValue('#009688');
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const infoUser = {
     stats: {
       friends: userInfo && userInfo.friends ? userInfo.friends.length : 0,
@@ -52,11 +57,15 @@ const PersonalScreen = ({navigation}: any) => {
       likes: 0,
     },
   };
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: withTiming(isDetail ? '#009688E0' : '#009688', {
-        duration: 900,
-      }),
+      backgroundColor: withTiming(
+        isDetail ? colors.bgProfile : colors.bgProfile2,
+        {
+          duration: 900,
+        },
+      ),
     };
   });
   useFocusEffect(
@@ -86,15 +95,21 @@ const PersonalScreen = ({navigation}: any) => {
   };
   const renderPost = ({item}: any) => {
     return (
-      <View style={profileStyles.postContainer} key={item._id}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
+        style={[profileStyles.postContainer, {backgroundColor: colors.card}]}
+        key={item._id}>
         <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
-        <Text style={profileStyles.postContent}>{item.content}</Text>
-      </View>
+        <TextComponent
+          label={item.content}
+          styles={profileStyles.postContent}
+        />
+      </TouchableOpacity>
     );
   };
+
   const handleAddFriend = async (friendUserId: string) => {
     try {
-      
       const res = await friendServices.handleFriendActionAdd_Cancel(
         friendUserId,
         'add',
@@ -144,9 +159,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent label={userInfo?.email} styles={profileStyles.email} />
         ),
-        icon: (
-          <Icon name="email" size={20} color={appColors.linearFocus59_pink} />
-        ),
+        icon: <Icon name="email" size={20} color={appColors.pink} />,
       },
       {
         key: 'majoring',
@@ -167,11 +180,11 @@ const PersonalScreen = ({navigation}: any) => {
           color={appColors.white}
           style={{position: 'absolute', left: '5%', top: '5%'}}
         />
-        {!auth.friends.includes(userId) && (
+        {!friendData.friends.includes(userId) && userId !== auth.userId && (
           <UserAdd
             onPress={() => handleAddFriend(userId)}
             size={appInfo.sizeIconBold}
-            color={appColors.white}
+            color={colors.icon}
             style={{position: 'absolute', right: '5%', top: '5%'}}
           />
         )}
@@ -202,6 +215,7 @@ const PersonalScreen = ({navigation}: any) => {
                   <TextComponent
                     label={userInfo.bio ?? 'bio'}
                     styles={profileStyles.bio}
+                    color={colors.text2}
                   />
                 </RowComponent>
               </Animated.View>
@@ -210,10 +224,7 @@ const PersonalScreen = ({navigation}: any) => {
                 onPress={toggleDetail}
                 type="action"
                 label="Cancel"
-                textStyle={[
-                  profileStyles.btn_Detail,
-                  {backgroundColor: '#009688'},
-                ]}
+                textStyle={[profileStyles.btn_Detail]}
                 styles={{}}
               />
             </View>
@@ -261,6 +272,7 @@ const PersonalScreen = ({navigation}: any) => {
                 <TextComponent
                   label={userInfo.bio ?? 'bio'}
                   styles={profileStyles.bio}
+                  color={colors.text2}
                 />
               </RowComponent>
               <SpaceComponent height={10} />
@@ -268,10 +280,7 @@ const PersonalScreen = ({navigation}: any) => {
                 onPress={toggleDetail}
                 type="action"
                 label="Detail"
-                textStyle={[
-                  profileStyles.btn_Detail,
-                  {backgroundColor: '#00961047'},
-                ]}
+                textStyle={[profileStyles.btn_Detail]}
               />
             </View>
           )
@@ -283,13 +292,19 @@ const PersonalScreen = ({navigation}: any) => {
   };
 
   return !isLoading ? (
-    <SafeAreaView style={profileStyles.container}>
+    <SafeAreaView
+      style={[profileStyles.container, {backgroundColor: colors.background}]}>
       <StatusBar barStyle="dark-content" />
 
       {renderHeader()}
-      <View style={profileStyles.statsContainer}>
+      <View style={[profileStyles.statsContainer, ,]}>
         {Object.entries(infoUser.stats).map(([key, value]) => (
-          <View key={key} style={profileStyles.stat}>
+          <View
+            key={key}
+            style={[
+              profileStyles.stat,
+              {backgroundColor: colors.background, shadowColor: colors.shadow},
+            ]}>
             <Text style={profileStyles.statNumber}>{value}</Text>
             <Text style={profileStyles.statLabel}>{key.toUpperCase()}</Text>
           </View>
@@ -297,7 +312,10 @@ const PersonalScreen = ({navigation}: any) => {
       </View>
 
       {/* Recent Posts */}
-      <Text style={profileStyles.sectionTitle}>Shared recently</Text>
+      <TextComponent
+        label="Shared recently"
+        styles={profileStyles.sectionTitle}
+      />
       {userInfo && userInfo.eventShares && (
         <FlatList
           inverted

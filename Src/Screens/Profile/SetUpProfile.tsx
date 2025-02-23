@@ -46,6 +46,8 @@ import {profileStyles} from './profileStyles';
 import {debounce} from 'lodash';
 import {majors} from '../../data/majoring';
 import {address} from '../../data/address';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -60,16 +62,19 @@ interface ProfileType {
 
 const SetUpProfile = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+  const user = useSelector(profileSelector);
   const [isLoading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [errors, setErrors] = useState({className: '', majoring: '', sex: ''});
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const initialProfile: ProfileType = {
-    userName: UserInfo.getName(auth.name),
-    majoring: auth.majoring ?? '',
-    className: auth.className ?? '',
-    avatar: auth.avatar ?? '',
-    sex: auth.sex ?? '',
-    majorCategory: auth.majorCategory ?? '',
+    userName: UserInfo.getName(user.name),
+    majoring: user.majoring ?? '',
+    className: user.className ?? '',
+    avatar: user.avatar ?? '',
+    sex: user.sex ?? '',
+    majorCategory: user.majorCategory ?? '',
     address: '',
     bio: '',
     link: '',
@@ -186,7 +191,7 @@ const SetUpProfile = ({navigation}: any) => {
     label: string,
     IconComponent: any,
   ) => (
-    <View style={profileStyles.centered}>
+    <View >
       <ButtonComponent
         type="action"
         iconLeft={
@@ -205,7 +210,7 @@ const SetUpProfile = ({navigation}: any) => {
           profileStyles.buttonStyles,
           {
             backgroundColor:
-              profile.sex === gender ? appColors.blue : appColors.white,
+              profile.sex === gender ? appColors.blue : colors.card,
             borderColor: errors.sex ? appColors.red : appColors.blueBack,
           },
         ]}
@@ -219,16 +224,17 @@ const SetUpProfile = ({navigation}: any) => {
     </View>
   );
   return (
-    <SafeAreaView style={profileStyles.container} key={refreshKey}>
+    <SafeAreaView
+      style={[profileStyles.container, {backgroundColor: colors.background}]}
+      key={refreshKey}>
       <HeaderComponent
         title="Profile"
         iconLeft={
-          <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.blueBack} />
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        
       />
-      <SpaceComponent height={20} />
-      <ScrollView >
+      <SpaceComponent height={12} />
+      <ScrollView>
         <View style={profileStyles.centered}>
           <Image
             source={{uri: profile.avatar}}
@@ -241,12 +247,7 @@ const SetUpProfile = ({navigation}: any) => {
           <View style={[globalStyles.overlay, {...globalStyles.imgStyles}]}>
             <ButtonImagePicker
               multiple={false}
-              icon={
-                <Camera
-                  size={appInfo.sizeIconBold}
-                  color={appColors.blueBack}
-                />
-              }
+              icon={<Camera size={appInfo.sizeIconBold} color={colors.icon} />}
               onSelect={val => {
                 val.type === 'url'
                   ? onchangeProfile('avatar', val.value.toString().trim())
@@ -263,7 +264,7 @@ const SetUpProfile = ({navigation}: any) => {
               styles={globalStyles.inputRow}
               onPress={() => handleModal('userName')}>
               <TextComponent label={profile.userName} color={appColors.grey} />
-              <Edit2 color={appColors.blue2} size={appInfo.sizeIcon} />
+              <Edit2 color={colors.icon} size={appInfo.sizeIcon} />
             </RowComponent>
           </RowComponent>
 
@@ -285,7 +286,7 @@ const SetUpProfile = ({navigation}: any) => {
                 color={appColors.grey}
               />
               <ArrowSquareDown
-                color={errors.majoring ? appColors.red : appColors.blue2}
+                color={errors.majoring ? appColors.red : colors.icon}
                 size={appInfo.sizeIconBold}
               />
             </RowComponent>
@@ -298,7 +299,7 @@ const SetUpProfile = ({navigation}: any) => {
               onPress={() => handleModal('className')}>
               <TextComponent label={profile.className} color={appColors.grey} />
               <Edit2
-                color={errors.majoring ? appColors.red : appColors.blue2}
+                color={errors.majoring ? appColors.red : colors.icon}
                 size={appInfo.sizeIcon}
               />
             </RowComponent>
@@ -310,16 +311,12 @@ const SetUpProfile = ({navigation}: any) => {
               styles={globalStyles.inputRow}
               onPress={() => handleModal('address')}>
               <TextComponent
-                label={
-                  profile.address
-                    ? profile.address
-                    : '...'
-                }
+                label={profile.address ? profile.address : '...'}
                 color={appColors.grey}
               />
 
               <ArrowSquareDown
-                color={errors.majoring ? appColors.red : appColors.blue2}
+                color={errors.majoring ? appColors.red : colors.icon}
                 size={appInfo.sizeIconBold}
               />
             </RowComponent>
@@ -335,7 +332,7 @@ const SetUpProfile = ({navigation}: any) => {
                 color={appColors.grey}
               />
               <Edit2
-                color={errors.majoring ? appColors.red : appColors.blue2}
+                color={errors.majoring ? appColors.red :colors.icon}
                 size={appInfo.sizeIcon}
               />
             </RowComponent>
@@ -351,7 +348,7 @@ const SetUpProfile = ({navigation}: any) => {
                 color={appColors.grey}
               />
               <Edit2
-                color={errors.majoring ? appColors.red : appColors.blue2}
+                color={errors.majoring ? appColors.red : colors.icon}
                 size={appInfo.sizeIcon}
               />
             </RowComponent>
@@ -359,7 +356,7 @@ const SetUpProfile = ({navigation}: any) => {
           <SpaceComponent height={50} />
           <ButtonComponent
             label="Save"
-            styles={{paddingVertical: 14}}
+            styles={{paddingVertical: 8}}
             onPress={debounce(() => {
               setLoading(true);
               setUpProfileUser();

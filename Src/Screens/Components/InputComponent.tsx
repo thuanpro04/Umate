@@ -17,6 +17,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import ButtonComponent from './ButtonComponent';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   value: string;
   onChange: (val: string) => void;
@@ -63,9 +65,20 @@ const InputComponent = (props: Props) => {
 
   const [isShowPass, setIsShowPass] = useState(isPass ?? false);
 
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <RowComponent styles={[style.searchStyles, {paddingVertical: 0}, styles]}>
+      <RowComponent
+        styles={[
+          style.searchStyles,
+          {
+            paddingVertical: 0,
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+          },
+          styles,
+        ]}>
         {affix && affix}
         <TextInput
           ref={inputRef}
@@ -83,7 +96,12 @@ const InputComponent = (props: Props) => {
           onChangeText={(element): any => onChange(element)}
           keyboardType={type ?? 'default'}
           autoCapitalize="none"
-          style={{flex: 1, color: appColors.black, paddingVertical: 8}}
+          style={{
+            flex: 1,
+            color: colors.text,
+            paddingVertical: 8,
+            backgroundColor: colors.background,
+          }}
           placeholderTextColor={placeholdColor ?? appColors.grey}
         />
         <TouchableOpacity onPress={() => onChange('')}>
@@ -91,7 +109,7 @@ const InputComponent = (props: Props) => {
             <AntDesign
               name="close"
               size={appInfo.sizeIcon - 5}
-              color={appColors.black}
+              color={colors.icon}
             />
           )}
         </TouchableOpacity>
@@ -113,10 +131,8 @@ const style = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: appColors.grey2,
     width: '90%',
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
     alignItems: 'center',
   },
 });

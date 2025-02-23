@@ -7,6 +7,8 @@ import {LikeDislike, MessageRemove, Velas} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -16,6 +18,8 @@ interface Props {
 const InfomationModal = (props: Props) => {
   const {visible, onClose, onPressAddGroud, listUser} = props;
   const modalizeRef = useRef<Modalize>(null);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useEffect(() => {
     if (visible) {
       modalizeRef.current?.open();
@@ -26,9 +30,7 @@ const InfomationModal = (props: Props) => {
   const chooseItems = [
     {
       key: 'addgroup',
-      icon: (
-        <LikeDislike size={appInfo.sizeIconBold} color={appColors.blueBack} />
-      ),
+      icon: <LikeDislike size={appInfo.sizeIconBold} color={colors.icon} />,
       name: 'Add group',
       onPress: () => onPressAddGroud(),
     },
@@ -38,7 +40,7 @@ const InfomationModal = (props: Props) => {
         <AntDesign
           name="pushpino"
           size={appInfo.sizeIconBold}
-          color={appColors.blueBack}
+          color={colors.icon}
         />
       ),
       name: 'Ghim conversation',
@@ -46,9 +48,7 @@ const InfomationModal = (props: Props) => {
     },
     {
       key: 'removeconversation',
-      icon: (
-        <MessageRemove size={appInfo.sizeIconBold} color={appColors.blueBack} />
-      ),
+      icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
       name: 'Remove conversation',
       onPress: () => console.log('hello'),
     },
@@ -59,7 +59,11 @@ const InfomationModal = (props: Props) => {
         ref={modalizeRef}
         onClose={onClose}
         adjustToContentHeight
-        modalStyle={{paddingHorizontal: 12, paddingTop: 18}}>
+        modalStyle={{
+          paddingHorizontal: 12,
+          paddingTop: 18,
+          backgroundColor: colors.background,
+        }}>
         {listUser
           ? listUser.map(item => {
               return <TextComponent label={item} />;
@@ -67,7 +71,7 @@ const InfomationModal = (props: Props) => {
           : chooseItems.map(item => (
               <React.Fragment key={item.key}>
                 <RowComponent
-                  styles={{justifyContent: 'flex-start', paddingVertical:8}}
+                  styles={{justifyContent: 'flex-start', paddingVertical: 8}}
                   onPress={item.onPress}>
                   {item.icon}
                   <TextComponent label={item.name} title />

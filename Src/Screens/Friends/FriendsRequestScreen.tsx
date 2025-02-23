@@ -10,12 +10,15 @@ import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import friendsAPI from '../../apis/friendsApi';
 import {friendServices} from '../Services/friendService.';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const FriendsRequestScreen = () => {
   const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
   const memoUser = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const handleScroll = (event: any) => {
     const currenOffset = event.nativeEvent.contentOffset.y;
     currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
@@ -79,22 +82,24 @@ const FriendsRequestScreen = () => {
     );
   };
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={memoUser}
-        keyExtractor={(item: any) => item.userId}
-        renderItem={renderItems}
-        style={styles.container}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      />
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: colors.background}]}>
+      {memoUser && (
+        <FlatList
+          data={memoUser}
+          keyExtractor={(item: any) => item.userId}
+          renderItem={renderItems}
+          style={styles.container}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        />
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: appColors.background,
     flex: 1,
     paddingHorizontal: 10,
   },

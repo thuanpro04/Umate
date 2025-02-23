@@ -1,6 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
 import {HambergerMenu, More, ScanBarcode} from 'iconsax-react-native';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
+import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
 import {useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
@@ -10,21 +14,19 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
-import {globalStyles} from '../../Styles/globalStyle';
 import InfomationModal from '../Modal/InfomationModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
-  const auth = useSelector(authSelector);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
 
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
@@ -58,8 +60,7 @@ const MessageScreen = ({navigation}: any) => {
   );
   const renderCardItems = ({item, index}: any) => {
     const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
-   
-    
+
     return (
       <CarUserChat
         key={index}
@@ -78,17 +79,18 @@ const MessageScreen = ({navigation}: any) => {
   };
 
   return (
-    <SafeAreaView style={globalStyles.container}>
+    <SafeAreaView
+      style={[globalStyles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
         iconStyle
         iconLeft={
-          <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
+          <HambergerMenu size={appInfo.sizeIconBold} color={colors.icon} />
         }
         styles={{justifyContent: 'space-between'}}
-        iconRight={<More color={appColors.blue2} size={appInfo.sizeIconBold} />}
+        iconRight={<More color={colors.icon} size={appInfo.sizeIconBold} />}
         // title="Messages"
         iconQR={
-          <ScanBarcode color={appColors.blue2} size={appInfo.sizeIconBold} />
+          <ScanBarcode color={appColors.blue} size={appInfo.sizeIconBold} />
         }
         onPress1={() => navigation.openDrawer()}
         onPress2={() => setIsVisible(true)}
@@ -100,7 +102,6 @@ const MessageScreen = ({navigation}: any) => {
             fontSize: 28, // Tăng kích thước chữ một chút để nổi bật
             fontStyle: 'italic', // Giữ phong cách nghiêng để tạo sự khác biệt
             fontWeight: '700', // Đặt độ đậm của chữ rõ ràng
-            color: appColors.blueBack, // Thêm màu sắc cho tiêu đề để dễ nhìn
           }}
         />
       </View>
@@ -117,6 +118,7 @@ const MessageScreen = ({navigation}: any) => {
           }
         />
       </View>
+      <SpaceComponent height={12} />
       {isLoading ? (
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
           <ActivityIndicator />
@@ -124,7 +126,6 @@ const MessageScreen = ({navigation}: any) => {
           {!users && (
             <TextComponent
               label={'Chats not found !!'}
-              color={appColors.grey2}
               styles={{fontStyle: 'italic', fontWeight: '300'}}
             />
           )}
@@ -142,11 +143,9 @@ const MessageScreen = ({navigation}: any) => {
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <TextComponent
             label={'Chats not found !!'}
-            color={appColors.grey2}
             styles={{
               fontStyle: 'italic',
               fontWeight: '300',
-              color: appColors.black,
             }}
           />
         </View>

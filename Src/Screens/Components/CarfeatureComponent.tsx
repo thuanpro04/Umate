@@ -13,6 +13,8 @@ import {appColors} from '../../Theme/Colors/appColors';
 import TextComponent from './TextComponent';
 import RowComponent from './RowComponent';
 import {globalStyles} from '../../Styles/globalStyle';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   label: string;
   onPress?: () => void;
@@ -25,12 +27,17 @@ interface Props {
 const CarfeatureComponent = (props: Props) => {
   const {label, onPress, icon, styles, labelColor, isBottomColor, isArrow} =
     props;
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   return (
     <RowComponent
       onPress={onPress}
       styles={[
         localStyle.carStyles,
-        {borderBottomColor: isBottomColor ? appColors.grey : 'transparent'},
+        {
+          borderBottomColor: isBottomColor ? appColors.grey : 'transparent',
+          
+        },
         styles,
       ]}>
       <RowComponent>
@@ -38,11 +45,11 @@ const CarfeatureComponent = (props: Props) => {
         <TextComponent
           label={label}
           size={appInfo.sizeTitle}
-          color={labelColor ?? '#363B4BC2'}
+          color={labelColor ?? colors.text}
         />
       </RowComponent>
       {isArrow && (
-        <ArrowRight2 size={appInfo.sizeIconBold} color={appColors.black} />
+        <ArrowRight2 size={appInfo.sizeIconBold} color={colors.icon} />
       )}
     </RowComponent>
   );
@@ -52,7 +59,7 @@ export default CarfeatureComponent;
 const localStyle = StyleSheet.create({
   carStyles: {
     paddingHorizontal: 12,
-    backgroundColor: ' #F8F9FA',
+
     borderBottomWidth: 1,
 
     paddingVertical: 12,

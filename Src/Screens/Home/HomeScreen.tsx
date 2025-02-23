@@ -20,11 +20,16 @@ import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
 import {userServices} from '../Services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const HomeScreen = ({navigation}: any) => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
+
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -46,7 +51,7 @@ const HomeScreen = ({navigation}: any) => {
           // Cập nhật state chỉ với các sự kiện duy nhất
           return uniqueEvents;
         });
-        console.log('Length', event.length);
+
         setLimitPage(res.data.totalPages);
         setPage(prevPage => prevPage + 1);
       }
@@ -57,7 +62,6 @@ const HomeScreen = ({navigation}: any) => {
     }
   };
 
-  
   const renderItemEvents = ({item, index}: any) => {
     return (
       <CarEventComponent
@@ -83,12 +87,6 @@ const HomeScreen = ({navigation}: any) => {
 
     return null;
   };
-  const renderHeader = () => {
-    if (isLoading) {
-      return <ActivityIndicator style={{marginBottom: 15}} size={18} />;
-    }
-    return null;
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -107,20 +105,17 @@ const HomeScreen = ({navigation}: any) => {
     <SafeAreaView
       style={[
         globalStyles.main,
-        {backgroundColor: appColors.white, paddingHorizontal: 0},
+        {backgroundColor: colors.background, paddingHorizontal: 0},
       ]}>
       <HeaderComponent
         iconLeft={
-          <HambergerMenu size={appInfo.sizeIconBold} color={appColors.blue} />
+          <HambergerMenu size={appInfo.sizeIconBold} color={colors.icon} />
         }
         iconRight={
           // NotificationScreen
           <TouchableOpacity
-            onPress={() => navigation.navigate('GoongMapScreen')}>
-            <Notification
-              color={appColors.blueBack}
-              fontSize={appInfo.sizeIconBold}
-            />
+            onPress={() => navigation.navigate('NotificationScreen')}>
+            <Notification color={colors.icon} fontSize={appInfo.sizeIconBold} />
             <View style={localStyles.notification} />
           </TouchableOpacity>
         }

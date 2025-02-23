@@ -10,6 +10,7 @@ import {debounce} from 'lodash';
 import {FlatList} from 'react-native';
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
@@ -20,6 +21,8 @@ const SuggestFriend = React.memo(() => {
   }>({});
   const memoUsers = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   useFocusEffect(
     useCallback(() => {
       getUsers();
@@ -128,7 +131,8 @@ const SuggestFriend = React.memo(() => {
     );
   };
   return !message && users ? (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: colors.background}]}>
       <FlatList
         data={memoUsers}
         keyExtractor={(item: any) => item.userId}
@@ -150,7 +154,6 @@ const SuggestFriend = React.memo(() => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: appColors.background,
     flex: 1,
     paddingHorizontal: 10,
   },

@@ -11,6 +11,8 @@ import {Validate} from '../Untils/Validate';
 import {CloseCircle} from 'iconsax-react-native';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   isVisible: boolean;
   nameField: string;
@@ -21,6 +23,9 @@ const UpdateInfoModal = (props: Props) => {
   const {isVisible, nameField, onCloseModal, onChangeProfile} = props;
   const [messageError, setMessageError] = useState('');
   const [value, setValue] = useState('');
+
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const optionMenu = [
     {
       key: 'groupName',
@@ -64,7 +69,7 @@ const UpdateInfoModal = (props: Props) => {
       /^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9(\.\?)?]/;
     return facebookRegex.test(url);
   };
-  
+
   const getField = () => {
     return optionMenu.find(item => item.key === nameField);
   };
@@ -97,7 +102,11 @@ const UpdateInfoModal = (props: Props) => {
       visible={isVisible}
       onRequestClose={onCloseModal}>
       <View style={localStyles.modalContainer}>
-        <View style={localStyles.modalContent}>
+        <View
+          style={[
+            localStyles.modalContent,
+            {backgroundColor: colors.background},
+          ]}>
           <RowComponent>
             <TextComponent label={getField()?.field ?? ''} />
             <ButtonComponent
@@ -105,7 +114,7 @@ const UpdateInfoModal = (props: Props) => {
               styles={{position: 'absolute', right: -10, top: -10}}
               iconRight={
                 <CloseCircle
-                  color={appColors.blue3}
+                  color={colors.icon}
                   size={appInfo.sizeIconBold}
                 />
               }
@@ -116,7 +125,11 @@ const UpdateInfoModal = (props: Props) => {
           <InputComponent
             value={value}
             onChange={e => setValue(e)}
-            styles={{paddingVertical: 6, width: '100%'}}
+            styles={{
+              paddingVertical: 6,
+              width: '100%',
+              backgroundColor: colors.background,
+            }}
             placehold={nameField}
           />
           {messageError && (
@@ -153,7 +166,7 @@ const localStyles = StyleSheet.create({
   modalContent: {
     width: '80%',
     padding: 20,
-    backgroundColor: 'white',
+
     borderRadius: 10,
   },
   closeButton: {

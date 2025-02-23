@@ -23,6 +23,7 @@ export class Notification {
       text2,
       position: 'top',
       visibilityTime: 4000,
+      
     });
   };
 }

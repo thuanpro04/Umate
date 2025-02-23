@@ -28,6 +28,8 @@ import CarUserComponent from './CarUserComponent';
 import {UserInfo} from '../Untils/UserInfo';
 import {appInfo} from '../../Theme/appInfo';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface SelectedUser {
   name: string;
   data?: {
@@ -72,6 +74,9 @@ const DropdownPicker = (props: Props) => {
   const [tempSelectedUsers, setTempSelectedUsers] = useState<any>([]);
   const modalizeRef = useRef<Modalize>(null);
   const [selectLeader, setSelectLeader] = useState<any>({});
+
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const onOpenModalize = () => {
     if (!isLeader) {
       setTempSelectedUsers(
@@ -192,7 +197,7 @@ const DropdownPicker = (props: Props) => {
         <CarUserComponent
           name={item.name}
           isFind
-          majoring={users.majorCategory??'chuyên ngành'}
+          majoring={users.majorCategory ?? 'chuyên ngành'}
           styles={{borderWidth: 0, gap: 20}}
           img={users.avatar}
         />
@@ -201,16 +206,15 @@ const DropdownPicker = (props: Props) => {
   };
   const renderHearder = () => {
     return (
-      <RowComponent styles={localStyles.containerHeader}>
+      <RowComponent styles={[localStyles.containerHeader]}>
         <InputComponent
           value={value}
           onChange={e => setValue(e)}
-          styles={{width: '90%'}}
+          styles={{width: '90%', backgroundColor: colors.background}}
           affix={<SearchNormal1 size={22} color={appColors.grey} />}
           placehold="Search..."
         />
         <ButtonComponent label="Cancel" onPress={onCloseModalize} styles={{}} />
-       
       </RowComponent>
     );
   };
@@ -237,9 +241,15 @@ const DropdownPicker = (props: Props) => {
   };
 
   return (
-    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+    <View
+      style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+        
+      }}>
       <TouchableOpacity
-        style={[localStyles.borderStyles, {}, styles]}
+        style={[localStyles.borderStyles, {borderColor: colors.border,}, styles]}
         onPress={onOpenModalize}>
         {renderSelectedUsers()}
         <ArrowDown2 size={22} color={appColors.grey} />
@@ -249,6 +259,7 @@ const DropdownPicker = (props: Props) => {
           ref={modalizeRef}
           handlePosition="inside"
           adjustToContentHeight
+          modalStyle={{backgroundColor: colors.background}}
           HeaderComponent={renderHearder()}
           FooterComponent={!(isDeputyLeader || isLeader) && renderFooter()}>
           {users.map((item: any, index: number) => renderUsers(item, index))}
@@ -275,8 +286,7 @@ const localStyles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom:22
-    
+    marginBottom: 22,
   },
   card: {
     justifyContent: 'center',

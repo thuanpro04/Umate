@@ -20,12 +20,14 @@ const AppRouters = () => {
     }, 1500);
     return () => clearTimeout(timeout);
   }, []);
-  
+
   const handleCheckLogin = async () => {
     const res = await getItem();
     console.log('res app routers', res);
     res && dispatch(addAuth(JSON.parse(res)));
   };
+ 
+
   return (
     <>
       {isShowSplash ? (

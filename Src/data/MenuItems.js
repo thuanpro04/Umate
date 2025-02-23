@@ -23,7 +23,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Octicons from 'react-native-vector-icons/Octicons';
 
 const size = appInfo.sizeIcon;
-const color = appColors.blue;
+const color = appColors.blue2;
 const MenuItems = [
   {
     key: 'profile',
@@ -52,83 +52,7 @@ const MenuItems = [
     icon: <Sms size={size} color={color} variant="Bulk" />,
   },
 ];
-const Categorys = [
-  {
-    key: 1,
-    title: 'Tùy chỉnh đoạn chat',
-    icon: <Designtools color={appColors.black} size={appInfo.sizeIconBold} />,
-    Object: [
-      {
-        id: 1,
-        label: 'Đổi chủ đề',
-        icon: (
-          <MaterialCommunityIcons
-            name="cookie-edit-outline"
-            color={appColors.black}
-            size={appInfo.sizeIcon}
-          />
-        ),
-      },
-      {
-        id: 2,
-        label: 'Thay đổi biệt danh',
-        icon: (
-          <MaterialCommunityIcons
-            name="human-edit"
-            color={appColors.black}
-            size={appInfo.sizeIcon}
-          />
-        ),
-      },
-    ],
-  },
-  {
-    key: 2,
-    title: 'Xem ảnh và link',
-    icon: <HuobiToken color={appColors.black} size={appInfo.sizeIconBold} />,
-    Object: [
-      {
-        id: 3,
-        label: 'Your Images',
-        icon: <Image color={appColors.black} size={appInfo.sizeIcon} />,
-      },
-      {
-        id: 4,
-        label: 'Link liên kết',
-        icon: <Link21 color={appColors.black} size={appInfo.sizeIcon} />,
-      },
-    ],
-  },
-  {
-    key: 3,
-    title: 'Quyền riêng tư && hỗ trợ',
-    icon: <SecurityUser color={appColors.black} size={appInfo.sizeIconBold} />,
-    Object: [
-      {
-        id: 5,
-        label: 'Block',
-        icon: (
-          <FontAwesome6
-            name="user-xmark"
-            color={appColors.black}
-            size={appInfo.sizeIcon}
-          />
-        ),
-      },
-      {
-        id: 6,
-        label: 'Báo cáo',
-        icon: (
-          <Octicons
-            name="report"
-            color={appColors.black}
-            size={appInfo.sizeIcon}
-          />
-        ),
-      },
-    ],
-  },
-];
+
 const ChoiceItems = [
   {
     key: 'call',
@@ -158,4 +82,4 @@ const ChoiceItems = [
   },
 ];
 
-export {MenuItems, Categorys, ChoiceItems};
+export {MenuItems, ChoiceItems};
