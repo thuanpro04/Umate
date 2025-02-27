@@ -27,7 +27,7 @@ export default LoadingModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center', // Căn giữa theo chiều dọc
     alignItems: 'center', // Căn giữa theo chiều ngang
     zIndex: 1, // Đặt zIndex thấp hơn so với Snackbar hoặc Toast

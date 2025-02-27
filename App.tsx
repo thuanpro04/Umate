@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import LoginSreen from './Src/Screens/Auth/LoginSreen';
-import {Provider} from 'react-redux';
+import {Provider, useSelector} from 'react-redux';
 import {StatusBar} from 'react-native';
 import store from './Src/redux/store';
 import MainNavigator from './Src/Screens/Navigators/MainNavigator';
@@ -15,11 +15,14 @@ import Orientation from 'react-native-orientation-locker';
 import {HandleNotification} from './Src/Screens/Untils/HandleNotification';
 import messaging from '@react-native-firebase/messaging';
 import {Notification} from './Src/Screens/Untils/Notification';
+import { themeSelector } from './Src/redux/reducers/themeSlice';
 const App = () => {
+  
   useEffect(() => {
     Orientation.lockToPortrait();
     HandleNotification.checkNotificationPertion();
   }, []);
+
   useEffect(() => {
     messaging().onMessage(async mess => {
       Notification.showToast(
@@ -40,7 +43,6 @@ const App = () => {
         <Host>
           <NavigationContainer>
             <AppRouters />
-            <Toast />
           </NavigationContainer>
         </Host>
       </Provider>

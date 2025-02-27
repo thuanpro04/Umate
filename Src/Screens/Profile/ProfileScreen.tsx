@@ -29,40 +29,22 @@ import {globalStyles} from '../../Styles/globalStyle';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import {eventSelector} from '../../redux/reducers/eventSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {friendSelector} from '../../redux/reducers/friendSlice';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
+  const friendData = useSelector(friendSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const userInfo = {
-    avatar: 'https://via.placeholder.com/150',
-    name: 'John Doe',
-    majoring: 'johndoe@gmail.com',
-    bio: 'Loving life, learning every day!',
     stats: {
-      friends: 120,
-      posts: 45,
+      friends: friendData && friendData.friends ? friendData.friends.length : 0,
+      posts:
+        eventData && eventData.eventShares ? eventData.eventShares.length : 0,
       likes: 230,
     },
-    recentPosts: [
-      {
-        id: '1',
-        content: 'Had an amazing day!',
-        image: 'https://via.placeholder.com/200',
-      },
-      {
-        id: '2',
-        content: 'Exploring new places.',
-        image: 'https://via.placeholder.com/200',
-      },
-      {
-        id: '3',
-        content: 'React Native is awesome!',
-        image: 'https://via.placeholder.com/200',
-      },
-    ],
   };
-  console.log(eventData.eventShares);
+
 
   const getEventShared = async () => {
     const res = await eventSevices.getEventShared(eventData.eventShares);
@@ -92,7 +74,11 @@ const ProfileScreen = ({navigation}: any) => {
   return (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}>
-      <View style={[locastyles.header, {backgroundColor: colors.background}]}>
+      <View
+        style={[
+          locastyles.header,
+          {backgroundColor: theme === 'light' ? colors.card: colors.card},
+        ]}>
         <ZoomImageComponent
           url={userData.avatar}
           styles={profileStyles.avatar}
@@ -154,16 +140,26 @@ const ProfileScreen = ({navigation}: any) => {
 
       {/* Stats */}
       <View style={profileStyles.statsContainer}>
-        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
-          <Text style={profileStyles.statNumber}>{userInfo.stats.friends}</Text>
+        <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
+          <TextComponent
+            label={userInfo.stats.friends}
+            styles={profileStyles.statNumber}
+          />
           <Text style={profileStyles.statLabel}>Friends</Text>
         </View>
-        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
-          <Text style={profileStyles.statNumber}>{userInfo.stats.posts}</Text>
+        <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
+          <TextComponent
+            label={userInfo.stats.posts}
+            styles={profileStyles.statNumber}
+          />
           <Text style={profileStyles.statLabel}>Shares</Text>
         </View>
-        <View style={[profileStyles.stat, {backgroundColor: colors.border}]}>
-          <Text style={profileStyles.statNumber}>{userInfo.stats.likes}</Text>
+        <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
+          <TextComponent
+            label={userInfo.stats.likes.toString()}
+            styles={profileStyles.statNumber}
+          />
+
           <Text style={profileStyles.statLabel}>Likes</Text>
         </View>
       </View>
@@ -196,7 +192,7 @@ const locastyles = StyleSheet.create({
     marginTop: 10,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: 'coral',
+    backgroundColor: appColors.blue,
     borderTopLeftRadius: 12,
     borderBottomRightRadius: 12,
     flexDirection: 'row',

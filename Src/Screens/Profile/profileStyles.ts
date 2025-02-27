@@ -27,11 +27,9 @@ export const profileStyles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: appColors.white,
   },
   majoring: {
     fontSize: 16,
-    color: '#fff',
   },
   link: {
     fontSize: 16,
@@ -47,8 +45,6 @@ export const profileStyles = StyleSheet.create({
   bio: {
     fontSize: 14,
     fontStyle: 'italic',
-    
-
   },
   statsContainer: {
     flexDirection: 'row',
@@ -57,10 +53,10 @@ export const profileStyles = StyleSheet.create({
   },
   stat: {
     alignItems: 'center',
-  
+
     padding: 15,
     borderRadius: 15,
-    
+
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -79,7 +75,7 @@ export const profileStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    
+
     marginHorizontal: 20,
     marginBottom: 10,
   },

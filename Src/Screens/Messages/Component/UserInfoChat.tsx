@@ -222,10 +222,11 @@ const UserInfoChat = ({navigation}: any) => {
   const handleChoiceItems = (key: string) => {
     switch (key) {
       case 'call':
-        console.log('Thay đổi chủ đề !!');
+        navigation.navigate("VoiceCall")
         break;
       case 'video':
-        setVisible(true);
+        navigation.navigate("VideoCall")
+
         break;
       case 'personal':
         navigation.navigate('PersonalScreen', {

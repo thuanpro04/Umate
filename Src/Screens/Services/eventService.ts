@@ -16,7 +16,7 @@ const updateUserHeartForEvent = async (
   id: string,
   action: 'add' | 'cancel',
 ) => {
-  url = `/action-heart?userId=${userId}&eventId=${id}&key=${action}`;
+  url = `/action-heart?userId=${userId}&id=${id}&key=${action}`;
   const res = eventApi.handleEvent(url);
   return res;
 };

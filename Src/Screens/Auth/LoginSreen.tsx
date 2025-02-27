@@ -23,12 +23,17 @@ import {Auth} from '../Services/authService.';
 import {Notification} from '../Untils/Notification';
 import {Validate} from '../Untils/Validate';
 import {setTheme, toggleTheme} from '../../redux/reducers/themeSlice';
-import {addProfile} from '../../redux/reducers/profileSlice';
+import {addProfile, profileSelector} from '../../redux/reducers/profileSlice';
 import {addFriend} from '../../redux/reducers/friendSlice';
 import {addEvent} from '../../redux/reducers/eventSlice';
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import * as ZIM from 'zego-zim-react-native';
+import * as ZPNs from 'zego-zpns-react-native';
+import {UserInfo} from '../Untils/UserInfo';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
   const dispatch = useDispatch();
   useEffect(() => {
     GoogleSignin.configure({
@@ -81,9 +86,18 @@ const LoginSreen = () => {
       dispatch(addFriend(res.data.friendSlice));
       dispatch(addEvent(res.data.eventSlice));
       dispatch(setTheme(res.data.authSlice.theme));
-      
-      await AsyncStorage.setItem('auth', JSON.stringify(res?.data.authSlice));
+
+      await AsyncStorage.setItem(
+        'userData',
+        JSON.stringify({
+          auth: res?.data.authSlice,
+          profile: res?.data.profileSlice,
+          friend: res?.data.friendSlice,
+          event: res?.data.eventSlice,
+        }),
+      );
       Notification.showToast('success', 'Login Success', 'Welcome to UMate 👋');
+      await onZegoService();
     } catch (error) {
       console.error('Login error:', error);
       Notification.showToast(
@@ -97,6 +111,26 @@ const LoginSreen = () => {
       setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
+  const onZegoService = async () => {
+    return ZegoUIKitPrebuiltCallService.init(
+      process.env.APPID, // You can get it from ZEGOCLOUD's console
+      process.env.APPSIGN, // You can get it from ZEGOCLOUD's console
+      auth.userId, // It can be any valid characters, but we recommend using a phone number.
+      UserInfo.getName(profile.name),
+      [ZIM, ZPNs],
+      {
+        ringtoneConfig: {
+          incomingCallFileName: 'zego_incoming.mp3',
+          outgoingCallFileName: 'zego_outgoing.mp3',
+        },
+        androidNotificationConfig: {
+          channelID: 'ZegoUIKit',
+          channelName: 'ZegoUIKit',
+        },
+      },
+    );
+  };
+
   return (
     <ContainerComponent>
       <LoadingModal visible={isLoading} />
@@ -118,7 +152,11 @@ const LoginSreen = () => {
               source={require('../../assets/images/logoApp.png')}
               style={styles.logo}
             />
-            <TextComponent label="UMATE" styles={{fontStyle: 'italic'}} title />
+            <TextComponent
+              label="UMATE"
+              styles={{fontStyle: 'italic', color: 'black'}}
+              title
+            />
           </RowComponent>
           <SpaceComponent height={appInfo.size.HEIGHT * 0.03} />
           <View style={styles.Vtext}>

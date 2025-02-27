@@ -20,6 +20,8 @@ import UserQRCode from '../QRCode/UserQRCode';
 import FriendScreens from '../Friends/FriendScreens';
 import NotificationScreen from '../notification/NotificationScreen';
 import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
+import SupportScreen from '../../SupportScreen/SupportScreen';
+import SecurityScreen from '../SecurityScreen/SecurityScreen';
 
 
 const MainNavigator = () => {
@@ -46,6 +48,9 @@ const MainNavigator = () => {
       <Stack.Screen name="UserQRCode" component={UserQRCode} />
       <Stack.Screen name="FriendScreens" component={FriendScreens} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+      <Stack.Screen name="SupportScreen" component={SupportScreen} />
+      <Stack.Screen name="SecurityScreen" component={SecurityScreen} />
+
 
 
 

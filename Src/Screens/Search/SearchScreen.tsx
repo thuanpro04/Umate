@@ -160,7 +160,6 @@ const SearchScreen = ({navigation}: any) => {
         image={item.avatar}
         lastMessage={item.lastMessage}
         onPress={() => onNavigationChat(item)}
-        
       />
     );
   };
@@ -264,7 +263,7 @@ const SearchScreen = ({navigation}: any) => {
                     },
                   ]}
                   labelColor={
-                    backgroundItem[item.key.toString()]
+                    backgroundItem[item.key.toString()] ||  theme === 'dark'
                       ? appColors.white
                       : appColors.black
                   }

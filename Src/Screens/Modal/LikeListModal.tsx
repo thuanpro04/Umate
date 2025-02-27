@@ -13,7 +13,9 @@ import {TextComponent} from '../Components';
 import {appColors} from '../../Theme/Colors/appColors';
 import {userServices} from '../Services/userService';
 import CarUserLikeComponent from '../Home/Components/CarUserLikeComponent';
-import { globalStyles } from '../../Styles/globalStyle';
+import {globalStyles} from '../../Styles/globalStyle';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 interface Props {
   title: string;
   listUsers: string[];
@@ -23,7 +25,8 @@ const LikeListModal = (props: Props) => {
   const {title, listUsers, navigation} = props;
   const modalizeRef = useRef<Modalize>();
   const [listUserInfo, setListUserInfo] = useState<any[]>([]);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme];
   const getUserForHeartEvent = async () => {
     try {
       const res = await userServices.getListUserInfo(listUsers);
@@ -42,8 +45,9 @@ const LikeListModal = (props: Props) => {
   const onCloseModal = () => {
     modalizeRef.current?.close();
   };
-  
+
   const renderItems = ({item, index}: any) => {
+    
     return (
       <CarUserLikeComponent
         item={item}
@@ -62,6 +66,7 @@ const LikeListModal = (props: Props) => {
         <Modalize
           ref={modalizeRef}
           handlePosition="inside"
+          modalStyle={{backgroundColor:colors.background}}
           adjustToContentHeight>
           <View
             style={{
@@ -81,6 +86,4 @@ const LikeListModal = (props: Props) => {
 
 export default LikeListModal;
 
-const styles = StyleSheet.create({
-  
-});
+const styles = StyleSheet.create({});

@@ -36,6 +36,7 @@ const TabNavigator = () => {
           borderTopRightRadius: theme === 'light' ? 12 : 0,
           backgroundColor: colors.background,
           display: isTabBarVisible ? 'flex' : 'none',
+          borderTopColor:colors.background
         },
         tabBarIcon: ({focused, color, size}) => {
           let icon: ReactNode;

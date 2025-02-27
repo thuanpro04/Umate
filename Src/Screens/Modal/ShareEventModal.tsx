@@ -192,7 +192,7 @@ const ShareEventModal = (props: Props) => {
               onChangeText={setValue}
               style={[
                 modalStyles.input,
-                {borderColor: colors.border, color: colors.text,backgroundColor:colors.border},
+                {borderColor: colors.border, color: colors.text},
               ]}
               placeholder="Add a comment..."
               placeholderTextColor={colors.placeholderTextColor}

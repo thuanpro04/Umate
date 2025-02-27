@@ -23,7 +23,7 @@ interface Props {
   img: string;
   content: string;
   timeStamp: string;
-  eventId: string;
+  id: any;
   like: boolean;
   countLike: number;
   listUsers: string[];
@@ -37,7 +37,7 @@ const CarComponent = (props: Props) => {
     img,
     content,
     timeStamp,
-    eventId,
+    id,
     like,
     countLike,
     listUsers,
@@ -69,7 +69,7 @@ const CarComponent = (props: Props) => {
     try {
       const res = await eventSevices.updateUserHeartForEvent(
         auth.userId,
-        eventId,
+        id,
         action,
       );
       if (res?.data) {
@@ -195,7 +195,7 @@ const CarComponent = (props: Props) => {
         </View>
 
         <ShareEventModal
-          eventId={eventId}
+          eventId={id}
           styles={[
             localStyles.actionButton,
             {borderColor: colors.border, borderWidth: 1},

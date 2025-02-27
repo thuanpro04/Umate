@@ -296,34 +296,45 @@ const PersonalScreen = ({navigation}: any) => {
       style={[profileStyles.container, {backgroundColor: colors.background}]}>
       <StatusBar barStyle="dark-content" />
 
-      {renderHeader()}
-      <View style={[profileStyles.statsContainer, ,]}>
-        {Object.entries(infoUser.stats).map(([key, value]) => (
-          <View
-            key={key}
-            style={[
-              profileStyles.stat,
-              {backgroundColor: colors.background, shadowColor: colors.shadow},
-            ]}>
-            <Text style={profileStyles.statNumber}>{value}</Text>
-            <Text style={profileStyles.statLabel}>{key.toUpperCase()}</Text>
+      {userInfo ? (
+        <>
+          {renderHeader()}
+          <View style={[profileStyles.statsContainer, ,]}>
+            {Object.entries(infoUser.stats).map(([key, value]) => (
+              <View
+                key={key}
+                style={[
+                  profileStyles.stat,
+                  {
+                    backgroundColor:
+                      theme === 'light' ? colors.background : colors.border,
+                    shadowColor: colors.shadow,
+                  },
+                ]}>
+                <Text style={profileStyles.statNumber}>{value}</Text>
+                <Text style={profileStyles.statLabel}>{key.toUpperCase()}</Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
 
-      {/* Recent Posts */}
-      <TextComponent
-        label="Shared recently"
-        styles={profileStyles.sectionTitle}
-      />
-      {userInfo && userInfo.eventShares && (
-        <FlatList
-          inverted
-          data={userInfo.eventShares}
-          renderItem={renderPost}
-          keyExtractor={item => item._id}
-          contentContainerStyle={profileStyles.postList}
-        />
+          <TextComponent
+            label="Shared recently"
+            styles={profileStyles.sectionTitle}
+          />
+          {userInfo.eventShares && (
+            <FlatList
+              inverted
+              data={userInfo.eventShares}
+              renderItem={renderPost}
+              keyExtractor={item => item._id}
+              contentContainerStyle={profileStyles.postList}
+            />
+          )}
+        </>
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <TextComponent label="Tài khoản không tồn tại." />
+        </View>
       )}
     </SafeAreaView>
   ) : (

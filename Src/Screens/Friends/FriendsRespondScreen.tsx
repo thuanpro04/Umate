@@ -1,28 +1,24 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import React, {useCallback, useMemo, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  View,
+  StyleSheet
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {appColors} from '../../Theme/Colors/appColors';
-import {addAuth, authSelector} from '../../redux/reducers/authReducer';
-import {CarUserComponent, SpaceComponent} from '../Components';
-import UserInfoModal from '../Modal/UserInfoModal';
-import {friendServices} from '../Services/friendService.';
-import {userServices} from '../Services/userService';
-import {UserInfo} from '../Untils/UserInfo';
+import { useDispatch, useSelector } from 'react-redux';
+import { appColors } from '../../Theme/Colors/appColors';
+import { addAuth, authSelector } from '../../redux/reducers/authReducer';
+import { friendSelector } from '../../redux/reducers/friendSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { CarUserComponent, SpaceComponent } from '../Components';
 import ActionModal from '../Modal/ActionModal';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {messageServices} from '../Services/messageServices';
-import {Item} from 'react-native-paper/lib/typescript/components/List/List';
 import LoadingModal from '../Modal/LoadingModal';
-import {add, isArray} from 'lodash';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {friendSelector} from '../../redux/reducers/friendSlice';
+import UserInfoModal from '../Modal/UserInfoModal';
+import { friendServices } from '../Services/friendService.';
+import { messageServices } from '../Services/messageServices';
+import { userServices } from '../Services/userService';
+import { UserInfo } from '../Untils/UserInfo';
 
 const initialUser = {
   avatar: '',

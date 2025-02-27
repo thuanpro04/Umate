@@ -6,13 +6,19 @@ import {addAuth, authSelector} from '../../redux/reducers/authReducer';
 import MainNavigator from './MainNavigator';
 import AuthNavigator from './AuthNavigator';
 import WelcomtoApp from '../WelcomtoApp';
+import Toast from 'react-native-toast-message';
+import {ToastConfig} from '../Components';
+import {setTheme, themeSelector} from '../../redux/reducers/themeSlice';
+import { addProfile } from '../../redux/reducers/profileSlice';
+import { addFriend } from '../../redux/reducers/friendSlice';
+import { addEvent } from '../../redux/reducers/eventSlice';
 
 const AppRouters = () => {
-  const {getItem, setItem} = useAsyncStorage('auth');
+  const {getItem, setItem} = useAsyncStorage('userData');
   const auth = useSelector(authSelector);
   const dispatch = useDispatch();
   const [isShowSplash, setIsShowSplash] = useState(true);
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
   useEffect(() => {
     handleCheckLogin();
     const timeout = setTimeout(() => {
@@ -22,11 +28,16 @@ const AppRouters = () => {
   }, []);
 
   const handleCheckLogin = async () => {
-    const res = await getItem();
-    console.log('res app routers', res);
-    res && dispatch(addAuth(JSON.parse(res)));
+    const userData = await getItem();
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      dispatch(addAuth(parsedData.auth));
+      dispatch(addProfile(parsedData.profile));
+      dispatch(addFriend(parsedData.friend));
+      dispatch(addEvent(parsedData.event));
+      dispatch(setTheme(theme));
+    }
   };
- 
 
   return (
     <>
@@ -37,6 +48,7 @@ const AppRouters = () => {
       ) : (
         <AuthNavigator />
       )}
+      <Toast config={ToastConfig(theme)} />
     </>
   );
 };

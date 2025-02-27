@@ -22,49 +22,56 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {themeSelector, toggleTheme} from '../../redux/reducers/themeSlice';
+import {
+  setTheme,
+  themeSelector,
+  toggleTheme,
+} from '../../redux/reducers/themeSlice';
 import {appColors} from '../../Theme/Colors/appColors';
 import {userServices} from '../Services/userService';
-import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {
+  addAuth,
+  authSelector,
+  removeAuth,
+} from '../../redux/reducers/authReducer';
 import LoadingModal from '../Modal/LoadingModal';
 import {ArrowLeft} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {SpaceComponent} from '../Components';
+import {HandleNotification} from '../Untils/HandleNotification';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {removeEvent} from '../../redux/reducers/eventSlice';
+import {removeFriend} from '../../redux/reducers/friendSlice';
+import {removeProfile} from '../../redux/reducers/profileSlice';
 
 const SettingScreen = () => {
   const navigation: any = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
+  const dispatch = useDispatch();
   const theme: 'light' | 'dark' = useSelector(themeSelector);
+  console.log(theme);
 
   const [isDarkMode, setIsDarkMode] = useState(
     theme === 'light' ? false : true,
   );
-
-  const dispatch = useDispatch();
   const colors = appColors[theme];
+
   const handleThemeToggle = async () => {
-    setIsLoading(true);
     try {
-      dispatch(toggleTheme());
+      const newTheme = theme === 'dark' ? 'light' : 'dark';
       const res = await userServices.updateThemeforUser(
         auth.userId,
         theme === 'dark' ? 'light' : 'dark',
       );
       if (res && res.data) {
-        console.log('res.data', res.data);
+        dispatch(setTheme(newTheme));
+        console.log('update successfully ', res.data);
       }
       setIsDarkMode(!isDarkMode);
-      setIsLoading(false);
     } catch (error) {
       console.log('Update state theme error: ', error);
-      setIsLoading(false);
     }
-  };
-
-  const handleLogout = async () => {
-    await AsyncStorage.clear();
-    navigation.reset({index: 0, routes: [{name: 'Login'}]});
   };
 
   const confirmDeleteAccount = () => {
@@ -73,11 +80,50 @@ const SettingScreen = () => {
       {
         text: 'Xóa',
         style: 'destructive',
-        onPress: () => console.log('Xóa tài khoản'),
+        onPress: () => handleRemoveForUser(),
       },
     ]);
   };
 
+  const handleRemoveForUser = async () => {
+    try {
+      const res = await userServices.handleRemoveUser(auth.userId);
+      if (res) {
+        console.log('Remove successfully !!');
+      }
+      await handleLogout();
+    } catch (error) {
+      console.log('handle remove user fail: ', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      const fcmToken = await AsyncStorage.getItem('fcmtoken');
+      if (fcmToken) {
+        if (auth.fcmTokens && auth.fcmTokens.length > 0) {
+          let items = [auth.fcmToken];
+          const index = items.findIndex(e => e === fcmToken);
+          if (index !== -1) {
+            items.splice(index, 1);
+          }
+          await HandleNotification.update(items, auth.userId);
+        }
+      }
+      await GoogleSignin.signOut();
+      dispatch(removeAuth());
+      dispatch(removeEvent());
+      dispatch(removeFriend());
+      dispatch(removeProfile());
+      await AsyncStorage.removeItem('auth');
+      const res = await userServices.updateUserStatus(auth.userId, false);
+      setIsLoading(false);
+    } catch (error) {
+      console.log('setting log out error: ', error);
+      setIsLoading(false);
+    }
+  };
   const SettingItem = ({icon: Icon, label, onPress, rightComponent}: any) => (
     <TouchableOpacity
       style={[styles.settingItem, {backgroundColor: colors.card}]}
@@ -89,7 +135,6 @@ const SettingScreen = () => {
       {rightComponent}
     </TouchableOpacity>
   );
-
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <ArrowLeft
@@ -115,8 +160,8 @@ const SettingScreen = () => {
 
       <SettingItem
         icon={Lock}
-        label="Bảo mật & Mật khẩu"
-        onPress={() => navigation.navigate('Security')}
+        label="Bảo mật"
+        onPress={() => navigation.navigate('SecurityScreen')}
       />
 
       <SettingItem
@@ -128,7 +173,7 @@ const SettingScreen = () => {
       <SettingItem
         icon={HelpCircle}
         label="Trợ giúp & Hỗ trợ"
-        onPress={() => navigation.navigate('Help')}
+        onPress={() => navigation.navigate('SupportScreen')}
       />
 
       <SettingItem

@@ -21,13 +21,16 @@ import {useSelector} from 'react-redux';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {notificationServices} from '../Services/notificationServices';
 import {Notification} from '../Untils/Notification';
-import { profileSelector } from '../../redux/reducers/profileSlice';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 const ContactUsScreen = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const profile = useSelector(profileSelector);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme];
   const handleSend = async () => {
     if (message.length > 10) {
       setIsLoading(true);
@@ -54,9 +57,11 @@ const ContactUsScreen = ({navigation}: any) => {
       return;
     }
   };
-
+  const placeHolderEmail = profile.email.substring(0, 30) + '...';
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, {backgroundColor: colors.background}]}
+      showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#6A11CB', '#2575FC']} style={styles.header}>
         <ArrowLeft2
           onPress={() => navigation.goBack()}
@@ -71,11 +76,14 @@ const ContactUsScreen = ({navigation}: any) => {
         </Text>
       </LinearGradient>
 
-      <View style={styles.formContainer}>
+      <View style={[styles.formContainer, {backgroundColor: colors.card}]}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>👤 Họ tên</Text>
+          <TextComponent label="👤 Họ tên" styles={styles.label} />
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {backgroundColor: colors.background, color: colors.text},
+            ]}
             placeholder={profile.name ?? 'Nhập tên của bạn'}
             placeholderTextColor="#B0B0B0"
             value={name}
@@ -83,19 +91,27 @@ const ContactUsScreen = ({navigation}: any) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>📧 Email</Text>
+          <TextComponent label='📧 Email' styles={styles.label} />
           <TextInput
-            style={styles.input}
-            placeholder={profile.email ?? 'Nhập email'}
+            style={[
+              styles.input,
+              {backgroundColor: colors.background, color: colors.text},
+            ]}
+            multiline
+            placeholder={placeHolderEmail ?? 'Nhập email'}
             placeholderTextColor="#B0B0B0"
             value={email}
             onChangeText={setEmail}
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>💬 Nội dung</Text>
+          <TextComponent label="💬 Nội dung" styles={styles.label} />
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[
+              styles.input,
+              styles.textArea,
+              {backgroundColor: colors.background, color: colors.text},
+            ]}
             placeholder="Nhập tin nhắn của bạn"
             placeholderTextColor="#B0B0B0"
             value={message}
@@ -129,7 +145,6 @@ const ContactUsScreen = ({navigation}: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
   },
   header: {
     height: 200,
@@ -154,7 +169,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     marginTop: -40,
-    backgroundColor: '#FFFFFF',
+
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 20,
@@ -166,18 +181,15 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#333333',
+
     marginBottom: 6,
   },
   input: {
     borderWidth: 1,
     borderColor: '#E5E5E5',
     borderRadius: 16,
-
     paddingVertical: 16,
-    backgroundColor: '#F5F5F5',
     fontSize: 16,
-    color: '#333333',
     paddingLeft: 18,
     paddingRight: 22,
   },

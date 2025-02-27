@@ -22,6 +22,7 @@ import {userServices} from '../Services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {profileSelector} from '../../redux/reducers/profileSlice';
 
 const HomeScreen = ({navigation}: any) => {
   const [event, setEvent] = useState<any[]>([]);
@@ -29,7 +30,6 @@ const HomeScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -63,13 +63,14 @@ const HomeScreen = ({navigation}: any) => {
   };
 
   const renderItemEvents = ({item, index}: any) => {
+    
     return (
       <CarEventComponent
         title={item.title}
         key={index}
         countLike={item.likes.length}
         like={item.likes.includes(auth.userId)}
-        eventId={item.eventId}
+        id={item._id}
         img={item.image}
         content={item.content}
         timeStamp={item.timestamp}

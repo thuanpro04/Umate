@@ -61,6 +61,7 @@ const ChatScreen = ({navigation}: any) => {
     };
     fetchData();
   }, []);
+  console.log(converInfo);
 
   useEffect(() => {
     if (converInfo) {
@@ -307,10 +308,7 @@ const ChatScreen = ({navigation}: any) => {
         ) : (
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <TextComponent
-              label="Messages not found 🙁"
-              
-            />
+            <TextComponent label="Messages not found 🙁" />
           </View>
         )}
         {showScrollToBottom && (

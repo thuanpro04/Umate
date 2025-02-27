@@ -21,7 +21,7 @@ export const appColors = {
     card: '#374151',
     text: '#F9FAFB',
     icon: '#9CA3AF',
-    shadow: '#9CA3AF',
+    shadow: '#3A5199',
     placeholderTextColor: '#9CA3AF',
     border: '#C1C1c1',
     facebook: '#3b5998',
@@ -30,8 +30,8 @@ export const appColors = {
     text2: '#A5A5A5',
     bgItem: 'rgba(66,165,245,0.3)',
     bgItem2: ' rgba(102,187,106,0.3)',
-    bgProfile: '#374151',
-    bgProfile2:'#37415129'
+    bgProfile2: '#37415190',
+    bgProfile:'#37415129'
   },
   blueBack: '#2F2E33',
   coolGray: '#D5D6D2',

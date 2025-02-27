@@ -30,7 +30,7 @@ import {
 import {removeEvent} from '../../redux/reducers/eventSlice';
 import {removeFriend} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const disPathch = useDispatch();
@@ -49,9 +49,9 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     try {
       const fcmToken = await AsyncStorage.getItem('fcmtoken');
       if (fcmToken) {
-        if (user.fcmTokens && user.fcmTokens.length > 0) {
+        if (auth.fcmTokens && auth.fcmTokens.length > 0) {
           // console.log(items);
-          let items = [user.fcmTokens]; // Copy mảng gốc
+          let items = [auth.fcmTokens]; // Copy mảng gốc
           const index = items.findIndex(e => e === fcmToken);
 
           if (index !== -1) {
@@ -69,11 +69,15 @@ const DrawerCustomsMenu = ({navigation}: any) => {
       disPathch(removeProfile());
       await AsyncStorage.removeItem('auth');
       const res = await userServices.updateUserStatus(auth.userId, false);
+      onLogoutCallService();
       setIsLoading(false);
     } catch (error) {
       console.log('Sign out', error);
       setIsLoading(false);
     }
+  };
+  const onLogoutCallService = async () => {
+    return ZegoUIKitPrebuiltCallService.uninit();
   };
   const handleShowItemMenu = async (key: string) => {
     switch (key) {

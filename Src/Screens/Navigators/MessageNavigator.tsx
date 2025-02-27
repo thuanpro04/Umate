@@ -5,6 +5,9 @@ import ChatScreen from '../Messages/ChatScreen';
 import UserInfoChat from '../Messages/Component/UserInfoChat';
 import MemberGroup from '../Messages/Component/MemberGroup';
 import SearchFriendScreen from '../Search/SearchFriendScreen';
+import VideoCall from '../Messages/VideoCall';
+import VoiceCall from '../Messages/VoiceCall';
+import ZegoUIKitPrebuiltCallWaitingScreen from '../Messages/ZegoUIKitPrebuiltCallWaitingScreen';
 
 const MessageNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -15,6 +18,13 @@ const MessageNavigator = () => {
       <Stack.Screen name="UserInfoChat" component={UserInfoChat} />
       <Stack.Screen name="MemberGroup" component={MemberGroup} />
       <Stack.Screen name="SearchFriends" component={SearchFriendScreen} />
+      <Stack.Screen name="VideoCall" component={VideoCall} />
+      <Stack.Screen name="VoiceCall" component={VoiceCall} />
+
+      <Stack.Screen
+        name="ZegoUIKitPrebuiltCallWaitingScreen"
+        component={ZegoUIKitPrebuiltCallWaitingScreen}
+      />
     </Stack.Navigator>
   );
 };

@@ -47,7 +47,12 @@ const updateThemeforUser = async (userId: string, theme: string) => {
     theme,
   };
   const res = await usersAPI.handleUsers(url, data, 'post');
-  return res
+  return res;
+};
+const handleRemoveUser = async (userId: string) => {
+  url = `/remove-user?id=${userId}`;
+  const res = usersAPI.handleUsers(url);
+  return res;
 };
 export const userServices = {
   getEquestFriendUsers,
@@ -57,4 +62,5 @@ export const userServices = {
   updateUserStatus,
   updateBlockUser,
   updateThemeforUser,
+  handleRemoveUser,
 };
