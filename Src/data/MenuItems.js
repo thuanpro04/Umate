@@ -53,33 +53,6 @@ const MenuItems = [
   },
 ];
 
-const ChoiceItems = [
-  {
-    key: 'call',
-    name: 'Call',
-    icon: <CallCalling size={appInfo.sizeIconBold} color={appColors.cobalt} />,
-  },
-  {
-    key: 'video',
-    name: 'Video',
-    icon: <Video size={appInfo.sizeIconBold} color={appColors.cobalt} />,
-  },
-  {
-    key: 'personal',
-    name: 'Personal',
-    icon: <Personalcard size={appInfo.sizeIconBold} color={appColors.cobalt} />,
-  },
-  {
-    key: 'notification',
-    name: 'Notification',
-    icon: (
-      <Ionicons
-        name="notifications-outline"
-        size={appInfo.sizeIconBold}
-        color={appColors.cobalt}
-      />
-    ),
-  },
-];
 
-export {MenuItems, ChoiceItems};
+
+export {MenuItems, };

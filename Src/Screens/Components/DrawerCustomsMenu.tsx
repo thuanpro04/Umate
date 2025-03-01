@@ -69,7 +69,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
       disPathch(removeProfile());
       await AsyncStorage.removeItem('auth');
       const res = await userServices.updateUserStatus(auth.userId, false);
-      onLogoutCallService();
+      // await onLogoutCallService();
       setIsLoading(false);
     } catch (error) {
       console.log('Sign out', error);
@@ -77,6 +77,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     }
   };
   const onLogoutCallService = async () => {
+    //xóa cấu hình cuộc gọi
     return ZegoUIKitPrebuiltCallService.uninit();
   };
   const handleShowItemMenu = async (key: string) => {

@@ -13,7 +13,7 @@ import {
   SearchFriendsComponent,
   SpaceComponent,
   TextComponent,
-} from '../Components';
+} from '../Components'; 
 import InfomationModal from '../Modal/InfomationModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
@@ -58,6 +58,7 @@ const MessageScreen = ({navigation}: any) => {
       getAllConversation();
     }, []),
   );
+  
   const renderCardItems = ({item, index}: any) => {
     const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
 

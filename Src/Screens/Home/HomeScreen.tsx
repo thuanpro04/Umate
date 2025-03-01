@@ -1,10 +1,12 @@
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {HambergerMenu, Notification} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  Alert,
   AppState,
   FlatList,
+  Image,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
@@ -14,7 +16,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
-import {Address} from '../../assets/svgs/indexSvg';
 import {addAuth, authSelector} from '../../redux/reducers/authReducer';
 import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
@@ -23,16 +24,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {profileSelector} from '../../redux/reducers/profileSlice';
-
-const HomeScreen = ({navigation}: any) => {
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import * as ZIM from 'zego-zim-react-native';
+import * as ZPNs from 'zego-zpns-react-native';
+import {UserInfo} from '../Untils/UserInfo';
+import {io} from 'socket.io-client';
+const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
   const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
+  const navigation = useNavigation<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const socket = io(appInfo.BASE_URL);
   const getNewEvent = async () => {
     if (isLoading || page > limitPage) return; // Ngăn chặn gọi API khi đang tải hoặc hết trang.
     try {
@@ -63,7 +71,6 @@ const HomeScreen = ({navigation}: any) => {
   };
 
   const renderItemEvents = ({item, index}: any) => {
-    
     return (
       <CarEventComponent
         title={item.title}
@@ -97,11 +104,76 @@ const HomeScreen = ({navigation}: any) => {
         const fcmToken = await AsyncStorage.getItem('fcmtoken');
         dispatch(addAuth({...auth, fcmTokens: fcmToken}));
       };
-
+      // onZegoService();
+      registerCall();
       setOnline();
     }, []),
   );
+  useEffect(() => {
+    socket.on('incomingCall', (callData: any) => {
+      console.log('receive callData: ', callData);
 
+      Alert.alert(
+        'Cuộc gọi đến',
+        `${callData.callerName} đang gọi cho bạn`,
+        [
+          {
+            text: 'Từ chối',
+            style: 'cancel',
+            onPress: () => console.log('Call Rejected'),
+          },
+          {
+            text: 'Chấp nhận',
+            onPress: () => {
+              const screen =
+                callData.callType === 'video' ? 'VideoCall' : 'VoiceCall';
+              navigation.navigate(screen, {
+                roomID: callData.callID,
+                name: callData.targetName,
+                userID: callData.targetId,
+              });
+            },
+          },
+        ],
+        {cancelable: false},
+      );
+    });
+
+    return () => {
+      socket.off('incomingCall');
+    };
+  }, []);
+
+  const registerCall = () => {
+    socket.emit('callRegister', auth.userId);
+  };
+
+  const onZegoService = async () => {
+    return ZegoUIKitPrebuiltCallService.init(
+      869126873, // App ID từ ZEGOCLOUD console
+      process.env.APPSIGN, // App Sign từ ZEGOCLOUD console
+      auth.userId, // userID của bạn, cần là chuỗi
+      UserInfo.getName(profile.name), // userName hiển thị
+      [ZIM, ZPNs], // module cần thiết nếu có
+      {
+        // Tuỳ chọn nhạc chuông, thông báo trên Android, v.v.
+        ringtoneConfig: {
+          incomingCallFileName: 'zego_incoming',
+          outgoingCallFileName: 'zego_outgoing',
+        },
+        androidNotificationConfig: {
+          channelID: 'zego_video_call',
+          channelName: 'zego_video_call',
+          sound: 'default',
+          vibration: true,
+          priority: 'high',
+        },
+
+        // Hàm cấu hình cho mỗi cuộc gọi
+        requireConfig: (data: any) => {},
+      },
+    );
+  };
   return (
     <SafeAreaView
       style={[

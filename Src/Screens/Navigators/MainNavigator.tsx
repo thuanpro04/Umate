@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
 import {
@@ -23,7 +23,12 @@ import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 import SupportScreen from '../../SupportScreen/SupportScreen';
 import SecurityScreen from '../SecurityScreen/SecurityScreen';
 
-
+import {
+  ZegoUIKitPrebuiltCallInCallScreen,
+  ZegoUIKitPrebuiltCallWaitingScreen,
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import VoiceCall from '../Messages/VoiceCall';
+import VideoCall from '../Messages/VideoCall';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -42,7 +47,10 @@ const MainNavigator = () => {
       <Stack.Screen name="PersonalScreen" component={PersonalScreen} />
       <Stack.Screen name="EditProfile" component={SetUpProfile} />
       <Stack.Screen name="FriendsRespond" component={FriendsRespondScreen} />
-      <Stack.Screen name="FriendsRequestScreen" component={FriendsRequestScreen} />
+      <Stack.Screen
+        name="FriendsRequestScreen"
+        component={FriendsRequestScreen}
+      />
       <Stack.Screen name="DetailEvent" component={DetailEvent} />
       <Stack.Screen name="GoongMapScreen" component={GoongMapScreen} />
       <Stack.Screen name="UserQRCode" component={UserQRCode} />
@@ -50,11 +58,21 @@ const MainNavigator = () => {
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="SupportScreen" component={SupportScreen} />
       <Stack.Screen name="SecurityScreen" component={SecurityScreen} />
-
-
-
-
-
+      <Stack.Screen
+        options={{headerShown: false}}
+        // DO NOT change the name
+        name="ZegoUIKitPrebuiltCallWaitingScreen"
+        component={ZegoUIKitPrebuiltCallWaitingScreen}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        // DO NOT change the name
+        name="ZegoUIKitPrebuiltCallInCallScreen"
+        component={ZegoUIKitPrebuiltCallInCallScreen}
+      />
+      <Stack.Screen name="VoiceCall" component={VoiceCall} />
+      <Stack.Screen name="VideoCall" component={VideoCall} />
+      
     </Stack.Navigator>
   );
 };

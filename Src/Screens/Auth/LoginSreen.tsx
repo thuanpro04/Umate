@@ -26,20 +26,13 @@ import {setTheme, toggleTheme} from '../../redux/reducers/themeSlice';
 import {addProfile, profileSelector} from '../../redux/reducers/profileSlice';
 import {addFriend} from '../../redux/reducers/friendSlice';
 import {addEvent} from '../../redux/reducers/eventSlice';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import * as ZIM from 'zego-zim-react-native';
-import * as ZPNs from 'zego-zpns-react-native';
-import {UserInfo} from '../Untils/UserInfo';
+
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
   const dispatch = useDispatch();
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: process.env.WEBCLIENTID,
-    });
-  }, []);
+ 
   // Hàm hiển thị toast để tái sử dụng
 
   const getDataUserWithGoogle = async () => {
@@ -97,7 +90,7 @@ const LoginSreen = () => {
         }),
       );
       Notification.showToast('success', 'Login Success', 'Welcome to UMate 👋');
-      await onZegoService();
+      
     } catch (error) {
       console.error('Login error:', error);
       Notification.showToast(
@@ -111,26 +104,13 @@ const LoginSreen = () => {
       setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
-  const onZegoService = async () => {
-    return ZegoUIKitPrebuiltCallService.init(
-      process.env.APPID, // You can get it from ZEGOCLOUD's console
-      process.env.APPSIGN, // You can get it from ZEGOCLOUD's console
-      auth.userId, // It can be any valid characters, but we recommend using a phone number.
-      UserInfo.getName(profile.name),
-      [ZIM, ZPNs],
-      {
-        ringtoneConfig: {
-          incomingCallFileName: 'zego_incoming.mp3',
-          outgoingCallFileName: 'zego_outgoing.mp3',
-        },
-        androidNotificationConfig: {
-          channelID: 'ZegoUIKit',
-          channelName: 'ZegoUIKit',
-        },
-      },
-    );
-  };
-
+  
+ useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: process.env.WEBCLIENTID,
+    });
+     
+  }, []);
   return (
     <ContainerComponent>
       <LoadingModal visible={isLoading} />

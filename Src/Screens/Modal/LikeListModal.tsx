@@ -26,7 +26,7 @@ const LikeListModal = (props: Props) => {
   const modalizeRef = useRef<Modalize>();
   const [listUserInfo, setListUserInfo] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme];
+  const colors = appColors[theme??'light'];
   const getUserForHeartEvent = async () => {
     try {
       const res = await userServices.getListUserInfo(listUsers);

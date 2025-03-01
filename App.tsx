@@ -15,9 +15,9 @@ import Orientation from 'react-native-orientation-locker';
 import {HandleNotification} from './Src/Screens/Untils/HandleNotification';
 import messaging from '@react-native-firebase/messaging';
 import {Notification} from './Src/Screens/Untils/Notification';
-import { themeSelector } from './Src/redux/reducers/themeSlice';
+import {themeSelector} from './Src/redux/reducers/themeSlice';
+import {ZegoCallInvitationDialog} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 const App = () => {
-  
   useEffect(() => {
     Orientation.lockToPortrait();
     HandleNotification.checkNotificationPertion();
@@ -42,6 +42,7 @@ const App = () => {
         />
         <Host>
           <NavigationContainer>
+            <ZegoCallInvitationDialog/>
             <AppRouters />
           </NavigationContainer>
         </Host>

@@ -1,10 +1,13 @@
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {
   ArrowLeft,
+  CallCalling,
   Designtools,
   HuobiToken,
   Link21,
+  Personalcard,
   SecurityUser,
+  Video,
 } from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -18,7 +21,6 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Octicons from 'react-native-vector-icons/Octicons';
-import {ChoiceItems} from '../../../data/MenuItems';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {appInfo} from '../../../Theme/appInfo';
 import {appColors} from '../../../Theme/Colors/appColors';
@@ -39,13 +41,18 @@ import {notificationServices} from '../../Services/notificationServices';
 import {useSelector} from 'react-redux';
 import {authReducer, authSelector} from '../../../redux/reducers/authReducer';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
-import {ImageIcon} from 'lucide-react-native';
+import {ImageIcon, VideoIcon} from 'lucide-react-native';
+import {PermissionsAndroid} from 'react-native';
+import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import CustomCallButtonComponent from './CustomCallButtonComponent';
+import {profileSelector} from '../../../redux/reducers/profileSlice';
 const UserInfoChat = ({navigation}: any) => {
   const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
   const [statusNotification, setStatusNotification] = useState(false);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -129,6 +136,26 @@ const UserInfoChat = ({navigation}: any) => {
       ],
     },
   ];
+  const ChoiceItems = [
+    {
+      key: 'personal',
+      name: 'Personal',
+      icon: (
+        <Personalcard size={appInfo.sizeIconBold} color={appColors.cobalt} />
+      ),
+    },
+    {
+      key: 'notification',
+      name: 'Notification',
+      icon: (
+        <Ionicons
+          name="notifications-outline"
+          size={appInfo.sizeIconBold}
+          color={appColors.cobalt}
+        />
+      ),
+    },
+  ];
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
     setStatusNotification(
@@ -152,9 +179,24 @@ const UserInfoChat = ({navigation}: any) => {
   useFocusEffect(
     useCallback(() => {
       getConversationInfo();
+      // requestMicrophonePermission();
     }, []),
   );
 
+  // const requestMicrophonePermission = async () => {
+  //   try {
+  //     const granted = await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+  //     );
+  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //       console.log('✅ Đã cấp quyền microphone');
+  //     } else {
+  //       console.log('🚫 Quyền microphone bị từ chối');
+  //     }
+  //   } catch (error) {
+  //     console.error('⚠️ Lỗi khi yêu cầu quyền microphone:', error);
+  //   }
+  // };
   const onPressItems = (key: number) => {
     console.log(key);
 
@@ -221,13 +263,7 @@ const UserInfoChat = ({navigation}: any) => {
   };
   const handleChoiceItems = (key: string) => {
     switch (key) {
-      case 'call':
-        navigation.navigate("VoiceCall")
-        break;
-      case 'video':
-        navigation.navigate("VideoCall")
-
-        break;
+     
       case 'personal':
         navigation.navigate('PersonalScreen', {
           userId: converInfo.type === 'personal' ? converInfo.userId : '',
@@ -280,7 +316,69 @@ const UserInfoChat = ({navigation}: any) => {
             size={28}
           />
           <SpaceComponent height={20} />
-          <RowComponent styles={{gap: 20}}>
+          <RowComponent styles={{gap: 20, marginHorizontal: 12}}>
+            {converInfo.type !== 'group' && (
+              // <View style={[styles.menu, {}]}>
+              //   <ZegoSendCallInvitationButton
+              //     invitees={[
+              //       {userID: converInfo.userId, userName: converInfo.name},
+              //     ]}
+              //     isVideoCall={false}
+              //     resourceID={'zego_data'} // Please fill in the resource ID name that has been configured in the ZEGOCLOUD's console here.
+              //     width={50}
+              //     height={28}
+              //     fontSize={16}
+              //   />
+
+              //   <TextComponent
+              //     label="Call"
+              //     size={12}
+              //     styles={{fontStyle: 'italic'}}
+              //   />
+              // </View>
+              <CustomCallButtonComponent
+                targetName={UserInfo.getName(converInfo.name)}
+                userId={auth.userId}
+                targetId={converInfo.userId}
+                userName={UserInfo.getName(profile.name)}
+                styles={styles.menu}
+                text="call"
+                resourceID="zego_data"
+                callType="voice"
+                icon={<CallCalling color="blue" size={22} />}
+              />
+            )}
+
+            {/* <View style={[styles.menu, {}]}>
+              <ZegoSendCallInvitationButton
+                invitees={[
+                  {userID: converInfo.userId, userName: converInfo.name},
+                ]}
+                isVideoCall={true}
+                resourceID={'zego_video_call'} // Please fill in the resource ID name that has been configured in the ZEGOCLOUD's console here.
+                width={50}
+                height={28}
+                fontSize={16}
+                showWaitingPageWhenGroupCall={true}
+                userAvatar={profile.avatar}
+              />
+              <TextComponent
+                label="Video"
+                size={12}
+                styles={{fontStyle: 'italic'}}
+              />
+            </View> */}
+            <CustomCallButtonComponent
+              targetName={UserInfo.getName(converInfo.name)}
+              userId={auth.userId}
+              targetId={converInfo.userId}
+              userName={UserInfo.getName(profile.name)}
+              styles={styles.menu}
+              text="video"
+              resourceID="zego_video_call"
+              callType="video"
+              icon={<Video color="blue" size={22} />}
+            />
             {ChoiceItems.map((item, index) => (
               <TouchableOpacity
                 onPress={() =>
@@ -316,7 +414,6 @@ const UserInfoChat = ({navigation}: any) => {
                 ) : (
                   item.icon
                 )}
-
                 <TextComponent
                   label={
                     converInfo.type === 'group' && item.key === 'personal'
