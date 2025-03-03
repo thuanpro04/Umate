@@ -105,44 +105,10 @@ const HomeScreen = () => {
         dispatch(addAuth({...auth, fcmTokens: fcmToken}));
       };
       // onZegoService();
-      registerCall();
+      // registerCall();
       setOnline();
     }, []),
   );
-  useEffect(() => {
-    socket.on('incomingCall', (callData: any) => {
-      console.log('receive callData: ', callData);
-
-      Alert.alert(
-        'Cuộc gọi đến',
-        `${callData.callerName} đang gọi cho bạn`,
-        [
-          {
-            text: 'Từ chối',
-            style: 'cancel',
-            onPress: () => console.log('Call Rejected'),
-          },
-          {
-            text: 'Chấp nhận',
-            onPress: () => {
-              const screen =
-                callData.callType === 'video' ? 'VideoCall' : 'VoiceCall';
-              navigation.navigate(screen, {
-                roomID: callData.callID,
-                name: callData.targetName,
-                userID: callData.targetId,
-              });
-            },
-          },
-        ],
-        {cancelable: false},
-      );
-    });
-
-    return () => {
-      socket.off('incomingCall');
-    };
-  }, []);
 
   const registerCall = () => {
     socket.emit('callRegister', auth.userId);

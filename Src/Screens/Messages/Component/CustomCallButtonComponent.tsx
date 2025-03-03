@@ -43,22 +43,16 @@ const CustomCallButtonComponent = (props: Props) => {
         callType,
         targetId,
         targetName,
+        userName,
       };
 
       socket.emit('sendCallInvitation', callData);
-      if (callType === 'video') {
-        navigation.navigate('VideoCall', {
-          roomID: callID,
-          name: userName,
-          userID: userId,
-        });
-      } else {
-        navigation.navigate('VoiceCall', {
-          roomID: callID,
-          name: userName,
-          userID: userId,
-        });
-      }
+      const screen = callType === 'video' ? 'VideoCall' : "VoiceCall";
+      navigation.navigate(screen, {
+        roomID: callID,
+        name: userName,
+        userID: userId,
+      });
     } catch (error) {
       console.error('❌ Lỗi khi gửi lời mời gọi:', error);
     }

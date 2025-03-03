@@ -129,6 +129,7 @@ const VoiceCall = (props: any) => {
           config={{
             // You can also use ONE_ON_ONE_VOICE_CALL_CONFIG/GROUP_VIDEO_CALL_CONFIG/GROUP_VOICE_CALL_CONFIG to make more types of calls.
             ...ONE_ON_ONE_VOICE_CALL_CONFIG,
+            notifyWhenAppRunningInBackgroundOrQuit: true,
             onCallEnd: (callID: any, reason: any, duration: any) => {
               navigation.goBack();
             },

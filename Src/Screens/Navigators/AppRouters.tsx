@@ -9,12 +9,10 @@ import WelcomtoApp from '../WelcomtoApp';
 import Toast from 'react-native-toast-message';
 import {ToastConfig} from '../Components';
 import {setTheme, themeSelector} from '../../redux/reducers/themeSlice';
-import { addProfile } from '../../redux/reducers/profileSlice';
-import { addFriend } from '../../redux/reducers/friendSlice';
-import { addEvent } from '../../redux/reducers/eventSlice';
-import { appInfo } from '../../Theme/appInfo';
-import { io } from 'socket.io-client';
-import { WebSocketProvider } from '../../redux/WebSocketProvider';
+import {addProfile} from '../../redux/reducers/profileSlice';
+import {addFriend} from '../../redux/reducers/friendSlice';
+import {addEvent} from '../../redux/reducers/eventSlice';
+import SocketManager from '../../redux/SocketManager';
 
 const AppRouters = () => {
   const {getItem, setItem} = useAsyncStorage('userData');
@@ -29,7 +27,7 @@ const AppRouters = () => {
     }, 1500);
     return () => clearTimeout(timeout);
   }, []);
-  
+
   const handleCheckLogin = async () => {
     const userData = await getItem();
     if (userData) {
@@ -47,7 +45,10 @@ const AppRouters = () => {
       {isShowSplash ? (
         <WelcomtoApp />
       ) : auth.accesstoken ? (
-        <MainNavigator />
+        <>
+          <SocketManager />
+          <MainNavigator />
+        </>
       ) : (
         <AuthNavigator />
       )}

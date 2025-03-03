@@ -32,7 +32,7 @@ const LoginSreen = () => {
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
   const dispatch = useDispatch();
- 
+
   // Hàm hiển thị toast để tái sử dụng
 
   const getDataUserWithGoogle = async () => {
@@ -90,7 +90,6 @@ const LoginSreen = () => {
         }),
       );
       Notification.showToast('success', 'Login Success', 'Welcome to UMate 👋');
-      
     } catch (error) {
       console.error('Login error:', error);
       Notification.showToast(
@@ -104,12 +103,11 @@ const LoginSreen = () => {
       setIsLoading(false); // Đặt trạng thái lại sau khi mọi thứ đã hoàn thành
     }
   };
-  
- useEffect(() => {
+
+  useEffect(() => {
     GoogleSignin.configure({
       webClientId: process.env.WEBCLIENTID,
     });
-     
   }, []);
   return (
     <ContainerComponent>
@@ -206,7 +204,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   VContainer: {
-    backgroundColor: appColors.white,
     width: '100%',
     borderTopLeftRadius: appInfo.size.HEIGHT * 0.05,
     borderTopRightRadius: appInfo.size.HEIGHT * 0.05,

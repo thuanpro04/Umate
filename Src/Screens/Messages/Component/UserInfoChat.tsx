@@ -43,7 +43,7 @@ import {authReducer, authSelector} from '../../../redux/reducers/authReducer';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
 import {ImageIcon, VideoIcon} from 'lucide-react-native';
 import {PermissionsAndroid} from 'react-native';
-import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+// import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
 const UserInfoChat = ({navigation}: any) => {

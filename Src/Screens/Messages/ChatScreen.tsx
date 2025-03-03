@@ -61,7 +61,7 @@ const ChatScreen = ({navigation}: any) => {
     };
     fetchData();
   }, []);
-  console.log(converInfo);
+
 
   useEffect(() => {
     if (converInfo) {
