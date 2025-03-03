@@ -57,86 +57,31 @@ const VoiceCall = (props: any) => {
     }, []),
   );
 
-  useEffect(() => {}, []);
-
   return (
-    <LinearGradient
-      colors={['#004AAD', '#E3F2FD']} // Trắng nhạt -> Xanh dương
-      style={styles.container}>
-      {isCallAccepted ? (
-        converInfo && (
-          <View style={styles.waitingScreen}>
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Image
-                source={{uri: converInfo.avatar}}
-                style={globalStyles.imgStyles}
-              />
-              <ActivityIndicator
-                size="large"
-                color="#00AC3B"
-                style={{position: 'absolute', top: '40%'}}
-              />
-              <SpaceComponent height={12} />
-              <RowComponent>
-                <CallCalling
-                  size={appInfo.sizeIconBold}
-                  color={appColors.green}
-                />
-                <TextComponent
-                  label={`Đang kết nối ${UserInfo.getName(converInfo.name)}`}
-                  styles={styles.waitingText}
-                  color="white"
-                />
-              </RowComponent>
-            </View>
-            <RowComponent styles={{flex: 1, alignItems: 'flex-end'}}>
-              <TouchableOpacity style={[styles.btn, styles.volumeBtn]}>
-                {isVolume ? (
-                  <Volume2 size={appInfo.sizeIconBold} color={colors.icon} />
-                ) : (
-                  <Volume1 size={appInfo.sizeIconBold} color={colors.icon} />
-                )}
-              </TouchableOpacity>
-              <SpaceComponent width={20} />
-              <TouchableOpacity
-                style={[styles.btn, styles.endCallBtn]}
-                onPress={() => props.navigation.goBack()}>
-                <CallCalling size={appInfo.sizeIconBold} color={colors.icon} />
-              </TouchableOpacity>
-              <SpaceComponent width={20} />
+    <View style={styles.container}>
+      <ZegoUIKitPrebuiltCall
+        appID={869126873}
+        appSign={
+          'fa5f0ebaabd60e8769aa6a5792f6330c188ffad58dd5b60a840e40a16fd545da'
+        }
+        userID={userID} // userID can be something like a phone number or the user id on your own user system.
+        userName={name}
+        callID={roomID} // callID can be any unique string.
+        config={{
+          // You can also use ONE_ON_ONE_VOICE_CALL_CONFIG/GROUP_VIDEO_CALL_CONFIG/GROUP_VOICE_CALL_CONFIG to make more types of calls.
+          ...ONE_ON_ONE_VOICE_CALL_CONFIG,
+          notifyWhenAppRunningInBackgroundOrQuit: true,
+          onCallAccepted: () => {
+            console.log('Người nhận đã bắt máy!');
+            setIsCallAccepted(true);
+          },
+          onCallEnd: (callID: any, reason: any, duration: any) => {
+            navigation.navigate("Home");
 
-              <TouchableOpacity style={[styles.btn, styles.micBtn]}>
-                {isMic ? (
-                  <MicOff size={appInfo.sizeIconBold} color={colors.icon} />
-                ) : (
-                  <Mic size={appInfo.sizeIconBold} color={colors.icon} />
-                )}
-              </TouchableOpacity>
-            </RowComponent>
-            <SpaceComponent height={60} />
-          </View>
-        )
-      ) : (
-        <ZegoUIKitPrebuiltCall
-          appID={869126873}
-          appSign={
-            'fa5f0ebaabd60e8769aa6a5792f6330c188ffad58dd5b60a840e40a16fd545da'
-          }
-          userID={userID} // userID can be something like a phone number or the user id on your own user system.
-          userName={name}
-          callID={roomID} // callID can be any unique string.
-          config={{
-            // You can also use ONE_ON_ONE_VOICE_CALL_CONFIG/GROUP_VIDEO_CALL_CONFIG/GROUP_VOICE_CALL_CONFIG to make more types of calls.
-            ...ONE_ON_ONE_VOICE_CALL_CONFIG,
-            notifyWhenAppRunningInBackgroundOrQuit: true,
-            onCallEnd: (callID: any, reason: any, duration: any) => {
-              navigation.goBack();
-            },
-          }}
-        />
-      )}
-    </LinearGradient>
+          },
+        }}
+      />
+    </View>
   );
 };
 
@@ -163,14 +108,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 5,
   },
-  volumeBtn: {
-    backgroundColor: '#90CAF9', // 🔈 Màu xám tối cho nút âm lượng
-  },
-  micBtn: {
-    backgroundColor: '#90CAF9', // 🎙 Xanh dương để bật/tắt mic
-  },
-  endCallBtn: {
-    backgroundColor: '#FF4B4B', // 🔴 Đỏ để kết thúc cuộc gọi
-  },
+  
 });
 export default VoiceCall;

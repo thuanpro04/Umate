@@ -263,7 +263,6 @@ const UserInfoChat = ({navigation}: any) => {
   };
   const handleChoiceItems = (key: string) => {
     switch (key) {
-     
       case 'personal':
         navigation.navigate('PersonalScreen', {
           userId: converInfo.type === 'personal' ? converInfo.userId : '',
@@ -337,6 +336,7 @@ const UserInfoChat = ({navigation}: any) => {
               //   />
               // </View>
               <CustomCallButtonComponent
+                avatar={converInfo.avatar}
                 targetName={UserInfo.getName(converInfo.name)}
                 userId={auth.userId}
                 targetId={converInfo.userId}
@@ -369,6 +369,7 @@ const UserInfoChat = ({navigation}: any) => {
               />
             </View> */}
             <CustomCallButtonComponent
+              avatar={converInfo.avatar}
               targetName={UserInfo.getName(converInfo.name)}
               userId={auth.userId}
               targetId={converInfo.userId}

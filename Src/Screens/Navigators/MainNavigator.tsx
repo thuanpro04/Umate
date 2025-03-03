@@ -29,6 +29,7 @@ import {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import VoiceCall from '../Messages/VoiceCall';
 import VideoCall from '../Messages/VideoCall';
+import CallWaitingScreen from '../Messages/CallWaitingScreen';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -72,6 +73,8 @@ const MainNavigator = () => {
       />
       <Stack.Screen name="VoiceCall" component={VoiceCall} />
       <Stack.Screen name="VideoCall" component={VideoCall} />
+      <Stack.Screen name="CallWaitingScreen" component={CallWaitingScreen} />
+
       
     </Stack.Navigator>
   );

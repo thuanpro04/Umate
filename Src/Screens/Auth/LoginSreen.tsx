@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import React, {useEffect, useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
 import {
@@ -110,7 +110,12 @@ const LoginSreen = () => {
     });
   }, []);
   return (
-    <ContainerComponent>
+    <SafeAreaView
+      style={{
+        flex: 1,
+
+        backgroundColor: appColors.white,
+      }}>
       <LoadingModal visible={isLoading} />
       <Image
         source={require('../../assets/images/scene-with-young-children-playing-nature-outdoors.jpg')}
@@ -168,8 +173,9 @@ const LoginSreen = () => {
           size={appInfo.size.WIDTH * 0.04}
           styles={styles.hint}
         />
+        <SpaceComponent height={20} />
       </View>
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 
@@ -197,6 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
+    backgroundColor: appColors.white,
   },
   text: {
     fontStyle: 'italic',
@@ -204,6 +211,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   VContainer: {
+    backgroundColor: appColors.white,
     width: '100%',
     borderTopLeftRadius: appInfo.size.HEIGHT * 0.05,
     borderTopRightRadius: appInfo.size.HEIGHT * 0.05,

@@ -7,13 +7,13 @@ import {io, Socket} from 'socket.io-client';
 import {appInfo} from '../Theme/appInfo';
 import {setIncomingCall} from './reducers/socketSlice';
 import PushNotification from 'react-native-push-notification';
+import {Notification} from '../Screens/Untils/Notification';
 
 const SocketManager = () => {
   const dispatch = useDispatch();
   const auth = useSelector(authSelector);
   const navigation = useNavigation<any>();
   const socketRef = useRef<Socket | null>(null);
-
   const requestNotificationPermission = async () => {
     if (Platform.OS === 'android') {
       const granted = await PermissionsAndroid.request(
@@ -37,21 +37,41 @@ const SocketManager = () => {
         console.log('📞 Nhận cuộc gọi từ:', callData);
         dispatch(setIncomingCall(callData));
         if (callData) {
-          const screen =
-            callData.callType === 'video' ? 'VideoCall' : 'VoiceCall';
-          console.log(`📲 Chuyển hướng đến ${screen}`);
-          navigation.navigate(screen, {
-            roomID: callData.callID,
-            name: callData.targetName,
-            userID: callData.targetId,
+          navigation.navigate('CallWaitingScreen', {
+            callData,
           });
         }
       });
     }
+    socketRef.current.on('feedbackAccepted', (data: any) => {
+      console.log('Feedbacked: ', data.callID);
+      if (data && data.callID) {
+        navigation.navigate(
+          data.callType === 'video' ? 'VideoCall' : 'VoiceCall',
+          {
+            roomID: data.callID,
+            name: data.userName,
+            userID: data.userId,
+          },
+        );
+      }
+    });
 
+    socketRef.current.on('feedbackRefused', (data: any) => {
+      console.log('callRefused: ', data.callID);
+      navigation.goBack();
+      Notification.showToast(
+        'error',
+        `${data.userName} đã từ chối`,
+        'Cuộc gọi của bạn ',
+      );
+    });
     return () => {
       if (socketRef.current) {
         socketRef.current.off('incomingCall');
+        socketRef.current.off('feedback');
+        socketRef.current.off('callRefused');
+
         socketRef.current.disconnect();
         socketRef.current = null;
       }
