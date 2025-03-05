@@ -8,7 +8,7 @@ const {
   handleUpdateStatusUser,
   handleActionBlockUser,
   handleUpdateFcmTokenForUser,
-  handleUpdateThemeForUser
+  handleUpdateThemeForUser,handleActionRemoveUser
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
@@ -52,8 +52,11 @@ const actionBlockUser = (req, res) => {
 const updateFcmTokenForUser = (req, res) => {
   handleUpdateFcmTokenForUser(req, res);
 };
-const updateThemForUser=(req, res) =>{
-  handleUpdateThemeForUser(req,res)
+const updateThemForUser = (req, res) => {
+  handleUpdateThemeForUser(req, res);
+};
+const actionRemoveUser=(req,res)=>{
+  handleActionRemoveUser(req,res)
 }
 module.exports = {
   getAllUsers,
@@ -62,5 +65,7 @@ module.exports = {
   getListUserForHeartEvent,
   updateStatusUser,
   actionBlockUser,
-  updateFcmTokenForUser,updateThemForUser
+  updateFcmTokenForUser,
+  updateThemForUser,
+  actionRemoveUser,
 };

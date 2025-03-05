@@ -3,11 +3,11 @@ const {
   ConversationModel,
   GroupConversationModel,
 } = require("../models/usersModel");
-const { transformUserData, findUserById } = require("./userServices");
 
+
+const { transformUserData, findUserById } = require("./userServices");
 const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
   const user = await findUserById(currentUserId);
-
   // Khởi tạo mảng điều kiện tìm kiếm
   let searchConditions = [{ name: { $regex: searchTerm, $options: "i" } }];
   // Nếu có điều kiện tìm kiếm

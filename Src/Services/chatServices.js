@@ -154,7 +154,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
           mess.receiverId,
           mess.content,
           "personal",
-          mess.senderId
+          mess.senderId,
         );
       }
     } else {
@@ -196,7 +196,8 @@ const sendMessageToGroupAndPersonal = async (data) => {
             mess.recipients,
             mess.content,
             "group",
-            mess.senderId
+            mess.senderId,
+            groupConversations.groupName
           );
         }
       } catch (error) {

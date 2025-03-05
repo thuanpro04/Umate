@@ -32,7 +32,21 @@ const getListFcmTokenUser = async (listId) => {
   const fcmTokens = validUsers.flatMap((user) => user.fcmTokens);
   return { fcmTokens };
 };
-const handleSendNotification = async (userId, content, key, currentUserId) => {
+const removeFcmToken = async (userId, token) => {
+  try {
+    await UserModel.updateOne({ userId }, { $pull: { fcmTokens: token } });
+    console.log(`🧹 Token ${token} đã được xóa khỏi user ${userId}.`);
+  } catch (err) {
+    console.log("❗ Lỗi khi xóa FCM token:", err);
+  }
+};
+const handleSendNotification = async (
+  userId,
+  content,
+  key,
+  currentUserId,
+  title
+) => {
   const user =
     key === "personal"
       ? await getFcmTokenForUser(userId)
@@ -43,7 +57,7 @@ const handleSendNotification = async (userId, content, key, currentUserId) => {
       const messages = {
         token: token,
         notification: {
-          title: userInfo.name,
+          title: title ? `${title} ${userInfo.name}` : userInfo.name,
           body: content ?? "",
         },
       };
@@ -52,12 +66,28 @@ const handleSendNotification = async (userId, content, key, currentUserId) => {
         console.log("Successfully sent message to:", token);
       } catch (error) {
         console.log("Error sending message:", error);
+        if (
+          error?.errorInfo?.code ===
+          "messaging/registration-token-not-registered"
+        ) {
+          console.log("⚠️ FCM token not registered. Removing token:", token);
+          // 👉 Xóa token không hợp lệ
+          await removeFcmToken(userId, token);
+          // 👉 Yêu cầu cập nhật token mới nếu có
+          const updatedToken = await getFcmTokenForUser(userId);
+          if (updatedToken && updatedToken.fcmTokens.length > 0) {
+            console.log("🔄 Cập nhật FCM token mới:", updatedToken.fcmTokens);
+          } else {
+            console.log("🚫 Không tìm thấy FCM token mới.");
+          }
+        }
       }
     }
   } else {
     console.log("No FCM tokens found for user:", userId);
   }
 };
+
 
 const updateNotificationGroup = async (userId, converId) => {
   const groupConv = await GroupConversationModel.findOne({
@@ -73,6 +103,7 @@ const updateNotificationGroup = async (userId, converId) => {
   }
   await groupConv.save();
 };
+
 const updateNotificationPersonal = async (userId, converId) => {
   const conv = await ConversationModel.findOne({
     conversationId: converId,
@@ -112,7 +143,8 @@ const addNotificationForUser = async (
   currentUserId,
   userId,
   content,
-  type
+  type,
+  title
 ) => {
   const user = await findUserById(currentUserId);
   if (!user) {
@@ -123,7 +155,7 @@ const addNotificationForUser = async (
     groupId: id,
     senderId: currentUserId,
     receiverId,
-    title: user.name,
+    title: title ?? user.name,
     content,
     type,
   }));

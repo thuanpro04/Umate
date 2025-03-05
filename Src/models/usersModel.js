@@ -72,6 +72,7 @@ const userSchema = new mongoose.Schema({
   fcmTokens: { type: [String] },
   theme: { type: String, default: "light" },
   language: { type: String },
+  like: { type: Number },
 });
 
 const commentSchema = new mongoose.Schema({

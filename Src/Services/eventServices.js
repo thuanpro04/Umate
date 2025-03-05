@@ -73,9 +73,9 @@ const getEvents = async () => {
   const existingEvents = await EventModel.find({
     title: { $in: scrapedTitles },
   }).lean();
-
+  const existingTitles = existingEvents.map((event) => event.title);
   const newEvents = scrapedData.filter(
-    (event) => !existingEvents.includes(event.title)
+    (event) => !existingTitles.includes(event.title)
   );
   //console.log("newEvents",newEvents, newEvents.length);
   // console.log("scrapedData", newEvents[0]);
@@ -92,6 +92,8 @@ const getEvents = async () => {
 const handleGetEvent = async (req, res) => {
   const { curentPage, limit } = req.query;
   try {
+    console.log({ curentPage, limit });
+
     // const hasNewEvent = await checkForNewEvent();
     const eventPage = await getEvents();
     const now = new Date();
@@ -101,13 +103,11 @@ const handleGetEvent = async (req, res) => {
       .skip((curentPage - 1) * limit)
       .limit(Number(limit));
 
-    // handleSendNotification();
-
     res.status(200).json({
       message: "Get events successfully!",
       data: {
         events,
-        totalPages: Math.ceil(eventPage.length / limit),
+        totalPages: Math.ceil(totalEvents / limit),
       },
     });
   } catch (error) {
@@ -115,10 +115,14 @@ const handleGetEvent = async (req, res) => {
   }
 };
 const handleActionHeartForEvent = async (req, res) => {
-  const { userId, eventId, key } = req.query;
+  const { userId, id, key } = req.query;
+  console.log({ userId, id, key });
+
 
   try {
-    const event = await EventModel.findOne({ eventId });
+    const event = await EventModel.findById(id);
+    console.log(event);
+    
     if (!event) {
       res.status(404).json({
         data: {
@@ -130,6 +134,7 @@ const handleActionHeartForEvent = async (req, res) => {
     if (!event.likes.includes(userId) && key === "add") {
       event.likes.push(userId);
       await event.save();
+      await UserModel.updateOne({ userId }, { $inc: { like: 1 } });
       res.status(200).json({
         data: {
           messages: "add heart for event successfully !!!",
@@ -139,6 +144,7 @@ const handleActionHeartForEvent = async (req, res) => {
     } else {
       event.likes = event.likes.filter((like) => like !== userId);
       await event.save();
+      await UserModel.updateOne({ userId }, { $inc: { like: -1 } });
       res.status(200).json({
         data: {
           messages: "Heart removed from event successfully!",

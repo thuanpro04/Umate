@@ -50,6 +50,7 @@ const handleLoginWithGoogle = async (req, res) => {
           friendRequests: existingUser.friendRequests,
           removeFriends: existingUser.removeFriends,
           block: existingUser.block,
+          like:existingUser.like
         },
         eventSlice: {
           eventShares: existingUser.eventShares,

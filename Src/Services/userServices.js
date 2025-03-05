@@ -62,6 +62,7 @@ const transformUserData = (users) => {
       majorCategory: user.majorCategory,
       className: user.className,
       block: user.block,
+      online: user.online,
     })) || []
   );
 };
@@ -118,6 +119,7 @@ const handleGetUserInfoById = async (req, res) => {
   const { userId } = req.query;
   try {
     const user = await findUserById(userId);
+
     res.status(200).json({
       message: "Get user info successfully !!",
       data: user,
@@ -135,10 +137,11 @@ const handleListUserForHeartEvent = async (req, res) => {
     const validUsers = listUserInfo.filter(
       (user) => user !== null && user !== undefined
     );
+    const user = transformUserData(validUsers);
     if (validUsers && validUsers.length > 0) {
       res.status(200).json({
         message: "get list user info succefully !!!",
-        data: validUsers,
+        data: user,
       });
     } else {
       res.status(401).json({
@@ -230,10 +233,6 @@ const handleUpdateThemeForUser = async (req, res) => {
   const { userId, theme } = req.body;
   try {
     const result = await UserModel.updateOne({ userId }, { $set: { theme } });
-    if (result.modifiedCount === 0) {
-      return res.status(401).json({ message: "update theme fail !!" });
-    }
-
 
     console.log("update theme successfully!!", userId, theme);
 
@@ -245,6 +244,24 @@ const handleUpdateThemeForUser = async (req, res) => {
     console.log("update theme error: ", error);
   }
 };
+const handleActionRemoveUser = async (req, res) => {
+  const { id } = req.query;
+  try {
+    const result = await UserModel.deleteOne({ userId: id });
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({
+        message: "update block user conversation fail.",
+      });
+    }
+    res.status(200).json({
+      message: "Remove successfully !!",
+    });
+  } catch (error) {
+    console.log("Remove user fail: ", error);
+  }
+};
+
+
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -259,4 +276,9 @@ module.exports = {
   handleUpdateFcmTokenForUser,
   updateFcmToken,
   handleUpdateThemeForUser,
+  handleActionRemoveUser,
 };
+
+
+
+
