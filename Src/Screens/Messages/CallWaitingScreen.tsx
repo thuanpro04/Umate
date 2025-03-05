@@ -15,12 +15,16 @@ import {appInfo} from '../../Theme/appInfo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import VideoCall from './VideoCall';
 import {io, Socket} from 'socket.io-client';
+import {UserInfo} from '../Untils/UserInfo';
+import { useSelector } from 'react-redux';
+import { socketSelector } from '../../redux/reducers/socketSlice';
 
 const CallWaitingScreen = ({route, navigation}: any) => {
   const {callData} = route.params;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
   const [sound, setSound] = useState<Sound | null>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const socket = useSelector(socketSelector).socket;
+
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
@@ -54,19 +58,10 @@ const CallWaitingScreen = ({route, navigation}: any) => {
         }
       },
     );
-    
- 
+
     return () => {
       ringtone.stop();
       ringtone.release();
-    };
-  }, []);
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(appInfo.BASE_URL);
-    }
-    return () => {
-      socketRef.current?.disconnect();
     };
   }, []);
 
@@ -76,33 +71,31 @@ const CallWaitingScreen = ({route, navigation}: any) => {
     }
 
     const data = {...callData};
-    socketRef.current?.emit('callAccepted', data);
-
-    navigation.navigate(
-      callData.callType === 'video' ? 'VideoCall' : 'VoiceCall',
-      {
-        roomID: callData.callID,
-        name: callData.userName,
-        userID: callData.targetId,
-      },
-    );
+    socket.emit('callAccepted', data);
+    navigation.navigate('VoiceCall', {
+      roomID: callData.callID,
+      name: callData.userName,
+      userID: callData.userId,
+      type: callData.type,
+    });
+    return socket.off('callAccepted')
   };
   const refuseCall = () => {
     if (sound) {
       sound.stop();
     }
     const data = {...callData};
-    socketRef.current?.emit('callRefused', data);
-    navigation.goBack();
+    socket.emit('callRefused', data);
+    navigation.navigate('Home');
     console.log('Bạn đã từ chối cuộc gọi !!!');
+    return socket.off('callRefused')
   };
-   useEffect(() => {
-     const timer = setTimeout(() => {
-       navigation.goBack();
-     }, 8000);
- 
-     return () => clearTimeout(timer); // Chỉ hủy khi component unmount
-   }, [navigation]);
+  const getName = () => {
+    if (callData.type === 'personal_voice' || callData === 'personal_video') {
+      return callData.userName;
+    }
+    return callData.targetName;
+  };
   return (
     <LinearGradient
       colors={['#004AAD', '#E3F2FD']} // Trắng nhạt -> Xanh dương
@@ -114,7 +107,7 @@ const CallWaitingScreen = ({route, navigation}: any) => {
           source={{uri: callData.avatar}}
           style={[styles.avatar, {opacity: opacityAnim}]}
         />
-        <Text style={styles.name}>{callData.userName}</Text>
+        <Text style={styles.name}>{getName()}</Text>
         <Text style={styles.callingText}>Đang gọi...</Text>
       </View>
       <RowComponent styles={{gap: 50}}>
@@ -131,7 +124,9 @@ const CallWaitingScreen = ({route, navigation}: any) => {
         </View>
         <View style={styles.mainBtn}>
           <TouchableOpacity style={styles.callButton} onPress={acceptCall}>
-            {callData.callType && callData.callType === 'voice' ? (
+            {callData.type &&
+            (callData.type === 'group_voice' ||
+              callData.type === 'personal_voice') ? (
               <CallCalling size={appInfo.sizeIconBold} color="white" />
             ) : (
               <Video size={appInfo.sizeIconBold} color="white" />

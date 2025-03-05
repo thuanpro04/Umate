@@ -6,18 +6,16 @@ const initialState = {
 };
 const socketSlice = createSlice({
   name: 'socket',
-  initialState: {
-    socketData: initialState,
-  },
+  initialState,
   reducers: {
     setSocket: (state, action) => {
-      state.socketData.socket = action.payload;
+      state.socket = action.payload;
     },
     setIncomingCall: (state, action) => {
-      state.socketData.incomingCall = action.payload;
+      state.incomingCall = action.payload;
     },
   },
 });
 export const socketReducer = socketSlice.reducer;
 export const {setSocket, setIncomingCall} = socketSlice.actions;
-export const socketSelector = (state: any) => state.socketReducer.socketData;
+export const socketSelector = (state: any) => state.socket;

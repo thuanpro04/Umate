@@ -1,13 +1,8 @@
-import {View, Text} from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import ChatScreen from '../Messages/ChatScreen';
-import UserInfoChat from '../Messages/Component/UserInfoChat';
 import MemberGroup from '../Messages/Component/MemberGroup';
+import UserInfoChat from '../Messages/Component/UserInfoChat';
 import SearchFriendScreen from '../Search/SearchFriendScreen';
-import VideoCall from '../Messages/VideoCall';
-import VoiceCall from '../Messages/VoiceCall';
-import CallWaitingAccept from '../Messages/Component/CallWaitingAccept';
 
 const MessageNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -18,7 +13,6 @@ const MessageNavigator = () => {
       <Stack.Screen name="UserInfoChat" component={UserInfoChat} />
       <Stack.Screen name="MemberGroup" component={MemberGroup} />
       <Stack.Screen name="SearchFriends" component={SearchFriendScreen} />
-      <Stack.Screen name="CallWaitingAccept" component={CallWaitingAccept} />
       
       
     </Stack.Navigator>

@@ -5,6 +5,7 @@ import {
   StatusBar,
   StyleProp,
   StyleSheet,
+  TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
@@ -21,27 +22,26 @@ import {globalStyles} from '../../../Styles/globalStyle';
 import {UserInfo} from '../../Untils/UserInfo';
 import {useSelector} from 'react-redux';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
+import { socketSelector } from '../../../redux/reducers/socketSlice';
 
 interface Props {
-  icon: React.ReactNode;
-  callType: 'voice' | 'video';
-  resourceID: string;
+  icon?: React.ReactNode;
   styles?: StyleProp<ViewStyle>;
   text: string;
   // Thông tin người gọi
   userId: string;
   userName: string;
   // Thông tin người được gọi (target)
-  targetId: string;
+  targetId: any;
   targetName: string;
   avatar: string;
+  txtStyles?: StyleProp<TextStyle>;
+  type: 'group_voice' | 'group_video' | 'personal_voice' | 'personal_video';
 }
 
 const CustomCallButtonComponent = (props: Props) => {
   const {
     icon,
-    resourceID,
-    callType,
     styles,
     text,
     userId,
@@ -49,43 +49,39 @@ const CustomCallButtonComponent = (props: Props) => {
     targetId,
     targetName,
     avatar,
+    txtStyles,
+    type,
   } = props;
   const navigation = useNavigation<any>();
-  const socketRef = useRef<Socket | null>(null);
+    const socket = useSelector(socketSelector).socket;
+  
   const profile = useSelector(profileSelector);
-  const [callStatus, setCallStatus] = useState<
-    'waiting' | 'ringing' | 'accepted' | 'ended'
-  >('waiting');
+
   const callID = `call_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
   const sendCallInvitation = async () => {
     try {
       // Tạo một callID duy nhất
-      if (!socketRef.current) {
-        socketRef.current = io(appInfo.BASE_URL);
-      }
+      
       const callData = {
         callID,
-        callType,
         targetId,
         targetName,
         userName,
-        avatar:profile.avatar,
+        avatar: profile.avatar,
         userId,
+        type,
       };
-
-      socketRef.current.emit('sendCallInvitation', callData);
+      socket.emit('sendCallInvitation', callData);
       navigation.navigate('CallWaitingAccept', {
         name: targetName,
         avatar,
+        callID,
+        userId,
+        targetId,
+        type,
       });
-
-      // const screen = callType === 'video' ? 'VideoCall' : 'VoiceCall';
-      // navigation.navigate(screen, {
-      //   roomID: callID,
-      //   name: userName,
-      //   userID: userId,
-      // });
+      return socket.off('sendCallInvitation')
     } catch (error) {
       console.error('❌ Lỗi khi gửi lời mời gọi:', error);
     }
@@ -96,30 +92,14 @@ const CustomCallButtonComponent = (props: Props) => {
       style={[styles]}
       onPress={sendCallInvitation}
       activeOpacity={0.6}>
-      {icon}
-      <TextComponent label={text} size={12} styles={{fontStyle: 'italic'}} />
+      {icon && icon}
+      <TextComponent
+        label={text}
+        size={12}
+        styles={[{fontStyle: 'italic'}, txtStyles]}
+      />
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 0,
-    marginTop: StatusBar.currentHeight,
-  },
-
-  waitingText: {
-    fontSize: 20,
-  },
-  btn: {
-    padding: 20,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-  },
-});
 export default CustomCallButtonComponent;

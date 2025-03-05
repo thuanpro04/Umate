@@ -1,31 +1,32 @@
+import {useFocusEffect} from '@react-navigation/native';
+import {ArrowLeft2, CallCalling, CallIncoming} from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
 import {
+  Animated,
+  FlatList,
   SafeAreaView,
   StyleSheet,
-  Text,
-  View,
-  FlatList,
   TouchableOpacity,
-  Animated,
+  View,
 } from 'react-native';
-import {globalStyles} from '../../Styles/globalStyle';
-import {HeaderComponent, RowComponent, TextComponent} from '../Components';
-import {ArrowLeft2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {Message} from 'iconsax-react-native';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {notificationServices} from '../Services/notificationServices';
-import {useFocusEffect} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import LoadingModal from '../Modal/LoadingModal';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
-import friendsAPI from '../../apis/friendsApi';
-import {friendServices} from '../Services/friendService.';
-import {UserInfo} from '../Untils/UserInfo';
-import {groupServices} from '../Services/groupServices';
+import {appInfo} from '../../Theme/appInfo';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {
+  HeaderComponent,
+  RowComponent,
+  SpaceComponent,
+  TextComponent,
+} from '../Components';
+import LoadingModal from '../Modal/LoadingModal';
+import {groupServices} from '../Services/groupServices';
+import {notificationServices} from '../Services/notificationServices';
+import {UserInfo} from '../Untils/UserInfo';
 
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
@@ -65,7 +66,9 @@ const NotificationScreen = ({navigation}: any) => {
           useNativeDriver: true,
         }),
       ]).start();
-      navigation.navigate('Friends');
+      item.type === 'calling'
+        ? navigation.navigate('MessageNavigator')
+        : navigation.navigate('Friends');
     };
     return (
       <Animated.View style={{transform: [{scale: scaleAnim}]}}>
@@ -79,6 +82,8 @@ const NotificationScreen = ({navigation}: any) => {
                 size={appInfo.sizeIconBold}
                 color="#FFFFFF"
               />
+            ) : item.type === 'calling' ? (
+              <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
             ) : (
               <FontAwesome5
                 name="user-friends"
@@ -130,7 +135,6 @@ const NotificationScreen = ({navigation}: any) => {
       const res = await notificationServices.getNotifications(auth.userId);
       if (res && res.data) {
         setDataNotifi(res.data);
-        
       }
       setIsLoading(false);
     } catch (error) {

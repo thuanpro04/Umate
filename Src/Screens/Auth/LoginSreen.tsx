@@ -144,7 +144,12 @@ const LoginSreen = () => {
           <SpaceComponent height={appInfo.size.HEIGHT * 0.03} />
           <View style={styles.Vtext}>
             <TextComponent
-              label="UMate - Your AI-powered social connector at Thu Dau Mot University. Find friends, join groups, and build meaningful connections based on your interests and personality."
+              label="UMate - Kết nối bạn bè, lan tỏa đam mê!"
+              styles={{fontWeight: 'bold', fontSize: 18, fontStyle: 'italic'}}
+            />
+            <SpaceComponent height={6} />
+            <TextComponent
+              label="🚀 Mạng xã hội thông minh dành cho sinh viên Đại học Thủ Dầu Một. Tìm bạn mới, tham gia nhóm, mở rộng mối quan hệ theo sở thích và cá tính của bạn!"
               styles={styles.text}
             />
           </View>

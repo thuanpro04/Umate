@@ -11,6 +11,9 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {
   ZegoUIKitPrebuiltCall,
   ONE_ON_ONE_VOICE_CALL_CONFIG,
+  ONE_ON_ONE_VIDEO_CALL_CONFIG,
+  GROUP_VIDEO_CALL_CONFIG,
+  GROUP_VOICE_CALL_CONFIG,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import {
   useFocusEffect,
@@ -29,11 +32,13 @@ import {themeSelector} from '../../redux/reducers/themeSlice';
 import {appColors} from '../../Theme/Colors/appColors';
 import LinearGradient from 'react-native-linear-gradient';
 import {io} from 'socket.io-client';
+import {authSelector} from '../../redux/reducers/authReducer';
 const VoiceCall = (props: any) => {
-  const {roomID, name, userID} = useRoute().params as {
+  const {roomID, name, userID, type} = useRoute().params as {
     roomID: string;
     name: string;
     userID: string;
+    type: string;
   };
   const [isCallAccepted, setIsCallAccepted] = useState(false);
   const navigation = useNavigation<any>();
@@ -43,6 +48,19 @@ const VoiceCall = (props: any) => {
   const [isMic, setIsMic] = useState(false);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const auth = useSelector(authSelector);
+  const getCallConfig = (type: string) => {
+    switch (type) {
+      case 'group_voice':
+        return GROUP_VOICE_CALL_CONFIG;
+      case 'group_video':
+        return GROUP_VIDEO_CALL_CONFIG;
+      case 'personal_video':
+        return ONE_ON_ONE_VIDEO_CALL_CONFIG;
+      default:
+        return ONE_ON_ONE_VOICE_CALL_CONFIG;
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       const fetchConversation = async () => {
@@ -64,20 +82,21 @@ const VoiceCall = (props: any) => {
         appSign={
           'fa5f0ebaabd60e8769aa6a5792f6330c188ffad58dd5b60a840e40a16fd545da'
         }
-        userID={userID} // userID can be something like a phone number or the user id on your own user system.
+        userID={auth.userId} // userID can be something like a phone number or the user id on your own user system.
         userName={name}
         callID={roomID} // callID can be any unique string.
         config={{
           // You can also use ONE_ON_ONE_VOICE_CALL_CONFIG/GROUP_VIDEO_CALL_CONFIG/GROUP_VOICE_CALL_CONFIG to make more types of calls.
-          ...ONE_ON_ONE_VOICE_CALL_CONFIG,
+          ...getCallConfig(type),
           notifyWhenAppRunningInBackgroundOrQuit: true,
           onCallAccepted: () => {
             console.log('Người nhận đã bắt máy!');
             setIsCallAccepted(true);
           },
           onCallEnd: (callID: any, reason: any, duration: any) => {
-            navigation.navigate("Home");
-
+            console.log('Lý do kết thúc cuộc gọi:', reason, duration);
+            //lưu thông tin cuộc gọi vào data 
+            navigation.navigate('Home');
           },
         }}
       />
@@ -108,6 +127,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 5,
   },
-  
 });
 export default VoiceCall;

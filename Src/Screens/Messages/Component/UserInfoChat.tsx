@@ -316,68 +316,56 @@ const UserInfoChat = ({navigation}: any) => {
           />
           <SpaceComponent height={20} />
           <RowComponent styles={{gap: 20, marginHorizontal: 12}}>
-            {converInfo.type !== 'group' && (
-              // <View style={[styles.menu, {}]}>
-              //   <ZegoSendCallInvitationButton
-              //     invitees={[
-              //       {userID: converInfo.userId, userName: converInfo.name},
-              //     ]}
-              //     isVideoCall={false}
-              //     resourceID={'zego_data'} // Please fill in the resource ID name that has been configured in the ZEGOCLOUD's console here.
-              //     width={50}
-              //     height={28}
-              //     fontSize={16}
-              //   />
-
-              //   <TextComponent
-              //     label="Call"
-              //     size={12}
-              //     styles={{fontStyle: 'italic'}}
-              //   />
-              // </View>
-              <CustomCallButtonComponent
-                avatar={converInfo.avatar}
-                targetName={UserInfo.getName(converInfo.name)}
-                userId={auth.userId}
-                targetId={converInfo.userId}
-                userName={UserInfo.getName(profile.name)}
-                styles={styles.menu}
-                text="call"
-                resourceID="zego_data"
-                callType="voice"
-                icon={<CallCalling color="blue" size={22} />}
-              />
-            )}
-
-            {/* <View style={[styles.menu, {}]}>
-              <ZegoSendCallInvitationButton
-                invitees={[
-                  {userID: converInfo.userId, userName: converInfo.name},
-                ]}
-                isVideoCall={true}
-                resourceID={'zego_video_call'} // Please fill in the resource ID name that has been configured in the ZEGOCLOUD's console here.
-                width={50}
-                height={28}
-                fontSize={16}
-                showWaitingPageWhenGroupCall={true}
-                userAvatar={profile.avatar}
-              />
-              <TextComponent
-                label="Video"
-                size={12}
-                styles={{fontStyle: 'italic'}}
-              />
-            </View> */}
             <CustomCallButtonComponent
+              type={
+                converInfo.type === 'personal'
+                  ? 'personal_voice'
+                  : 'group_voice'
+              }
               avatar={converInfo.avatar}
-              targetName={UserInfo.getName(converInfo.name)}
+              targetName={
+                converInfo.type === 'personal'
+                  ? UserInfo.getName(converInfo.name)
+                  : UserInfo.getName(converInfo.groupName)
+              }
               userId={auth.userId}
-              targetId={converInfo.userId}
+              targetId={
+                converInfo.type === 'personal'
+                  ? converInfo.userId
+                  : converInfo.invitedUsers &&
+                    converInfo.invitedUsers.filter(
+                      (id: any) => id !== auth.userId,
+                    )
+              }
+              userName={UserInfo.getName(profile.name)}
+              styles={styles.menu}
+              text="call"
+              icon={<CallCalling color="blue" size={22} />}
+            />
+            <CustomCallButtonComponent
+              type={
+                converInfo.type === 'personal'
+                  ? 'personal_video'
+                  : 'group_video'
+              }
+              avatar={converInfo.avatar}
+              targetName={
+                converInfo.type === 'personal'
+                  ? UserInfo.getName(converInfo.name)
+                  : UserInfo.getName(converInfo.groupName)
+              }
+              userId={auth.userId}
+              targetId={
+                converInfo.type === 'personal'
+                  ? converInfo.userId
+                  : converInfo.invitedUsers &&
+                    converInfo.invitedUsers.filter(
+                      (id: any) => id !== auth.userId,
+                    )
+              }
               userName={UserInfo.getName(profile.name)}
               styles={styles.menu}
               text="video"
-              resourceID="zego_video_call"
-              callType="video"
               icon={<Video color="blue" size={22} />}
             />
             {ChoiceItems.map((item, index) => (

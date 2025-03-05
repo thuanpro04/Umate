@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Animated,
   Image,
   StatusBar,
   StyleSheet,
@@ -7,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
 import {CallCalling} from 'iconsax-react-native';
 import {appInfo} from '../../../Theme/appInfo';
@@ -18,30 +19,103 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useRoute} from '@react-navigation/native';
 import {io, Socket} from 'socket.io-client';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useSelector} from 'react-redux';
+import {profileSelector} from '../../../redux/reducers/profileSlice';
+import Sound from 'react-native-sound';
+import {socketSelector} from '../../../redux/reducers/socketSlice';
 const CallWaitingAccept = ({navigation}: any) => {
-  const {avatar, name} = useRoute().params as {
+  const {avatar, name, callID, targetId, userId, type} = useRoute().params as {
     avatar: string;
     name: string;
+    callID: string;
+    targetId: string;
+    userId: string;
+    type: string;
+  };
+  const profile = useSelector(profileSelector);
+  const socket = useSelector(socketSelector).socket;
+  const opacityAnim = useRef(new Animated.Value(0.3)).current;
+  const soundRef = useRef<Sound | null>(null);
+
+  const hanldeCancelCall = () => {
+    if (soundRef.current) {
+      soundRef.current.stop();
+    }
+    const data = {userId, targetId, callID, name: profile.name, type};
+    socket.emit('cancelCall', data);
+    navigation.goBack();
+    return socket.off('cancelCall');
   };
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.goBack();
-    }, 8000);
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0.3,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [opacityAnim]);
+  useEffect(() => {
+    const ringtone = new Sound(
+      'zego_incoming.mp3',
+      Sound.MAIN_BUNDLE,
+      error => {
+        if (error) {
+          console.log('Call waiting accept sound error: ', error);
+        } else {
+          ringtone.setNumberOfLoops(-1);
+          ringtone.play();
+          soundRef.current = ringtone;
+        }
+      },
+    );
 
-    return () => clearTimeout(timer); // Chỉ hủy khi component unmount
-  }, [navigation]);
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stop();
+        soundRef.current.release();
+      }
+    };
+  }, []);
+  useEffect(() => {
+    socket.on('feedbackAccepted', (data: any) => {
+      if (soundRef.current) {
+        soundRef.current.stop();
+      }
+      console.log('Feedbacked: ', data.callID);
+      if (data && data.callID) {
+        navigation.navigate('VoiceCall', {
+          roomID: data.callID,
+          name: data.userName,
+          userID: data.userId,
+          type: data.type,
+        });
+      }
+    });
+    return () => {
+      socket.off('feedbackAccepted');
+    };
+  }, []);
   return (
     <LinearGradient
       colors={['#004AAD', '#E3F2FD']} // Trắng nhạt -> Xanh dương
       style={styles.container}>
       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-          <Image source={{uri: avatar}} style={globalStyles.imgStyles} />
-          <ActivityIndicator
-            size="large"
-            color="#00AC3B"
-            style={{position: 'absolute', top: '45%'}}
+          <Animated.Image
+            source={{uri: avatar}}
+            style={globalStyles.imgStyles}
           />
+
           <SpaceComponent height={12} />
           <RowComponent>
             <CallCalling size={appInfo.sizeIconBold} color={appColors.green} />
@@ -53,7 +127,7 @@ const CallWaitingAccept = ({navigation}: any) => {
           </RowComponent>
         </View>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={hanldeCancelCall}
           style={{backgroundColor: 'red', borderRadius: 100, padding: 16}}>
           <MaterialIcons
             name="call-end"

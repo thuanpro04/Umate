@@ -30,6 +30,8 @@ import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import chatsAPI from '../../apis/chatApi';
 import {Text} from 'react-native-svg';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {io, Socket} from 'socket.io-client';
+import {socketSelector} from '../../redux/reducers/socketSlice';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -37,7 +39,7 @@ const ChatScreen = ({navigation}: any) => {
   const scrollViewRef = useRef<FlatList>(null);
   const [converInfo, setConverInfo] = useState<any>('');
   const [members, setMembers] = useState<any>([]);
-  const [loading, setLoading] = useState(false); // Trạng thái tải
+  const [isLoading, setIsLoading] = useState(false); // Trạng thái tải
   const [page, setPage] = useState(1);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
@@ -49,7 +51,7 @@ const ChatScreen = ({navigation}: any) => {
   const [limitPage, setLimitPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const clearReplyMessage = () => setReplyMessage(null);
-
+  const socketRef = useRef<Socket | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,7 +63,6 @@ const ChatScreen = ({navigation}: any) => {
     };
     fetchData();
   }, []);
-
 
   useEffect(() => {
     if (converInfo) {
@@ -88,8 +89,10 @@ const ChatScreen = ({navigation}: any) => {
     }
   };
   const handleLoadMoreMessages = useCallback(async () => {
-    if (loading) return;
-    setLoading(true);
+    setIsLoading(prev => {
+      if (prev) return true; // Nếu đang loading, không gọi API nữa
+      return true;
+    });
     if (converInfo) {
       try {
         const res = await messageServices.getAllMessagesUser(
@@ -100,7 +103,7 @@ const ChatScreen = ({navigation}: any) => {
           page,
         );
         setMembers(res?.data.invitedUsers);
-        if (res?.data && res.data.messages) {
+        if (res?.data && res.data.messages.length > 0) {
           // console.log(res.data.messages);
           setLimitPage(res.data.totalPages);
           // console.log('limitPage: ', limitPage, 'page: ', page);
@@ -110,28 +113,27 @@ const ChatScreen = ({navigation}: any) => {
             const allMessages = [...newMessages, ...prev];
 
             // Loại bỏ các tin nhắn trùng lặp dựa trên một thuộc tính duy nhất, ví dụ như 'id'
-            const uniqueMessages = allMessages.filter(
+            return allMessages.filter(
               (value, index, self) =>
                 index ===
                 self.findIndex(
                   t => t._id === value._id, // Thay 'id' bằng thuộc tính duy nhất của tin nhắn
                 ),
             );
-
-            return uniqueMessages;
           });
           if (page < limitPage) {
             setPage(prevPage => prevPage + 1);
           }
           // console.log(messages);
         }
-        setLoading(false);
+
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching messages:', error);
-        setLoading(false);
+        setIsLoading(false);
       }
     }
-  }, [converInfo, page, loading]);
+  }, [converInfo, page, isLoading]);
 
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]; reply?: string}) => {
@@ -234,12 +236,36 @@ const ChatScreen = ({navigation}: any) => {
         />
       );
     },
-    [messages],
+    [
+      messages,
+      updateRowRef,
+      navigation,
+      currentUserId,
+      converInfo,
+      members,
+      setReplyMessage,
+    ],
   );
-  // console.log(messages);
   const ListHeader = () => {
-    return loading ? <ActivityIndicator /> : <></>;
+    return isLoading ? <ActivityIndicator /> : <></>;
   };
+  const socket = useSelector(socketSelector).socket;
+  useEffect(() => {
+    socket.on('receive_message', (data: any) => {
+      setMessages(prev => {
+        if (!prev.some(msg => msg._id === data._id)) {
+          return [...prev, data];
+        }
+        return prev;
+      });
+    });
+
+    return () => {
+      socket.off('receive_message');
+    };
+  }, []);
+  const onEndReachedCalled = useRef(false);
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, {backgroundColor: colors.background}]}>
@@ -273,9 +299,6 @@ const ChatScreen = ({navigation}: any) => {
             data={messages}
             keyExtractor={keyExtractor}
             style={{flex: 1}}
-            initialNumToRender={20} // Số lượng render ban đầu
-            maxToRenderPerBatch={5} // Giảm số lượng render mỗi lần
-            removeClippedSubviews={true} // Tăng hiệu suất khi cuộn
             renderItem={renderItemMessages}
             // onEndReachedThreshold={0.05}
             scrollEventThrottle={16} // Tần suất lắng nghe cuộn
@@ -283,11 +306,12 @@ const ChatScreen = ({navigation}: any) => {
               paddingHorizontal: 10,
               paddingTop: 65,
             }}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
             ListHeaderComponent={page < limitPage ? ListHeader : <></>}
             onScroll={({nativeEvent}) => {
               const yOffSet = nativeEvent.contentOffset.y;
               const contentHeight = nativeEvent.contentSize.height;
-              // console.log(contentHeight, ' ', yOffSet);
               yOffSet < 10 && page <= limitPage ? handleLoadMoreMessages() : '';
               const layoutHeight = nativeEvent.layoutMeasurement.height;
               yOffSet + layoutHeight < contentHeight - 100
@@ -308,7 +332,7 @@ const ChatScreen = ({navigation}: any) => {
         ) : (
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <TextComponent label="Messages not found 🙁" />
+            <ActivityIndicator size={22} />
           </View>
         )}
         {showScrollToBottom && (

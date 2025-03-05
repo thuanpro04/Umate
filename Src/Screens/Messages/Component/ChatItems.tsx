@@ -13,7 +13,12 @@ import ImageViewing from 'react-native-image-viewing';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {appInfo} from '../../../Theme/appInfo';
-import {RowComponent, TextComponent} from '../../Components';
+import {
+  ButtonComponent,
+  RowComponent,
+  SpaceComponent,
+  TextComponent,
+} from '../../Components';
 import {UserInfo} from '../../Untils/UserInfo';
 import CustomFootImages from './CustomFootImages';
 import CustormLinkPreview from '../../Components/CustormLinkPreview';
@@ -21,6 +26,9 @@ import {LinkPreview} from '@flyerhq/react-native-link-preview';
 import {userServices} from '../../Services/userService';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {CallIncoming} from 'iconsax-react-native';
+import CustomCallButtonComponent from './CustomCallButtonComponent';
+import {profileSelector} from '../../../redux/reducers/profileSlice';
 
 interface Props {
   currentUserId: string;
@@ -53,6 +61,7 @@ const ChatItems = memo((props: Props) => {
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [showTime, setShowTime] = useState<any[]>([]);
   const [user, setUser] = useState<any>('');
+  const profile = useSelector(profileSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const isNextMyMessage = true;
@@ -105,39 +114,42 @@ const ChatItems = memo((props: Props) => {
     const isStacked = totalImages > 1;
 
     return (
+      arrImages &&
       arrImages.length > 0 &&
-      arrImages.map((item, imgIndex) => (
-        <RowComponent
-          onPress={() => onPressImg(item)}
-          activeOpacity={0.8}
-          styles={{}}
-          key={imgIndex}>
-          {imgIndex === arrImages.length - 1 &&
-            isRight &&
-            shareDocuments(isStacked, isRight ?? false, arrImages)}
-          <Image
-            key={imgIndex}
-            source={{uri: item}}
-            onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
-            style={[
-              styles.imageStyle,
-              isStacked && {
-                position: 'absolute',
-                left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
-                right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
-                top: -imgIndex, // Xếp chồng theo index
-                zIndex: totalImages - imgIndex,
-              },
-            ]}
-            onError={error =>
-              console.log('Error loading image:', error.nativeEvent.error)
-            }
-          />
-          {imgIndex === arrImages.length - 1 &&
-            !isRight &&
-            shareDocuments(isStacked, !isRight, arrImages)}
-        </RowComponent>
-      ))
+      arrImages.map((item, imgIndex) => {
+        item && (
+          <RowComponent
+            onPress={() => onPressImg(item)}
+            activeOpacity={0.8}
+            styles={{}}
+            key={imgIndex}>
+            {imgIndex === arrImages.length - 1 &&
+              isRight &&
+              shareDocuments(isStacked, isRight ?? false, arrImages)}
+            <Image
+              key={imgIndex}
+              source={{uri: item}}
+              onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
+              style={[
+                styles.imageStyle,
+                isStacked && {
+                  position: 'absolute',
+                  left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
+                  right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
+                  top: -imgIndex, // Xếp chồng theo index
+                  zIndex: totalImages - imgIndex,
+                },
+              ]}
+              onError={error =>
+                console.log('Error loading image:', error.nativeEvent.error)
+              }
+            />
+            {imgIndex === arrImages.length - 1 &&
+              !isRight &&
+              shareDocuments(isStacked, !isRight, arrImages)}
+          </RowComponent>
+        );
+      })
     );
   };
   const onSwipeableOpenAction = () => {
@@ -197,6 +209,7 @@ const ChatItems = memo((props: Props) => {
 
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
+
     return (
       <View key={index} style={{flex: 1}}>
         <View
@@ -232,36 +245,89 @@ const ChatItems = memo((props: Props) => {
                 paddingHorizontal: item?.reply ? 2 : 8,
               },
             ]}>
-            {item?.reply && item.reply.content && (
-              <View
-                style={[
-                  styles.replyStyles,
-                  {
-                    borderLeftColor:
-                      item?.reply?.senderId === currentUserId
-                        ? '#2196f3'
-                        : 'green',
-                  },
-                ]}>
-                <TextComponent
-                  styles={{fontSize: 14}}
-                  label={item?.reply?.content}
+            {item.messageId.slice(0, 4) === 'call' ? (
+              <View>
+                <View
+                  style={{
+                    alignItems: 'flex-start',
+                    justifyContent: 'flex-start',
+                  }}>
+                  <TextComponent
+                    key={index}
+                    label={item.content}
+                    styles={[
+                      styles.contentStyles,
+                      {marginHorizontal: item?.reply ? 15 : 0, fontSize: 18},
+                    ]}
+                    title
+                  />
+                  <RowComponent>
+                    <CallIncoming size={12} color={colors.icon} />
+                    <TextComponent
+                      key={index}
+                      label={'Cuộc gọi thoại'}
+                      styles={[
+                        styles.contentStyles,
+                        {marginHorizontal: item?.reply ? 15 : 0},
+                      ]}
+                      size={12}
+                    />
+                  </RowComponent>
+                </View>
+                <SpaceComponent height={5} />
+                <SpaceComponent
+                  bgCrossBar="grey"
+                  width={'100%'}
+                  isCrossBar
+                  height={0.5}
+                />
+                <SpaceComponent height={5} />
+                <CustomCallButtonComponent
+                  type='personal_voice'
+                  styles={{justifyContent: 'center', alignItems: 'center'}}
+                  targetName={name}
+                  userId={currentUserId}
+                  userName={UserInfo.getName(profile.name)}
+                  avatar={profile.avatar}
+                  targetId={userId}
+                  text="Gọi lại"
+                  txtStyles={{color: appColors.blue, fontSize: 18}}
                 />
               </View>
-            )}
-            {isLink ? (
-              <View style={{height: 240}}>
-                <CustormLinkPreview txtLink={item.content} />
-              </View>
             ) : (
-              <TextComponent
-                key={index}
-                label={item.content}
-                styles={[
-                  styles.contentStyles,
-                  {marginHorizontal: item?.reply ? 15 : 0},
-                ]}
-              />
+              <>
+                {item?.reply && item.reply.content && (
+                  <View
+                    style={[
+                      styles.replyStyles,
+                      {
+                        borderLeftColor:
+                          item?.reply?.senderId === currentUserId
+                            ? '#2196f3'
+                            : 'green',
+                      },
+                    ]}>
+                    <TextComponent
+                      styles={{fontSize: 14}}
+                      label={item?.reply?.content}
+                    />
+                  </View>
+                )}
+                {isLink ? (
+                  <View style={{height: 240}}>
+                    <CustormLinkPreview txtLink={item.content} />
+                  </View>
+                ) : (
+                  <TextComponent
+                    key={index}
+                    label={item.content}
+                    styles={[
+                      styles.contentStyles,
+                      {marginHorizontal: item?.reply ? 15 : 0},
+                    ]}
+                  />
+                )}
+              </>
             )}
           </TouchableOpacity>
         </View>

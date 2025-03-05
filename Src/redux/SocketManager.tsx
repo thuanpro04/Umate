@@ -5,9 +5,10 @@ import {authSelector} from './reducers/authReducer';
 import {useNavigation} from '@react-navigation/native';
 import {io, Socket} from 'socket.io-client';
 import {appInfo} from '../Theme/appInfo';
-import {setIncomingCall} from './reducers/socketSlice';
+import {setIncomingCall, setSocket} from './reducers/socketSlice';
 import PushNotification from 'react-native-push-notification';
 import {Notification} from '../Screens/Untils/Notification';
+import {UserInfo} from '../Screens/Untils/UserInfo';
 
 const SocketManager = () => {
   const dispatch = useDispatch();
@@ -30,6 +31,7 @@ const SocketManager = () => {
 
     if (!socketRef.current) {
       socketRef.current = io(appInfo.BASE_URL);
+      dispatch(setSocket(socketRef.current));
       requestNotificationPermission();
       socketRef.current.emit('callRegister', auth.userId);
 
@@ -43,35 +45,35 @@ const SocketManager = () => {
         }
       });
     }
-    socketRef.current.on('feedbackAccepted', (data: any) => {
-      console.log('Feedbacked: ', data.callID);
-      if (data && data.callID) {
-        navigation.navigate(
-          data.callType === 'video' ? 'VideoCall' : 'VoiceCall',
-          {
-            roomID: data.callID,
-            name: data.userName,
-            userID: data.userId,
-          },
-        );
-      }
-    });
+    
 
     socketRef.current.on('feedbackRefused', (data: any) => {
       console.log('callRefused: ', data.callID);
-      navigation.goBack();
+      if(data.type === 'personal_voice' || data.type === 'personal_viceo'){
+        navigation.goBack();
+      }
       Notification.showToast(
         'error',
         `${data.userName} đã từ chối`,
         'Cuộc gọi của bạn ',
       );
     });
+    socketRef.current.on('feedbackCancelCall', data => {
+      Notification.showToast(
+        'info',
+        `Bạn có cuộc gọi nhở từ ${UserInfo.getName(data.name)}`,
+        `${new Date().toLocaleString()}`,
+      );
+      navigation.goBack();
+    });
+    
     return () => {
       if (socketRef.current) {
         socketRef.current.off('incomingCall');
-        socketRef.current.off('feedback');
-        socketRef.current.off('callRefused');
-
+        socketRef.current.off('callRegister');
+        socketRef.current.off('feedbackRefused');
+        socketRef.current.off('feedbackCancelCall');
+        dispatch(setSocket(null));
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -79,31 +81,6 @@ const SocketManager = () => {
   }, [auth?.userId]);
 
   // Hiển thị thông báo cuộc gọi đến
-  const showIncomingCallNotification = (callData: any) => {
-    PushNotification.localNotification({
-      channelId: 'zego_video_call',
-      title: '📞 Cuộc gọi đến',
-      message: `${callData.targetName} đang gọi cho bạn!`,
-      playSound: true,
-      soundName: 'default',
-      vibrate: true,
-      priority: 'high',
-      importance: 'high',
-      actions: ['Chấp nhận', 'Từ chối'],
-      invokeApp: true, // Đảm bảo mở app khi người dùng nhấn vào thông báo
-      userInfo: {callData},
-    });
-  };
-
-  // Cấu hình xử lý khi người dùng nhấn vào thông báo
-
-  // Điều hướng đến màn hình nhận cuộc gọi khi người dùng nhấn "Chấp nhận"
-  const handleAcceptCall = (callData: any) => {
-    if (!callData || !callData.callType || !callData.callID) {
-      console.log('⚠️ Dữ liệu cuộc gọi không hợp lệ:', callData);
-      return;
-    }
-  };
 
   return null;
 };

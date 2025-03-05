@@ -25,6 +25,9 @@ import {UserInfo} from '../Untils/UserInfo';
 import {eventSevices} from '../Services/eventService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {socketSelector} from '../../redux/reducers/socketSlice';
+import Share from 'react-native-share';
+import Mailer from 'react-native-mail';
 
 interface Props {
   title: string;
@@ -44,7 +47,7 @@ const ShareEventModal = (props: Props) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const socket = io(appInfo.BASE_URL);
+  const socket = useSelector(socketSelector).socket;
   const url = `https://tdmu.edu.vn${href}`;
   const dispatch = useDispatch();
   const onOpenModal = () => {
@@ -125,11 +128,44 @@ const ShareEventModal = (props: Props) => {
       case 'In-App':
         await handlePostEventMyApp();
         break;
-
+      case 'facebook':
+        await handleShareInFacebook();
+        break;
       default:
+        handleShareInEmail();
         break;
     }
     onCloseModal();
+  };
+  const handleShareInEmail = () => {
+    Mailer.mail(
+      {
+        subject: 'Check out this event!',
+        recipients: [], // Danh sách email người nhận (có thể truyền array)
+        body: `Hey, check out this event: <a href="${url}">${url}</a>`,
+        isHTML: true, // Sử dụng HTML để format nội dung email
+      },
+      (error, event) => {
+        if (error) {
+          console.log('Error sending email:', error);
+        } else {
+          console.log('Email sent successfully!');
+        }
+      },
+    );
+  };
+  const handleShareInFacebook = async () => {
+    const shareOptions: any = {
+      title: 'Chia sẽ sự kiện',
+      message: `Hãy xem sự kiện này ${url}`,
+      url: urlImg,
+      social: Share.Social.FACEBOOK,
+    };
+    try {
+      await Share.shareSingle(shareOptions);
+    } catch (error) {
+      console.log('Error sharing on Facebook:', error);
+    }
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
@@ -221,7 +257,7 @@ const ShareEventModal = (props: Props) => {
                     borderColor: colors.border,
                   },
                 ]}
-                onPress={() => handleShare('Facebook')}>
+                onPress={() => handleShare('facebook')}>
                 <Icon name="facebook" size={24} color={colors.facebook} />
                 <TextComponent
                   styles={modalStyles.buttonText}
@@ -230,7 +266,7 @@ const ShareEventModal = (props: Props) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[modalStyles.shareButton, {borderColor: colors.border}]}
-                onPress={() => handleShare('Email')}>
+                onPress={() => handleShare('email')}>
                 <Icon name="email" size={24} color={colors.email} />
                 <TextComponent label="Email" styles={modalStyles.buttonText} />
               </TouchableOpacity>

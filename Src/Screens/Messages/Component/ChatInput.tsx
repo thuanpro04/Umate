@@ -65,44 +65,46 @@ const ChatInput = (props: Props) => {
         reply,
       };
 
-      try {
-        if (Array.isArray(userId)) {
-          // Trường hợp gửi cho nhiều userId
+      if (messageData.content.length > 0 || messageData.imagesUrl.length > 0) {
+        try {
+          if (Array.isArray(userId)) {
+            // Trường hợp gửi cho nhiều userId
 
-          const data = {
-            ...messageData,
-            recipients: userId,
-          };
+            const data = {
+              ...messageData,
+              recipients: userId,
+            };
 
-          socket.emit('send_message', data, (response: any) => {
-            console.log('Message sent to user:', response);
+            socket.emit('send_message', data, (response: any) => {
+              console.log('Message sent to user:', response);
+            });
+          } else {
+            // Trường hợp gửi cho một userId
+            const data = {
+              ...messageData,
+              receiverId: userId, 
+            };
+            socket.emit('send_message', data, (response: any) => {
+              console.log(
+                'Message sent to user:',
+                userId,
+                'server response:',
+                response,
+              );
+            });
+          }
+
+          onSendMessage({
+            content: content ?? '',
+            imagesUrl: imagesUrl as string[],
+            reply,
           });
-        } else {
-          // Trường hợp gửi cho một userId
-          const data = {
-            ...messageData,
-            receiverId: userId,
-          };
-          socket.emit('send_message', data, (response: any) => {
-            console.log(
-              'Message sent to user:',
-              userId,
-              'server response:',
-              response,
-            );
-          });
+          setContent('');
+          setIsDisable(false);
+        } catch (error) {
+          console.log('Error in handleSendMessageAndImage:', error);
+          setIsDisable(false);
         }
-
-        onSendMessage({
-          content: content ?? '',
-          imagesUrl: imagesUrl as string[],
-          reply,
-        });
-        setContent('');
-        setIsDisable(false);
-      } catch (error) {
-        console.log('Error in handleSendMessageAndImage:', error);
-        setIsDisable(false);
       }
     },
     [content, userId, onSendMessage, socket],
