@@ -88,7 +88,6 @@ const handleSendNotification = async (
   }
 };
 
-
 const updateNotificationGroup = async (userId, converId) => {
   const groupConv = await GroupConversationModel.findOne({
     groupId: converId,
@@ -192,9 +191,31 @@ const handleGetNotifications = async (req, res) => {
     console.log("get notification error: ", error);
   }
 };
+const mongoose = require("mongoose");
+
 const deletedNotification = async (id) => {
-  return await notificationModel.findByIdAndDelete(id);
+  let idsArray;
+
+  // Nếu id là mảng, giữ nguyên
+  if (Array.isArray(id)) {
+    idsArray = id;
+  } 
+  // Nếu id là chuỗi có dấu phẩy (danh sách id), tách thành mảng
+  else if (typeof id === "string" && id.includes(",")) {
+    idsArray = id.split(",");
+  } 
+  // Nếu id là một chuỗi ObjectId duy nhất
+  else {
+    idsArray = [id];
+  }
+
+  // Chuyển tất cả id thành ObjectId hợp lệ
+  const objectIds = idsArray.map((item) => new mongoose.Types.ObjectId(item));
+
+  // Xóa tất cả thông báo theo danh sách ID
+  return await notificationModel.deleteMany({ _id: { $in: objectIds } });
 };
+
 const handleActionDeleteNotification = async (req, res) => {
   const { id } = req.query;
   try {

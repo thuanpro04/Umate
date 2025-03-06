@@ -3,7 +3,8 @@ const {
   handleGetAllConversationUsers,
   handleCheckConversation,
   handleActionBlockUserConversation,
-  handleUpdateStatusMessage
+  handleUpdateStatusMessage,
+  handleDeleteConversation
 } = require("../Services/chatServices");
 
 const receiveMessageUsers = async (req, res) => {
@@ -18,9 +19,12 @@ const checkConversation = async (req, res) => {
 const updateStatusMessage = (req, res) => {
   handleUpdateStatusMessage(req, res);
 };
+const deleteConversation=(req,res) =>{
+  handleDeleteConversation(req,res)
+}
 module.exports = {
   receiveMessageUsers,
   getAllConversationUsers,
   checkConversation,
-  updateStatusMessage,
+  updateStatusMessage,deleteConversation
 };

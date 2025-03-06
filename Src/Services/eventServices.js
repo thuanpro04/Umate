@@ -67,25 +67,35 @@ const getEvents = async () => {
   await browser.close();
   //const newEvent = [];
 
-  const scrapedTitles = scrapedData.map((e) => e.title);
-  // console.log("Checking titles in DB:", scrapedTitles);
+  if (scrapedData.length === 0) {
+    console.log("Không có dữ liệu mới để kiểm tra.");
+    return [];
+  }
 
+  // **Lấy danh sách title từ scrapedData**
+  const scrapedTitles = scrapedData.map((e) => e.title);
+
+  // **Tìm các sự kiện đã tồn tại trong DB theo title**
   const existingEvents = await EventModel.find({
     title: { $in: scrapedTitles },
   }).lean();
-  const existingTitles = existingEvents.map((event) => event.title);
-  const newEvents = scrapedData.filter(
-    (event) => !existingTitles.includes(event.title)
-  );
-  //console.log("newEvents",newEvents, newEvents.length);
-  // console.log("scrapedData", newEvents[0]);
 
+  // **Tạo danh sách title đã tồn tại trong DB**
+  const existingTitles = new Set(existingEvents.map((event) => event.title));
+
+  // **Lọc ra những sự kiện chưa tồn tại**
+  const newEvents = scrapedData.filter(
+    (event) => !existingTitles.has(event.title)
+  );
+
+  // **Chỉ lưu nếu có sự kiện mới**
   if (newEvents.length > 0) {
-    await EventModel.insertMany(newEvents); // Thêm tất cả bài mới một lần
-    console.log(`Đã lưu ${newEvents.length} bài viết mới.`);
+    await EventModel.insertMany(newEvents);
+    console.log(`✅ Đã lưu ${newEvents.length} bài viết mới.`);
   } else {
-    console.log("Không có bài viết mới nào.");
+    console.log("⚡ Không có bài viết mới nào.");
   }
+
   return newEvents;
 };
 
@@ -96,13 +106,12 @@ const handleGetEvent = async (req, res) => {
 
     // const hasNewEvent = await checkForNewEvent();
     const eventPage = await getEvents();
-    const now = new Date();
-    await MetaModel.updateOne({}, { lastScrapeTime: now }, { upsert: true });
+    
     const totalEvents = await EventModel.countDocuments();
     const events = await EventModel.find({})
-      .skip((curentPage - 1) * limit)
-      .limit(Number(limit));
-
+    .sort({ timestamp: -1 })  // 🔥 Sắp xếp giảm dần theo timestamp (mới nhất lên đầu)
+    .skip((curentPage - 1) * limit)
+    .limit(Number(limit));
     res.status(200).json({
       message: "Get events successfully!",
       data: {
@@ -118,11 +127,10 @@ const handleActionHeartForEvent = async (req, res) => {
   const { userId, id, key } = req.query;
   console.log({ userId, id, key });
 
-
   try {
     const event = await EventModel.findById(id);
     console.log(event);
-    
+
     if (!event) {
       res.status(404).json({
         data: {

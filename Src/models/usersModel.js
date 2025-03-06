@@ -89,6 +89,7 @@ const messageSchema = new mongoose.Schema({
   recipients: [{ type: String, ref: "User" }], // cho tất cả thành viên group
   content: { type: String },
   reply: { type: {} },
+  typeCall: { type: String },
   imagesUrl: [{ type: String }],
   timestamp: { type: Date, default: Date.now, index: true },
   status: {

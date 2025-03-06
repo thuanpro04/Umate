@@ -11,13 +11,11 @@ module.exports = function initializeSocket(server) {
       origin: "*", // Cho phép tất cả các nguồn truy cập
     },
   });
-
   io.on("connection", (socket) => {
     socket.on("callRegister", (userId) => {
       users[userId] = socket.id;
       console.log("📌 User register call: ", users);
     });
-    
 
     socket.on("sendCallInvitation", (callData) => {
       let targetSocketId;
@@ -31,7 +29,6 @@ module.exports = function initializeSocket(server) {
           targetSocketId &&
             io.to(targetSocketId).emit("incomingCall", callData);
           console.log("Đã gui den user: ", targetSocketId);
-          
         });
       } else {
         if (!callData.targetId) {
@@ -81,30 +78,40 @@ module.exports = function initializeSocket(server) {
     });
 
     socket.on("cancelCall", (data) => {
-      let targetSocketId = users[data.targetId];
-      console.log("🎯 targetSocketId: ", targetSocketId, users);
-
+      const { targetId, userId, type } = data;
+      const targetSocketId = users[targetId];
+      const userSocketId = users[userId];
+    
+      console.log("🎯 Target Socket ID:", targetSocketId);
+      console.log("📞 Cancel call for user:", userId);
+    
+      const messageId = generateUniqueID();
+      const messageData = {
+        messageId,
+        senderId: userId,
+        content: "Bạn đã hủy cuộc gọi",
+        imagesUrl: [],
+        receiverId: targetId,
+        reply: "",
+        typeCall: type,
+      };
+    
+      // Gửi sự kiện feedbackCancelCall nếu target online
       if (targetSocketId) {
         io.to(targetSocketId).emit("feedbackCancelCall", data);
-        console.log(`📞 Cancel call for user ${targetSocketId}`);
-      } else {
-        targetSocketId = users[data.userId];
-        console.log("🎯 targetSocketId: ", targetSocketId);
-
-        const messageId = `call_${data.type}` + generateUniqueID();
-        const messageData = {
-          messageId,
-          senderId: data.userId,
-          content: "Bạn đã hủy",
-          imagesUrl: [],
-          receiverId: data.targetId,
-          reply: "",
-        };
-        io.to(targetSocketId).emit("receive_message", messageData);
-        console.log("receive_message id: ", targetSocketId);
-        sendMessageToGroupAndPersonal(messageData);
       }
+    
+      // Gửi tin nhắn hủy đến cả 2 người
+      [targetSocketId, userSocketId].forEach((socketId) => {
+        if (socketId) {
+          io.to(socketId).emit("receive_message", messageData);
+        }
+      });
+    
+      // Lưu tin nhắn vào database
+      sendMessageToGroupAndPersonal(messageData);
     });
+    
     socket.on("send_message", async (data) => {
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };

@@ -154,7 +154,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
           mess.receiverId,
           mess.content,
           "personal",
-          mess.senderId,
+          mess.senderId
         );
       }
     } else {
@@ -355,10 +355,44 @@ const handleUpdateStatusMessage = async (req, res) => {
     console.log("update status message fail: ", error);
   }
 };
+const actionDeleteConversationForPersonal = async (ids) => {
+  return await ConversationModel.deleteMany({ conversationId: { $in: ids } });
+};
+const actionDeleteConversationForGroup = async (ids) => {
+  return GroupConversationModel.deleteMany({ groupId: { $in: ids } });
+};
+const handleDeleteConversation = async (req, res) => {
+  const arrConver = req.body;
+  const idPersons = arrConver["personal"] || [];
+  const idGroups = arrConver["group"] || [];
+  if (idGroups.length === 0 && idPersons.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Không có cuộc trò chuyện nào để xóa!" });
+  }
+  try {
+    const [deletePersonal, deleteGroup] = await Promise.all([
+      actionDeleteConversationForPersonal(idPersons),
+      actionDeleteConversationForGroup(idGroups),
+    ]);
+    if (deletePersonal.deletedCount > 0 || deleteGroup.deletedCount > 0) {
+      res.status(200).json({
+        message: "Delete conversation successfully!! ",
+      });
+    } else {
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy cuộc trò chuyện nào để xóa!" });
+    }
+  } catch (error) {
+    console.log("Delete conversation error: ", error);
+  }
+};
 module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
   handleGetAllConversationUsers,
   handleCheckConversation,
   handleUpdateStatusMessage,
+  handleDeleteConversation,
 };

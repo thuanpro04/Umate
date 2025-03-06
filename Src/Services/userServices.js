@@ -261,7 +261,6 @@ const handleActionRemoveUser = async (req, res) => {
   }
 };
 
-
 module.exports = {
   findUserById,
   getUsersByIds,
