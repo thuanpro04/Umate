@@ -31,7 +31,7 @@ const getNotifications = async (userId: string) => {
   const res = await notificationAPI.handleNotification(url);
   return res;
 };
-const handleDeleteNotification = async (id: string) => {
+const handleDeleteNotification = async (id: string| string[]) => {
   url = `/delete?id=${id}`;
   const res = await notificationAPI.handleNotification(url);
   return res;

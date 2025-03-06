@@ -41,7 +41,7 @@ interface Props {
   item?: any;
   name: string;
 }
-const ChatItems = memo((props: Props) => {
+const ChatItems = (props: Props) => {
   const {
     currentUserId,
     userId,
@@ -53,8 +53,6 @@ const ChatItems = memo((props: Props) => {
     item,
     name,
   } = props;
-
-  const [showTimeMessages, setShowTimeMessages] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -195,7 +193,7 @@ const ChatItems = memo((props: Props) => {
       </Animated.View>
     );
   };
-
+ 
   const onPressImg = (urlImg: string) => {
     const tempUrl = {uri: urlImg};
 
@@ -206,10 +204,9 @@ const ChatItems = memo((props: Props) => {
     setIsVisible(true);
   };
   const urlRegex = /(https?:\/\/[^\s]+)/g;
-
+  const condition = item.typeCall ;
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
-
     return (
       <View key={index} style={{flex: 1}}>
         <View
@@ -245,7 +242,7 @@ const ChatItems = memo((props: Props) => {
                 paddingHorizontal: item?.reply ? 2 : 8,
               },
             ]}>
-            {item.messageId.slice(0, 4) === 'call' ? (
+            {condition ? (
               <View>
                 <View
                   style={{
@@ -257,7 +254,7 @@ const ChatItems = memo((props: Props) => {
                     label={item.content}
                     styles={[
                       styles.contentStyles,
-                      {marginHorizontal: item?.reply ? 15 : 0, fontSize: 18},
+                      {marginHorizontal: item?.reply ? 15 : 0, fontSize: 16},
                     ]}
                     title
                   />
@@ -283,7 +280,7 @@ const ChatItems = memo((props: Props) => {
                 />
                 <SpaceComponent height={5} />
                 <CustomCallButtonComponent
-                  type='personal_voice'
+                  type={condition}
                   styles={{justifyContent: 'center', alignItems: 'center'}}
                   targetName={name}
                   userId={currentUserId}
@@ -407,7 +404,7 @@ const ChatItems = memo((props: Props) => {
       )}
     </GestureHandlerRootView>
   );
-});
+};
 
 export default ChatItems;
 const styles = StyleSheet.create({

@@ -1,30 +1,27 @@
-import React, {useEffect, useRef, useState} from 'react';
+import { CallCalling, Video } from 'iconsax-react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
   Animated,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Sound from 'react-native-sound';
-import {RowComponent, SpaceComponent, TextComponent} from '../Components';
-import {CallCalling, CallRemove, Video} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import VideoCall from './VideoCall';
-import {io, Socket} from 'socket.io-client';
-import {UserInfo} from '../Untils/UserInfo';
 import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
 import { socketSelector } from '../../redux/reducers/socketSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { RowComponent, SpaceComponent, TextComponent } from '../Components';
 
 const CallWaitingScreen = ({route, navigation}: any) => {
   const {callData} = route.params;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
   const [sound, setSound] = useState<Sound | null>(null);
   const socket = useSelector(socketSelector).socket;
-
+  const auth=useSelector(authSelector)
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
@@ -75,7 +72,6 @@ const CallWaitingScreen = ({route, navigation}: any) => {
     navigation.navigate('VoiceCall', {
       roomID: callData.callID,
       name: callData.userName,
-      userID: callData.userId,
       type: callData.type,
     });
     return socket.off('callAccepted')
@@ -96,6 +92,7 @@ const CallWaitingScreen = ({route, navigation}: any) => {
     }
     return callData.targetName;
   };
+  
   return (
     <LinearGradient
       colors={['#004AAD', '#E3F2FD']} // Trắng nhạt -> Xanh dương

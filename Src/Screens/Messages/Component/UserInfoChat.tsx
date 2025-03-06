@@ -316,58 +316,62 @@ const UserInfoChat = ({navigation}: any) => {
           />
           <SpaceComponent height={20} />
           <RowComponent styles={{gap: 20, marginHorizontal: 12}}>
-            <CustomCallButtonComponent
-              type={
-                converInfo.type === 'personal'
-                  ? 'personal_voice'
-                  : 'group_voice'
-              }
-              avatar={converInfo.avatar}
-              targetName={
-                converInfo.type === 'personal'
-                  ? UserInfo.getName(converInfo.name)
-                  : UserInfo.getName(converInfo.groupName)
-              }
-              userId={auth.userId}
-              targetId={
-                converInfo.type === 'personal'
-                  ? converInfo.userId
-                  : converInfo.invitedUsers &&
-                    converInfo.invitedUsers.filter(
-                      (id: any) => id !== auth.userId,
-                    )
-              }
-              userName={UserInfo.getName(profile.name)}
-              styles={styles.menu}
-              text="call"
-              icon={<CallCalling color="blue" size={22} />}
-            />
-            <CustomCallButtonComponent
-              type={
-                converInfo.type === 'personal'
-                  ? 'personal_video'
-                  : 'group_video'
-              }
-              avatar={converInfo.avatar}
-              targetName={
-                converInfo.type === 'personal'
-                  ? UserInfo.getName(converInfo.name)
-                  : UserInfo.getName(converInfo.groupName)
-              }
-              userId={auth.userId}
-              targetId={
-                converInfo.type === 'personal'
-                  ? converInfo.userId
-                  : converInfo.invitedUsers &&
-                    converInfo.invitedUsers.filter(
-                      (id: any) => id !== auth.userId,
-                    )
-              }
-              userName={UserInfo.getName(profile.name)}
-              styles={styles.menu}
-              text="video"
-              icon={<Video color="blue" size={22} />}
-            />
+            {converInfo && (
+              <>
+                <CustomCallButtonComponent
+                  type={
+                    converInfo.type === 'personal'
+                      ? 'personal_voice'
+                      : 'group_voice'
+                  }
+                  avatar={converInfo.avatar}
+                  targetName={
+                    converInfo.type === 'personal'
+                      ? UserInfo.getName(converInfo.name)
+                      : UserInfo.getName(converInfo.groupName)
+                  }
+                  userId={auth.userId}
+                  targetId={
+                    converInfo.type === 'personal'
+                      ? converInfo.userId
+                      : converInfo.invitedUsers &&
+                        converInfo.invitedUsers.filter(
+                          (id: any) => id !== auth.userId,
+                        )
+                  }
+                  userName={UserInfo.getName(profile.name)}
+                  styles={styles.menu}
+                  text="call"
+                  icon={<CallCalling color="blue" size={22} />}
+                />
+                <CustomCallButtonComponent
+                  type={
+                    converInfo.type === 'personal'
+                      ? 'personal_video'
+                      : 'group_video'
+                  }
+                  avatar={converInfo.avatar}
+                  targetName={
+                    converInfo.type === 'personal'
+                      ? UserInfo.getName(converInfo.name)
+                      : UserInfo.getName(converInfo.groupName)
+                  }
+                  userId={auth.userId}
+                  targetId={
+                    converInfo.type === 'personal'
+                      ? converInfo.userId
+                      : converInfo.invitedUsers &&
+                        converInfo.invitedUsers.filter(
+                          (id: any) => id !== auth.userId,
+                        )
+                  }
+                  userName={UserInfo.getName(profile.name)}
+                  styles={styles.menu}
+                  text="video"
+                  icon={<Video color="blue" size={22} />}
+                />
+              </>
+            )}
             {ChoiceItems.map((item, index) => (
               <TouchableOpacity
                 onPress={() =>

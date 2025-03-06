@@ -3,6 +3,7 @@ import React from 'react';
 import MemberGroup from '../Messages/Component/MemberGroup';
 import UserInfoChat from '../Messages/Component/UserInfoChat';
 import SearchFriendScreen from '../Search/SearchFriendScreen';
+import TrashConversation from '../Messages/TrashConversation';
 
 const MessageNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -12,9 +13,7 @@ const MessageNavigator = () => {
       initialRouteName="UserInfoChat">
       <Stack.Screen name="UserInfoChat" component={UserInfoChat} />
       <Stack.Screen name="MemberGroup" component={MemberGroup} />
-      <Stack.Screen name="SearchFriends" component={SearchFriendScreen} />
-      
-      
+      <Stack.Screen name="SearchFriends" component={SearchFriendScreen} />      
     </Stack.Navigator>
   );
 };

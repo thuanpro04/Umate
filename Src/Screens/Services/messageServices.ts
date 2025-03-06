@@ -1,8 +1,8 @@
 import chatsAPI from '../../apis/chatApi';
-
+let url;
 const getAllMessagesUser = async (id: any, key: string, page: number) => {
   try {
-    const url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
+    url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
 
     const res = await chatsAPI.handleChats(url);
     return res;
@@ -11,7 +11,7 @@ const getAllMessagesUser = async (id: any, key: string, page: number) => {
   }
 };
 const checkConversation = async (senderId: string, receiverId: string) => {
-  const url = '/new-conversation';
+  url = '/new-conversation';
   let data = {
     senderId,
     receiverId,
@@ -25,7 +25,7 @@ const checkConversation = async (senderId: string, receiverId: string) => {
   }
 };
 const getAllConversationUsers = async (currentUserId: string) => {
-  const url = `/get-all-conversation?currentUserId=${currentUserId}`;
+  url = `/get-all-conversation?currentUserId=${currentUserId}`;
   // console.log(url);
 
   try {
@@ -36,13 +36,18 @@ const getAllConversationUsers = async (currentUserId: string) => {
   }
 };
 const updateStatusMessage = async (userId: string, id: string, key: string) => {
-  const url = `/update-status-message?userId=${userId}&&id=${id}`;
+  url = `/update-status-message?userId=${userId}&&id=${id}`;
   const data = {
     userId,
     id,
     key,
   };
-  const res = await chatsAPI.handleChats(url,data,'post');
+  const res = await chatsAPI.handleChats(url, data, 'post');
+  return res;
+};
+const deleteConversation = async (arrConver: any) => {
+  url = '/delete-conver';
+  const res = await chatsAPI.handleChats(url, arrConver, 'post');
   return res;
 };
 export const messageServices = {
@@ -50,4 +55,5 @@ export const messageServices = {
   getAllConversationUsers,
   checkConversation,
   updateStatusMessage,
+  deleteConversation,
 };

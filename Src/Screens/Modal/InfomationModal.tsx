@@ -14,9 +14,10 @@ interface Props {
   onClose: () => void;
   onPressAddGroud: () => void;
   listUser?: [];
+  onPressRemove: () => void;
 }
 const InfomationModal = (props: Props) => {
-  const {visible, onClose, onPressAddGroud, listUser} = props;
+  const {visible, onClose, onPressAddGroud, listUser,onPressRemove} = props;
   const modalizeRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -50,7 +51,7 @@ const InfomationModal = (props: Props) => {
       key: 'removeconversation',
       icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
       name: 'Remove conversation',
-      onPress: () => console.log('hello'),
+      onPress: () => onPressRemove(),
     },
   ];
   return (

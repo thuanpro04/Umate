@@ -27,10 +27,15 @@ import LoadingModal from '../Modal/LoadingModal';
 import {groupServices} from '../Services/groupServices';
 import {notificationServices} from '../Services/notificationServices';
 import {UserInfo} from '../Untils/UserInfo';
-
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTrash, setTrash] = useState(false);
+  const [selectItems, setSelectItems] = useState<{[key: string]: Boolean}>({});
+  const [selectTrash, setSelectTrash] = useState<string[]>([]);
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -51,84 +56,128 @@ const NotificationScreen = ({navigation}: any) => {
       console.log('action friend error: ', error);
     }
   };
-  const RenderNotificationItem = ({item}: any) => {
-    const scaleAnim = React.useRef(new Animated.Value(1)).current;
-    const handlePress = () => {
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 0.95,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      item.type === 'calling'
-        ? navigation.navigate('MessageNavigator')
-        : navigation.navigate('Friends');
-    };
-    return (
-      <Animated.View style={{transform: [{scale: scaleAnim}]}}>
-        <TouchableOpacity
-          style={[styles.notificationCard, {backgroundColor: colors.card}]}
-          onPress={handlePress}>
-          <View style={styles.iconContainer}>
-            {item.type === 'groupInvite' ? (
-              <MaterialCommunityIcons
-                name="lightbulb-group-outline"
-                size={appInfo.sizeIconBold}
-                color="#FFFFFF"
-              />
-            ) : item.type === 'calling' ? (
-              <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
-            ) : (
-              <FontAwesome5
-                name="user-friends"
-                size={appInfo.sizeIconBold}
-                color="#FFFFFF"
-              />
-            )}
-          </View>
-          <View style={styles.textContainer}>
-            <RowComponent>
-              <TextComponent label={item.title} styles={styles.title} />
+  const RenderNotificationItem = useCallback(
+    ({item}: any) => {
+      const scaleAnim = React.useRef(new Animated.Value(1)).current;
+      const handlePress = () => {
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 0.95,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]).start();
+        if (item.type !== 'calling') {
+          navigation.navigate('Friends');
+        }
+      };
+      const onChangleItemToTrash = (key: any) => {
+        setSelectItems(prev => {
+          const newItem = {
+            ...prev,
+            [key]: !prev[key],
+          };
+          console.log(newItem);
 
-              <TextComponent
-                label={UserInfo.getDay(item.timestamp)}
-                styles={[
-                  globalStyles.actionText,
-                  {alignItems: 'flex-end', justifyContent: 'flex-end'},
-                ]}
-              />
-            </RowComponent>
-            <TextComponent label={item.content} styles={styles.content} />
-            {item.type === 'groupInvite' && (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.acceptButton}
-                  onPress={() =>
-                    handleActionFriend('agree', item._id, item.groupId)
-                  }>
-                  <TextComponent
-                    label={'Chấp nhận'}
-                    styles={styles.buttonText}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.declineButton}
-                  onPress={() => handleActionFriend('cancel', item._id)}>
-                  <TextComponent label={'Từ chối'} styles={styles.buttonText} />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
+          return newItem;
+        });
+        if (selectTrash.includes(key)) {
+          setSelectTrash(prevSelect => prevSelect.filter(id => id !== key));
+        } else {
+          setSelectTrash(prev => [...prev, key]);
+        }
+      };
+
+      return (
+        <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+          <TouchableOpacity
+            activeOpacity={item.type === 'calling' ? 10 : 0.2}
+            style={[styles.notificationCard, {backgroundColor: colors.card}]}
+            onPress={handlePress}>
+            <View style={styles.iconContainer}>
+              {item.type === 'groupInvite' ? (
+                <MaterialCommunityIcons
+                  name="lightbulb-group-outline"
+                  size={appInfo.sizeIconBold}
+                  color="#FFFFFF"
+                />
+              ) : item.type === 'calling' ? (
+                <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
+              ) : (
+                <FontAwesome5
+                  name="user-friends"
+                  size={appInfo.sizeIconBold}
+                  color="#FFFFFF"
+                />
+              )}
+            </View>
+            <View style={styles.textContainer}>
+              <RowComponent>
+                <TextComponent label={item.title} styles={styles.title} />
+                <View style={{}}>
+                  {!isTrash ? (
+                    <TextComponent
+                      label={UserInfo.getDay(item.timestamp)}
+                      styles={[
+                        globalStyles.actionText,
+                        {alignItems: 'flex-end', justifyContent: 'flex-end'},
+                      ]}
+                    />
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => onChangleItemToTrash(item._id)}>
+                      {!selectItems[item._id] ? (
+                        <MaterialIcons
+                          name="check-box-outline-blank"
+                          size={appInfo.sizeIconBold}
+                          color={colors.icon}
+                        />
+                      ) : (
+                        <MaterialIcons
+                          name="check-box"
+                          size={appInfo.sizeIconBold}
+                          color={colors.icon}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </RowComponent>
+              <TextComponent label={item.content} styles={styles.content} />
+              {item.type === 'groupInvite' && (
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.acceptButton}
+                    onPress={() =>
+                      handleActionFriend('agree', item._id, item.groupId)
+                    }>
+                    <TextComponent
+                      label={'Chấp nhận'}
+                      styles={styles.buttonText}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.declineButton}
+                    onPress={() => handleActionFriend('cancel', item._id)}>
+                    <TextComponent
+                      label={'Từ chối'}
+                      styles={styles.buttonText}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+    [isTrash, selectItems, selectTrash],
+  );
   const fetchNotification = async () => {
     setIsLoading(true);
     try {
@@ -141,6 +190,30 @@ const NotificationScreen = ({navigation}: any) => {
       console.log('fetch notification error: ', error);
       setIsLoading(false);
     }
+  };
+  const handleTrashNotification = async () => {
+    if (isTrash) {
+      if (selectTrash.length < 1) {
+        setTrash(false);
+        return;
+      }
+      try {
+     
+        const res = await notificationServices.handleDeleteNotification(
+          selectTrash,
+        );
+        if (res) {
+          console.log('Delete successfully !!');
+          fetchNotification();
+        }
+        setSelectItems({});
+        setSelectTrash([]);
+        setTrash(false);
+      } catch (error) {
+        console.log('Trash notification error: ', error);
+      }
+    }
+    setTrash(true);
   };
   useFocusEffect(
     useCallback(() => {
@@ -155,6 +228,18 @@ const NotificationScreen = ({navigation}: any) => {
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         title="Thông báo"
+        iconRight={
+          isTrash ? (
+            <FontAwesome
+              name="trash"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ) : (
+            <Feather name="trash" color={colors.icon} size={appInfo.sizeIcon} />
+          )
+        }
+        onPress2={handleTrashNotification}
       />
       {dataNotifi && dataNotifi.length > 0 ? (
         <FlatList

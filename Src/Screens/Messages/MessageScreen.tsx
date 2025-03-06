@@ -59,7 +59,7 @@ const MessageScreen = ({navigation}: any) => {
     }, []),
   );
   
-  const renderCardItems = ({item, index}: any) => {
+  const renderCardItems = useCallback(({item, index}: any) => {
     const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
 
     return (
@@ -77,7 +77,7 @@ const MessageScreen = ({navigation}: any) => {
         }
       />
     );
-  };
+  },[users])
 
   return (
     <SafeAreaView
@@ -152,6 +152,10 @@ const MessageScreen = ({navigation}: any) => {
         </View>
       )}
       <InfomationModal
+        onPressRemove={()=> {
+          setIsVisible(false)
+          navigation.navigate('TrashConversation',{users})
+        }}
         visible={isVisible}
         onClose={onCloseModal}
         onPressAddGroud={handleAddGroup}

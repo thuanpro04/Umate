@@ -194,7 +194,6 @@ const ChatInput = (props: Props) => {
         />
         <TouchableOpacity
           onPress={() => {
-            Keyboard.dismiss();
             onSendMessage({content, imagesUrl: [], reply});
             onActionSendMessages();
           }}>

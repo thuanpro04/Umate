@@ -29,6 +29,7 @@ import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
 import {UserInfo} from '../Untils/UserInfo';
 import {io} from 'socket.io-client';
+import {socketSelector} from '../../redux/reducers/socketSlice';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -55,7 +56,6 @@ const HomeScreen = () => {
             (event, index, self) =>
               index === self.findIndex(e => e._id === event._id),
           );
-
           // Cập nhật state chỉ với các sự kiện duy nhất
           return uniqueEvents;
         });
@@ -110,10 +110,6 @@ const HomeScreen = () => {
     }, []),
   );
 
-  const registerCall = () => {
-    socket.emit('callRegister', auth.userId);
-  };
-
   const onZegoService = async () => {
     return ZegoUIKitPrebuiltCallService.init(
       869126873, // App ID từ ZEGOCLOUD console
@@ -159,7 +155,6 @@ const HomeScreen = () => {
           </TouchableOpacity>
         }
         onPress1={() => navigation.openDrawer()}
-        // onPress2={() => navigation.navigate('GoongMapScreen')}
       />
       {event.length > 0 ? (
         <FlatList

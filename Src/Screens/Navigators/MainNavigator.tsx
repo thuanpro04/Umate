@@ -1,5 +1,9 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import SupportScreen from '../../SupportScreen/SupportScreen';
+import DetailEvent from '../Events/DetailEvent';
+import FriendScreens from '../Friends/FriendScreens';
+import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
 import {
   AddGroupScreens,
@@ -7,25 +11,21 @@ import {
   SearchScreen,
   SettingScreen,
 } from '../index';
+import GoongMapScreen from '../map/GoongMapScreen';
 import ChatScreen from '../Messages/ChatScreen';
-import UserInfoChat from '../Messages/Component/UserInfoChat';
+
+import NotificationScreen from '../notification/NotificationScreen';
 import PersonalScreen from '../Profile/PersonalScreen';
 import SetUpProfile from '../Profile/SetUpProfile';
+import UserQRCode from '../QRCode/UserQRCode';
+import SecurityScreen from '../SecurityScreen/SecurityScreen';
 import ShareScreen from '../ShareScreen';
 import DrawerNavigator from './DrawerNavigator';
-import DetailEvent from '../Events/DetailEvent';
-import GoongMapScreen from '../map/GoongMapScreen';
 import MessageNavigator from './MessageNavigator';
-import UserQRCode from '../QRCode/UserQRCode';
-import FriendScreens from '../Friends/FriendScreens';
-import NotificationScreen from '../notification/NotificationScreen';
-import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
-import SupportScreen from '../../SupportScreen/SupportScreen';
-import SecurityScreen from '../SecurityScreen/SecurityScreen';
-import VoiceCall from '../Messages/VoiceCall';
-import VideoCall from '../Messages/VideoCall';
-import CallWaitingScreen from '../Messages/CallWaitingScreen';
-import CallWaitingAccept from '../Messages/Component/CallWaitingAccept';
+import VoiceCall from '../VideoCall/VoiceCall';
+import CallWaitingScreen from '../VideoCall/CallWaitingScreen';
+import CallWaitingAccept from '../VideoCall/CallWaitingAccept';
+import TrashConversation from '../Messages/TrashConversation';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -57,9 +57,9 @@ const MainNavigator = () => {
       <Stack.Screen name="SecurityScreen" component={SecurityScreen} />
      
       <Stack.Screen name="VoiceCall" component={VoiceCall} />
-      <Stack.Screen name="VideoCall" component={VideoCall} />
       <Stack.Screen name="CallWaitingScreen" component={CallWaitingScreen} />
       <Stack.Screen name="CallWaitingAccept" component={CallWaitingAccept} />
+      <Stack.Screen name="TrashConversation" component={TrashConversation} />
       
       
     </Stack.Navigator>

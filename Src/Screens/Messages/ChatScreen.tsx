@@ -51,7 +51,7 @@ const ChatScreen = ({navigation}: any) => {
   const [limitPage, setLimitPage] = useState(1);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const clearReplyMessage = () => setReplyMessage(null);
-  const socketRef = useRef<Socket | null>(null);
+  const socket = useSelector(socketSelector).socket;
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -244,12 +244,13 @@ const ChatScreen = ({navigation}: any) => {
       converInfo,
       members,
       setReplyMessage,
+      socket
     ],
   );
   const ListHeader = () => {
     return isLoading ? <ActivityIndicator /> : <></>;
   };
-  const socket = useSelector(socketSelector).socket;
+
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
       setMessages(prev => {
@@ -264,8 +265,7 @@ const ChatScreen = ({navigation}: any) => {
       socket.off('receive_message');
     };
   }, []);
-  const onEndReachedCalled = useRef(false);
-
+ 
   return (
     <KeyboardAvoidingView
       style={[styles.container, {backgroundColor: colors.background}]}>

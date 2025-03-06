@@ -1,28 +1,24 @@
+import { useRoute } from '@react-navigation/native';
+import { CallCalling } from 'iconsax-react-native';
+import React, { useEffect, useRef } from 'react';
 import {
-  ActivityIndicator,
   Animated,
-  Image,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
-import {CallCalling} from 'iconsax-react-native';
-import {appInfo} from '../../../Theme/appInfo';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {UserInfo} from '../../Untils/UserInfo';
-import {globalStyles} from '../../../Styles/globalStyle';
 import LinearGradient from 'react-native-linear-gradient';
-import {useRoute} from '@react-navigation/native';
-import {io, Socket} from 'socket.io-client';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {useSelector} from 'react-redux';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
 import Sound from 'react-native-sound';
-import {socketSelector} from '../../../redux/reducers/socketSlice';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { socketSelector } from '../../redux/reducers/socketSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { RowComponent, SpaceComponent, TextComponent } from '../Components';
+import { UserInfo } from '../Untils/UserInfo';
 const CallWaitingAccept = ({navigation}: any) => {
   const {avatar, name, callID, targetId, userId, type} = useRoute().params as {
     avatar: string;
@@ -96,7 +92,6 @@ const CallWaitingAccept = ({navigation}: any) => {
         navigation.navigate('VoiceCall', {
           roomID: data.callID,
           name: data.userName,
-          userID: data.userId,
           type: data.type,
         });
       }

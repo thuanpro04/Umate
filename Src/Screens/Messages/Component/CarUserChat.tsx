@@ -1,5 +1,5 @@
 import {View, Text, Image} from 'react-native';
-import React from 'react';
+import React, {ReactNode} from 'react';
 import {
   ButtonComponent,
   RowComponent,
@@ -11,6 +11,8 @@ import {TouchableOpacity} from 'react-native';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {Check} from 'lucide-react-native';
+import {appInfo} from '../../../Theme/appInfo';
 interface Props {
   name: string;
   massv?: string;
@@ -21,6 +23,7 @@ interface Props {
   onPressSend?: () => void;
   lastMessageColor?: string;
   majoring?: string;
+  iconCheck?: ReactNode;
 }
 const CarUserChat = (props: Props) => {
   const {
@@ -31,7 +34,9 @@ const CarUserChat = (props: Props) => {
     lastMessage,
     isBtnSend,
     onPressSend,
-    lastMessageColor,majoring
+    lastMessageColor,
+    majoring,
+    iconCheck,
   } = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -58,7 +63,7 @@ const CarUserChat = (props: Props) => {
         <View style={{flex: 1}}>
           <RowComponent>
             <TextComponent label={name} styles={{fontWeight: '500'}} />
-            {!isBtnSend && <TextComponent label={`@${massv}`} />}
+            {!isBtnSend && !iconCheck && <TextComponent label={`@${massv}`} />}
           </RowComponent>
           <TextComponent
             label={lastMessage}
@@ -67,7 +72,10 @@ const CarUserChat = (props: Props) => {
             styles={{fontSize: 14, fontWeight: 'bold', marginLeft: 12}}
           />
         </View>
-        {isBtnSend && <ButtonComponent label="Send" onPress={onPressSend} />}
+        {isBtnSend && !iconCheck && (
+          <ButtonComponent label="Send" onPress={onPressSend} />
+        )}
+        {!isBtnSend && iconCheck && iconCheck}
       </RowComponent>
     </TouchableOpacity>
   );
