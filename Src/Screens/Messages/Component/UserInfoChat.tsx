@@ -1,15 +1,11 @@
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   ArrowLeft,
   CallCalling,
-  Designtools,
-  HuobiToken,
-  Link21,
-  Personalcard,
-  SecurityUser,
-  Video,
+  Video
 } from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -18,12 +14,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import Octicons from 'react-native-vector-icons/Octicons';
-import {globalStyles} from '../../../Styles/globalStyle';
-import {appInfo} from '../../../Theme/appInfo';
-import {appColors} from '../../../Theme/Colors/appColors';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useDispatch, useSelector } from 'react-redux';
+import { authSelector } from '../../../redux/reducers/authReducer';
+import { themeSelector } from '../../../redux/reducers/themeSlice';
+import { globalStyles } from '../../../Styles/globalStyle';
+import { appInfo } from '../../../Theme/appInfo';
+import { appColors } from '../../../Theme/Colors/appColors';
 import {
   CarfeatureComponent,
   HeaderComponent,
@@ -31,131 +29,34 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../../Components';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import UpdateInfoModal from '../../Modal/UpdateInfoModal';
-import {UserInfo} from '../../Untils/UserInfo';
-import ZoomImageComponent from './ZoomImageComponent';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import {notificationServices} from '../../Services/notificationServices';
-import {useSelector} from 'react-redux';
-import {authReducer, authSelector} from '../../../redux/reducers/authReducer';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
-import {ImageIcon, VideoIcon} from 'lucide-react-native';
-import {PermissionsAndroid} from 'react-native';
+import { notificationServices } from '../../Services/notificationServices';
+import { UserInfo } from '../../Untils/UserInfo';
 // import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { MenuChat } from '../../../data/MenuItems';
+import { friendSelector, setBlock } from '../../../redux/reducers/friendSlice';
+import { profileSelector } from '../../../redux/reducers/profileSlice';
+import ActionModal from '../../Modal/ActionModal';
+import { userServices } from '../../Services/userService';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
 const UserInfoChat = ({navigation}: any) => {
   const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
+  const [isShowBlockModal, setShowBlockModal] = useState(false);
+
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
+  const friendData = useSelector(friendSelector);
   const [statusNotification, setStatusNotification] = useState(false);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const dispatch = useDispatch();
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
-  const Categorys = [
-    {
-      key: 1,
-      title: 'Tùy chỉnh đoạn chat',
-      icon: <Designtools color={colors.icon} size={appInfo.sizeIconBold} />,
-      Object: [
-        {
-          id: 1,
-          label: 'Đổi chủ đề',
-          icon: (
-            <MaterialCommunityIcons
-              name="cookie-edit-outline"
-              color={colors.icon}
-              size={appInfo.sizeIcon}
-            />
-          ),
-        },
-        {
-          id: 2,
-          label: 'Thay đổi biệt danh',
-          icon: (
-            <MaterialCommunityIcons
-              name="human-edit"
-              color={colors.icon}
-              size={appInfo.sizeIcon}
-            />
-          ),
-        },
-      ],
-    },
-    {
-      key: 2,
-      title: 'Xem ảnh và link',
-      icon: <HuobiToken color={colors.icon} size={appInfo.sizeIconBold} />,
-      Object: [
-        {
-          id: 3,
-          label: 'Your Images',
-          icon: <ImageIcon color={colors.icon} size={appInfo.sizeIcon} />,
-        },
-        {
-          id: 4,
-          label: 'Link liên kết',
-          icon: <Link21 color={colors.icon} size={appInfo.sizeIcon} />,
-        },
-      ],
-    },
-    {
-      key: 3,
-      title: 'Quyền riêng tư && hỗ trợ',
-      icon: <SecurityUser color={colors.icon} size={appInfo.sizeIconBold} />,
-      Object: [
-        {
-          id: 5,
-          label: 'Block',
-          icon: (
-            <FontAwesome6
-              name="user-xmark"
-              color={colors.icon}
-              size={appInfo.sizeIcon}
-            />
-          ),
-        },
-        {
-          id: 6,
-          label: 'Báo cáo',
-          icon: (
-            <Octicons
-              name="report"
-              color={colors.icon}
-              size={appInfo.sizeIcon}
-            />
-          ),
-        },
-      ],
-    },
-  ];
-  const ChoiceItems = [
-    {
-      key: 'personal',
-      name: 'Personal',
-      icon: (
-        <Personalcard size={appInfo.sizeIconBold} color={appColors.cobalt} />
-      ),
-    },
-    {
-      key: 'notification',
-      name: 'Notification',
-      icon: (
-        <Ionicons
-          name="notifications-outline"
-          size={appInfo.sizeIconBold}
-          color={appColors.cobalt}
-        />
-      ),
-    },
-  ];
+
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
     setStatusNotification(
@@ -174,6 +75,23 @@ const UserInfoChat = ({navigation}: any) => {
       );
     } catch (error) {
       console.log('Action notification fail error: ', error);
+    }
+  };
+  const handleBlockUser = async () => {
+    setShowBlockModal(true);
+  };
+  const actionBlockUser = async (userId: string, userFriendId: string) => {
+    try {
+      const res = await userServices.updateBlockUser(userId, userFriendId);
+      if (res) {
+        console.log('Block successfully !!!', res.data);
+        dispatch(setBlock(res.data));
+        console.log('Sau khi cập nhật:', friendData.block);
+      }
+      setShowBlockModal(false);
+    } catch (error) {
+      console.log('handle block user fail: ', error);
+      setShowBlockModal(false);
     }
   };
   useFocusEffect(
@@ -208,24 +126,40 @@ const UserInfoChat = ({navigation}: any) => {
         setVisible(true);
         break;
       case 3:
+        navigation.navigate('YourImagesScreen',{conversationId:converInfo.conversationId})
         break;
       case 4:
+        navigation.navigate('YourLinkScreen',{conversationId:converInfo.conversationId})
+
         break;
       case 5:
+        handleBlockUser();
         break;
       case 6:
+        navigation.navigate('ReportScreen', {
+          name: converInfo.name,
+          userId: converInfo.userId,
+        });
+
         break;
       default:
         break;
     }
   };
+
   const renderObjectCategory = (item: any[]) => {
     return (
       <View style={styles.showItemStyle}>
         {item.map((element, index) => (
           <CarfeatureComponent
             key={index}
-            label={element.label}
+            label={
+              element.id === 5 &&
+              friendData.block &&
+              friendData.block.includes(converInfo.userId)
+                ? `Un${element.label}`
+                : element.label
+            }
             icon={element.icon}
             onPress={() => onPressItems(element.id)}
           />
@@ -235,15 +169,16 @@ const UserInfoChat = ({navigation}: any) => {
   };
 
   const renderCategory = () => {
-    return Categorys.map((item, index) => (
+    const data = MenuChat(colors).Categorys;
+    return data.map((item, index) => (
       <View
         key={index}
         style={{
           backgroundColor: colors.card,
           borderTopLeftRadius: index === 0 ? 12 : 0,
           borderTopRightRadius: index === 0 ? 12 : 0,
-          borderBottomLeftRadius: index === Categorys.length - 1 ? 12 : 0,
-          borderBottomRightRadius: index === Categorys.length - 1 ? 12 : 0,
+          borderBottomLeftRadius: index === data.length - 1 ? 12 : 0,
+          borderBottomRightRadius: index === data.length - 1 ? 12 : 0,
         }}>
         <CarfeatureComponent
           label={item.title}
@@ -319,6 +254,12 @@ const UserInfoChat = ({navigation}: any) => {
             {converInfo && (
               <>
                 <CustomCallButtonComponent
+                  isDisible={
+                    (converInfo.block &&
+                      converInfo.block.includes(auth.userId)) ||
+                    (friendData.block &&
+                      friendData.block.includes(converInfo.userId))
+                  }
                   type={
                     converInfo.type === 'personal'
                       ? 'personal_voice'
@@ -345,6 +286,12 @@ const UserInfoChat = ({navigation}: any) => {
                   icon={<CallCalling color="blue" size={22} />}
                 />
                 <CustomCallButtonComponent
+                  isDisible={
+                    (converInfo.block &&
+                      converInfo.block.includes(auth.userId)) ||
+                    (friendData.block &&
+                      friendData.block.includes(converInfo.userId))
+                  }
                   type={
                     converInfo.type === 'personal'
                       ? 'personal_video'
@@ -372,7 +319,7 @@ const UserInfoChat = ({navigation}: any) => {
                 />
               </>
             )}
-            {ChoiceItems.map((item, index) => (
+            {MenuChat(colors).ChoiceItems.map((item, index) => (
               <TouchableOpacity
                 onPress={() =>
                   handleChoiceItems(
@@ -433,6 +380,23 @@ const UserInfoChat = ({navigation}: any) => {
         nameField="UserName"
         onCloseModal={() => setVisible(false)}
         onChangeProfile={(key, value) => {}}
+      />
+      <ActionModal
+        visible={isShowBlockModal}
+        onPressNo={() => setShowBlockModal(false)}
+        onPressYes={async () =>
+          await actionBlockUser(auth.userId, converInfo.userId)
+        }
+        descriptions={`Do you really want to ${
+          friendData.block && friendData.block.includes(converInfo.userId)
+            ? ' un'
+            : ''
+        }block this friend?`}
+        title={`Bạn có thực sự muốn${
+          friendData.block && friendData.block.includes(converInfo.userId)
+            ? ' bỏ'
+            : ''
+        } chặn ${UserInfo.getName(converInfo.name)} không`}
       />
     </SafeAreaView>
   );

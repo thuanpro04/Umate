@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
@@ -32,26 +32,31 @@ import {Text} from 'react-native-svg';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {io, Socket} from 'socket.io-client';
 import {socketSelector} from '../../redux/reducers/socketSlice';
+import {userServices} from '../Services/userService';
+import {friendSelector, setBlock} from '../../redux/reducers/friendSlice';
+import ActionModal from '../Modal/ActionModal';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const scrollViewRef = useRef<FlatList>(null);
-  const [converInfo, setConverInfo] = useState<any>('');
   const [members, setMembers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false); // Trạng thái tải
+  const [converInfo, setConverInfo] = useState<any>('');
+  const [replyMessage, setReplyMessage] = useState<any>(null);
   const [page, setPage] = useState(1);
+  const scrollViewRef = useRef<FlatList>(null);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
-  const [replyMessage, setReplyMessage] = useState<any>(null);
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const currentUserId = auth.userId;
   const [limitPage, setLimitPage] = useState(1);
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const clearReplyMessage = () => setReplyMessage(null);
   const socket = useSelector(socketSelector).socket;
+  const dispatch = useDispatch();
+  const friendData = useSelector(friendSelector);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,6 +76,7 @@ const ChatScreen = ({navigation}: any) => {
     }
     //  scrollViewToEnd()
   }, [converInfo]);
+
   const handleUpdateStatusMessage = async () => {
     try {
       const res = await messageServices.updateStatusMessage(
@@ -82,7 +88,7 @@ const ChatScreen = ({navigation}: any) => {
       );
 
       if (res) {
-        console.log(res.data);
+        // console.log(res.data);
       }
     } catch (error) {
       console.log('update status message fail: ', error);
@@ -124,7 +130,6 @@ const ChatScreen = ({navigation}: any) => {
           if (page < limitPage) {
             setPage(prevPage => prevPage + 1);
           }
-          // console.log(messages);
         }
 
         setIsLoading(false);
@@ -216,8 +221,13 @@ const ChatScreen = ({navigation}: any) => {
         .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
         .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
 
+
       return (
         <ChatItems
+          isBlock={
+            (converInfo.block && converInfo.block.includes(auth.userId)) ||
+            (friendData.block && friendData.block.includes(converInfo.userId))
+          }
           updateRowRef={updateRowRef}
           navigation={navigation}
           currentUserId={currentUserId}
@@ -244,7 +254,7 @@ const ChatScreen = ({navigation}: any) => {
       converInfo,
       members,
       setReplyMessage,
-      socket
+      socket,
     ],
   );
   const ListHeader = () => {
@@ -265,7 +275,27 @@ const ChatScreen = ({navigation}: any) => {
       socket.off('receive_message');
     };
   }, []);
- 
+
+  const renderViewBlock = () => {
+    return (
+      converInfo &&
+      converInfo.block &&
+      converInfo.block.includes(auth.userId) && (
+        <View style={styles.block}>
+          <TextComponent
+            label={`Bạn đã bị block bởi ${UserInfo.getName(
+              converInfo.name,
+            )} liu liu !!!`}
+            styles={{fontWeight: '500', fontStyle: 'italic'}}
+            color={appColors.white}
+          />
+          <SpaceComponent height={8} />
+          <TextComponent label="🤫" size={28} />
+        </View>
+      )
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, {backgroundColor: colors.background}]}>
@@ -319,8 +349,6 @@ const ChatScreen = ({navigation}: any) => {
                 : setShowScrollToBottom(false);
             }}
             onContentSizeChange={(width, height) => {
-              // console.log('height ', height);
-
               if (messages.length > 0 && page === 1) {
                 scrollViewRef.current?.scrollToOffset({
                   offset: height, // Cuộn trực tiếp đến cuối cùng
@@ -359,19 +387,12 @@ const ChatScreen = ({navigation}: any) => {
       converInfo.type === 'personal' &&
       converInfo.block &&
       converInfo.block.includes(auth.userId) ? (
-        <View style={styles.block}>
-          <TextComponent
-            label={`Bạn đã bị block bởi ${UserInfo.getName(
-              converInfo.name,
-            )} liu liu !!!`}
-            styles={{fontWeight: '500', fontStyle: 'italic'}}
-            color={appColors.white}
-          />
-          <SpaceComponent height={8} />
-          <TextComponent label="😜" size={28} />
-        </View>
+        renderViewBlock()
       ) : (
         <ChatInput
+          isBlock={
+            friendData.block && friendData.block.includes(converInfo.userId)
+          }
           onSendMessage={onSendMessages}
           onScroll={() => scrollViewToEnd()}
           clearReply={clearReplyMessage}
@@ -405,7 +426,7 @@ const styles = StyleSheet.create({
   },
   block: {
     backgroundColor: '#81C784',
-    height: 120,
+    height: 145,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     alignItems: 'center',

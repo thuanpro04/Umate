@@ -19,8 +19,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {Send2} from 'iconsax-react-native';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
 import {appColors} from '../../../Theme/Colors/appColors';
+import {Notification} from '../../Untils/Notification';
 interface Props {
   reply: string;
+  isBlock: boolean;
   clearReply: any;
   onScroll?: any;
   groupId?: string;
@@ -32,9 +34,10 @@ interface Props {
   }) => void;
 }
 const ChatInput = (props: Props) => {
-  const {reply, clearReply, onScroll, groupId, userId, onSendMessage} = props;
+  const {reply, clearReply, onScroll, groupId, userId, onSendMessage, isBlock} =
+    props;
   const [content, setContent] = useState('');
-  const [isDisable, setIsDisable] = useState(false);
+
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -47,12 +50,11 @@ const ChatInput = (props: Props) => {
 
   const handleSendMessageAndImage = useCallback(
     async (urlImage?: string[] | string) => {
-      setIsDisable(true);
+    
       const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
 
-      if (!content && !imagesUrl) {
+      if (content.trim().length === 0 && imagesUrl.length === 0) {
         console.log('Message is empty, nothing to send.');
-        setIsDisable(false);
         return;
       }
 
@@ -82,7 +84,7 @@ const ChatInput = (props: Props) => {
             // Trường hợp gửi cho một userId
             const data = {
               ...messageData,
-              receiverId: userId, 
+              receiverId: userId,
             };
             socket.emit('send_message', data, (response: any) => {
               console.log(
@@ -100,31 +102,21 @@ const ChatInput = (props: Props) => {
             reply,
           });
           setContent('');
-          setIsDisable(false);
         } catch (error) {
           console.log('Error in handleSendMessageAndImage:', error);
-          setIsDisable(false);
         }
       }
     },
     [content, userId, onSendMessage, socket],
   );
-  const MIN_SEND_INTERVAL = 5000; // Khoảng cách tối thiểu giữa các lần gửi tin nhắn (5 giây)
-  let lastSendTime = 0;
+
   const onActionSendMessages = () => {
-    const now = Date.now();
-    if (now - lastSendTime < MIN_SEND_INTERVAL) {
-      console.log('Bạn đang gửi tin quá nhanh. Vui lòng chờ...');
-      setIsDisable(true); // Vô hiệu hóa nút
+    if (content.trim().length === 0) {
+      console.log('Message is empty, nothing to send.');
       return;
     }
-    setIsDisable(true); // Vô hiệu hóa nút ngay sau khi bấm
-    lastSendTime = now; // Cập nhật thời gian gửi
     handleSendMessageAndImage(); // Gửi tin nhắn
     // Tự động bật lại nút sau khoảng thời gian tối thiểu
-    setTimeout(() => {
-      setIsDisable(false);
-    }, MIN_SEND_INTERVAL);
   };
   const getFilePaths = (val: ImageOrVideo[] | ImageOrVideo): string[] => {
     return Array.isArray(val)
@@ -162,6 +154,11 @@ const ChatInput = (props: Props) => {
     },
     [getFilePaths, handleSendMessageAndImage, uploadFileToStorage],
   );
+  const handleToastNotificationBlock = () => {
+    if (isBlock) {
+      Notification.showSnackbar('Mở chặn đi gòi nhắn 😏', () => {});
+    }
+  };
 
   return (
     <View>
@@ -194,8 +191,7 @@ const ChatInput = (props: Props) => {
         />
         <TouchableOpacity
           onPress={() => {
-            onSendMessage({content, imagesUrl: [], reply});
-            onActionSendMessages();
+            isBlock ? handleToastNotificationBlock() : onActionSendMessages();
           }}>
           <Send2 size={appInfo.sizeIcon} color={colors.icon} />
         </TouchableOpacity>

@@ -22,7 +22,8 @@ import {globalStyles} from '../../../Styles/globalStyle';
 import {UserInfo} from '../../Untils/UserInfo';
 import {useSelector} from 'react-redux';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
-import { socketSelector } from '../../../redux/reducers/socketSlice';
+import {socketSelector} from '../../../redux/reducers/socketSlice';
+import {Notification} from '../../Untils/Notification';
 
 interface Props {
   icon?: React.ReactNode;
@@ -37,6 +38,7 @@ interface Props {
   avatar: string;
   txtStyles?: StyleProp<TextStyle>;
   type: 'group_voice' | 'group_video' | 'personal_voice' | 'personal_video';
+  isDisible: Boolean;
 }
 
 const CustomCallButtonComponent = (props: Props) => {
@@ -51,18 +53,22 @@ const CustomCallButtonComponent = (props: Props) => {
     avatar,
     txtStyles,
     type,
+    isDisible,
   } = props;
   const navigation = useNavigation<any>();
-    const socket = useSelector(socketSelector).socket;
-  
+  const socket = useSelector(socketSelector).socket;
+
   const profile = useSelector(profileSelector);
 
   const callID = `call_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
   const sendCallInvitation = async () => {
+    if (isDisible) {
+      return;
+    }
     try {
       // Tạo một callID duy nhất
-      
+
       const callData = {
         callID,
         targetId,
@@ -81,16 +87,20 @@ const CustomCallButtonComponent = (props: Props) => {
         targetId,
         type,
       });
-      return socket.off('sendCallInvitation')
+      return socket.off('sendCallInvitation');
     } catch (error) {
       console.error('❌ Lỗi khi gửi lời mời gọi:', error);
     }
   };
-
+  const handleToastNotificationBlock = () => {
+    if (isDisible) {
+      Notification.showSnackbar('Mở chặn đi gòi nhắn 😏', () => {});
+    }
+  };
   return (
     <TouchableOpacity
       style={[styles]}
-      onPress={sendCallInvitation}
+      onPress={isDisible ? handleToastNotificationBlock : sendCallInvitation}
       activeOpacity={0.6}>
       {icon && icon}
       <TextComponent

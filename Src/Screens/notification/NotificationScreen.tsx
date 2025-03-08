@@ -1,5 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native';
-import {ArrowLeft2, CallCalling, CallIncoming} from 'iconsax-react-native';
+import {ArrowLeft2, CallCalling} from 'iconsax-react-native';
+import {Check} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
 import {
   Animated,
@@ -9,6 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
@@ -17,19 +20,11 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import {
-  HeaderComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from '../Components';
+import {HeaderComponent, RowComponent, TextComponent} from '../Components';
 import LoadingModal from '../Modal/LoadingModal';
 import {groupServices} from '../Services/groupServices';
 import {notificationServices} from '../Services/notificationServices';
 import {UserInfo} from '../Untils/UserInfo';
-import Feather from 'react-native-vector-icons/Feather';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,7 +77,6 @@ const NotificationScreen = ({navigation}: any) => {
             ...prev,
             [key]: !prev[key],
           };
-          console.log(newItem);
 
           return newItem;
         });
@@ -98,7 +92,9 @@ const NotificationScreen = ({navigation}: any) => {
           <TouchableOpacity
             activeOpacity={item.type === 'calling' ? 10 : 0.2}
             style={[styles.notificationCard, {backgroundColor: colors.card}]}
-            onPress={handlePress}>
+            onPress={() =>
+              isTrash ? onChangleItemToTrash(item._id) : handlePress()
+            }>
             <View style={styles.iconContainer}>
               {item.type === 'groupInvite' ? (
                 <MaterialCommunityIcons
@@ -129,22 +125,11 @@ const NotificationScreen = ({navigation}: any) => {
                       ]}
                     />
                   ) : (
-                    <TouchableOpacity
-                      onPress={() => onChangleItemToTrash(item._id)}>
-                      {!selectItems[item._id] ? (
-                        <MaterialIcons
-                          name="check-box-outline-blank"
-                          size={appInfo.sizeIconBold}
-                          color={colors.icon}
-                        />
-                      ) : (
-                        <MaterialIcons
-                          name="check-box"
-                          size={appInfo.sizeIconBold}
-                          color={colors.icon}
-                        />
+                    <View>
+                      {selectItems[item._id] && (
+                        <Check size={appInfo.sizeIconBold} color={'red'} />
                       )}
-                    </TouchableOpacity>
+                    </View>
                   )}
                 </View>
               </RowComponent>
@@ -198,7 +183,6 @@ const NotificationScreen = ({navigation}: any) => {
         return;
       }
       try {
-     
         const res = await notificationServices.handleDeleteNotification(
           selectTrash,
         );

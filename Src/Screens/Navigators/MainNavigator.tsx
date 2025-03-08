@@ -26,6 +26,7 @@ import VoiceCall from '../VideoCall/VoiceCall';
 import CallWaitingScreen from '../VideoCall/CallWaitingScreen';
 import CallWaitingAccept from '../VideoCall/CallWaitingAccept';
 import TrashConversation from '../Messages/TrashConversation';
+import ReportScreen from '../Report/ReportScreen';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -60,6 +61,7 @@ const MainNavigator = () => {
       <Stack.Screen name="CallWaitingScreen" component={CallWaitingScreen} />
       <Stack.Screen name="CallWaitingAccept" component={CallWaitingAccept} />
       <Stack.Screen name="TrashConversation" component={TrashConversation} />
+      <Stack.Screen name="ReportScreen" component={ReportScreen} />
       
       
     </Stack.Navigator>

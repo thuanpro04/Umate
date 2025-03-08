@@ -4,32 +4,25 @@ import React, {useCallback, useState} from 'react';
 import {
   KeyboardAvoidingView,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   View,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
-import {useSelector} from 'react-redux';
-import {globalStyles} from '../../Styles/globalStyle';
+
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {HeaderComponent} from '../Components';
 import {generateAIResponse} from '../Services/generateAiService';
 import ChatBox from './ChatBox';
 import InputGenimi from './InputGenimi';
-import {StatusBar} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
-const GeminiChat = ({
-  onFocus,
-  onBlur,
-}: {
-  onFocus: () => void;
-  onBlur: () => void;
-}) => {
+const GeminiChat = ({onFocus, onBlur}: any) => {
   const [userInput, setUserInput] = useState('');
   const [messageInfo, setMessageInfo] = useState<any[]>([]);
   const [isDisable, setDisable] = useState(false);
   const navigation = useNavigation();
-  const auth = useSelector(authSelector);
 
   useFocusEffect(
     useCallback(() => {
@@ -72,17 +65,21 @@ const GeminiChat = ({
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1}}>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
       <SafeAreaView style={styles.container}>
         {/* Header */}
-        <HeaderComponent
-          title="Gemini Chat"
-          titleColor={appColors.white}
-          iconLeft={
-            <ArrowLeft size={appInfo.sizeIconBold} color={appColors.white} />
-          }
-          onPress1={() => navigation.goBack()}
-        />
+        <LinearGradient
+          colors={['#3E4EB8', '#1C1F57']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+          style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}>
+            <ArrowLeft size={28} color={appColors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Gemini Chat</Text>
+        </LinearGradient>
 
         {/* Chat Box */}
         <View style={styles.chatContainer}>
@@ -104,22 +101,44 @@ const GeminiChat = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Màu nền chính
-    paddingBottom: 10,
-    paddingHorizontal: 12,
+    backgroundColor: '#0E0F1F',
+    paddingBottom: 12,
+    paddingHorizontal: 14,
     marginTop: StatusBar.currentHeight,
   },
-  chatContainer: {
-    flex: 1,
-    backgroundColor: '#1E1E1EFA',
-    borderRadius: 16,
-    padding: 10,
-    marginVertical: 10,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 3},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: appColors.white,
+    marginLeft: 10,
+  },
+  chatContainer: {
+    flex: 1,
+    backgroundColor: '#1D1E33',
+    borderRadius: 18,
+    padding: 12,
+    marginVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 6,
   },
 });
 

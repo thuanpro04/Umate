@@ -25,6 +25,11 @@ interface Props {
   bgColor?: string;
   icon?: ReactNode;
   onPressMore?: () => void;
+  navigation?: any;
+  userId: string;
+  onPressUnFriend?: () => void;
+  onPressBlock?: () => void;
+  isBlock?: Boolean;
 }
 const CarUserComponent = (props: Props) => {
   const {
@@ -37,13 +42,42 @@ const CarUserComponent = (props: Props) => {
     bgColor,
     onPressMore,
     icon,
+    navigation,
+    userId,
+    onPressUnFriend,
+    onPressBlock,
+    isBlock,
   } = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const [isVisible, setisVisible] = useState(false);
 
   const showMenu = () => setisVisible(true);
-  const hideMenu = () => setisVisible(false);
+
+  const hideMenu = () => {
+    setisVisible(false);
+  };
+  const actionMenu = async (key: string) => {
+    switch (key) {
+      case 'report':
+        navigation.navigate('ReportScreen', {name: userName, userId});
+        break;
+      case 'delete':
+        if (onPressUnFriend) {
+          hideMenu();
+          await onPressUnFriend();
+        }
+        break;
+      default:
+        if (onPressBlock) {
+          hideMenu();
+          await onPressBlock();
+        }
+
+        break;
+    }
+  };
+  
   return (
     <RowComponent
       styles={[
@@ -87,23 +121,33 @@ const CarUserComponent = (props: Props) => {
                 elevation: 5,
                 backgroundColor: colors.background,
               }}>
-              <MenuItem onPress={hideMenu} style={styles.menuItem}>
+              <MenuItem
+                onPress={() => actionMenu('report')}
+                style={styles.menuItem}>
                 <Flag color={'red'} size={18} />
                 <SpaceComponent width={6} />
                 <TextComponent label="Báo cáo" styles={styles.menuText} />
               </MenuItem>
               <MenuDivider />
-              <MenuItem onPress={hideMenu} style={styles.menuItem}>
+              <MenuItem
+                onPress={() => actionMenu('delete')}
+                style={styles.menuItem}>
                 <UserX color={'yellow'} size={18} />
                 <SpaceComponent width={6} />
 
                 <TextComponent label="Xóa bạn" styles={styles.menuText} />
               </MenuItem>
               <MenuDivider />
-              <MenuItem onPress={hideMenu} style={styles.menuItem}>
+              <MenuItem
+                onPress={() => actionMenu('block')}
+                style={styles.menuItem}>
                 <ShieldOff color={'green'} size={18} />
                 <SpaceComponent width={6} />
-                <TextComponent label="Chặn" styles={styles.menuText} />
+                {isBlock ? (
+                  <TextComponent label="Bỏ chặn" styles={styles.menuText} />
+                ) : (
+                  <TextComponent label="Chặn" styles={styles.menuText} />
+                )}
               </MenuItem>
             </Menu>
           </View>

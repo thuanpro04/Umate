@@ -1,24 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useMemo, useState } from 'react';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {FlatList, SafeAreaView, StyleSheet} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import {appColors} from '../../Theme/Colors/appColors';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
 import {
-  FlatList,
-  SafeAreaView,
-  StyleSheet
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { appColors } from '../../Theme/Colors/appColors';
-import { addAuth, authSelector } from '../../redux/reducers/authReducer';
-import { friendSelector } from '../../redux/reducers/friendSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { CarUserComponent, SpaceComponent } from '../Components';
+  addFriend,
+  friendSelector,
+  setBlock,
+} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {CarUserComponent, SpaceComponent} from '../Components';
 import ActionModal from '../Modal/ActionModal';
 import LoadingModal from '../Modal/LoadingModal';
 import UserInfoModal from '../Modal/UserInfoModal';
-import { friendServices } from '../Services/friendService.';
-import { messageServices } from '../Services/messageServices';
-import { userServices } from '../Services/userService';
-import { UserInfo } from '../Untils/UserInfo';
+import {friendServices} from '../Services/friendService.';
+import {messageServices} from '../Services/messageServices';
+import {userServices} from '../Services/userService';
+import {UserInfo} from '../Untils/UserInfo';
 
 const initialUser = {
   avatar: '',
@@ -111,7 +111,7 @@ const FriendsRespondScreen = () => {
       console.error('Respond save user error ', error);
     }
   };
-  const handleBlockUser = async (userId: string) => {
+  const handleBlockUser = () => {
     setShowBlockModal(true);
     setIsModal(false);
   };
@@ -121,7 +121,7 @@ const FriendsRespondScreen = () => {
       const res = await userServices.updateBlockUser(userId, userFriendId);
       if (res) {
         console.log('Block successfully !!!', res.data);
-        dispatch(addAuth({...friendData, block: res.data}));
+        dispatch(setBlock(res.data));
         console.log('Sau khi cập nhật:', friendData.block);
       }
       setIsLoading(false);
@@ -198,7 +198,7 @@ const FriendsRespondScreen = () => {
           await onNavigationMessage({...selectedUser, type: 'personal'});
         }}
         handleUnFriend={() => actionUnFriend()}
-        handleBlockUser={async () => await handleBlockUser(selectedUser.userId)}
+        handleBlockUser={async () => await handleBlockUser()}
       />
       <LoadingModal visible={isLoading} />
       <ActionModal

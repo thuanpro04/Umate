@@ -1,35 +1,30 @@
+import {CallIncoming, CloseCircle} from 'iconsax-react-native';
 import React, {memo, useCallback, useState} from 'react';
 import {
   Animated,
   Image,
-  Linking,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
 import ImageViewing from 'react-native-image-viewing';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import {useSelector} from 'react-redux';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {appInfo} from '../../../Theme/appInfo';
-import {
-  ButtonComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from '../../Components';
-import {UserInfo} from '../../Untils/UserInfo';
-import CustomFootImages from './CustomFootImages';
-import CustormLinkPreview from '../../Components/CustormLinkPreview';
-import {LinkPreview} from '@flyerhq/react-native-link-preview';
-import {userServices} from '../../Services/userService';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
-import {CallIncoming} from 'iconsax-react-native';
-import CustomCallButtonComponent from './CustomCallButtonComponent';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
-
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
+import CustormLinkPreview from '../../Components/CustormLinkPreview';
+import {userServices} from '../../Services/userService';
+import {UserInfo} from '../../Untils/UserInfo';
+import CustomCallButtonComponent from './CustomCallButtonComponent';
+import CustomFootImages from './CustomFootImages';
+import FastImage from 'react-native-fast-image';
+import {ArrowDown, Download, DownloadCloudIcon} from 'lucide-react-native';
+import CustomHeaderImages from './CustomHeaderImages';
+import CustormImageViewing from './CustormImageViewing';
 interface Props {
   currentUserId: string;
   userId?: string | string[];
@@ -40,6 +35,7 @@ interface Props {
   setReplyOnSwipeOpen: any;
   item?: any;
   name: string;
+  isBlock: Boolean;
 }
 const ChatItems = (props: Props) => {
   const {
@@ -52,8 +48,8 @@ const ChatItems = (props: Props) => {
     setReplyOnSwipeOpen,
     item,
     name,
+    isBlock,
   } = props;
-  const [isLoading, setLoading] = useState(true);
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
@@ -63,6 +59,8 @@ const ChatItems = (props: Props) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const isNextMyMessage = true;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const condition = item.typeCall;
   const isUser = props?.item.senderId === props?.currentUserId;
   const getUserSenderId = async (senderId: string) => {
     try {
@@ -107,15 +105,12 @@ const ChatItems = (props: Props) => {
       />
     );
   };
-  const renderImage = (arrImages: string[], isRight?: boolean) => {
-    const totalImages = arrImages.length;
-    const isStacked = totalImages > 1;
-
-    return (
-      arrImages &&
-      arrImages.length > 0 &&
-      arrImages.map((item, imgIndex) => {
-        item && (
+  const renderImage = useCallback(
+    (arrImages: string[], isRight?: boolean) => {
+      const totalImages = arrImages.length;
+      const isStacked = totalImages > 1;
+      return arrImages.map((item, imgIndex) => {
+        return (
           <RowComponent
             onPress={() => onPressImg(item)}
             activeOpacity={0.8}
@@ -124,10 +119,7 @@ const ChatItems = (props: Props) => {
             {imgIndex === arrImages.length - 1 &&
               isRight &&
               shareDocuments(isStacked, isRight ?? false, arrImages)}
-            <Image
-              key={imgIndex}
-              source={{uri: item}}
-              onLoadEnd={() => setLoading(false)} // Cập nhật sau khi từng hình ảnh được tải
+            <FastImage
               style={[
                 styles.imageStyle,
                 isStacked && {
@@ -138,18 +130,22 @@ const ChatItems = (props: Props) => {
                   zIndex: totalImages - imgIndex,
                 },
               ]}
-              onError={error =>
-                console.log('Error loading image:', error.nativeEvent.error)
-              }
+              source={{
+                uri: item,
+                priority: FastImage.priority.high, // Đặt mức ưu tiên cao
+                cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
+              }}
+              resizeMode={FastImage.resizeMode.cover}
             />
             {imgIndex === arrImages.length - 1 &&
               !isRight &&
               shareDocuments(isStacked, !isRight, arrImages)}
           </RowComponent>
         );
-      })
-    );
-  };
+      });
+    },
+    [props?.item.imagesUrl],
+  );
   const onSwipeableOpenAction = () => {
     if (props.item) {
       setReplyOnSwipeOpen({...props.item, name});
@@ -193,18 +189,16 @@ const ChatItems = (props: Props) => {
       </Animated.View>
     );
   };
- 
+
   const onPressImg = (urlImg: string) => {
     const tempUrl = {uri: urlImg};
-
     const Images = urlImages ? urlImages.map((url: any) => ({uri: url})) : [];
     setDisplayImgs(Images);
     const imageIndex = Images.findIndex((img: any) => img.uri === tempUrl.uri);
     setImageIndex(imageIndex);
     setIsVisible(true);
   };
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const condition = item.typeCall ;
+ 
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
     return (
@@ -280,6 +274,7 @@ const ChatItems = (props: Props) => {
                 />
                 <SpaceComponent height={5} />
                 <CustomCallButtonComponent
+                  isDisible={isBlock}
                   type={condition}
                   styles={{justifyContent: 'center', alignItems: 'center'}}
                   targetName={name}
@@ -311,7 +306,7 @@ const ChatItems = (props: Props) => {
                   </View>
                 )}
                 {isLink ? (
-                  <View style={{height: 240}}>
+                  <View style={{height: 255}}>
                     <CustormLinkPreview txtLink={item.content} />
                   </View>
                 ) : (
@@ -388,18 +383,12 @@ const ChatItems = (props: Props) => {
         )}
       </Swipeable>
       {displayImgs && (
-        <ImageViewing
+        <CustormImageViewing
+          onChangeImageIndex={onChangeImageIndex}
+          onClose={() => setIsVisible(false)}
           imageIndex={imageIndex}
           images={displayImgs}
-          visible={isVisible}
-          onRequestClose={() => setIsVisible(false)}
-          FooterComponent={() => (
-            <CustomFootImages
-              indexImage={imageIndex}
-              arrImages={displayImgs}
-              onChangeImageIndex={onChangeImageIndex}
-            />
-          )}
+          isVisible={isVisible}
         />
       )}
     </GestureHandlerRootView>

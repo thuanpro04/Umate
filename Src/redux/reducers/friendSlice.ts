@@ -22,14 +22,17 @@ const friendSlice = createSlice({
       state.removeFriends = action.payload.removeFriends;
       state.block = action.payload.block;
     },
-    removeFriend: (state) => {
+    removeFriend: state => {
       state.friends = [];
       state.friendRequests = [];
       state.removeFriends = [];
       state.block = [];
     },
+    setBlock: (state, action: PayloadAction<string[]>) => {
+      state.block = action.payload; // ✅ Chỉ cập nhật block, không ảnh hưởng dữ liệu khác
+    },
   },
 });
 export const friendReducer = friendSlice.reducer;
-export const {addFriend, removeFriend} = friendSlice.actions;
+export const {addFriend, removeFriend, setBlock} = friendSlice.actions;
 export const friendSelector = (state: any) => state.friends;

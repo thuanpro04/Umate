@@ -59,7 +59,7 @@ const MessageScreen = ({navigation}: any) => {
     }, []),
   );
   
-  const renderCardItems = useCallback(({item, index}: any) => {
+const renderCardItems = useCallback(({item, index}: any) => {
     const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
 
     return (

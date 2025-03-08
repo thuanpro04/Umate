@@ -43,12 +43,13 @@ const ActionModal = (props: Props) => {
                 borderWidth: 1,
                 borderColor: colors.border,
               }}
-              
+              labelColor={colors.text}
             />
             <ButtonComponent
               label="Comfirm"
               styles={{backgroundColor: '#007ABF99'}}
               onPress={onPressYes}
+              labelColor={colors.text}
             />
           </RowComponent>
           <SpaceComponent height={8} />

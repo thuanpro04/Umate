@@ -26,7 +26,7 @@ const checkConversation = async (senderId: string, receiverId: string) => {
 };
 const getAllConversationUsers = async (currentUserId: string) => {
   url = `/get-all-conversation?currentUserId=${currentUserId}`;
-  // console.log(url);
+  console.log(url);
 
   try {
     const res = await chatsAPI.handleChats(url);
@@ -50,10 +50,22 @@ const deleteConversation = async (arrConver: any) => {
   const res = await chatsAPI.handleChats(url, arrConver, 'post');
   return res;
 };
+const getImages = async (conversationId: string) => {
+  url = `/get-images?id=${conversationId}`;
+  const res = await chatsAPI.handleChats(url);
+  return res;
+};
+const getLinkYourConversation = async (conversationId: string) => {
+  url = `/get-link?id=${conversationId}`;
+  const res = await chatsAPI.handleChats(url);
+  return res
+};
 export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
   checkConversation,
   updateStatusMessage,
   deleteConversation,
+  getImages,
+  getLinkYourConversation,
 };
