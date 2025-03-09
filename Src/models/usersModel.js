@@ -121,6 +121,7 @@ const groupConversationSchema = new mongoose.Schema(
     lastMessageTimestamp: { type: Date, default: Date.now },
     type: { type: String },
     notification: [{ type: String, ref: "User" }],
+    nicknames: { type: Map, of: String, default: {} },
   },
   { timestamps: true }
 );
@@ -134,6 +135,7 @@ const conversationSchema = new mongoose.Schema(
     lastMessage: { type: String, default: "" }, // Tin nhắn mới nhất
     lastMessageTimestamp: { type: Date, default: Date.now },
     notification: [{ type: String, ref: "User" }],
+    nicknames: { type: Map, of: String, default: {} },
   },
   {
     timestamps: true,

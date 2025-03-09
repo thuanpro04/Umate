@@ -9,6 +9,11 @@ const handleFriendRequestAction = async (req, res, action) => {
   try {
     // Tìm thông tin người dùng
     // Thực hiện hành động thêm hoặc hủy kết bạn
+    const user = await findUserById(currentUserId);
+    if (user.friends.includes(friendUserId)) {
+      return;
+    }
+
     const updateAction =
       action === "add"
         ? { $addToSet: { friendRequests: currentUserId } } //thêm ko trùng lập

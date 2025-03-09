@@ -161,11 +161,6 @@ const handleUpdateStatusUser = async (req, res) => {
       { userId: id },
       { $set: { online: booleanStatus } }
     );
-    // if (result.modifiedCount === 0) {
-    //   return res.status(400).json({
-    //     message: "Update status fail !!",
-    //   });
-    // }
     res.status(200).json({
       message: "Update status user successfully !!!",
     });
@@ -178,10 +173,12 @@ const handleUpdateStatusUser = async (req, res) => {
 
 const handleActionBlockUser = async (req, res) => {
   const { userId, userFriendId } = req.body;
+  console.log({ userId, userFriendId });
+
   let result;
   try {
     const userInfo = await findUserById(userId);
-    if (userInfo.block.includes(userFriendId)) {
+    if (userInfo.block && userInfo.block.includes(userFriendId)) {
       result = await UserModel.updateOne(
         { userId },
         { $pull: { block: userFriendId } }
@@ -197,8 +194,8 @@ const handleActionBlockUser = async (req, res) => {
         message: "update block user conversation fail.",
       });
     }
-
     const updatedUser = await findUserById(userId);
+    console.log("Block for user successfully !!");
     res.status(200).json({
       message: "update block user successfully !!",
       data: updatedUser.block,
@@ -207,6 +204,8 @@ const handleActionBlockUser = async (req, res) => {
     console.log("Block user fail ", error);
   }
 };
+
+
 const updateFcmToken = async (userId, fcmTokens) => {
   const result = await UserModel.updateOne(
     { userId },
@@ -277,7 +276,3 @@ module.exports = {
   handleUpdateThemeForUser,
   handleActionRemoveUser,
 };
-
-
-
-

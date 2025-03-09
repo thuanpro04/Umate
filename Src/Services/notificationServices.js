@@ -247,7 +247,6 @@ const handleActionSendEmail = async (req, res) => {
     subject: name,
     text: message,
   };
-
   try {
     await transporter.sendMail(emailOptions, (error, info) => {
       if (error) {

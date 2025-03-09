@@ -9,6 +9,7 @@ const {
   updateFcmTokenForUser,
   updateThemForUser,actionRemoveUser
 } = require("../Controller/UsersController");
+
 const usersRouter = Router();
 usersRouter.get("/get-all", getAllUsers);
 usersRouter.post("/update-users", setUpProfileInfo);

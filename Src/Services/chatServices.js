@@ -10,7 +10,6 @@ const { handleSendNotification } = require("./notificationServices");
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
   // console.log(req.query);
-
   try {
     // console.log("Page", page, "Limit", limit * page);
 
@@ -76,20 +75,7 @@ const getLastMessages = (data) => {
   }
   return "";
 };
-const findMessageById = async (id) => {
-  const mess = await MessageModel.findOne({ messageId: id });
-  return mess;
-};
-const updateMessageById = async (id, data) => {
-  try {
-    const result = await MessageModel.updateOne({ messageId: id }, data);
-    if (result.nModified === 0) {
-      console.error("No message found with ID: ", id);
-    }
-  } catch (error) {
-    console.error("Error updating message", error);
-  }
-};
+
 const handleCheckConversation = async (req, res) => {
   const { senderId, receiverId } = req.body;
   const conv = await getConversationInfo(senderId, receiverId);
@@ -121,25 +107,27 @@ const setConversation = async (data) => {
   });
   await newConversation.save();
   console.log("New conversation created");
+  return newConversation;
 };
 const sendMessageToGroupAndPersonal = async (data) => {
-  // console.log("dataMessage", data);
+  console.log("dataMessage", data);
   try {
     if (!data.groupId) {
       if (!data.senderId || !data.receiverId) {
         console.error("Sender or receiver ID is missing");
         return;
       }
-      const conversation = await getConversationInfo(
+
+      let conversation = await getConversationInfo(
         data.senderId,
         data.receiverId
       );
 
       if (!conversation) {
-        await setConversation(data);
+        conversation = await setConversation(data);
       } else {
         conversation.message.push(data);
-        conversation.lastMessageTimestamp = data.timestamp | new Date();
+        conversation.lastMessageTimestamp = data.timestamp || new Date();
         conversation.lastMessage = data.content ?? data.imagesUrl;
         await conversation.save(),
           console.log("Message added to existing conversation");
@@ -148,6 +136,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
       const mess = conversation.message[conversation.message.length - 1];
       if (
         mess.status === "sent" &&
+        Array.isArray(conversation.notification) &&
         !conversation.notification.includes(mess.receiverId)
       ) {
         handleSendNotification(
@@ -258,6 +247,7 @@ const handleGetAllConversationUsers = async (req, res) => {
           conv.message[conv.message.length - 1].receiverId === currentUserId &&
           conv.message[conv.message.length - 1].status === "sent",
         notification: conv.notification,
+        nickNames: conv.nicknames,
       };
     });
     // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
@@ -281,6 +271,7 @@ const handleGetAllConversationUsers = async (req, res) => {
       notification: group.notification,
       statusLastMessage:
         !group.message[group.message.length - 1].senderId === currentUserId,
+      nickNames: group.nicknames,
     }));
 
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
@@ -388,6 +379,95 @@ const handleDeleteConversation = async (req, res) => {
     console.log("Delete conversation error: ", error);
   }
 };
+const getConversation = async (id) => {
+  return await ConversationModel.findOne({ conversationId: id });
+};
+const getGroupConversation = async (id) => {
+  return await GroupConversationModel.findOne({ groupId: id });
+};
+const handleGetImageForConversation = async (req, res) => {
+  const { id, type } = req.query;
+  try {
+    const conver = await (type === "personal"
+      ? getConversation(id)
+      : getGroupConversation(id));
+    if (!conver || !Array.isArray(conver.message)) {
+      return res
+        .status(404)
+        .json({ error: "Conversation not found or has no messages" });
+    }
+    const images = conver.message.flatMap((item) =>
+      Array.isArray(item.imagesUrl) ? item.imagesUrl.filter(Boolean) : []
+    );
+    res.status(200).json({
+      message: "Get images successfully !!!",
+      data: images,
+    });
+  } catch (error) {
+    console.log("Get image fail: ", error);
+  }
+};
+const handleGetLink = async (req, res) => {
+  const { id, type } = req.query;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  try {
+    const conver = await (type === "personal"
+      ? getConversation(id)
+      : getGroupConversation(id));
+    if (!conver) {
+      return res.status(401).json({
+        message: "Conversation not found ?",
+      });
+    }
+    console.log(conver);
+    const result = conver.message.filter((item) => urlRegex.test(item.content));
+    console.log("Get link successfully !!!");
+
+    res.status(200).json({
+      message: "Get link successfully !!!",
+      data: result,
+    });
+  } catch (error) {
+    console.log("Get link error: ", error);
+  }
+};
+const handleUpdateNickName = async (req, res) => {
+  const { userId, value, id, key } = req.body;
+  console.log(userId, value, id, key);
+  let data;
+  try {
+    if (key === "personal") {
+      const conversation = await ConversationModel.findOneAndUpdate(
+        { conversationId: id },
+        { $set: { [`nicknames.${userId}`]: value } }, // Cập nhật key trong Map
+        { new: true }
+      );
+
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      data = conversation.nicknames;
+    } else {
+      const group = await GroupConversationModel.findOneAndUpdate(
+        { groupId: id },
+        { $set: { [`nicknames.${userId}`]: value } },
+        { new: true }
+      );
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      data = group.nicknames;
+    }
+    res.json({
+      message: "Nickname updated successfully",
+      data,
+    });
+  } catch (error) {
+    console.error("Error updating nickname:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
@@ -395,4 +475,8 @@ module.exports = {
   handleCheckConversation,
   handleUpdateStatusMessage,
   handleDeleteConversation,
+  handleGetImageForConversation,
+  handleGetLink,
+  getConversation,
+  handleUpdateNickName,
 };

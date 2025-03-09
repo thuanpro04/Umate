@@ -3,11 +3,11 @@ const { generateUniqueID } = require("../untils/informationUntils");
 const { deletedNotification } = require("./notificationServices");
 
 const handleNewGroupUser = async (req, res) => {
-  const groupInfo = { groupId: generateUniqueID(), ...req.body };
+  const groupInfo = req.body;
   // console.log("group", groupInfo);
   const invitedUsers = groupInfo.invitedUsers.flatMap((user) => user.userId);
   // console.log("invitedUsers", invitedUsers);
-
+  const id = generateUniqueID();
   try {
     const messageId = generateUniqueID();
     const newGroup = new GroupConversationModel({
@@ -16,7 +16,7 @@ const handleNewGroupUser = async (req, res) => {
       message: [{ messageId }],
       lastMessage: "",
       lastMessageTimestamp: null,
-      groupId: generateUniqueID(),
+      groupId: id,
     });
     await newGroup.save();
     if (!res.headersSent) {
@@ -56,7 +56,85 @@ const handleActionAgreeOnGroup = async (req, res) => {
     console.log("Action agree on group error: ", error);
   }
 };
+const getGroupConversation = async (id) => {
+  return await GroupConversationModel.findOne({ groupId: id });
+};
+const handleOutGroup = async (req, res) => {
+  const { id, userId } = req.query;
+  const group = await getGroupConversation(id);
+  if (!group) {
+    return res.status(401).json({
+      message: "Group not found !",
+    });
+  }
+  try {
+    if (group.invitedUsers.length === 1) {
+      await GroupConversationModel.findOneAndDelete({ groupId: id });
+      return res.status(200).json({ message: "Group deleted successfully!" });
+    }
+    group.invitedUsers = group.invitedUsers.filter((item) => item !== userId);
+    if (group.leader.userId === userId) {
+      if (group.invitedUsers.length > 0) {
+        group.leader.userId = group.invitedUsers[0]; // Chọn leader mới
+      } else {
+        group.leader = null; // Không còn ai để làm leader
+      }
+    }
+    await group.save();
+
+    return res.status(200).json({
+      message: "User removed from group successfully!",
+      data: group.invitedUsers,
+    });
+  } catch (error) {
+    console.error("Error removing user from group:", error);
+    return res.status(500).json({
+      message: "Error removing user from group",
+      error: error.message,
+    });
+  }
+};
+const handleActionPosition = async (req, res) => {
+  const { id, userId, position } = req.body;
+  console.log(position);
+
+  try {
+    if (!position) {
+      return res.status(400).json({ message: "Position is required!" });
+    }
+    const group = await getGroupConversation(id);
+    if (!group) {
+      return res.status(401).json({
+        message: "Group not found !",
+      });
+    }
+    if (position === "leader") {
+      group.leader.userId = userId;
+    } else if (position === "deputyLeader") {
+      group.deputyLeader.userId = userId;
+    }
+    await group.save();
+
+    return res.status(200).json({
+      message: `Successfully updated ${position}!`,
+      data:
+        position === "leader"
+          ? group.leader
+          : position === "deputyLeader"
+          ? group.deputyLeader
+          : undefined,
+    });
+  } catch (error) {
+    console.error("Error changing position:", error);
+    return res
+      .status(500)
+      .json({ message: "Error changing position", error: error.message });
+  }
+};
 module.exports = {
   handleNewGroupUser,
   handleActionAgreeOnGroup,
+  handleOutGroup,
+  getGroupConversation,
+  handleActionPosition,
 };
