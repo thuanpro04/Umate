@@ -6,6 +6,7 @@ import SearchFriendScreen from '../Search/SearchFriendScreen';
 import TrashConversation from '../Messages/TrashConversation';
 import YourImagesScreen from '../Messages/YourImagesScreen';
 import YourLinkScreen from '../Messages/YourLinkScreen';
+import CustormNickNameScreen from '../Messages/CustormNickNameScreen';
 
 const MessageNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -17,7 +18,9 @@ const MessageNavigator = () => {
       <Stack.Screen name="MemberGroup" component={MemberGroup} />
       <Stack.Screen name="SearchFriends" component={SearchFriendScreen} />
       <Stack.Screen name="YourImagesScreen" component={YourImagesScreen} />   
-      <Stack.Screen name="YourLinkScreen" component={YourLinkScreen} />      
+      <Stack.Screen name="YourLinkScreen" component={YourLinkScreen} />
+      <Stack.Screen name="CustormNickNameScreen" component={CustormNickNameScreen} />      
+
 
 
     </Stack.Navigator>

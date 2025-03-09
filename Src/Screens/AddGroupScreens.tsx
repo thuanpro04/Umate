@@ -7,6 +7,7 @@ import {
   Modal,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
@@ -37,6 +38,7 @@ import {UserInfo} from './Untils/UserInfo';
 import UpdateInfoModal from './Modal/UpdateInfoModal';
 import {groupServices} from './Services/groupServices';
 import {themeSelector} from '../redux/reducers/themeSlice';
+import FastImage from 'react-native-fast-image';
 const initValues = {
   groupName: '',
   description: '',
@@ -51,6 +53,7 @@ const AddGroupScreens = ({navigation}: any) => {
   const [visible, setVisible] = useState(false);
   const [nameField, setNameField] = useState('');
   const [users, setUsers] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
   const [messageErrors, setMessageErrors] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -109,7 +112,11 @@ const AddGroupScreens = ({navigation}: any) => {
       const filePath = val.path;
       const fileName = filePath.split('/').pop();
       const path = `avatars/${fileName}`;
+      console.log('path: ', path);
+
       const urlImage = await imageService.uploadImageToFirebase(filePath, path);
+      console.log('Url: ', urlImage);
+
       onChangeGroupInfo('avatar', {
         name: urlImage,
         data: {userId: auth.userId},
@@ -173,6 +180,7 @@ const AddGroupScreens = ({navigation}: any) => {
     }
   };
   // console.log('groupInfo', groupInfo);
+  
 
   return (
     <ScrollView
@@ -185,12 +193,29 @@ const AddGroupScreens = ({navigation}: any) => {
       />
       <ScrollView>
         <View style={localStyles.containerImages}>
-          <Image
+          {loading && (
+            <View
+              style={{
+                ...localStyles.imgStyles,
+                position: 'absolute',
+                justifyContent: 'center',
+                alignItems: 'center',
+               
+              }}>
+              <ActivityIndicator size="small" color="#555" />
+            </View>
+          )}
+
+          <FastImage
             source={{
-              uri: groupInfo.avatar.name ?? getAvatar(),
+              uri: groupInfo.avatar ? groupInfo.avatar.name : getAvatar(),
+              cache: FastImage.cacheControl.immutable,
+              priority: FastImage.priority.high,
             }}
             resizeMode="cover"
             style={[localStyles.imgStyles, {zIndex: -1}]}
+            onLoadStart={() => setLoading(true)} // Bắt đầu tải
+            onLoadEnd={() => setLoading(false)} // Hoàn tất tải
           />
           <SpaceComponent height={12} />
           <View style={[globalStyles.overlay, {...localStyles.imgStyles}]}>

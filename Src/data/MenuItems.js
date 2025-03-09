@@ -14,6 +14,7 @@ import {
   Video,
   Image,
   People,
+  UserAdd,
 } from 'iconsax-react-native';
 import {appInfo} from '../Theme/appInfo';
 import {appColors} from '../Theme/Colors/appColors';
@@ -21,7 +22,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Octicons from 'react-native-vector-icons/Octicons';
-import { ImageIcon } from 'lucide-react-native';
+import {Flag, ImageIcon, ShieldOff, UserX, ZoomOut} from 'lucide-react-native';
 
 const size = appInfo.sizeIcon;
 const color = appColors.blue2;
@@ -53,16 +54,15 @@ const MenuItems = [
     icon: <Sms size={size} color={color} variant="Bulk" />,
   },
 ];
-const MenuChat = (colors) => {
-  
-  const Categorys = [
+const MenuChat = colors => {
+  const CategoryPersonal = [
     {
       key: 1,
       title: 'Tùy chỉnh đoạn chat',
       icon: <Designtools color={colors.icon} size={appInfo.sizeIconBold} />,
       Object: [
         {
-          id: 1,
+          id: 'topic',
           label: 'Đổi chủ đề',
           icon: (
             <MaterialCommunityIcons
@@ -73,7 +73,7 @@ const MenuChat = (colors) => {
           ),
         },
         {
-          id: 2,
+          id: 'nickname',
           label: 'Thay đổi biệt danh',
           icon: (
             <MaterialCommunityIcons
@@ -91,12 +91,12 @@ const MenuChat = (colors) => {
       icon: <HuobiToken color={colors.icon} size={appInfo.sizeIconBold} />,
       Object: [
         {
-          id: 3,
+          id: 'images',
           label: 'Your Images',
           icon: <ImageIcon color={colors.icon} size={appInfo.sizeIcon} />,
         },
         {
-          id: 4,
+          id: 'link',
           label: 'Link liên kết',
           icon: <Link21 color={colors.icon} size={appInfo.sizeIcon} />,
         },
@@ -108,7 +108,7 @@ const MenuChat = (colors) => {
       icon: <SecurityUser color={colors.icon} size={appInfo.sizeIconBold} />,
       Object: [
         {
-          id: 5,
+          id: 'block',
           label: 'Block',
           icon: (
             <FontAwesome6
@@ -119,7 +119,84 @@ const MenuChat = (colors) => {
           ),
         },
         {
-          id: 6,
+          id: 'report',
+          label: 'Báo cáo',
+          icon: (
+            <Octicons
+              name="report"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+      ],
+    },
+  ];
+  const CategoryGroup = [
+    {
+      key: 1,
+      title: 'Tùy chỉnh đoạn chat',
+      icon: <Designtools color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 'topic',
+          label: 'Đổi chủ đề',
+          icon: (
+            <MaterialCommunityIcons
+              name="cookie-edit-outline"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+        {
+          id: 'nickname',
+          label: 'Thay đổi biệt danh',
+          icon: (
+            <MaterialCommunityIcons
+              name="human-edit"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+      ],
+    },
+    {
+      key: 2,
+      title: 'Xem ảnh và link',
+      icon: <HuobiToken color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 'images',
+          label: 'Your Images',
+          icon: <ImageIcon color={colors.icon} size={appInfo.sizeIcon} />,
+        },
+        {
+          id: 'link',
+          label: 'Link liên kết',
+          icon: <Link21 color={colors.icon} size={appInfo.sizeIcon} />,
+        },
+      ],
+    },
+    {
+      key: 3,
+      title: 'Quyền riêng tư && hỗ trợ',
+      icon: <SecurityUser color={colors.icon} size={appInfo.sizeIconBold} />,
+      Object: [
+        {
+          id: 'outgroup',
+          label: 'Thoát nhóm',
+          icon: (
+            <FontAwesome6
+              name="user-xmark"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
+        {
+          id: 'report',
           label: 'Báo cáo',
           icon: (
             <Octicons
@@ -152,9 +229,38 @@ const MenuChat = (colors) => {
       ),
     },
   ];
+  const attributeMember = [
+    {
+      id: 'report',
+      name: 'Báo cáo',
+      icon: <Flag color={'red'} size={18} />,
+    },
+    
+ 
+  ];
+  const attributeUser = [
+    {
+      id: 'report',
+      name: 'Báo cáo',
+      icon: <Flag color={'red'} size={18} />,
+    },
+    {
+      id: 'delete',
+      name: 'Xóa bạn',
+      icon: <UserX color={'yellow'} size={18} />,
+    },
+    {
+      id: 'block',
+      name: 'block',
+      icon: <ShieldOff color={'green'} size={18} />,
+    },
+  ];
   return {
     ChoiceItems,
-    Categorys,
+    CategoryPersonal,
+    CategoryGroup,
+    attributeMember,
+    attributeUser
   };
 };
 

@@ -13,20 +13,22 @@ import CustormLinkPreview from '../Components/CustormLinkPreview';
 import CardLinkComponent from './Component/CardLinkComponent';
 
 const YourLinkScreen = () => {
-  const {conversationId} = useRoute().params as {conversationId: string};
+  const {id, type} = useRoute().params as {id: string; type: string};
   const [links, setLinks] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+
   useFocusEffect(
     useCallback(() => {
       const getLinkYourConversation = async () => {
-        if (!conversationId) {
+        if (!id || !type) {
+          console.log('id or type not existing');
+
           return;
         }
+
         try {
-          const res = await messageServices.getLinkYourConversation(
-            conversationId,
-          );
+          const res = await messageServices.getLinkYourConversation(id, type);
           if (res && res.data) {
             console.log('res.data: ', res.data);
             setLinks(res.data);
@@ -36,10 +38,10 @@ const YourLinkScreen = () => {
         }
       };
       getLinkYourConversation();
-    }, [conversationId]),
+    }, [id]),
   );
   const renderItems = ({item, index}: any) => {
-    return <CardLinkComponent url={item.content} />;
+    return <CardLinkComponent url={item.content} key={index}/>;
   };
   return (
     <SafeAreaView
@@ -53,7 +55,7 @@ const YourLinkScreen = () => {
       <FlatList
         style={{flex: 1, paddingHorizontal: 12}}
         data={links}
-        keyExtractor={item => item.messageId}
+        keyExtractor={item => item.messageid}
         renderItem={renderItems}
       />
     </SafeAreaView>

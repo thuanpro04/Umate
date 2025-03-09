@@ -24,6 +24,7 @@ import {UserInfo} from '../Untils/UserInfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {globalStyles} from '../../Styles/globalStyle';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {messageServices} from '../Services/messageServices';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -141,10 +142,29 @@ const SearchScreen = ({navigation}: any) => {
     );
   };
   const onNavigationChat = async (item: any) => {
-    console.log(item);
+    try {
+      const res = await messageServices.checkConversation(
+        auth.userId,
+        item.userId,
+      );
+      res && console.log('res.data', res.data);
 
-    await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
-    navigation.navigate('Chat');
+      if (res && res.data) {
+        let conversationId = res.data;
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({...item, conversationId}),
+        );
+      } else {
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({...item, type: 'personal'}),
+        );
+      }
+      navigation.navigate('Chat');
+    } catch (error) {
+      console.error('Respond save user error ', error);
+    }
   };
 
   const renderItemsConversation = (item: any, index: number) => {
@@ -263,7 +283,7 @@ const SearchScreen = ({navigation}: any) => {
                     },
                   ]}
                   labelColor={
-                    backgroundItem[item.key.toString()] ||  theme === 'dark'
+                    backgroundItem[item.key.toString()] || theme === 'dark'
                       ? appColors.white
                       : appColors.black
                   }

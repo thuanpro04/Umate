@@ -1,31 +1,28 @@
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
 import {
   FlatList,
   SafeAreaView,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
 
 import FastImage from 'react-native-fast-image';
-
-import ImageViewing from 'react-native-image-viewing';
 
 import {ArrowLeft2} from 'iconsax-react-native';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import {appColors} from '../../Theme/Colors/appColors';
-import {messageServices} from '../Services/messageServices';
 import {globalStyles} from '../../Styles/globalStyle';
-import {HeaderComponent} from '../Components';
 import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {HeaderComponent} from '../Components';
+import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
 
 const YourImagesScreen = () => {
-  const {conversationId} = useRoute().params as {conversationId: string};
+  const {id, type} = useRoute().params as {id: string; type: string};
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [converInfo, setConverInfo] = useState<any>('');
   const [visible, setVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
@@ -65,21 +62,21 @@ const YourImagesScreen = () => {
   useFocusEffect(
     useCallback(() => {
       const getImageForConversation = async () => {
-        if (!conversationId) {
+        if (!id) {
           return;
         }
         try {
-          const res = await messageServices.getImages(conversationId);
+          const res = await messageServices.getImages(id, type);
           if (res && res.data) {
             setImages(res.data);
-            // console.log(res.data);
+            console.log('get image successfully ', res.data);
           }
         } catch (error) {
           console.log('Get images fail: ', error);
         }
       };
       getImageForConversation();
-    }, [conversationId]),
+    }, [id]),
   );
   const onPressImg = (urlImg: string) => {
     const tempUrl = {uri: urlImg};

@@ -83,9 +83,11 @@ const ShareEventModal = (props: Props) => {
       } else {
         const data = {
           ...messageData,
-          recipients: Id,
+          groupId: Id,
         };
-        socket.emit('send event info ', data, (response: any) => {
+       
+
+        socket.emit('send_message', data, (response: any) => {
           console.log(
             'Message sent to user:',
             Id,

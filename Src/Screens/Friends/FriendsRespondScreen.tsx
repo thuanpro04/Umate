@@ -103,7 +103,10 @@ const FriendsRespondScreen = () => {
           JSON.stringify({...item, conversationId}),
         );
       } else {
-        await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({...item, type: 'personal'}),
+        );
       }
       setIsModal(false);
       navigation.navigate('Chat');

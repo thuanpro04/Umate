@@ -1,11 +1,9 @@
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import {
-  ArrowLeft,
-  CallCalling,
-  Video
-} from 'iconsax-react-native';
-import React, { useCallback, useState } from 'react';
+import AsyncStorage, {
+  useAsyncStorage,
+} from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
+import {ArrowLeft, CallCalling, Video} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -16,12 +14,12 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch, useSelector } from 'react-redux';
-import { authSelector } from '../../../redux/reducers/authReducer';
-import { themeSelector } from '../../../redux/reducers/themeSlice';
-import { globalStyles } from '../../../Styles/globalStyle';
-import { appInfo } from '../../../Theme/appInfo';
-import { appColors } from '../../../Theme/Colors/appColors';
+import {useDispatch, useSelector} from 'react-redux';
+import {authSelector} from '../../../redux/reducers/authReducer';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {globalStyles} from '../../../Styles/globalStyle';
+import {appInfo} from '../../../Theme/appInfo';
+import {appColors} from '../../../Theme/Colors/appColors';
 import {
   CarfeatureComponent,
   HeaderComponent,
@@ -30,21 +28,20 @@ import {
   TextComponent,
 } from '../../Components';
 import UpdateInfoModal from '../../Modal/UpdateInfoModal';
-import { notificationServices } from '../../Services/notificationServices';
-import { UserInfo } from '../../Untils/UserInfo';
+import {notificationServices} from '../../Services/notificationServices';
+import {UserInfo} from '../../Untils/UserInfo';
 // import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import { MenuChat } from '../../../data/MenuItems';
-import { friendSelector, setBlock } from '../../../redux/reducers/friendSlice';
-import { profileSelector } from '../../../redux/reducers/profileSlice';
+import {MenuChat} from '../../../data/MenuItems';
+import {friendSelector, setBlock} from '../../../redux/reducers/friendSlice';
+import {profileSelector} from '../../../redux/reducers/profileSlice';
 import ActionModal from '../../Modal/ActionModal';
-import { userServices } from '../../Services/userService';
+import {userServices} from '../../Services/userService';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
+import {groupServices} from '../../Services/groupServices';
 const UserInfoChat = ({navigation}: any) => {
-  const [visible, setVisible] = useState(false);
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
   const [isShowBlockModal, setShowBlockModal] = useState(false);
-
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
@@ -53,6 +50,10 @@ const UserInfoChat = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
+  const name =
+    converInfo.nickNames && converInfo.nickNames[converInfo.userId]
+      ? converInfo.nickNames[converInfo.userId]
+      : UserInfo.getName(converInfo.name);
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
@@ -62,7 +63,6 @@ const UserInfoChat = ({navigation}: any) => {
     setStatusNotification(
       converInfo && converInfo.notification.includes(auth.userId),
     );
-    // console.log("converInfo",converInfo);
   }, []);
   const handleActionNotification = async () => {
     try {
@@ -94,53 +94,59 @@ const UserInfoChat = ({navigation}: any) => {
       setShowBlockModal(false);
     }
   };
+
   useFocusEffect(
     useCallback(() => {
       getConversationInfo();
-      // requestMicrophonePermission();
     }, []),
   );
 
-  // const requestMicrophonePermission = async () => {
-  //   try {
-  //     const granted = await PermissionsAndroid.request(
-  //       PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-  //     );
-  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //       console.log('✅ Đã cấp quyền microphone');
-  //     } else {
-  //       console.log('🚫 Quyền microphone bị từ chối');
-  //     }
-  //   } catch (error) {
-  //     console.error('⚠️ Lỗi khi yêu cầu quyền microphone:', error);
-  //   }
-  // };
-  const onPressItems = (key: number) => {
-    console.log(key);
-
+  const onPressItems = (key: string) => {
+    // xử lí group
     switch (key) {
-      case 1:
+      case 'topic':
         console.log('Thay đổi chủ đề !!');
         break;
-      case 2:
-        setVisible(true);
+      case 'nickname':
+        navigation.navigate('CustormNickNameScreen', {
+          converInfo,
+        });
         break;
-      case 3:
-        navigation.navigate('YourImagesScreen',{conversationId:converInfo.conversationId})
+      case 'images':
+        navigation.navigate('YourImagesScreen', {
+          id:
+            converInfo.type === 'personal'
+              ? converInfo.conversationId
+              : converInfo.groupId,
+          type: converInfo.type,
+        });
         break;
-      case 4:
-        navigation.navigate('YourLinkScreen',{conversationId:converInfo.conversationId})
-
+      case 'link':
+        navigation.navigate('YourLinkScreen', {
+          id:
+            converInfo.type === 'personal'
+              ? converInfo.conversationId
+              : converInfo.groupId,
+          type: converInfo.type,
+        });
         break;
-      case 5:
+      case 'block':
         handleBlockUser();
         break;
-      case 6:
+      case 'report':
         navigation.navigate('ReportScreen', {
-          name: converInfo.name,
-          userId: converInfo.userId,
+          name:
+            converInfo.type === 'personal'
+              ? converInfo.name
+              : converInfo.groupName,
+          userId:
+            converInfo.type === 'personal'
+              ? converInfo.userId
+              : converInfo.groupId,
         });
-
+        break;
+      case 'outgroup':
+        handleOutGroup();
         break;
       default:
         break;
@@ -169,7 +175,10 @@ const UserInfoChat = ({navigation}: any) => {
   };
 
   const renderCategory = () => {
-    const data = MenuChat(colors).Categorys;
+    const data =
+      converInfo.type === 'personal'
+        ? MenuChat(colors).CategoryPersonal
+        : MenuChat(colors).CategoryGroup;
     return data.map((item, index) => (
       <View
         key={index}
@@ -212,7 +221,28 @@ const UserInfoChat = ({navigation}: any) => {
         break;
     }
   };
-
+  const handleOutGroup = async () => {
+    try {
+      const res = await groupServices.handleOutGroup(
+        auth.userId,
+        converInfo.groupId,
+      );
+      if (res && res.data) {
+        console.log('Member: ', res.data);
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({
+            ...converInfo,
+            invitedUsers: res.data,
+          }),
+        );
+        console.log('Out group successfully !!');
+        navigation.navigate('Messages');
+      }
+    } catch (error) {
+      console.log('out group error: ', error);
+    }
+  };
   return (
     <SafeAreaView
       style={[globalStyles.main, {backgroundColor: colors.background}]}>
@@ -241,11 +271,7 @@ const UserInfoChat = ({navigation}: any) => {
             />
           )}
           <TextComponent
-            label={
-              converInfo.type === 'personal'
-                ? UserInfo.getName(converInfo.name)
-                : converInfo.groupName
-            }
+            label={converInfo.type === 'personal' ? name : converInfo.groupName}
             title
             size={28}
           />
@@ -268,7 +294,7 @@ const UserInfoChat = ({navigation}: any) => {
                   avatar={converInfo.avatar}
                   targetName={
                     converInfo.type === 'personal'
-                      ? UserInfo.getName(converInfo.name)
+                      ? name
                       : UserInfo.getName(converInfo.groupName)
                   }
                   userId={auth.userId}
@@ -300,7 +326,7 @@ const UserInfoChat = ({navigation}: any) => {
                   avatar={converInfo.avatar}
                   targetName={
                     converInfo.type === 'personal'
-                      ? UserInfo.getName(converInfo.name)
+                      ? name
                       : UserInfo.getName(converInfo.groupName)
                   }
                   userId={auth.userId}
@@ -374,13 +400,6 @@ const UserInfoChat = ({navigation}: any) => {
           {renderCategory()}
         </View>
       </ScrollView>
-
-      <UpdateInfoModal
-        isVisible={visible}
-        nameField="UserName"
-        onCloseModal={() => setVisible(false)}
-        onChangeProfile={(key, value) => {}}
-      />
       <ActionModal
         visible={isShowBlockModal}
         onPressNo={() => setShowBlockModal(false)}
@@ -396,7 +415,7 @@ const UserInfoChat = ({navigation}: any) => {
           friendData.block && friendData.block.includes(converInfo.userId)
             ? ' bỏ'
             : ''
-        } chặn ${UserInfo.getName(converInfo.name)} không`}
+        } chặn ${name} không`}
       />
     </SafeAreaView>
   );

@@ -1,43 +1,29 @@
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import AsyncStorage, {
+  useAsyncStorage,
+} from '@react-native-async-storage/async-storage';
+import {useFocusEffect} from '@react-navigation/native';
+import {ArrowLeft2, SearchFavorite1} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-  HeaderComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from '../../Components';
-import {globalStyles} from '../../../Styles/globalStyle';
-import {
-  ArrowLeft,
-  ArrowLeft2,
-  SearchFavorite1,
-  UserAdd,
-} from 'iconsax-react-native';
-import {appInfo} from '../../../Theme/appInfo';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {userServices} from '../../Services/userService';
-import {UserInfo} from '../../Untils/UserInfo';
-import CarUserComponent from '../../Friends/Components/CarUserComponent';
-import {useDispatch, useSelector} from 'react-redux';
-import {addAuth, authSelector} from '../../../redux/reducers/authReducer';
-import {friendServices} from '../../Services/friendService.';
+import {FlatList, KeyboardAvoidingView, StyleSheet, View} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import AddFriendModal from '../../Modal/AddFriendModal';
-import DropdownPicker from '../../Components/DropdownPicker';
-import {notificationServices} from '../../Services/notificationServices';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import LoadingModal from '../../Modal/LoadingModal';
+import {useDispatch, useSelector} from 'react-redux';
+import {authSelector} from '../../../redux/reducers/authReducer';
 import {friendSelector} from '../../../redux/reducers/friendSlice';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {globalStyles} from '../../../Styles/globalStyle';
+import {appInfo} from '../../../Theme/appInfo';
+import {appColors} from '../../../Theme/Colors/appColors';
+import {HeaderComponent, SpaceComponent, TextComponent} from '../../Components';
+import CarUserComponent from '../../Friends/Components/CarUserComponent';
+import AddFriendModal from '../../Modal/AddFriendModal';
+import LoadingModal from '../../Modal/LoadingModal';
+import {friendServices} from '../../Services/friendService.';
+import {notificationServices} from '../../Services/notificationServices';
+import {userServices} from '../../Services/userService';
+import {UserInfo} from '../../Untils/UserInfo';
+import {MoreVerticalIcon} from 'lucide-react-native';
+import {MenuChat} from '../../../data/MenuItems';
+import {groupServices} from '../../Services/groupServices';
 const MemberGroup = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
@@ -98,28 +84,111 @@ const MemberGroup = ({navigation}: any) => {
     });
   };
 
-  const renderUserInfo = ({item, index}: any) => {
-    return (
-      <CarUserComponent
-        authori={
-          item.userId === converInfo.leader.userId
-            ? 'Trưởng nhóm'
-            : item.userId === converInfo.deputyLeader.userId
-            ? 'Phó nhóm'
-            : 'Thành viên'
-        }
-        url={item.avatar}
-        addFriend={
-          !item.friendRequests.includes(auth.userId) &&
-          shouldShowAddFriendIcon(item.userId)
-        }
-        userName={UserInfo.getName(item.name)}
-        onPress={() => onPressCarUser(item)}
-        onPressAdd={() => handleAddFriend(item.userId)}
-      />
-    );
-  };
+  const renderUserInfo = useCallback(
+    ({item, index}: any) => {
+      return (
+        <CarUserComponent
+        navigation={navigation}
+          menuData={MenuChat(colors).attributeMember}
+          userId={item.userId}
+          authori={
+            item.userId === converInfo.leader.userId
+              ? 'Trưởng nhóm'
+              : item.userId === converInfo.deputyLeader.userId
+              ? 'Phó nhóm'
+              : 'Thành viên'
+          }
+          deputyLeaderId={
+            auth.userId === converInfo.deputyLeader.userId ? auth.userId : ''
+          }
+          leaderId={auth.userId === converInfo.leader.userId ? auth.userId : ''}
+          url={item.avatar}
+          addFriend={
+            !item.friendRequests.includes(auth.userId) &&
+            shouldShowAddFriendIcon(item.userId)
+          }
+          icon={
+            item.userId !== auth.userId && (
+              <MoreVerticalIcon size={22} color={colors.icon} />
+            )
+          }
+          userName={UserInfo.getName(item.name)}
+          onPress={() => onPressCarUser(item)}
+          onPressAdd={() => handleAddFriend(item.userId)}
+          onPressOutGroup={() => handleOutGroup(item.userId)}
+          onPressPosition={() =>
+            handlePosition(
+              item.userId,
+              auth.userId === converInfo.leader.userId
+                ? 'leader'
+                : auth.userId === converInfo.deputyLeader.userId
+                ? 'deputyLeader'
+                : undefined,
+            )
+          }
+        />
+      );
+    },
+    [userInfo, converInfo, setConverInfo],
+  );
 
+  const handlePosition = async (userId: string, position?: string) => {
+    try {
+      if (!userId) {
+        console.log('UserId or onPressOutGroup no existing!!');
+        return;
+      }
+      const res = await groupServices.handlePosition(
+        userId,
+        converInfo.groupId,
+        position,
+      );
+      if (res && res.data) {
+        const data =
+          position === 'leader'
+            ? {
+                ...converInfo,
+                leader: res.data,
+              }
+            : {
+                ...converInfo,
+                deputyLeader: res.data,
+              };
+        console.log('Position successfully !!', res.data);
+        await AsyncStorage.setItem('ConversationInfo', JSON.stringify(data));
+        setConverInfo(data);
+      }
+    } catch (error) {
+      console.log('Position error: ', error);
+    }
+  };
+  const handleOutGroup = async (userId: string) => {
+    try {
+      if (!userId) {
+        console.log('UserId or onPressOutGroup no existing!!');
+        return;
+      }
+      const res = await groupServices.handleOutGroup(
+        userId,
+        converInfo.groupId,
+      );
+      if (res && res.data) {
+        console.log('Member: ', res.data);
+        const user = userInfo.filter(item => item.userId !== userId);
+        setUserInfo(user);
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({
+            ...converInfo,
+            invitedUsers: res.data,
+          }),
+        );
+        console.log('Out group successfully !!');
+      }
+    } catch (error) {
+      console.log('out group error: ', error);
+    }
+  };
   const handleInviteToGroup = async (selectUser: string[]) => {
     try {
       setIsLoading(true);

@@ -7,8 +7,8 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {InputComponent, SpaceComponent} from '../Components';
-import {SearchFavorite} from 'iconsax-react-native';
+import {InputComponent, RowComponent, SpaceComponent} from '../Components';
+import {ArrowLeft2, SearchFavorite} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {globalStyles} from '../../Styles/globalStyle';
@@ -46,25 +46,6 @@ const SearchFriendScreen = ({navigation}: any) => {
     };
     fetchData();
   }, []);
-  // useEffect(() => {
-  //   if (converInfo) {
-  //     fetUserInfos();
-  //   }
-  //   //  scrollViewToEnd()
-  // }, [converInfo]);
-  // const fetUserInfos = async () => {
-  //   try {
-  //     const listUserId = converInfo.invitedUsers.map(
-  //       (item: any) => item.userId,
-  //     );
-  //     const res = await userServices.getListUserInfo(listUserId);
-  //     if (res && res.data) {
-  //       setUserInfo(res.data);
-  //     }
-  //   } catch (error) {
-  //     console.error('fetch use info in search friend fail: ', error);
-  //   }
-  // };
   const searchByNameInGroup = (value: string) => {
     if (users) {
       const result = users.filter(
@@ -109,6 +90,7 @@ const SearchFriendScreen = ({navigation}: any) => {
   const renderItemUsers = ({item, index}: any) => {
     return item.userId !== auth.userId ? (
       <CarUserComponent
+        userId={item.userId}
         key={index}
         authori={item.majoring ?? 'chuyên ngành ?'}
         addFriend={
@@ -129,17 +111,25 @@ const SearchFriendScreen = ({navigation}: any) => {
     <KeyboardAvoidingView
       style={[styles.container, {backgroundColor: colors.background}]}>
       <SpaceComponent height={12} />
-      <InputComponent
-        value={text}
-        onChange={setText}
-        allowClear
-        placehold="search friend...."
-        affix={
-          <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
-        }
-        styles={{borderRadius: 20, paddingVertical: 4}}
-      />
-      <SpaceComponent height={22}/>
+
+      <RowComponent>
+        <ArrowLeft2
+          size={appInfo.sizeIconBold}
+          color={colors.icon}
+          onPress={() => navigation.goBack()}
+        />
+        <InputComponent
+          value={text}
+          onChange={setText}
+          allowClear
+          placehold="search friend...."
+          affix={
+            <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
+          }
+          styles={{borderRadius: 20, paddingVertical: 4, flex: 1}}
+        />
+      </RowComponent>
+      <SpaceComponent height={22} />
       {userInfo && (
         <FlatList
           data={userInfo}
@@ -158,6 +148,6 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
     alignItems: 'center',
     flex: 1,
-    paddingHorizontal:12
+    paddingHorizontal: 12,
   },
 });

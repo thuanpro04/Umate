@@ -20,6 +20,7 @@ import ActionModal from '../Modal/ActionModal';
 import {UserInfo} from '../Untils/UserInfo';
 import {friendServices} from '../Services/friendService.';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {MenuChat} from '../../data/MenuItems';
 
 const FriendScreens = ({navigation}: any) => {
   const [data, setData] = useState<any[]>([]);
@@ -88,6 +89,7 @@ const FriendScreens = ({navigation}: any) => {
       return (
         <React.Fragment key={item.userId}>
           <CarUserComponent
+            menuData={MenuChat(colors).attributeUser}
             onPressUnFriend={() => {
               setShowUnfriendModal(true);
             }}

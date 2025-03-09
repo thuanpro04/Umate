@@ -56,6 +56,10 @@ const ChatScreen = ({navigation}: any) => {
   const socket = useSelector(socketSelector).socket;
   const dispatch = useDispatch();
   const friendData = useSelector(friendSelector);
+  const name =
+    converInfo.nickNames && converInfo.nickNames[converInfo.userId]
+      ? converInfo.nickNames[converInfo.userId]
+      : UserInfo.getName(converInfo.name);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,6 +83,9 @@ const ChatScreen = ({navigation}: any) => {
 
   const handleUpdateStatusMessage = async () => {
     try {
+      if (!messages || messages.length === 0) {
+        return;
+      }
       const res = await messageServices.updateStatusMessage(
         auth.userId,
         converInfo.type === 'personal'
@@ -99,44 +106,45 @@ const ChatScreen = ({navigation}: any) => {
       if (prev) return true; // Nếu đang loading, không gọi API nữa
       return true;
     });
-    if (converInfo) {
-      try {
-        const res = await messageServices.getAllMessagesUser(
-          converInfo.type === 'personal'
-            ? converInfo.conversationId
-            : converInfo.groupId,
-          converInfo.type,
-          page,
-        );
-        setMembers(res?.data.invitedUsers);
-        if (res?.data && res.data.messages.length > 0) {
-          // console.log(res.data.messages);
-          setLimitPage(res.data.totalPages);
-          // console.log('limitPage: ', limitPage, 'page: ', page);
-          setMessages(prev => {
-            const newMessages = res.data.messages.reverse();
-            // Kết hợp các tin nhắn mới và cũ
-            const allMessages = [...newMessages, ...prev];
+    if (converInfo.type === 'personal' && !converInfo.conversationId) {
+      return;
+    }
+    try {
+      const res = await messageServices.getAllMessagesUser(
+        converInfo.type === 'personal'
+          ? converInfo.conversationId
+          : converInfo.groupId,
+        converInfo.type,
+        page,
+      );
+      setMembers(res?.data.invitedUsers);
+      if (res?.data && res.data.messages.length > 0) {
+        // console.log(res.data.messages);
+        setLimitPage(res.data.totalPages);
+        // console.log('limitPage: ', limitPage, 'page: ', page);
+        setMessages(prev => {
+          const newMessages = res.data.messages.reverse();
+          // Kết hợp các tin nhắn mới và cũ
+          const allMessages = [...newMessages, ...prev];
 
-            // Loại bỏ các tin nhắn trùng lặp dựa trên một thuộc tính duy nhất, ví dụ như 'id'
-            return allMessages.filter(
-              (value, index, self) =>
-                index ===
-                self.findIndex(
-                  t => t._id === value._id, // Thay 'id' bằng thuộc tính duy nhất của tin nhắn
-                ),
-            );
-          });
-          if (page < limitPage) {
-            setPage(prevPage => prevPage + 1);
-          }
+          // Loại bỏ các tin nhắn trùng lặp dựa trên một thuộc tính duy nhất, ví dụ như 'id'
+          return allMessages.filter(
+            (value, index, self) =>
+              index ===
+              self.findIndex(
+                t => t._id === value._id, // Thay 'id' bằng thuộc tính duy nhất của tin nhắn
+              ),
+          );
+        });
+        if (page < limitPage) {
+          setPage(prevPage => prevPage + 1);
         }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        setIsLoading(false);
       }
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setIsLoading(false);
     }
   }, [converInfo, page, isLoading]);
 
@@ -221,7 +229,6 @@ const ChatScreen = ({navigation}: any) => {
         .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
         .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
 
-
       return (
         <ChatItems
           isBlock={
@@ -301,11 +308,7 @@ const ChatScreen = ({navigation}: any) => {
       style={[styles.container, {backgroundColor: colors.background}]}>
       <SafeAreaView style={globalStyles.main}>
         <HeaderComponent
-          title={
-            converInfo.type === 'personal'
-              ? converInfo.name
-              : converInfo.groupName
-          }
+          title={converInfo.type === 'personal' ? name : converInfo.groupName}
           image={
             converInfo.type === 'personal'
               ? converInfo.avatar
@@ -360,7 +363,7 @@ const ChatScreen = ({navigation}: any) => {
         ) : (
           <View
             style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator size={22} />
+            {/* <ActivityIndicator size={22} /> */}
           </View>
         )}
         {showScrollToBottom && (

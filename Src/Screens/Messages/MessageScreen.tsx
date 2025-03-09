@@ -13,7 +13,7 @@ import {
   SearchFriendsComponent,
   SpaceComponent,
   TextComponent,
-} from '../Components'; 
+} from '../Components';
 import InfomationModal from '../Modal/InfomationModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
@@ -58,26 +58,35 @@ const MessageScreen = ({navigation}: any) => {
       getAllConversation();
     }, []),
   );
-  
-const renderCardItems = useCallback(({item, index}: any) => {
-    const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
 
-    return (
-      <CarUserChat
-        key={index}
-        name={item.groupName ?? UserInfo.getName(item.name)}
-        massv={
-          item.type === 'group' ? sumUsers : UserInfo.getYearOfbirth(item.email)
-        }
-        image={item.avatar}
-        lastMessage={item.lastMessage}
-        onPress={() => onNavigation(item)}
-        lastMessageColor={
-          item.statusLastMessage ? appColors.blueBack : appColors.grey
-        }
-      />
-    );
-  },[users])
+  const renderCardItems = useCallback(
+    ({item, index}: any) => {
+      const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
+      const name =
+        item.nickNames && item.nickNames[item.userId]
+          ? item.nickNames[item.userId]
+          : UserInfo.getName(item.name);
+
+      return (
+        <CarUserChat
+          key={index}
+          name={item.groupName ?? name}
+          massv={
+            item.type === 'group'
+              ? sumUsers
+              : UserInfo.getYearOfbirth(item.email)
+          }
+          image={item.avatar}
+          lastMessage={item.lastMessage}
+          onPress={() => onNavigation(item)}
+          lastMessageColor={
+            item.statusLastMessage ? appColors.blueBack : appColors.grey
+          }
+        />
+      );
+    },
+    [users],
+  );
 
   return (
     <SafeAreaView
@@ -152,9 +161,9 @@ const renderCardItems = useCallback(({item, index}: any) => {
         </View>
       )}
       <InfomationModal
-        onPressRemove={()=> {
-          setIsVisible(false)
-          navigation.navigate('TrashConversation',{users})
+        onPressRemove={() => {
+          setIsVisible(false);
+          navigation.navigate('TrashConversation', {users});
         }}
         visible={isVisible}
         onClose={onCloseModal}

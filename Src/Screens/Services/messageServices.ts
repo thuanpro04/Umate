@@ -50,15 +50,23 @@ const deleteConversation = async (arrConver: any) => {
   const res = await chatsAPI.handleChats(url, arrConver, 'post');
   return res;
 };
-const getImages = async (conversationId: string) => {
-  url = `/get-images?id=${conversationId}`;
+const getImages = async (conversationId: string, type: string) => {
+  url = `/get-images?id=${conversationId}&&type=${type}`;
   const res = await chatsAPI.handleChats(url);
   return res;
 };
-const getLinkYourConversation = async (conversationId: string) => {
-  url = `/get-link?id=${conversationId}`;
+const getLinkYourConversation = async (
+  conversationId: string,
+  type: string,
+) => {
+  url = `/get-link?id=${conversationId}&&type=${type}`;
   const res = await chatsAPI.handleChats(url);
-  return res
+  return res;
+};
+const updateNickNameConversation = async (data: any) => {
+  url = '/update-nickname';
+  const res = await chatsAPI.handleChats(url, data, 'post');
+  return res;
 };
 export const messageServices = {
   getAllMessagesUser,
@@ -68,4 +76,5 @@ export const messageServices = {
   deleteConversation,
   getImages,
   getLinkYourConversation,
+  updateNickNameConversation,
 };

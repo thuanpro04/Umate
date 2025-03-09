@@ -18,9 +18,10 @@ interface Props {
   nameField: string;
   onChangeProfile: (key: string, value: string) => void;
   onCloseModal: () => void;
+  nickName?: string;
 }
 const UpdateInfoModal = (props: Props) => {
-  const {isVisible, nameField, onCloseModal, onChangeProfile} = props;
+  const {isVisible, nameField, onCloseModal, onChangeProfile, nickName} = props;
   const [messageError, setMessageError] = useState('');
   const [value, setValue] = useState('');
 
@@ -94,7 +95,11 @@ const UpdateInfoModal = (props: Props) => {
       setValue(''); // Clear input after successful save
     }
   };
-
+  const fieldName = getField()?.field
+    ? getField()?.field
+    : nickName
+    ? nickName
+    : null;
   return (
     <Modal
       transparent={true}
@@ -108,15 +113,12 @@ const UpdateInfoModal = (props: Props) => {
             {backgroundColor: colors.background},
           ]}>
           <RowComponent>
-            <TextComponent label={getField()?.field ?? ''} />
+            <TextComponent label={fieldName ?? ' '} />
             <ButtonComponent
               type="action"
               styles={{position: 'absolute', right: -10, top: -10}}
               iconRight={
-                <CloseCircle
-                  color={colors.icon}
-                  size={appInfo.sizeIconBold}
-                />
+                <CloseCircle color={colors.icon} size={appInfo.sizeIconBold} />
               }
               onPress={onCloseModal}
             />
@@ -161,7 +163,7 @@ const localStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Semi-transparent background
   },
   modalContent: {
     width: '80%',

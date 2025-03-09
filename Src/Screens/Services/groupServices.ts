@@ -12,14 +12,42 @@ const handelNewGroupUser = async (
   }
   return null;
 };
-const handleAgreeOnGroup = async (userId: string, id: string, groupId?:string) => {
+const handleAgreeOnGroup = async (
+  userId: string,
+  id: string,
+  groupId?: string,
+) => {
   url = '/agree';
   const data = {
     userId,
     id,
-    groupId
+    groupId,
   };
   const res = await groupAPI.handleGroup(url, data, 'post');
-  return res
+  return res;
 };
-export const groupServices = {handelNewGroupUser, handleAgreeOnGroup};
+const handleOutGroup = async (userId: string, groupId: string) => {
+  url = `/out-group?id=${groupId}&&userId=${userId}`;
+  const res = await groupAPI.handleGroup(url);
+  return res;
+};
+const handlePosition = async (
+  userId: string,
+  groupId: string,
+  position?: string,
+) => {
+  url = `/position`;
+  const data = {
+    id: groupId,
+    userId,
+    position,
+  };
+  const res = await groupAPI.handleGroup(url, data, 'post');
+  return res;
+};
+export const groupServices = {
+  handelNewGroupUser,
+  handleAgreeOnGroup,
+  handleOutGroup,
+  handlePosition,
+};
