@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Image, StyleProp, StyleSheet, TouchableOpacity, ViewProps } from 'react-native';
+import { StyleProp, StyleSheet, TouchableOpacity, ViewProps } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import ImageView from 'react-native-image-viewing';
 interface Props {
   url: string;
@@ -12,9 +13,9 @@ const ZoomImageComponent = (props: Props | any) => {
   return (
     <>
       <TouchableOpacity onPress={() => setVisible(true)}>
-        <Image
+        <FastImage
           resizeMode="cover"
-          source={{uri: url}}
+          source={{uri: url,priority:FastImage.priority.high, cache:FastImage.cacheControl.immutable}}
           style={[locastyles.thumbnail, styles]}
         />
       </TouchableOpacity>

@@ -2,6 +2,7 @@ import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {ButtonComponent} from '../../Components';
+import FastImage from 'react-native-fast-image';
 interface Props {
   arrImages: string[];
   indexImage: number;
@@ -18,8 +19,12 @@ const CustomFootImages = (props: Props) => {
         type="action"
         activeOpacity={0.2}
         onPress={() => onChangeImageIndex(index)}>
-        <Image
-          source={{uri: image.uri}}
+        <FastImage
+          source={{
+            uri: image.uri,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
           style={[
             styles.imageStyles,
             {

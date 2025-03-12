@@ -1,36 +1,40 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import React, {useEffect, useState} from 'react';
-import {Image, SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  View
+} from 'react-native';
+import { useDispatch } from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
 import {
   addAuth,
-  authSelector,
-  removeAuth,
+  removeAuth
 } from '../../redux/reducers/authReducer';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { addEvent } from '../../redux/reducers/eventSlice';
+import { addFriend } from '../../redux/reducers/friendSlice';
+import { setLanguage } from '../../redux/reducers/languageSlice';
+import { addProfile } from '../../redux/reducers/profileSlice';
+import { setTheme } from '../../redux/reducers/themeSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
-  ContainerComponent,
   RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
 import LoadingModal from '../Modal/LoadingModal';
-import {Auth} from '../Services/authService.';
-import {Notification} from '../Untils/Notification';
-import {Validate} from '../Untils/Validate';
-import {setTheme, toggleTheme} from '../../redux/reducers/themeSlice';
-import {addProfile, profileSelector} from '../../redux/reducers/profileSlice';
-import {addFriend} from '../../redux/reducers/friendSlice';
-import {addEvent} from '../../redux/reducers/eventSlice';
-
+import { Auth } from '../Services/authService.';
+import { Notification } from '../Untils/Notification';
+import { Validate } from '../Untils/Validate';
+import './../../i18n/i18n';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const auth = useSelector(authSelector);
-  const profile = useSelector(profileSelector);
+  const {t} = useTranslation();
   const dispatch = useDispatch();
 
   // Hàm hiển thị toast để tái sử dụng
@@ -79,7 +83,7 @@ const LoginSreen = () => {
       dispatch(addFriend(res.data.friendSlice));
       dispatch(addEvent(res.data.eventSlice));
       dispatch(setTheme(res.data.authSlice.theme));
-
+      dispatch(setLanguage(res.data.authSlice.language));
       await AsyncStorage.setItem(
         'userData',
         JSON.stringify({
@@ -144,20 +148,21 @@ const LoginSreen = () => {
           <SpaceComponent height={appInfo.size.HEIGHT * 0.03} />
           <View style={styles.Vtext}>
             <TextComponent
-              label="UMate - Kết nối bạn bè, lan tỏa đam mê!"
+              label={t('umate_slogan')}
               styles={{fontWeight: 'bold', fontSize: 18, fontStyle: 'italic'}}
             />
             <SpaceComponent height={6} />
             <TextComponent
-              label="🚀 Mạng xã hội thông minh dành cho sinh viên Đại học Thủ Dầu Một. Tìm bạn mới, tham gia nhóm, mở rộng mối quan hệ theo sở thích và cá tính của bạn!"
+              label={t('umate_description')}
               styles={styles.text}
             />
           </View>
         </View>
       </View>
+
       <View style={styles.VbtnStyle}>
         <ButtonComponent
-          label="Sign In with Google"
+          label={t('button_login')}
           styles={styles.button}
           bgColor={appColors.blue2}
           labelColor={appColors.white}
@@ -174,11 +179,11 @@ const LoginSreen = () => {
         <SpaceComponent height={appInfo.size.HEIGHT * 0.02} />
 
         <TextComponent
-          label="Please log in with your school's gmail account."
+          label={t('login_hint')}
           size={appInfo.size.WIDTH * 0.04}
           styles={styles.hint}
         />
-        <SpaceComponent height={20} />
+        <SpaceComponent height={28} />
       </View>
     </SafeAreaView>
   );

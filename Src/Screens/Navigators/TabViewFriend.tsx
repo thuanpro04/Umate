@@ -9,11 +9,13 @@ import {appColors} from '../../Theme/Colors/appColors';
 import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 
 const TabViewFriend = () => {
   const [index, setIndex] = useState(0);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
   const SuggestRouter = () => {
     return <SuggestFriend key={'SuggestFriend'} />;
   };
@@ -29,10 +31,11 @@ const TabViewFriend = () => {
     third: SuggestRouter,
   });
   const routes = [
-    {key: 'first', title: ' Request'},
-    {key: 'second', title: 'Friends'},
-    {key: 'third', title: ' Suggestions'},
+    {key: 'first', title: t('request')},
+    {key: 'second', title: t('friend')},
+    {key: 'third', title: t('suggest')},
   ];
+
   return (
     <TabView
       navigationState={{index, routes}}
@@ -42,7 +45,6 @@ const TabViewFriend = () => {
       renderTabBar={props => (
         <TabBar
           {...props}
-          key={'tabview'}
           style={{backgroundColor: colors.background}}
           labelStyle={{
             color: appColors.grey3, // Màu cam đậm

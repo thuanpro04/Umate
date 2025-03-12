@@ -1,19 +1,12 @@
 import {SearchNormal} from 'iconsax-react-native';
 import React from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import RowComponent from './RowComponent';
 import TextComponent from './TextComponent';
-import HeaderComponent from './HeaderComponent';
-import {globalStyles} from '../../Styles/globalStyle';
+import {useTranslation} from 'react-i18next';
 
 interface Props {
   onPress?: () => void;
@@ -22,6 +15,7 @@ interface Props {
 }
 const SearchFriendsComponent = (props: Props) => {
   const {onPress, placeHold, styles} = props;
+  const {t} = useTranslation();
   return (
     <View style={[localStyles.container, styles]}>
       <RowComponent onPress={onPress} styles={globalStyles.searchStyles}>
@@ -31,7 +25,7 @@ const SearchFriendsComponent = (props: Props) => {
           variant="Broken"
         />
         <TextComponent
-          label={placeHold ?? 'Search ...'}
+          label={placeHold ?? t('search')}
           styles={{fontWeight: '400', color: appColors.grey}}
         />
       </RowComponent>

@@ -31,9 +31,12 @@ import {removeEvent} from '../../redux/reducers/eventSlice';
 import {removeFriend} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import {useTranslation} from 'react-i18next';
+import FastImage from 'react-native-fast-image';
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const disPathch = useDispatch();
+  const {t} = useTranslation();
   const user = useSelector(profileSelector);
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -122,17 +125,22 @@ const DrawerCustomsMenu = ({navigation}: any) => {
             screen: 'profile',
           });
         }}>
-        {user.avatar ? (
-          <Image
-            source={{uri: user.avatar}}
+        {user && user.avatar ? (
+          <FastImage
+            source={{
+              uri: user.avatar,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
+            }}
             style={[globalStyles.userImg, {width: 100, height: 100}]}
           />
         ) : (
-          <Image
+          <FastImage
             source={require('../../assets/images/User-Icon.jpg')}
             style={globalStyles.avatar}
           />
         )}
+        <SpaceComponent height={12} />
         <TextComponent label={UserInfo.getName(user.name)} title size={28} />
       </TouchableOpacity>
       <SpaceComponent height={22} />
@@ -148,7 +156,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
             onPress={() => handleShowItemMenu(item.key)}>
             {item.icon}
             <TextComponent
-              label={item.title}
+              label={t(`${item.title}`)}
               styles={localStyle.listItemText}
             />
           </RowComponent>

@@ -13,6 +13,11 @@ import {addProfile} from '../../redux/reducers/profileSlice';
 import {addFriend} from '../../redux/reducers/friendSlice';
 import {addEvent} from '../../redux/reducers/eventSlice';
 import SocketManager from '../../redux/SocketManager';
+import {
+  languageSelecter,
+  setLanguage,
+} from '../../redux/reducers/languageSlice';
+import i18next from 'i18next';
 
 const AppRouters = () => {
   const {getItem, setItem} = useAsyncStorage('userData');
@@ -20,6 +25,7 @@ const AppRouters = () => {
   const dispatch = useDispatch();
   const [isShowSplash, setIsShowSplash] = useState(true);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const language: 'vi' | 'en' = useSelector(languageSelecter);
   useEffect(() => {
     handleCheckLogin();
     const timeout = setTimeout(() => {
@@ -37,9 +43,15 @@ const AppRouters = () => {
       dispatch(addFriend(parsedData.friend));
       dispatch(addEvent(parsedData.event));
       dispatch(setTheme(theme));
+      dispatch(setLanguage(parsedData.auth.language));
     }
   };
 
+  useEffect(() => {
+    i18next.changeLanguage(language);
+    
+    
+  }, [language]);
   return (
     <>
       {isShowSplash ? (

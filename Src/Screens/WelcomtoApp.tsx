@@ -1,9 +1,8 @@
-import {View, Text, StyleSheet, ActivityIndicator, SafeAreaView} from 'react-native';
 import React from 'react';
-import {ContainerComponent, RowComponent, TextComponent} from './Components';
-import {appColors} from '../Theme/Colors/appColors';
-import {Digital, Rocket} from '../assets/svgs/indexSvg';
-import {appInfo} from '../Theme/appInfo';
+import { ActivityIndicator, SafeAreaView, StyleSheet, View } from 'react-native';
+import { Digital, Rocket } from '../assets/svgs/indexSvg';
+import { appColors } from '../Theme/Colors/appColors';
+import { RowComponent, TextComponent } from './Components';
 const WelcomtoApp = () => {
   return (
     <SafeAreaView style={localStyles.conatiner}>

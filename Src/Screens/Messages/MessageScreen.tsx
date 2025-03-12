@@ -8,6 +8,7 @@ import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   HeaderComponent,
   SearchFriendsComponent,
@@ -19,6 +20,7 @@ import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
@@ -27,7 +29,7 @@ const MessageScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-
+  const {t} = useTranslation();
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -98,16 +100,20 @@ const MessageScreen = ({navigation}: any) => {
         }
         styles={{justifyContent: 'space-between'}}
         iconRight={<More color={colors.icon} size={appInfo.sizeIconBold} />}
-        // title="Messages"
         iconQR={
-          <ScanBarcode color={appColors.blue} size={appInfo.sizeIconBold} />
+          <MaterialIcons
+            name="qr-code-scanner"
+            size={appInfo.sizeIconBold}
+            color={appColors.blue}
+          />
         }
         onPress1={() => navigation.openDrawer()}
         onPress2={() => setIsVisible(true)}
+        onPressQR={() => navigation.navigate('UserQRCode')}
       />
       <View style={{paddingLeft: 18}}>
         <TextComponent
-          label="Messages"
+          label={t('message')}
           styles={{
             fontSize: 28, // Tăng kích thước chữ một chút để nổi bật
             fontStyle: 'italic', // Giữ phong cách nghiêng để tạo sự khác biệt
@@ -122,7 +128,7 @@ const MessageScreen = ({navigation}: any) => {
             flex: 0,
             width: '90%',
           }}
-          placeHold="conversations ..."
+          placeHold={t('search')}
           onPress={() =>
             navigation.navigate('Search', {key: 'searchConversations'})
           }
@@ -135,7 +141,7 @@ const MessageScreen = ({navigation}: any) => {
 
           {!users && (
             <TextComponent
-              label={'Chats not found !!'}
+              label={t('conversation_found')}
               styles={{fontStyle: 'italic', fontWeight: '300'}}
             />
           )}
@@ -152,7 +158,7 @@ const MessageScreen = ({navigation}: any) => {
       ) : (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <TextComponent
-            label={'Chats not found !!'}
+            label={t('conversation_found')}
             styles={{
               fontStyle: 'italic',
               fontWeight: '300',

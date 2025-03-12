@@ -1,5 +1,6 @@
-import {UserEdit} from 'iconsax-react-native';
-import React, {useCallback} from 'react';
+import { UserEdit } from 'iconsax-react-native';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Image,
@@ -9,10 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
+import FastImage from 'react-native-fast-image';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { eventSelector } from '../../redux/reducers/eventSlice';
+import { friendSelector } from '../../redux/reducers/friendSlice';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
 import {
   ButtonComponent,
   RowComponent,
@@ -20,31 +27,24 @@ import {
   TextComponent,
 } from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import {UserInfo} from '../Untils/UserInfo';
-import {profileStyles} from './profileStyles';
-import {eventSevices} from '../Services/eventService';
-import {useFocusEffect} from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {globalStyles} from '../../Styles/globalStyle';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {eventSelector} from '../../redux/reducers/eventSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {friendSelector} from '../../redux/reducers/friendSlice';
+import { eventSevices } from '../Services/eventService';
+import { UserInfo } from '../Untils/UserInfo';
+import { profileStyles } from './profileStyles';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
   const friendData = useSelector(friendSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
   const userInfo = {
     stats: {
       friends: friendData && friendData.friends ? friendData.friends.length : 0,
       posts:
         eventData && eventData.eventShares ? eventData.eventShares.length : 0,
-      likes: 230,
+      likes: (friendData && friendData.like && friendData.like) ?? 0,
     },
   };
-
 
   const getEventShared = async () => {
     const res = await eventSevices.getEventShared(eventData.eventShares);
@@ -62,7 +62,14 @@ const ProfileScreen = ({navigation}: any) => {
           {backgroundColor: colors.background},
         ]}
         key={index}>
-        <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
+        <FastImage
+          source={{
+            uri: item.urlImage,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
+          style={profileStyles.postImage}
+        />
         <TextComponent
           styles={profileStyles.postContent}
           label={item.content ? item.content : '...'}
@@ -77,7 +84,7 @@ const ProfileScreen = ({navigation}: any) => {
       <View
         style={[
           locastyles.header,
-          {backgroundColor: theme === 'light' ? colors.card: colors.card},
+          {backgroundColor: theme === 'light' ? colors.card : colors.card},
         ]}>
         <ZoomImageComponent
           url={userData.avatar}
@@ -92,7 +99,7 @@ const ProfileScreen = ({navigation}: any) => {
 
           <TextComponent
             styles={[profileStyles.majoring, {marginLeft: 4}]}
-            label={userData.majoring ?? 'Chuyên ngành'}
+            label={userData.majoring ?? t('majoring')}
           />
           <SpaceComponent height={6} />
           <RowComponent>
@@ -104,7 +111,7 @@ const ProfileScreen = ({navigation}: any) => {
             />
             <TextComponent
               styles={[profileStyles.bio, {color: '#888', flex: 1}]}
-              label={userData.bio ?? 'Tiểu sử'}
+              label={userData.bio ?? t('bio')}
               numberOfLine={5}
             />
           </RowComponent>
@@ -116,7 +123,7 @@ const ProfileScreen = ({navigation}: any) => {
               <UserEdit color={appColors.white} size={appInfo.sizeIcon} />
               <TextComponent
                 styles={profileStyles.editButtonText}
-                label="Edit Profile"
+                label={t('edit_profile')}
               />
             </TouchableOpacity>
             <ButtonComponent
@@ -145,14 +152,14 @@ const ProfileScreen = ({navigation}: any) => {
             label={userInfo.stats.friends}
             styles={profileStyles.statNumber}
           />
-          <Text style={profileStyles.statLabel}>Friends</Text>
+          <Text style={profileStyles.statLabel}>{t('friend')}</Text>
         </View>
         <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
           <TextComponent
             label={userInfo.stats.posts}
             styles={profileStyles.statNumber}
           />
-          <Text style={profileStyles.statLabel}>Shares</Text>
+          <Text style={profileStyles.statLabel}>{t('share')}</Text>
         </View>
         <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
           <TextComponent
@@ -160,12 +167,15 @@ const ProfileScreen = ({navigation}: any) => {
             styles={profileStyles.statNumber}
           />
 
-          <Text style={profileStyles.statLabel}>Likes</Text>
+          <Text style={profileStyles.statLabel}>{t('like')}</Text>
         </View>
       </View>
 
       {/* Recent Posts */}
-      <TextComponent styles={profileStyles.sectionTitle} label="Recent Share" />
+      <TextComponent
+        styles={profileStyles.sectionTitle}
+        label={t('recently_share')}
+      />
       <FlatList
         data={eventData.eventShares}
         renderItem={renderPost}

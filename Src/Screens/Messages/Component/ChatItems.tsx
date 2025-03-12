@@ -1,4 +1,4 @@
-import {CallIncoming, CloseCircle} from 'iconsax-react-native';
+import {CallIncoming} from 'iconsax-react-native';
 import React, {memo, useCallback, useState} from 'react';
 import {
   Animated,
@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
-import ImageViewing from 'react-native-image-viewing';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../../Theme/Colors/appColors';
@@ -20,10 +20,6 @@ import CustormLinkPreview from '../../Components/CustormLinkPreview';
 import {userServices} from '../../Services/userService';
 import {UserInfo} from '../../Untils/UserInfo';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
-import CustomFootImages from './CustomFootImages';
-import FastImage from 'react-native-fast-image';
-import {ArrowDown, Download, DownloadCloudIcon} from 'lucide-react-native';
-import CustomHeaderImages from './CustomHeaderImages';
 import CustormImageViewing from './CustormImageViewing';
 interface Props {
   currentUserId: string;
@@ -36,6 +32,7 @@ interface Props {
   item?: any;
   name: string;
   isBlock: Boolean;
+  blockId:string
 }
 const ChatItems = (props: Props) => {
   const {
@@ -49,6 +46,7 @@ const ChatItems = (props: Props) => {
     item,
     name,
     isBlock,
+    blockId
   } = props;
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -198,7 +196,7 @@ const ChatItems = (props: Props) => {
     setImageIndex(imageIndex);
     setIsVisible(true);
   };
- 
+
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
     return (
@@ -274,6 +272,9 @@ const ChatItems = (props: Props) => {
                 />
                 <SpaceComponent height={5} />
                 <CustomCallButtonComponent
+                  blockId={
+                    blockId
+                  }
                   isDisible={isBlock}
                   type={condition}
                   styles={{justifyContent: 'center', alignItems: 'center'}}

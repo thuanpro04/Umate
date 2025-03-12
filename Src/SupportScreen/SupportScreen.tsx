@@ -1,26 +1,28 @@
-import React, {useState} from 'react';
+import { ArrowLeft2 } from 'iconsax-react-native';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  TextInput,
-} from 'react-native';
-import {
+  AlertTriangle,
+  HelpCircle,
+  LucideIcon,
   Mail,
   Phone,
-  AlertTriangle,
-  LucideIcon,
   Search,
-  HelpCircle,
 } from 'lucide-react-native';
-import {globalStyles} from '../Styles/globalStyle';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../redux/reducers/themeSlice';
-import {appColors} from '../Theme/Colors/appColors';
-import {TextComponent} from '../Screens/Components';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../redux/reducers/themeSlice';
+import { HeaderComponent, TextComponent } from '../Screens/Components';
+import { globalStyles } from '../Styles/globalStyle';
+import { appInfo } from '../Theme/appInfo';
+import { appColors } from '../Theme/Colors/appColors';
 interface Props {
   icon: LucideIcon;
   title: string;
@@ -32,6 +34,8 @@ const SupportScreen = ({navigation}: any) => {
   const [searchText, setSearchText] = useState('');
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme];
+  const {t} = useTranslation();
+
   const SupportOption: React.FC<Props> = ({
     icon: Icon,
     title,
@@ -49,57 +53,64 @@ const SupportScreen = ({navigation}: any) => {
     </TouchableOpacity>
   );
   return (
-    <ScrollView
-      style={[styles.container, {backgroundColor: colors.background}]}>
-      <TextComponent styles={styles.header} label="📚 Trợ giúp & Hỗ trợ" />
-
-      {/* 🔍 Thanh tìm kiếm */}
-      <View style={[styles.searchBox, {backgroundColor: colors.background}]}>
-        <Search color={colors.icon} size={22} />
-        <TextInput
-          style={[
-            styles.searchInput,
-            {
-              color: colors.text,
-              borderColor: colors.border,
-              borderWidth: 1,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-            },
-          ]}
-          placeholder="Tìm kiếm câu hỏi hoặc hỗ trợ..."
-          value={searchText}
-          onChangeText={setSearchText}
-          placeholderTextColor={colors.placeholderTextColor}
+    <SafeAreaView
+      style={[globalStyles.container, {backgroundColor: colors.background}]}>
+      <HeaderComponent
+        iconLeft={
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
+        }
+        onPress1={() => navigation.goBack()}
+      />
+      <View style={{paddingHorizontal: 16}}>
+        <TextComponent
+          styles={styles.header}
+          label={`📚 ${t('help_support')}`}
+        />
+        <View style={[styles.searchBox, {backgroundColor: colors.background}]}>
+          <Search color={colors.icon} size={22} />
+          <TextInput
+            style={[
+              styles.searchInput,
+              {
+                color: colors.text,
+                borderColor: colors.border,
+                borderWidth: 1,
+                borderRadius: 12,
+                paddingHorizontal: 12,
+              },
+            ]}
+            placeholder={t('search_help')}
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholderTextColor={colors.placeholderTextColor}
+          />
+        </View>
+        <SupportOption
+          icon={HelpCircle}
+          title={t('faq')}
+          description={t('popular_questions')}
+          onPress={() => navigation.navigate('FAQ')}
+        />
+        <SupportOption
+          icon={Mail}
+          title={t('contact_support_email')}
+          description={t('response_time')}
+          onPress={() => navigation.navigate('ContactEmail')}
+        />
+        <SupportOption
+          icon={Phone}
+          title={t('call_us')}
+          description={t('hotline_24_7')}
+          onPress={() => navigation.navigate('ContactPhone')}
+        />
+        <SupportOption
+          icon={AlertTriangle}
+          title={t('report_issue')}
+          description={t('send_issue_info')}
+          onPress={() => navigation.navigate('ReportIssue')}
         />
       </View>
-
-      {/* 📝 Các lựa chọn hỗ trợ */}
-      <SupportOption
-        icon={HelpCircle}
-        title="Câu hỏi thường gặp (FAQ)"
-        description="Giải đáp những thắc mắc phổ biến nhất"
-        onPress={() => navigation.navigate('FAQ')}
-      />
-      <SupportOption
-        icon={Mail}
-        title="Liên hệ hỗ trợ qua email"
-        description="Chúng tôi sẽ phản hồi trong vòng 24h"
-        onPress={() => navigation.navigate('ContactEmail')}
-      />
-      <SupportOption
-        icon={Phone}
-        title="Gọi cho chúng tôi"
-        description="Tổng đài 24/7: 1800-123-456"
-        onPress={() => navigation.navigate('ContactPhone')}
-      />
-      <SupportOption
-        icon={AlertTriangle}
-        title="Báo cáo sự cố"
-        description="Gửi thông tin sự cố bạn gặp phải"
-        onPress={() => navigation.navigate('ReportIssue')}
-      />
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 

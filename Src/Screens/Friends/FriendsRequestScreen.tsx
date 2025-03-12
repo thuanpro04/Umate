@@ -11,19 +11,15 @@ import {UserInfo} from '../Untils/UserInfo';
 import friendsAPI from '../../apis/friendsApi';
 import {friendServices} from '../Services/friendService.';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 
 const FriendsRequestScreen = () => {
-  const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
   const memoUser = useMemo(() => users, [users]);
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const handleScroll = (event: any) => {
-    const currenOffset = event.nativeEvent.contentOffset.y;
-    currenOffset > 50 ? setshowTabBar(false) : setshowTabBar(true);
-  };
-
+  const {t} = useTranslation();
   const getUsers = async () => {
     try {
       const res = await userServices.getEquestFriendUsers(
@@ -73,8 +69,8 @@ const FriendsRequestScreen = () => {
       <CarUserComponent
         img={item.avatar}
         name={UserInfo.getName(item.name)}
-        sayYes="Agree"
-        sayNo="Remove"
+        sayYes={t('agree')}
+        sayNo={t('refuse')}
         key={index}
         onPressYes={() => handleAgreeFriend(item.userId)}
         onPressNo={() => handleRemoveFriend(item.userId)}
@@ -90,7 +86,6 @@ const FriendsRequestScreen = () => {
           keyExtractor={(item: any) => item.userId}
           renderItem={renderItems}
           style={styles.container}
-          onScroll={handleScroll}
           scrollEventThrottle={16}
         />
       )}

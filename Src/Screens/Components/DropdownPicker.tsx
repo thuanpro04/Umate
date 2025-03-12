@@ -1,35 +1,27 @@
+import {ArrowDown2, SearchNormal1} from 'iconsax-react-native';
+import React, {useRef, useState} from 'react';
 import {
-  View,
-  Text,
+  StatusBar,
+  StyleProp,
   StyleSheet,
   TouchableOpacity,
-  StyleProp,
+  View,
   ViewStyle,
-  StatusBar,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {SelectedModel} from '../models/SelectModel';
 import {Modalize} from 'react-native-modalize';
-import ContainerComponent from './ContainerComponent';
-import TextComponent from './TextComponent';
-import RowComponent from './RowComponent';
-import {
-  ArrowDown2,
-  Check,
-  CloseCircle,
-  SearchNormal1,
-} from 'iconsax-react-native';
-import {appColors} from '../../Theme/Colors/appColors';
 import {Portal} from 'react-native-portalize';
-import InputComponent from './InputComponent';
-import ButtonComponent from './ButtonComponent';
-import SpaceComponent from './SpaceComponent';
-import CarUserComponent from './CarUserComponent';
-import {UserInfo} from '../Untils/UserInfo';
-import {appInfo} from '../../Theme/appInfo';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {SelectedModel} from '../models/SelectModel';
+import ButtonComponent from './ButtonComponent';
+import CarUserComponent from './CarUserComponent';
+import InputComponent from './InputComponent';
+import RowComponent from './RowComponent';
+import TextComponent from './TextComponent';
+import {useTranslation} from 'react-i18next';
 interface SelectedUser {
   name: string;
   data?: {
@@ -51,6 +43,7 @@ interface Props {
   styles?: StyleProp<ViewStyle>;
   userName?: string;
   isDeputyLeader?: boolean;
+  color?: string;
 }
 
 const DropdownPicker = (props: Props) => {
@@ -64,6 +57,7 @@ const DropdownPicker = (props: Props) => {
     isLeader,
     isDeputyLeader,
     styles,
+    color,
   } = props;
 
   const [value, setValue] = useState('');
@@ -73,7 +67,7 @@ const DropdownPicker = (props: Props) => {
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
   const [tempSelectedUsers, setTempSelectedUsers] = useState<any>([]);
   const modalizeRef = useRef<Modalize>(null);
-  const [selectLeader, setSelectLeader] = useState<any>({});
+  const {t} = useTranslation();
 
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -197,7 +191,7 @@ const DropdownPicker = (props: Props) => {
         <CarUserComponent
           name={item.name}
           isFind
-          majoring={users.majorCategory ?? 'chuyên ngành'}
+          majoring={users.majorCategory ?? t('majoring')}
           styles={{borderWidth: 0, gap: 20}}
           img={users.avatar}
         />
@@ -212,9 +206,9 @@ const DropdownPicker = (props: Props) => {
           onChange={e => setValue(e)}
           styles={{width: '90%', backgroundColor: colors.background}}
           affix={<SearchNormal1 size={22} color={appColors.grey} />}
-          placehold="Search..."
+          placehold={t('search')}
         />
-        <ButtonComponent label="Cancel" onPress={onCloseModalize} styles={{}} />
+        <ButtonComponent label={t('close')} onPress={onCloseModalize} styles={{}} />
       </RowComponent>
     );
   };
@@ -224,7 +218,10 @@ const DropdownPicker = (props: Props) => {
       // Khi là Leader, chỉ hiển thị tên của leader đã chọn'
       const nameLeader: any = userName ? userName : placeHold;
       return (
-        <TextComponent label={nameLeader} styles={{textAlign: 'center'}} />
+        <TextComponent
+          label={nameLeader}
+          styles={{textAlign: 'center', color: color ?? colors.text}}
+        />
       );
     } else {
       if (userSelected && userSelected.length > 0) {
@@ -237,7 +234,12 @@ const DropdownPicker = (props: Props) => {
         ));
       }
     }
-    return <TextComponent label={placeHold} styles={{textAlign: 'center'}} />;
+    return (
+      <TextComponent
+        label={placeHold}
+        styles={{textAlign: 'center', color: color ?? colors.text}}
+      />
+    );
   };
 
   return (
@@ -246,10 +248,9 @@ const DropdownPicker = (props: Props) => {
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.background,
-        
       }}>
       <TouchableOpacity
-        style={[localStyles.borderStyles, {borderColor: colors.border,}, styles]}
+        style={[localStyles.borderStyles, {borderColor: colors.border}, styles]}
         onPress={onOpenModalize}>
         {renderSelectedUsers()}
         <ArrowDown2 size={22} color={appColors.grey} />
@@ -259,7 +260,10 @@ const DropdownPicker = (props: Props) => {
           ref={modalizeRef}
           handlePosition="inside"
           adjustToContentHeight
-          modalStyle={{backgroundColor: colors.background}}
+          modalStyle={{
+            backgroundColor: colors.background,
+            paddingHorizontal: 12,
+          }}
           HeaderComponent={renderHearder()}
           FooterComponent={!(isDeputyLeader || isLeader) && renderFooter()}>
           {users.map((item: any, index: number) => renderUsers(item, index))}

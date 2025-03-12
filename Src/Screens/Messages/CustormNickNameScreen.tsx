@@ -27,6 +27,7 @@ import UpdateInfoModal from '../Modal/UpdateInfoModal';
 import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import {userServices} from '../Services/userService';
+import {useTranslation} from 'react-i18next';
 
 const CustormNickNameScreen = () => {
   const {converInfo} = useRoute().params as {converInfo: any};
@@ -40,6 +41,7 @@ const CustormNickNameScreen = () => {
   const [visible, setVisible] = useState(false);
   const colors = appColors[theme ?? 'light'];
   const key = converInfo.type;
+  const {t} = useTranslation();
 
   const fetchUserInfos = async () => {
     try {
@@ -123,7 +125,7 @@ const CustormNickNameScreen = () => {
             <TouchableOpacity
               style={{flex: 1}}
               onPress={() => onOpenModal(item)}>
-              <TextComponent label="Danh hiệu" />
+              <TextComponent label={t('alias')} />
               <SpaceComponent height={3} />
               <TextComponent
                 label={getNameInGroup(item)}
@@ -149,7 +151,7 @@ const CustormNickNameScreen = () => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        title="Biệt danh"
+        title={t('nickname')}
       />
       <View style={{paddingHorizontal: 12}}>
         {!converData.groupId ? (
@@ -166,7 +168,7 @@ const CustormNickNameScreen = () => {
       </View>
       <UpdateInfoModal
         isVisible={visible}
-        nickName="Đặt biệt hiệu đi ?"
+        nickName={t('set_nickname')}
         nameField={UserInfo.getName(selectUser.name)}
         onCloseModal={() => setVisible(false)}
         onChangeProfile={(key, value) =>

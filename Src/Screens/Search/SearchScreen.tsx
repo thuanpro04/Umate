@@ -1,30 +1,29 @@
-import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
-import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
+import { ArrowLeft2, HeartCircle, SearchNormal } from 'iconsax-react-native';
+import { debounce } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {useRoute} from '@react-navigation/native';
-import {debounce} from 'lodash';
-import {useSelector} from 'react-redux';
-import {Accelerate, Creativity} from '../../assets/svgs/indexSvg';
-import {authSelector} from '../../redux/reducers/authReducer';
+import { useSelector } from 'react-redux';
+import { Accelerate, Creativity } from '../../assets/svgs/indexSvg';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   CarfeatureComponent,
   CarUserComponent,
-  ContainerComponent,
   InputComponent,
   RowComponent,
   SpaceComponent,
-  TextComponent,
+  TextComponent
 } from '../Components';
 import CarUserChat from '../Messages/Component/CarUserChat';
-import {searchServices} from '../Services/searchServices';
-import {UserInfo} from '../Untils/UserInfo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {globalStyles} from '../../Styles/globalStyle';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {messageServices} from '../Services/messageServices';
+import { messageServices } from '../Services/messageServices';
+import { searchServices } from '../Services/searchServices';
+import { UserInfo } from '../Untils/UserInfo';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');

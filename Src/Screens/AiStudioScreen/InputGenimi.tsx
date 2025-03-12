@@ -1,12 +1,8 @@
-import {StyleSheet, Text, TextInput, View} from 'react-native';
-import React, {useState} from 'react';
-import {TouchableOpacity} from 'react-native';
-import {Send2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
+import React from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {appColors} from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 interface Props {
   onPress: () => void;
   isDisable: boolean;

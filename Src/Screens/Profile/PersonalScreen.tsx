@@ -38,6 +38,8 @@ import {friendServices} from '../Services/friendService.';
 import {Notification} from '../Untils/Notification';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
+import FastImage from 'react-native-fast-image';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -46,15 +48,16 @@ const PersonalScreen = ({navigation}: any) => {
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
+  const {t} = useTranslation();
+
   const bgColor = useSharedValue('#009688');
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const infoUser = {
     stats: {
-      friends: userInfo && userInfo.friends ? userInfo.friends.length : 0,
-      shares:
-        userInfo && userInfo.eventShares ? userInfo.eventShares.length : 0,
-      likes: 0,
+      friend: userInfo && userInfo.friends ? userInfo.friends.length : 0,
+      share: userInfo && userInfo.eventShares ? userInfo.eventShares.length : 0,
+      like: 0,
     },
   };
 
@@ -99,7 +102,14 @@ const PersonalScreen = ({navigation}: any) => {
         onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
         style={[profileStyles.postContainer, {backgroundColor: colors.card}]}
         key={item._id}>
-        <Image source={{uri: item.urlImage}} style={profileStyles.postImage} />
+        <FastImage
+          source={{
+            uri: item.urlImage,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
+          style={profileStyles.postImage}
+        />
         <TextComponent
           label={item.content}
           styles={profileStyles.postContent}
@@ -127,7 +137,7 @@ const PersonalScreen = ({navigation}: any) => {
         content: (
           <TextComponent
             styles={profileStyles.majoring}
-            label={userInfo?.majoring ?? 'Chuyên ngành'}
+            label={userInfo?.majoring ?? t('majoring')}
           />
         ),
         icon: <Icon name="school" size={20} color={'#1b4f72'} />,
@@ -223,7 +233,7 @@ const PersonalScreen = ({navigation}: any) => {
               <ButtonComponent
                 onPress={toggleDetail}
                 type="action"
-                label="Cancel"
+                label={t('cancel')}
                 textStyle={[profileStyles.btn_Detail]}
                 styles={{}}
               />
@@ -259,7 +269,7 @@ const PersonalScreen = ({navigation}: any) => {
               <SpaceComponent height={6} />
               <TextComponent
                 styles={profileStyles.majoring}
-                label={userInfo.majoring ?? 'Chuyên ngành'}
+                label={userInfo.majoring ?? t('majoring')}
               />
               <SpaceComponent height={8} />
               <RowComponent>
@@ -279,7 +289,7 @@ const PersonalScreen = ({navigation}: any) => {
               <ButtonComponent
                 onPress={toggleDetail}
                 type="action"
-                label="Detail"
+                label={t('detail')}
                 textStyle={[profileStyles.btn_Detail]}
               />
             </View>
@@ -312,13 +322,15 @@ const PersonalScreen = ({navigation}: any) => {
                   },
                 ]}>
                 <Text style={profileStyles.statNumber}>{value}</Text>
-                <Text style={profileStyles.statLabel}>{key.toUpperCase()}</Text>
+                <Text style={profileStyles.statLabel}>
+                  {t(key).toUpperCase()}
+                </Text>
               </View>
             ))}
           </View>
 
           <TextComponent
-            label="Shared recently"
+            label={t('recently_share')}
             styles={profileStyles.sectionTitle}
           />
           {userInfo.eventShares && (

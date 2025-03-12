@@ -1,25 +1,23 @@
-import React, {useCallback, useState} from 'react';
+import { Send2 } from 'iconsax-react-native';
+import React, { useCallback, useState } from 'react';
 import {
-  Image,
-  Keyboard,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../../redux/reducers/authReducer';
+import { ImageOrVideo } from 'react-native-image-crop-picker';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useSelector } from 'react-redux';
+import io from 'socket.io-client';
+import { authSelector } from '../../../redux/reducers/authReducer';
+import { themeSelector } from '../../../redux/reducers/themeSlice';
+import { appInfo } from '../../../Theme/appInfo';
+import { appColors } from '../../../Theme/Colors/appColors';
+import { imageService } from '../../Services/imageService';
+import { Notification } from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
-import io from 'socket.io-client';
-import {appInfo} from '../../../Theme/appInfo';
-import {ImageOrVideo} from 'react-native-image-crop-picker';
-import {imageService} from '../../Services/imageService';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {Send2} from 'iconsax-react-native';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {Notification} from '../../Untils/Notification';
 interface Props {
   reply: string;
   isBlock: boolean;

@@ -1,35 +1,30 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {HambergerMenu, Notification} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { HambergerMenu, Notification } from 'iconsax-react-native';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  AppState,
   FlatList,
-  Image,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
-import {addAuth, authSelector} from '../../redux/reducers/authReducer';
-import {CarEventComponent, HeaderComponent} from '../Components';
-import {eventSevices} from '../Services/eventService';
-import {userServices} from '../Services/userService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {friendSelector} from '../../redux/reducers/friendSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { useDispatch, useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
-import {UserInfo} from '../Untils/UserInfo';
-import {io} from 'socket.io-client';
-import {socketSelector} from '../../redux/reducers/socketSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { addAuth, authSelector } from '../../redux/reducers/authReducer';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { CarEventComponent, HeaderComponent } from '../Components';
+import { eventSevices } from '../Services/eventService';
+import { userServices } from '../Services/userService';
+import { UserInfo } from '../Untils/UserInfo';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -104,38 +99,11 @@ const HomeScreen = () => {
         const fcmToken = await AsyncStorage.getItem('fcmtoken');
         dispatch(addAuth({...auth, fcmTokens: fcmToken}));
       };
-      // onZegoService();
-      // registerCall();
       setOnline();
     }, []),
   );
 
-  const onZegoService = async () => {
-    return ZegoUIKitPrebuiltCallService.init(
-      869126873, // App ID từ ZEGOCLOUD console
-      process.env.APPSIGN, // App Sign từ ZEGOCLOUD console
-      auth.userId, // userID của bạn, cần là chuỗi
-      UserInfo.getName(profile.name), // userName hiển thị
-      [ZIM, ZPNs], // module cần thiết nếu có
-      {
-        // Tuỳ chọn nhạc chuông, thông báo trên Android, v.v.
-        ringtoneConfig: {
-          incomingCallFileName: 'zego_incoming',
-          outgoingCallFileName: 'zego_outgoing',
-        },
-        androidNotificationConfig: {
-          channelID: 'zego_video_call',
-          channelName: 'zego_video_call',
-          sound: 'default',
-          vibration: true,
-          priority: 'high',
-        },
-
-        // Hàm cấu hình cho mỗi cuộc gọi
-        requireConfig: (data: any) => {},
-      },
-    );
-  };
+ 
   return (
     <SafeAreaView
       style={[

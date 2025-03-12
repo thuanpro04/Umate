@@ -12,6 +12,7 @@ import {TextComponent} from '../../Components';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
 import {UserInfo} from '../../Untils/UserInfo';
+import FastImage from 'react-native-fast-image';
 interface Props {
   clearReply: any;
   message: any;
@@ -98,7 +99,7 @@ const Replymessage = (props: Props) => {
             />
           </View>
         ) : (
-          urlImg && <Image source={{uri: urlImg}} style={styles.imageReply} />
+          urlImg && <FastImage source={{uri: urlImg,priority:FastImage.priority.high, cache:FastImage.cacheControl.immutable}} style={styles.imageReply} />
         )}
       </View>
       {message && (

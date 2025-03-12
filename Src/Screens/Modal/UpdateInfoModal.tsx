@@ -13,6 +13,7 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 interface Props {
   isVisible: boolean;
   nameField: string;
@@ -24,7 +25,7 @@ const UpdateInfoModal = (props: Props) => {
   const {isVisible, nameField, onCloseModal, onChangeProfile, nickName} = props;
   const [messageError, setMessageError] = useState('');
   const [value, setValue] = useState('');
-
+  const {t} = useTranslation();
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const optionMenu = [
@@ -79,11 +80,11 @@ const UpdateInfoModal = (props: Props) => {
     const item = getField();
     const messagesErr =
       value.length < 6 && item?.key !== 'description'
-        ? 'Please enter at least 6 characters.'
+        ? t('min_characters')
         : value.length > 25 && item?.key === 'userName'
-        ? 'Please no longer than 25 characters.'
+        ? t('max_characters')
         : !isFacebookURL(value) && item?.key === 'link'
-        ? 'Invalid URL. Please enter a valid Facebook link.'
+        ? t('invalid_facebook_url')
         : '';
 
     setMessageError(messagesErr);
@@ -143,7 +144,7 @@ const UpdateInfoModal = (props: Props) => {
           <SpaceComponent height={20} />
           <View style={{justifyContent: 'center', alignItems: 'center'}}>
             <ButtonComponent
-              label="Enter"
+              label={t('save')}
               onPress={handleModal}
               styles={{
                 width: '85%',

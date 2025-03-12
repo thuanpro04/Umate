@@ -23,6 +23,7 @@ import {friendServices} from '../Services/friendService.';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import FastImage from 'react-native-fast-image';
 interface Props {
   img?: any;
   name: string;
@@ -108,9 +109,11 @@ const CarUserComponent = (props: Props) => {
         {borderColor: colors.border},
         styles,
       ]}>
-      <Image
+      <FastImage
         source={{
           uri: img,
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.immutable,
         }}
         style={[globalStyles.userImg, iconAddCancel && {width: 50, height: 50}]}
       />
@@ -126,10 +129,7 @@ const CarUserComponent = (props: Props) => {
         <TouchableOpacity
           onPress={handleAdd_CancelFriends}
           activeOpacity={0.7}
-          style={[
-            localStyle.buttonStyles,
-            {transform: [{scale: scaleAnim}], },
-          ]}>
+          style={[localStyle.buttonStyles, {transform: [{scale: scaleAnim}]}]}>
           {isShowIcon ? (
             <AntDesign
               name="check"
@@ -177,11 +177,13 @@ const CarUserComponent = (props: Props) => {
     <RowComponent styles={{flex: 1, justifyContent: 'flex-start'}}>
       <TouchableOpacity onPress={onPressImg} activeOpacity={0.7}>
         {img ? (
-          <Image
+          <FastImage
             source={{
               uri:
                 img ??
                 'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F2023%2Flovepik-happy-man-png-image_401141286_wh1200.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fa-man-clipart-12.htm&docid=XVX5d6ymItErVM&tbnid=h-y_6bYduFw3RM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA..i&w=1002&h=1002&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECGUQAA',
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
             }}
             style={globalStyles.userImg}
           />
@@ -193,17 +195,25 @@ const CarUserComponent = (props: Props) => {
         <TextComponent label={name} title />
         <RowComponent styles={{gap: 20, paddingVertical: 0}}>
           <RowComponent styles={[localStyle.card, {gap: 0}]}>
-            <Image
+            <FastImage
               source={{
                 uri:
                   img ??
                   'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F8300%2F2368%2Fsuccessful-business-man-clipart-xl.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fclipart-person_56.html&docid=OkUhgGtFeO4JbM&tbnid=Zmddp8xIvMJKSM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECFcQAA..i&w=1906&h=1920&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECFcQAA',
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
               }}
               style={localStyle.imgHint}
             />
-            <Image
+            <FastImage
               source={
-                img ? {uri: img} : require('../../assets/images/imgBg.jpg')
+                img
+                  ? {
+                      uri: img,
+                      priority: FastImage.priority.high,
+                      cache: FastImage.cacheControl.immutable,
+                    }
+                  : require('../../assets/images/imgBg.jpg')
               }
               style={localStyle.imgHint}
             />

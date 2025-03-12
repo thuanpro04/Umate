@@ -54,6 +54,11 @@ const handleRemoveUser = async (userId: string) => {
   const res = usersAPI.handleUsers(url);
   return res;
 };
+const updateLanguage = async (id: string, key: string) => {
+  url = '/update-language';
+  const res = usersAPI.handleUsers(url, {id, key}, 'post');
+  return res;
+};
 export const userServices = {
   getEquestFriendUsers,
   updateUsersById,
@@ -63,4 +68,5 @@ export const userServices = {
   updateBlockUser,
   updateThemeforUser,
   handleRemoveUser,
+  updateLanguage
 };

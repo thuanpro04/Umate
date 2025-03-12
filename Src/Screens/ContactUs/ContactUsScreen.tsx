@@ -23,6 +23,7 @@ import {notificationServices} from '../Services/notificationServices';
 import {Notification} from '../Untils/Notification';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 const ContactUsScreen = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -31,6 +32,8 @@ const ContactUsScreen = ({navigation}: any) => {
   const profile = useSelector(profileSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme];
+  const {t} = useTranslation();
+
   const handleSend = async () => {
     if (message.length > 10) {
       setIsLoading(true);
@@ -44,8 +47,8 @@ const ContactUsScreen = ({navigation}: any) => {
         setIsLoading(false);
         Notification.showToast(
           'success',
-          '🎉 Cảm ơn bạn rất nhiều!',
-          '✨Chúng tôi rất trân trọng ý kiến đóng góp của bạn và sẽ xem xét để cải thiện ứng dụng tốt hơn.',
+          `🎉${t('thank_you')}`,
+          t('feedback_appreciation'),
         );
         navigation.goBack();
       } catch (error) {
@@ -70,49 +73,47 @@ const ContactUsScreen = ({navigation}: any) => {
           style={{position: 'absolute', left: '1%', bottom: '65%'}}
         />
         <SpaceComponent height={20} />
-        <Text style={styles.headerTitle}>📬 Liên hệ với chúng tôi</Text>
-        <Text style={styles.headerSubtitle}>
-          💡 Chúng tôi rất mong nhận được phản hồi từ bạn!
-        </Text>
+        <Text style={styles.headerTitle}>{'📬' + t('contact')}</Text>
+        <Text style={styles.headerSubtitle}>{t('feeback_user')}</Text>
       </LinearGradient>
 
       <View style={[styles.formContainer, {backgroundColor: colors.card}]}>
         <View style={styles.inputContainer}>
-          <TextComponent label="👤 Họ tên" styles={styles.label} />
+          <TextComponent label={`👤 ${name}`} styles={styles.label} />
           <TextInput
             style={[
               styles.input,
               {backgroundColor: colors.background, color: colors.text},
             ]}
-            placeholder={profile.name ?? 'Nhập tên của bạn'}
+            placeholder={profile.name ?? t('yourname')}
             placeholderTextColor="#B0B0B0"
             value={name}
             onChangeText={setName}
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextComponent label='📧 Email' styles={styles.label} />
+          <TextComponent label="📧 Email" styles={styles.label} />
           <TextInput
             style={[
               styles.input,
               {backgroundColor: colors.background, color: colors.text},
             ]}
             multiline
-            placeholder={placeHolderEmail ?? 'Nhập email'}
+            placeholder={placeHolderEmail ?? t('email')}
             placeholderTextColor="#B0B0B0"
             value={email}
             onChangeText={setEmail}
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextComponent label="💬 Nội dung" styles={styles.label} />
+          <TextComponent label={t('content')} styles={styles.label} />
           <TextInput
             style={[
               styles.input,
               styles.textArea,
               {backgroundColor: colors.background, color: colors.text},
             ]}
-            placeholder="Nhập tin nhắn của bạn"
+            placeholder={t('your_message')}
             placeholderTextColor="#B0B0B0"
             value={message}
             onChangeText={setMessage}
@@ -134,7 +135,7 @@ const ContactUsScreen = ({navigation}: any) => {
         </View>
         <TouchableOpacity onPress={handleSend} style={styles.buttonWrapper}>
           <LinearGradient colors={['#36D1DC', '#5B86E5']} style={styles.button}>
-            <Text style={styles.buttonText}>🚀 Gửi tin nhắn</Text>
+            <Text style={styles.buttonText}>{t('send_message')}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>

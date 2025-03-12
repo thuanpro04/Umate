@@ -1,44 +1,36 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  SafeAreaView,
-  StatusBar,
-  ActivityIndicator,
-} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
+import {ArrowLeft2, Camera, Edit2} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
+import FastImage from 'react-native-fast-image';
+import {ImageOrVideo} from 'react-native-image-crop-picker';
+import {useSelector} from 'react-redux';
+import {globalStyles} from '../Styles/globalStyle';
+import {appColors} from '../Theme/Colors/appColors';
+import {appInfo} from '../Theme/appInfo';
+import {authSelector} from '../redux/reducers/authReducer';
+import {themeSelector} from '../redux/reducers/themeSlice';
+import {
   ButtonComponent,
-  ContainerComponent,
   HeaderComponent,
-  InputComponent,
   RowComponent,
   SpaceComponent,
   TextComponent,
 } from './Components';
-import {ArrowLeft2, ArrowSquareDown, Camera, Edit2} from 'iconsax-react-native';
-import {appColors} from '../Theme/Colors/appColors';
-import {appInfo} from '../Theme/appInfo';
-import {globalStyles} from '../Styles/globalStyle';
-import ButtonImagePicker from './Messages/Component/ButtonImagePicker';
-import {imageService} from './Services/imageService';
-import {ImageOrVideo} from 'react-native-image-crop-picker';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../redux/reducers/authReducer';
-import EditUserModal from './Modal/EditUserModal';
 import DropdownPicker from './Components/DropdownPicker';
-import {useFocusEffect} from '@react-navigation/native';
-import {userServices} from './Services/userService';
-import AddGroupModal from './Modal/AddGroupModal';
-import {Validate} from './Untils/Validate';
-import {UserInfo} from './Untils/UserInfo';
+import ButtonImagePicker from './Messages/Component/ButtonImagePicker';
 import UpdateInfoModal from './Modal/UpdateInfoModal';
 import {groupServices} from './Services/groupServices';
-import {themeSelector} from '../redux/reducers/themeSlice';
-import FastImage from 'react-native-fast-image';
+import {imageService} from './Services/imageService';
+import {userServices} from './Services/userService';
+import {Validate} from './Untils/Validate';
+import {useTranslation} from 'react-i18next';
 const initValues = {
   groupName: '',
   description: '',
@@ -57,6 +49,8 @@ const AddGroupScreens = ({navigation}: any) => {
   const [messageErrors, setMessageErrors] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const [groupInfo, setGroupInfo] = useState<any>({
     ...initValues,
     authorId: auth.userId,
@@ -71,6 +65,7 @@ const AddGroupScreens = ({navigation}: any) => {
   useEffect(() => {
     setMessageErrors(Validate.groupValidation(groupInfo));
   }, [groupInfo]);
+
   const getAllUsers = async () => {
     try {
       const res = await userServices.getEquestFriendUsers(auth.userId, '');
@@ -179,8 +174,6 @@ const AddGroupScreens = ({navigation}: any) => {
       console.log('handleAddGroupUser', error);
     }
   };
-  // console.log('groupInfo', groupInfo);
-  
 
   return (
     <ScrollView
@@ -189,7 +182,6 @@ const AddGroupScreens = ({navigation}: any) => {
         iconLeft={
           <ArrowLeft2 color={colors.icon} size={appInfo.sizeIconBold} />
         }
-        title="Add Group"
       />
       <ScrollView>
         <View style={localStyles.containerImages}>
@@ -200,7 +192,6 @@ const AddGroupScreens = ({navigation}: any) => {
                 position: 'absolute',
                 justifyContent: 'center',
                 alignItems: 'center',
-               
               }}>
               <ActivityIndicator size="small" color="#555" />
             </View>
@@ -235,17 +226,28 @@ const AddGroupScreens = ({navigation}: any) => {
         </View>
         <View style={{paddingHorizontal: 18}}>
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Group Name" styles={globalStyles.label} />
+            <TextComponent
+              label={t('group_name')}
+              styles={globalStyles.label}
+            />
             <RowComponent
               styles={[globalStyles.inputRow, {borderColor: colors.border}]}
               onPress={() => handleModal('groupName')}>
               <TextComponent label={groupInfo.groupName} color={colors.text2} />
-              <Edit2 color={colors.icon} size={appInfo.sizeIcon} />
+              <Edit2
+                color={
+                  messageErrors.includes('groupName') ? 'red' : colors.icon
+                }
+                size={appInfo.sizeIcon}
+              />
             </RowComponent>
           </RowComponent>
           <SpaceComponent height={20} />
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Description" styles={globalStyles.label} />
+            <TextComponent
+              label={t('description')}
+              styles={globalStyles.label}
+            />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('description')}>
@@ -258,14 +260,14 @@ const AddGroupScreens = ({navigation}: any) => {
           </RowComponent>
           <SpaceComponent height={20} />
           <View style={{}}>
-            <TextComponent
-              label={'Invited users'}
-              styles={globalStyles.label}
-            />
+            <TextComponent label={t('member')} styles={globalStyles.label} />
             <SpaceComponent height={10} />
             <DropdownPicker
-              placeHold="Selected"
+              placeHold={t('select')}
               users={users}
+              color={
+                messageErrors.includes('invitedUsers') ? 'red' : colors.icon
+              }
               nameField="invitedUsers"
               onChangeValue={onChangeGroupInfo}
               userSelected={groupInfo.invitedUsers}
@@ -273,10 +275,10 @@ const AddGroupScreens = ({navigation}: any) => {
           </View>
           <SpaceComponent height={20} />
           <View>
-            <TextComponent label="Leader" styles={globalStyles.label} />
+            <TextComponent label={t('leader')} styles={globalStyles.label} />
             <SpaceComponent height={10} />
             <DropdownPicker
-              placeHold="select leader"
+              placeHold={t('select')}
               users={groupInfo.invitedUsers}
               onChangeValue={onChangeGroupInfo}
               userSelected={groupInfo.leader}
@@ -288,10 +290,13 @@ const AddGroupScreens = ({navigation}: any) => {
           </View>
           <SpaceComponent height={20} />
           <View>
-            <TextComponent label="DeputyLeader" styles={globalStyles.label} />
+            <TextComponent
+              label={t('deputy_leader')}
+              styles={globalStyles.label}
+            />
             <SpaceComponent height={10} />
             <DropdownPicker
-              placeHold="Select Deputy Leader"
+              placeHold={t('select')}
               users={
                 groupInfo.invitedUsers && groupInfo.leader
                   ? groupInfo.invitedUsers.filter(
@@ -299,6 +304,9 @@ const AddGroupScreens = ({navigation}: any) => {
                         item.data.userId != groupInfo.leader.data.userId,
                     )
                   : groupInfo.invitedUsers
+              }
+              color={
+                messageErrors.includes('deputyLeader') ? 'red' : colors.icon
               }
               onChangeValue={onChangeGroupInfo}
               userSelected={[]}
@@ -308,24 +316,12 @@ const AddGroupScreens = ({navigation}: any) => {
               styles={{width: '80%'}}
             />
           </View>
-          <SpaceComponent height={10} />
-          {messageErrors.length > 0 && (
-            <View>
-              {messageErrors.map((item, index) => (
-                <TextComponent
-                  key={index}
-                  label={item}
-                  color={appColors.red}
-                  styles={{marginBottom: 12}}
-                />
-              ))}
-            </View>
-          )}
+
           <SpaceComponent height={30} />
           <ButtonComponent
             type="primary"
             onPress={() => messageErrors.length === 0 && handleAddGroupUser()}
-            label="Add Group"
+            label={t('create_group')}
             styles={{paddingVertical: 6}}
           />
           <SpaceComponent height={30} />

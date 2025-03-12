@@ -18,6 +18,7 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {HeaderComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
+import { useTranslation } from 'react-i18next';
 
 const YourImagesScreen = () => {
   const {id, type} = useRoute().params as {id: string; type: string};
@@ -28,6 +29,8 @@ const YourImagesScreen = () => {
   const [images, setImages] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const columnCount = 4;
   // const images: any = [
   //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
@@ -118,7 +121,7 @@ const YourImagesScreen = () => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        title="Image"
+        title={t('yourimage')}
       />
       <FlatList
         data={images}

@@ -9,6 +9,7 @@ import {
 } from '../Components';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 interface Props {
   title: string;
   descriptions?: string;
@@ -21,6 +22,7 @@ const ActionModal = (props: Props) => {
   const {title, onPressYes, onPressNo, visible, descriptions, styles} = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
   return (
     <Modal visible={visible} transparent style={{}}>
       <View style={localStyles.overlay}>
@@ -36,7 +38,7 @@ const ActionModal = (props: Props) => {
           <SpaceComponent height={8} />
           <RowComponent styles={localStyles.btnStyles}>
             <ButtonComponent
-              label="cancel"
+              label={t('cancel')}
               onPress={onPressNo}
               styles={{
                 backgroundColor: colors.card,
@@ -46,7 +48,7 @@ const ActionModal = (props: Props) => {
               labelColor={colors.text}
             />
             <ButtonComponent
-              label="Comfirm"
+              label={t('comfirm')}
               styles={{backgroundColor: '#007ABF99'}}
               onPress={onPressYes}
               labelColor={colors.text}

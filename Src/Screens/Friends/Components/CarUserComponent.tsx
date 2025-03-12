@@ -1,26 +1,19 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {ReactNode, useState} from 'react';
-import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
-import {globalStyles} from '../../../Styles/globalStyle';
 import {UserAdd} from 'iconsax-react-native';
-import {appInfo} from '../../../Theme/appInfo';
+import React, {ReactNode, useState} from 'react';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {globalStyles} from '../../../Styles/globalStyle';
 import {appColors} from '../../../Theme/Colors/appColors';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
 
-import {
-  Flag,
-  MoreVertical,
-  MoreVerticalIcon,
-  ShieldOff,
-  UserX,
-} from 'lucide-react-native';
-import {Menu, MenuItem, MenuDivider} from 'react-native-material-menu';
-import {MenuChat} from '../../../data/MenuItems';
-import {groupServices} from '../../Services/groupServices';
+import {useTranslation} from 'react-i18next';
+import {Menu, MenuDivider, MenuItem} from 'react-native-material-menu';
 import {authSelector} from '../../../redux/reducers/authReducer';
 import {Notification} from '../../Untils/Notification';
+import FastImage from 'react-native-fast-image';
+
 interface Props {
   userName: string;
   authori: string;
@@ -69,6 +62,7 @@ const CarUserComponent = (props: Props) => {
   const [isVisible, setisVisible] = useState(false);
   const auth = useSelector(authSelector);
   const showMenu = () => setisVisible(true);
+  const {t} = useTranslation();
 
   const hideMenu = () => {
     setisVisible(false);
@@ -118,7 +112,7 @@ const CarUserComponent = (props: Props) => {
       <MenuItem onPress={() => actionMenu('position')} style={styles.menuItem}>
         <Ionicons name="leaf-outline" color={'blue'} size={18} />
         <SpaceComponent width={6} />
-        <TextComponent label={'Nhường chức'} styles={styles.menuText} />
+        <TextComponent label={t('transfer_role')} styles={styles.menuText} />
       </MenuItem>
     );
   };
@@ -135,7 +129,14 @@ const CarUserComponent = (props: Props) => {
       ]}>
       <RowComponent styles={{marginHorizontal: 8}}>
         <TouchableOpacity onPress={onPress}>
-          <Image source={{uri: props.url}} style={globalStyles.userImg} />
+          <FastImage
+            source={{
+              uri: props.url,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
+            }}
+            style={globalStyles.userImg}
+          />
         </TouchableOpacity>
         <View style={styles.main}>
           <TextComponent label={userName} styles={globalStyles.label} />
@@ -169,12 +170,12 @@ const CarUserComponent = (props: Props) => {
                         onPress={() => actionMenu(item.id)}
                         style={styles.menuItem}>
                         {item.icon}
-                        <SpaceComponent width={6} />
+                        <SpaceComponent width={12} />
                         <TextComponent
                           label={
                             item.id === 'block'
-                              ? `${isBlock ? `Bỏ ${item.name}` : item.name}`
-                              : item.name
+                              ? `${isBlock ? `${t('unblock')}` : t(item.name)}`
+                              : t(item.name)
                           }
                           styles={styles.menuText}
                         />
@@ -190,7 +191,10 @@ const CarUserComponent = (props: Props) => {
                   style={styles.menuItem}>
                   <UserAdd color={'green'} size={18} />
                   <SpaceComponent width={6} />
-                  <TextComponent label={'Thêm bạn'} styles={styles.menuText} />
+                  <TextComponent
+                    label={t('add_friend')}
+                    styles={styles.menuText}
+                  />
                 </MenuItem>
               )}
 
@@ -204,7 +208,10 @@ const CarUserComponent = (props: Props) => {
                     style={styles.menuItem}>
                     <Ionicons name="cut-outline" color={'coral'} size={18} />
                     <SpaceComponent width={6} />
-                    <TextComponent label={'Kích'} styles={styles.menuText} />
+                    <TextComponent
+                      label={t('remove_from_group')}
+                      styles={styles.menuText}
+                    />
                   </MenuItem>
                 ))}
             </Menu>

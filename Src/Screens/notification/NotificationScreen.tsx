@@ -25,6 +25,7 @@ import LoadingModal from '../Modal/LoadingModal';
 import {groupServices} from '../Services/groupServices';
 import {notificationServices} from '../Services/notificationServices';
 import {UserInfo} from '../Untils/UserInfo';
+import {useTranslation} from 'react-i18next';
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +35,7 @@ const NotificationScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
   const handleActionFriend = async (
     action: 'agree' | 'cancel',
     id: string,
@@ -142,7 +144,7 @@ const NotificationScreen = ({navigation}: any) => {
                       handleActionFriend('agree', item._id, item.groupId)
                     }>
                     <TextComponent
-                      label={'Chấp nhận'}
+                      label={t('agree')}
                       styles={styles.buttonText}
                     />
                   </TouchableOpacity>
@@ -150,7 +152,7 @@ const NotificationScreen = ({navigation}: any) => {
                     style={styles.declineButton}
                     onPress={() => handleActionFriend('cancel', item._id)}>
                     <TextComponent
-                      label={'Từ chối'}
+                      label={'refuse'}
                       styles={styles.buttonText}
                     />
                   </TouchableOpacity>
@@ -211,7 +213,7 @@ const NotificationScreen = ({navigation}: any) => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        title="Thông báo"
+        title={t('notification')}
         iconRight={
           isTrash ? (
             <FontAwesome
@@ -235,7 +237,7 @@ const NotificationScreen = ({navigation}: any) => {
         />
       ) : (
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <TextComponent label="Rỗng" title />
+          <TextComponent label={t('empty')} title />
         </View>
       )}
       <LoadingModal visible={isLoading} />

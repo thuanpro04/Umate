@@ -94,6 +94,7 @@ const ButtonComponent = (props: Props) => {
             color={labelColor ?? appColors.white}
             size={appInfo.size.WIDTH * 0.04}
             font="bold"
+            title
             styles={[{paddingVertical: 2, paddingHorizontal: 12}, textStyle]}
           />
           {iconRight && iconRight}

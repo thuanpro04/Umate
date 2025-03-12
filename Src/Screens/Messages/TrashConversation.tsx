@@ -14,6 +14,7 @@ import CarUserChat from './Component/CarUserChat';
 import {messageServices} from '../Services/messageServices';
 import {authSelector} from '../../redux/reducers/authReducer';
 import LoadingModal from '../Modal/LoadingModal';
+import {useTranslation} from 'react-i18next';
 
 const TrashConversation = () => {
   const {users} = useRoute().params as {users: any[]};
@@ -24,6 +25,8 @@ const TrashConversation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const colors = appColors[theme ?? 'light'];
   const auth = useSelector(authSelector);
+  const {t} = useTranslation();
+
   const onChangeItems = (type: string, key: string) => {
     setIsBgUsers(prev => {
       const newItems = {
@@ -47,20 +50,19 @@ const TrashConversation = () => {
     });
   };
   const actionDeleteConversation = () => {
-    Alert.alert(
-      'Xác nhận xóa',
-      'Bạn có chắc chắn muốn xóa cuộc trò chuyện này hay không?',
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel',
-        },
-        {
-          text: 'Xóa',
-          onPress: async () => await handleDeleteConversation(),
-        },
-      ],
-    );
+    if (Object.keys(selectItems).length === 0) {
+      return;
+    }
+    Alert.alert(t('confirm_delete'), t('confirm_delete_chat'), [
+      {
+        text: 'Hủy',
+        style: 'cancel',
+      },
+      {
+        text: 'Xóa',
+        onPress: async () => await handleDeleteConversation(),
+      },
+    ]);
   };
   const handleDeleteConversation = async () => {
     if (Object.keys(selectItems).length === 0) {

@@ -1,18 +1,21 @@
-import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {ArrowLeft, Setting} from 'iconsax-react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   SafeAreaView,
   StyleSheet,
   View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {socketSelector} from '../../redux/reducers/socketSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -26,15 +29,6 @@ import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import chatsAPI from '../../apis/chatApi';
-import {Text} from 'react-native-svg';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {io, Socket} from 'socket.io-client';
-import {socketSelector} from '../../redux/reducers/socketSlice';
-import {userServices} from '../Services/userService';
-import {friendSelector, setBlock} from '../../redux/reducers/friendSlice';
-import ActionModal from '../Modal/ActionModal';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -54,7 +48,8 @@ const ChatScreen = ({navigation}: any) => {
   const [limitPage, setLimitPage] = useState(1);
   const clearReplyMessage = () => setReplyMessage(null);
   const socket = useSelector(socketSelector).socket;
-  const dispatch = useDispatch();
+  const {t} = useTranslation();
+
   const friendData = useSelector(friendSelector);
   const name =
     converInfo.nickNames && converInfo.nickNames[converInfo.userId]
@@ -231,6 +226,11 @@ const ChatScreen = ({navigation}: any) => {
 
       return (
         <ChatItems
+          blockId={
+            converInfo.block && converInfo.type === 'personal'
+              ? converInfo.block[0]
+              : ''
+          }
           isBlock={
             (converInfo.block && converInfo.block.includes(auth.userId)) ||
             (friendData.block && friendData.block.includes(converInfo.userId))
@@ -290,9 +290,9 @@ const ChatScreen = ({navigation}: any) => {
       converInfo.block.includes(auth.userId) && (
         <View style={styles.block}>
           <TextComponent
-            label={`Bạn đã bị block bởi ${UserInfo.getName(
+            label={`${t('you_are_blocked')} ${UserInfo.getName(
               converInfo.name,
-            )} liu liu !!!`}
+            )}`}
             styles={{fontWeight: '500', fontStyle: 'italic'}}
             color={appColors.white}
           />

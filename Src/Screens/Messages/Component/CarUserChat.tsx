@@ -13,6 +13,7 @@ import {useSelector} from 'react-redux';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
 import {Check} from 'lucide-react-native';
 import {appInfo} from '../../../Theme/appInfo';
+import FastImage from 'react-native-fast-image';
 interface Props {
   name: string;
   massv?: string;
@@ -58,7 +59,14 @@ const CarUserChat = (props: Props) => {
           paddingVertical: 10,
           alignItems: 'center',
         }}>
-        <Image source={{uri: image}} style={[globalStyles.userImg]} />
+        <FastImage
+          source={{
+            uri: image,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
+          style={[globalStyles.userImg]}
+        />
 
         <View style={{flex: 1}}>
           <RowComponent>

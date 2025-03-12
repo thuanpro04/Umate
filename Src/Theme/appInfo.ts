@@ -8,7 +8,7 @@ export const appInfo = {
   BASE_URL: 'http://192.168.1.8:3004',
   sizeIcon: 22,
   sizeText: Dimensions.get('window').width * 0.045,
-  sizeTitle: Dimensions.get('window').width * 0.05,
+  sizeTitle: Dimensions.get('window').width * 0.055,
   sizeIconBold:27,
   monthNames: [
     'January',

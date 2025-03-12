@@ -1,20 +1,19 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { ArrowLeft2, SearchFavorite } from 'iconsax-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FlatList, Image, SafeAreaView, StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
+import { appColors } from '../Theme/Colors/appColors';
+import { appInfo } from '../Theme/appInfo';
+import { authSelector } from '../redux/reducers/authReducer';
 import {
-  ContainerComponent,
   HeaderComponent,
   InputComponent,
-  SpaceComponent,
+  SpaceComponent
 } from './Components';
-import {ArrowLeft, ArrowLeft2, SearchFavorite} from 'iconsax-react-native';
-import {appColors} from '../Theme/Colors/appColors';
-import {appInfo} from '../Theme/appInfo';
 import CarUserChat from './Messages/Component/CarUserChat';
-import {messageServices} from './Services/messageServices';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../redux/reducers/authReducer';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {io} from 'socket.io-client';
+import { messageServices } from './Services/messageServices';
 import { UserInfo } from './Untils/UserInfo';
 
 const ShareScreen = ({navigation}: any) => {
@@ -95,7 +94,7 @@ const ShareScreen = ({navigation}: any) => {
     }
   };
   return (
-    <ContainerComponent>
+    <SafeAreaView>
       <HeaderComponent
         iconLeft={
           <ArrowLeft2 color={appColors.blueBack} size={appInfo.sizeIconBold} />
@@ -134,7 +133,7 @@ const ShareScreen = ({navigation}: any) => {
           />
         ))}
       </View>
-    </ContainerComponent>
+    </SafeAreaView>
   );
 };
 

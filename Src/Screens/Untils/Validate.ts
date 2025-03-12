@@ -25,7 +25,7 @@ export class Validate {
   }
   static getKeyToGroup = (key: string) => {
     if (key === 'groupName') {
-      return 'group name';
+      return 'group_name';
     } else if (key === 'deputyLeader') {
       return 'deputy leader';
     } else {
@@ -41,12 +41,11 @@ export class Validate {
         key !== 'avatar' &&
         key !== 'leader'
       ) {
-        !data[`${key}`] &&
-          mess.push(`${this.getKeyToGroup(key)} is required !!!`);
+        !data[`${key}`] && mess.push(key);
       }
     });
     if (data.invitedUsers.length < 2) {
-      mess.push('invited must be greater than two !!!');
+      mess.push('invitedUsers');
     }
     return mess;
   }

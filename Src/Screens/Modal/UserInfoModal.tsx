@@ -1,33 +1,28 @@
+import { Messenger, ProfileDelete } from 'iconsax-react-native';
 import React, {
-  forwardRef,
-  useImperativeHandle,
   useEffect,
-  useState,
-  useRef,
+  useRef
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  StyleSheet
 } from 'react-native';
-import {Modalize} from 'react-native-modalize';
-import {Portal} from 'react-native-portalize';
+import { Modalize } from 'react-native-modalize';
+import { Portal } from 'react-native-portalize';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {Messenger, ProfileDelete} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {Loss} from '../../assets/svgs/indexSvg';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import FastImage from 'react-native-fast-image';
 interface Props {
   img: string;
   name: string;
@@ -53,6 +48,8 @@ const UserInfoModal = (props: Props) => {
   const modalRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   useEffect(() => {
     if (visible) {
       modalRef.current?.open(); // Open the modal if visible
@@ -72,14 +69,17 @@ const UserInfoModal = (props: Props) => {
         onClose={onClose}
         modalStyle={[styles.modalStyle, {backgroundColor: colors.background}]}>
         <RowComponent styles={styles.content}>
-          {img && <Image source={{uri: img}} style={styles.image} />}
+          {img && <FastImage source={{uri: img,priority:FastImage.priority.high, cache:FastImage.cacheControl.immutable}} style={styles.image} />}
 
           <TextComponent label={name} title />
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content} onPress={handleNavigation}>
           <Messenger size={appInfo.sizeIconBold} color={colors.icon} />
-          <TextComponent label={`Message with ${getFirstName(name)}`} title />
+          <TextComponent
+            label={`${t('chat_with')} ${getFirstName(name)}`}
+            title
+          />
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content} onPress={handleBlockUser}>
@@ -89,21 +89,24 @@ const UserInfoModal = (props: Props) => {
             color={colors.icon}
           />
           {!isBlock ? (
-            <TextComponent label={`Block ${getFirstName(name)}`} title />
+            <TextComponent
+              label={`${t('block')} ${getFirstName(name)}`}
+              title
+            />
           ) : (
-            <TextComponent label={`unblock ${getFirstName(name)}`} title />
+            <TextComponent
+              label={`${t('unblock')} ${getFirstName(name)}`}
+              title
+            />
           )}
         </RowComponent>
         <SpaceComponent height={18} />
         <RowComponent styles={styles.content}>
-          <ProfileDelete
-            size={appInfo.sizeIconBold}
-            color={colors.icon}
-          />
+          <ProfileDelete size={appInfo.sizeIconBold} color={colors.icon} />
           <ButtonComponent type="action" onPress={handleUnFriend}>
-            <TextComponent label={`Unfriend ${getFirstName(name)}`} title />
+            <TextComponent label={`${t('unfriend')} ${getFirstName(name)}`} title />
             <TextComponent
-              label={`Remove ${getFirstName(name)} as a friend.`}
+              label={`${t('remove_friend')}`}
             />
           </ButtonComponent>
         </RowComponent>

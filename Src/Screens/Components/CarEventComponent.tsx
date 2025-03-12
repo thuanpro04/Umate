@@ -1,6 +1,7 @@
 import { DirectRight } from 'iconsax-react-native';
 import { debounce } from 'lodash';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Foundation from 'react-native-vector-icons/Foundation';
@@ -14,11 +15,7 @@ import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import LikeListModal from '../Modal/LikeListModal';
 import ShareEventModal from '../Modal/ShareEventModal';
 import { eventSevices } from '../Services/eventService';
-import {
-  RowComponent,
-  SpaceComponent,
-  TextComponent
-} from './index';
+import { RowComponent, SpaceComponent, TextComponent } from './index';
 interface Props {
   img: string;
   content: string;
@@ -50,6 +47,7 @@ const CarComponent = (props: Props) => {
   const [isProcessing, setProcessing] = useState(false);
   const [isShowContent, setIsShowContent] = useState(false);
   const [count, setCount] = useState(countLike);
+  const {t} = useTranslation();
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -132,7 +130,7 @@ const CarComponent = (props: Props) => {
         {isShowContent ? (
           <TouchableOpacity onPress={() => setIsShowContent(!isShowContent)}>
             <TextComponent
-              label="Ẩn đi"
+              label={t('hide')}
               styles={globalStyles.actionText}
               size={22}
             />
@@ -140,7 +138,7 @@ const CarComponent = (props: Props) => {
         ) : (
           <TouchableOpacity onPress={() => setIsShowContent(!isShowContent)}>
             <TextComponent
-              label="Xem thêm"
+              label={t('more')}
               styles={globalStyles.actionText}
               size={22}
             />

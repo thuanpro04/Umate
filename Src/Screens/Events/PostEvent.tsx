@@ -1,27 +1,26 @@
-import {useFocusEffect} from '@react-navigation/native';
-import {CloseCircle} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
-import {ImageOrVideo} from 'react-native-image-crop-picker';
-import {useSelector} from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
+import { CloseCircle } from 'iconsax-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { ImageOrVideo } from 'react-native-image-crop-picker';
+import { useSelector } from 'react-redux';
 import eventApi from '../../apis/eventApi';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
-  ContainerComponent,
   DateTimePickerComponent,
   InputComponent,
   RowComponent,
   SpaceComponent,
-  TextComponent,
+  TextComponent
 } from '../Components';
 import DropdownPicker from '../Components/DropdownPicker';
 import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
-import {imageService} from '../Services/imageService';
-import {userServices} from '../Services/userService';
-import {Validate} from '../Untils/Validate';
+import { imageService } from '../Services/imageService';
+import { userServices } from '../Services/userService';
+import { Validate } from '../Untils/Validate';
 const initValues = {
   content: '',
   photoUrl: '',
@@ -61,8 +60,8 @@ const PostEvent = ({setIsTabBarVisible, navigation}: any) => {
   const getAllUsers = async () => {
     try {
       const res = await userServices.getEquestFriendUsers(auth.userID, '');
-      if (res) {
-        const data = res.map((user: any) => ({
+      if (res && res.data) {
+        const data = res.data.map((user: any) => ({
           name: user.name,
           avatar: user.avatar,
           userID: user.userID,
@@ -115,7 +114,7 @@ const PostEvent = ({setIsTabBarVisible, navigation}: any) => {
     }
   };
   return (
-    <ContainerComponent styles={styles.container} isScroll>
+    <ScrollView style={styles.container}>
       <TextComponent
         label="Add New Event"
         styles={styles.textStyle}
@@ -222,7 +221,7 @@ const PostEvent = ({setIsTabBarVisible, navigation}: any) => {
         styles={{paddingVertical: 10}}
       />
       <SpaceComponent height={65} />
-    </ContainerComponent>
+    </ScrollView>
   );
 };
 

@@ -7,7 +7,7 @@ import {
   Alert,
   StatusBar,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {
   Sun,
@@ -19,7 +19,9 @@ import {
   HelpCircle,
   Trash,
 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage, {
+  useAsyncStorage,
+} from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 
 import {
@@ -40,9 +42,18 @@ import {appInfo} from '../../Theme/appInfo';
 import {SpaceComponent} from '../Components';
 import {HandleNotification} from '../Untils/HandleNotification';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {removeEvent} from '../../redux/reducers/eventSlice';
-import {removeFriend} from '../../redux/reducers/friendSlice';
-import {removeProfile} from '../../redux/reducers/profileSlice';
+import {eventSelector, removeEvent} from '../../redux/reducers/eventSlice';
+import {friendSelector, removeFriend} from '../../redux/reducers/friendSlice';
+import {
+  profileSelector,
+  removeProfile,
+} from '../../redux/reducers/profileSlice';
+import {useTranslation} from 'react-i18next';
+import {
+  languageSelecter,
+  setLanguage,
+} from '../../redux/reducers/languageSlice';
+import i18next from 'i18next';
 
 const SettingScreen = () => {
   const navigation: any = useNavigation();
@@ -50,12 +61,18 @@ const SettingScreen = () => {
   const auth = useSelector(authSelector);
   const dispatch = useDispatch();
   const theme: 'light' | 'dark' = useSelector(themeSelector);
-  console.log(theme);
-
+  const colors = appColors[theme];
+  const profile = useSelector(profileSelector);
+  const friend = useSelector(friendSelector);
+  const event = useSelector(eventSelector);
+  const {t} = useTranslation();
   const [isDarkMode, setIsDarkMode] = useState(
     theme === 'light' ? false : true,
   );
-  const colors = appColors[theme];
+  const language: 'vi' | 'en' = useSelector(languageSelecter);
+  const [isLanguage, setIsLanguage] = useState(
+    language === 'vi' ? false : true,
+  );
 
   const handleThemeToggle = async () => {
     try {
@@ -73,12 +90,37 @@ const SettingScreen = () => {
       console.log('Update state theme error: ', error);
     }
   };
-
+  const handleChangeLanguage = async () => {
+    const newLanguage = language === 'vi' ? 'en' : 'vi';
+    try {
+      const res = await userServices.updateLanguage(
+        auth.userId,
+        language === 'vi' ? 'en' : 'vi',
+      );
+      if (res && res.data) {
+        dispatch(setLanguage(newLanguage));
+        await AsyncStorage.setItem(
+          'userData',
+          JSON.stringify({
+            auth: {...auth, language: newLanguage}, // Cập nhật ngôn ngữ
+            profile,
+            friend,
+            event,
+          }),
+        );
+        i18next.changeLanguage(newLanguage);
+        console.log('update language successfully: ', res.data);
+      }
+      setIsLanguage(!isLanguage);
+    } catch (error) {
+      console.log('Update language fail: ', error);
+    }
+  };
   const confirmDeleteAccount = () => {
-    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa tài khoản không?', [
-      {text: 'Hủy', style: 'cancel'},
+    Alert.alert(t('confirm'), t('delete_account_confirmation'), [
+      {text: t('cancel'), style: 'cancel'},
       {
-        text: 'Xóa',
+        text: t('agree'),
         style: 'destructive',
         onPress: () => handleRemoveForUser(),
       },
@@ -124,6 +166,9 @@ const SettingScreen = () => {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    i18next.changeLanguage(language);
+  }, [language]);
   const SettingItem = ({icon: Icon, label, onPress, rightComponent}: any) => (
     <TouchableOpacity
       style={[styles.settingItem, {backgroundColor: colors.card}]}
@@ -143,16 +188,16 @@ const SettingScreen = () => {
         onPress={() => navigation.goBack()}
       />
       <SpaceComponent height={16} />
-      <Text style={[styles.header, {color: colors.text}]}>Cài đặt</Text>
+      <Text style={[styles.header, {color: colors.text}]}>{t('setting')}</Text>
 
       <SettingItem
         icon={User}
-        label="Thông tin cá nhân"
-        onPress={() => navigation.navigate('Profile')}
+        label={t('personal_information')}
+        onPress={() => navigation.navigate('EditProfile')}
       />
       <SettingItem
         icon={isDarkMode ? Moon : Sun}
-        label="Chế độ tối"
+        label={t('dark_mode')}
         rightComponent={
           <Switch value={isDarkMode} onValueChange={handleThemeToggle} />
         }
@@ -160,29 +205,31 @@ const SettingScreen = () => {
 
       <SettingItem
         icon={Lock}
-        label="Bảo mật"
+        label={t('security')}
         onPress={() => navigation.navigate('SecurityScreen')}
       />
 
       <SettingItem
         icon={Globe}
-        label="Ngôn ngữ"
-        onPress={() => navigation.navigate('Language')}
+        label={t('language')}
+        rightComponent={
+          <Switch value={isLanguage} onValueChange={handleChangeLanguage} />
+        }
       />
 
       <SettingItem
         icon={HelpCircle}
-        label="Trợ giúp & Hỗ trợ"
+        label={t('help_support')}
         onPress={() => navigation.navigate('SupportScreen')}
       />
 
       <SettingItem
         icon={Trash}
-        label="Xóa tài khoản"
+        label={t('delete_account')}
         onPress={confirmDeleteAccount}
       />
 
-      <SettingItem icon={LogOut} label="Đăng xuất" onPress={handleLogout} />
+      <SettingItem icon={LogOut} label={t('logout')} onPress={handleLogout} />
       <LoadingModal visible={isLoading} />
     </View>
   );

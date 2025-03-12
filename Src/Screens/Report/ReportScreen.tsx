@@ -22,6 +22,7 @@ import {useRoute} from '@react-navigation/native';
 import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
 import {profileSelector} from '../../redux/reducers/profileSlice';
+import { useTranslation } from 'react-i18next';
 
 const ReportScreen = () => {
   const {name, userId} = useRoute().params as {name: string; userId: string};
@@ -31,27 +32,28 @@ const ReportScreen = () => {
   const [reportReason, setReportReason] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const profile = useSelector(profileSelector);
+  const {t} = useTranslation();
 
   const categories = [
-    'Spam',
-    'Lừa đảo',
-    'Lời lẽ xúc phạm',
-    'Nội dung không phù hợp',
-    'Khác',
+    t('spam'),
+    t('scam'),
+    t('offensive_language'),
+    t('inappropriate_content'),
+    t('other'),
   ];
 
   const handleSubmitReport = () => {
     if (!selectedCategory || !reportReason.trim()) {
-      Alert.alert('Vui lòng chọn lý do và nhập mô tả chi tiết.');
+      Alert.alert(t('please_select_reason'));
       return;
     }
-    Alert.alert(`Báo cáo ${UserInfo.getName(name)}`, 'Bạn chắc chắn chứ ?', [
+    Alert.alert(`${t('report')} ${UserInfo.getName(name)}`,t('are_you_sure'), [
       {
-        text: 'Không',
+        text: t('no'),
         style: 'cancel',
       },
       {
-        text: 'Có',
+        text: t('yes'),
         onPress: async () => await handleReportForUser(),
       },
     ]);
@@ -68,8 +70,8 @@ const ReportScreen = () => {
       if (res && res.data) {
         Notification.showToast(
           'success',
-          '🎉 Cảm ơn bạn rất nhiều!',
-          '✨Chúng tôi rất trân trọng ý kiến đóng góp của bạn và sẽ xem xét để cải thiện ứng dụng tốt hơn.',
+          t('thank_you'),
+          t('feedback_appreciation'),
         );
       }
       setReportReason('');
@@ -89,12 +91,12 @@ const ReportScreen = () => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        title="Báo cáo"
+        title={t('report')}
       />
 
       <View style={styles.content}>
         <Text style={[styles.label, {color: colors.text}]}>
-          Chọn lý do báo cáo:
+         {t('select_report_reason')}
         </Text>
         <View style={styles.categoryContainer}>
           {categories.map(category => (
@@ -120,14 +122,14 @@ const ReportScreen = () => {
         </View>
 
         <Text style={[styles.label, {color: colors.text}]}>
-          Mô tả chi tiết:
+          {t('detailed_description')}
         </Text>
         <TextInput
           style={[
             styles.input,
             {borderColor: colors.border, color: colors.text},
           ]}
-          placeholder="Nhập mô tả..."
+          placeholder={t('enter_description')}
           placeholderTextColor={colors.text2}
           multiline
           value={reportReason}
@@ -138,7 +140,7 @@ const ReportScreen = () => {
           style={[styles.submitButton, {backgroundColor: appColors.blue}]}
           onPress={handleSubmitReport}>
           <Text style={[styles.submitText, {color: appColors.white}]}>
-            Gửi báo cáo
+            {t('send_report')}
           </Text>
         </TouchableOpacity>
       </View>

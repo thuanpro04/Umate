@@ -1,20 +1,16 @@
+import { ArrowRight2 } from 'iconsax-react-native';
+import React, { ReactNode } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   StyleProp,
-  ViewStyle,
-  Image,
+  StyleSheet,
+  ViewStyle
 } from 'react-native';
-import React, {ReactNode} from 'react';
-import {ArrowRight2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import TextComponent from './TextComponent';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import RowComponent from './RowComponent';
-import {globalStyles} from '../../Styles/globalStyle';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import TextComponent from './TextComponent';
 interface Props {
   label: string;
   onPress?: () => void;

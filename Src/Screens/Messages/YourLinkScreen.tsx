@@ -11,12 +11,14 @@ import {ArrowLeft2} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import CustormLinkPreview from '../Components/CustormLinkPreview';
 import CardLinkComponent from './Component/CardLinkComponent';
+import { useTranslation } from 'react-i18next';
 
 const YourLinkScreen = () => {
   const {id, type} = useRoute().params as {id: string; type: string};
   const [links, setLinks] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
 
   useFocusEffect(
     useCallback(() => {
@@ -50,7 +52,7 @@ const YourLinkScreen = () => {
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
-        title="Your link"
+        title={t('yourlink')}
       />
       <FlatList
         style={{flex: 1, paddingHorizontal: 12}}

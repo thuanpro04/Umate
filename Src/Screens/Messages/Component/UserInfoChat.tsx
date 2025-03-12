@@ -38,6 +38,8 @@ import ActionModal from '../../Modal/ActionModal';
 import {userServices} from '../../Services/userService';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
 import {groupServices} from '../../Services/groupServices';
+import {useTranslation} from 'react-i18next';
+import FastImage from 'react-native-fast-image';
 const UserInfoChat = ({navigation}: any) => {
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
@@ -50,6 +52,8 @@ const UserInfoChat = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
+  const {t} = useTranslation();
+
   const name =
     converInfo.nickNames && converInfo.nickNames[converInfo.userId]
       ? converInfo.nickNames[converInfo.userId]
@@ -163,8 +167,8 @@ const UserInfoChat = ({navigation}: any) => {
               element.id === 5 &&
               friendData.block &&
               friendData.block.includes(converInfo.userId)
-                ? `Un${element.label}`
-                : element.label
+                ? t(`unblock`)
+                : t(`${element.label}`)
             }
             icon={element.icon}
             onPress={() => onPressItems(element.id)}
@@ -190,7 +194,7 @@ const UserInfoChat = ({navigation}: any) => {
           borderBottomRightRadius: index === data.length - 1 ? 12 : 0,
         }}>
         <CarfeatureComponent
-          label={item.title}
+          label={t(`${item.title}`)}
           icon={item.icon}
           styles={{
             backgroundColor: showItems[item.key]
@@ -243,6 +247,7 @@ const UserInfoChat = ({navigation}: any) => {
       console.log('out group error: ', error);
     }
   };
+
   return (
     <SafeAreaView
       style={[globalStyles.main, {backgroundColor: colors.background}]}>
@@ -253,12 +258,14 @@ const UserInfoChat = ({navigation}: any) => {
       <ScrollView style={{flex: 1}}>
         <View style={styles.container}>
           {converInfo ? (
-            <Image
+            <FastImage
               source={{
                 uri:
                   converInfo.type === 'personal'
                     ? converInfo.avatar
                     : converInfo.avatar,
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
               }}
               style={styles.avatar}
             />
@@ -280,10 +287,17 @@ const UserInfoChat = ({navigation}: any) => {
             {converInfo && (
               <>
                 <CustomCallButtonComponent
+                  blockId={
+                    converInfo.block && converInfo.type === 'personal'
+                      ? converInfo.block[0]
+                      : ''
+                  }
                   isDisible={
                     (converInfo.block &&
+                      converInfo.type === 'personal' &&
                       converInfo.block.includes(auth.userId)) ||
                     (friendData.block &&
+                      converInfo.type === 'personal' &&
                       friendData.block.includes(converInfo.userId))
                   }
                   type={
@@ -312,6 +326,11 @@ const UserInfoChat = ({navigation}: any) => {
                   icon={<CallCalling color="blue" size={22} />}
                 />
                 <CustomCallButtonComponent
+                  blockId={
+                    converInfo.block && converInfo.type === 'personal'
+                      ? converInfo.block[0]
+                      : ''
+                  }
                   isDisible={
                     (converInfo.block &&
                       converInfo.block.includes(auth.userId)) ||
@@ -383,8 +402,8 @@ const UserInfoChat = ({navigation}: any) => {
                 <TextComponent
                   label={
                     converInfo.type === 'group' && item.key === 'personal'
-                      ? 'Thành viên'
-                      : item?.name
+                      ? t('member')
+                      : t(`${item?.name}`)
                   }
                   size={12}
                   styles={{fontStyle: 'italic'}}
@@ -395,7 +414,7 @@ const UserInfoChat = ({navigation}: any) => {
         </View>
         <SpaceComponent height={100} />
         <View style={{flex: 1}}>
-          <TextComponent label="Chức năng" title />
+          <TextComponent label={t('feature')} title styles={{marginLeft: 12}} />
           <SpaceComponent height={12} />
           {renderCategory()}
         </View>
@@ -406,16 +425,16 @@ const UserInfoChat = ({navigation}: any) => {
         onPressYes={async () =>
           await actionBlockUser(auth.userId, converInfo.userId)
         }
-        descriptions={`Do you really want to ${
+        descriptions={`${
           friendData.block && friendData.block.includes(converInfo.userId)
-            ? ' un'
-            : ''
-        }block this friend?`}
-        title={`Bạn có thực sự muốn${
+            ? t('confirm_unblock') + UserInfo.getName(converInfo.name)
+            : t('confirm_block') + UserInfo.getName(converInfo.name)
+        }`}
+        title={`${
           friendData.block && friendData.block.includes(converInfo.userId)
-            ? ' bỏ'
-            : ''
-        } chặn ${name} không`}
+            ? t('unblock_friend') + UserInfo.getName(converInfo.name)
+            : t('block_friend') + UserInfo.getName(converInfo.name)
+        }`}
       />
     </SafeAreaView>
   );

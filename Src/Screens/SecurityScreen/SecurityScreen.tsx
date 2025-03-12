@@ -5,12 +5,22 @@ import {
   Alert,
   TouchableOpacity,
   StatusBar,
+  SafeAreaView,
 } from 'react-native';
-import {Smartphone, LogOut, Trash2} from 'lucide-react-native';
+import {Smartphone, LogOut, Trash2, icons} from 'lucide-react-native';
 import {View} from 'react-native';
-import {SpaceComponent, TextComponent} from '../Components';
+import {HeaderComponent, SpaceComponent, TextComponent} from '../Components';
+import {globalStyles} from '../../Styles/globalStyle';
+import {ArrowLeft2} from 'iconsax-react-native';
+import {appInfo} from '../../Theme/appInfo';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {appColors} from '../../Theme/Colors/appColors';
+import {useTranslation} from 'react-i18next';
 
 const SecurityScreen = ({navigation}: any) => {
+  const {t} = useTranslation();
+
   const SecurityOption = ({icon: Icon, title, description, onPress}: any) => {
     return (
       <TouchableOpacity
@@ -18,7 +28,7 @@ const SecurityScreen = ({navigation}: any) => {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: '#fff',
+          backgroundColor: colors.card,
           padding: 16,
           borderRadius: 12,
           marginBottom: 12,
@@ -36,7 +46,7 @@ const SecurityScreen = ({navigation}: any) => {
             label={title}
             styles={{fontSize: 16, fontWeight: '600', marginBottom: 4}}
           />
-          
+
           <TextComponent
             label={description}
             styles={{fontSize: 14, color: '#6B7280'}}
@@ -45,42 +55,52 @@ const SecurityScreen = ({navigation}: any) => {
       </TouchableOpacity>
     );
   };
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   return (
-    <ScrollView
-      style={{padding: 16, marginTop: StatusBar.currentHeight, flex: 1}}>
-      <TextComponent label="🔒 Cài đặt Bảo mật" />
-      <SpaceComponent height={12} />
-      <SecurityOption
-        icon={Smartphone}
-        title="Thiết bị & Phiên đăng nhập"
-        description="Xem và quản lý các thiết bị đang đăng nhập"
-        onPress={() => navigation.navigate('LoginSessions')}
-      />
-
-      <SecurityOption
-        icon={LogOut}
-        title="Đăng xuất khỏi tất cả thiết bị"
-        description="Bảo vệ tài khoản bằng cách đăng xuất khỏi mọi thiết bị"
-        onPress={() =>
-          Alert.alert('Xác nhận', 'Đăng xuất khỏi tất cả thiết bị?', [
-            {text: 'Hủy', style: 'cancel'},
-            {text: 'Xác nhận', onPress: () => {}},
-          ])
+    <SafeAreaView
+      style={[globalStyles.container, {backgroundColor: colors.background}]}>
+      <HeaderComponent
+        iconLeft={
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
+        onPress1={() => navigation.goBack()}
       />
+      <View style={{paddingHorizontal: 16}}>
+        <TextComponent label={t('security_settings')} title />
+        <SpaceComponent height={12} />
+        <SecurityOption
+          icon={Smartphone}
+          title={t('devices_sessions')}
+          description={t('devices_sessions_description')}
+          onPress={() => navigation.navigate('LoginSessions')}
+        />
 
-      <SecurityOption
-        icon={Trash2}
-        title="Xóa tài khoản"
-        description="Xóa tài khoản và dữ liệu khỏi hệ thống"
-        onPress={() =>
-          Alert.alert('Xác nhận xóa', 'Bạn có chắc muốn xóa tài khoản?', [
-            {text: 'Hủy', style: 'cancel'},
-            {text: 'Xóa', style: 'destructive', onPress: () => {}},
-          ])
-        }
-      />
-    </ScrollView>
+        <SecurityOption
+          icon={LogOut}
+          title={t('logout_all_devices')}
+          description={t('logout_all_devices_description')}
+          onPress={() =>
+            Alert.alert(t('comfirm'), t('logout_all_devices_question'), [
+              {text: t('cancel'), style: 'cancel'},
+              {text: t('agree'), onPress: () => {}},
+            ])
+          }
+        />
+
+        <SecurityOption
+          icon={Trash2}
+          title={t('delete_account')}
+          description={t('delete_account_description')}
+          onPress={() =>
+            Alert.alert(t('comfirm'), t('confirm_delete_account'), [
+              {text: t('cancel'), style: 'cancel'},
+              {text: t('agree'), style: 'destructive', onPress: () => {}},
+            ])
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 

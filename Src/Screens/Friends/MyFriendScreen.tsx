@@ -1,14 +1,13 @@
 import React from 'react';
 import {Image, StatusBar, View} from 'react-native';
 import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {RowComponent, SearchFriendsComponent} from '../Components';
-import TabTopNavigator from '../Navigators/TabTopNavigator';
 import TabViewFriend from '../Navigators/TabViewFriend';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import FastImage from 'react-native-fast-image';
 
 const MyFriendScreen = ({navigation}: any) => {
   const user = useSelector(profileSelector);
@@ -23,7 +22,14 @@ const MyFriendScreen = ({navigation}: any) => {
       }}>
       <RowComponent styles={{paddingHorizontal: 12, paddingVertical: 6}}>
         <RowComponent onPress={() => navigation.openDrawer()}>
-          <Image source={{uri: user.avatar}} style={globalStyles.avatar} />
+          <FastImage
+            source={{
+              uri: user.avatar,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
+            }}
+            style={globalStyles.avatar}
+          />
         </RowComponent>
         <SearchFriendsComponent
           onPress={() => navigation.navigate('Search', {key: 'searchFriends'})}

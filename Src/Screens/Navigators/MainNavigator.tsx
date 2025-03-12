@@ -27,6 +27,7 @@ import CallWaitingScreen from '../VideoCall/CallWaitingScreen';
 import CallWaitingAccept from '../VideoCall/CallWaitingAccept';
 import TrashConversation from '../Messages/TrashConversation';
 import ReportScreen from '../Report/ReportScreen';
+import ScanBarcode from '../QRCode/ScanBarcode';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -62,6 +63,7 @@ const MainNavigator = () => {
       <Stack.Screen name="CallWaitingAccept" component={CallWaitingAccept} />
       <Stack.Screen name="TrashConversation" component={TrashConversation} />
       <Stack.Screen name="ReportScreen" component={ReportScreen} />
+      <Stack.Screen name="ScanBarcode" component={ScanBarcode} />
       
       
     </Stack.Navigator>

@@ -1,4 +1,4 @@
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import QRCode from 'react-native-qrcode-svg';
 import {useSelector} from 'react-redux';
@@ -9,14 +9,18 @@ import {
   RowComponent,
   SpaceComponent,
 } from '../Components';
-import {ArrowLeft} from 'iconsax-react-native';
+import {ArrowLeft, ArrowLeft2} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {globalStyles} from '../../Styles/globalStyle';
 import LinearGradient from 'react-native-linear-gradient';
+import ScanBarcode from './ScanBarcode';
+import {useTranslation} from 'react-i18next';
 
 const UserQRCode = ({navigation}: any) => {
   const auth = useSelector(authSelector);
+  const {t} = useTranslation();
+
   const [isFocused, setIsFocused] = useState(true);
   const qrData = JSON.stringify({
     userId: auth.userId,
@@ -24,22 +28,19 @@ const UserQRCode = ({navigation}: any) => {
   const renderQRCodeSvg = () => {
     return (
       <View style={styles.qrWrapper}>
-        <Text style={styles.title}>Mã QR Cá Nhân</Text>
+        <Text style={styles.title}>{t('personal_qr')}</Text>
         <QRCode value={qrData} size={220} />
       </View>
     );
   };
   const renderScanner = () => {
-    return <></>;
+    return <ScanBarcode />;
   };
   return (
-    <LinearGradient
-      colors={['#0052D4', '#4364F7', '#6FB1FC']}
-      style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
       <HeaderComponent
         iconLeft={
-          <ArrowLeft size={appInfo.sizeIconBold} color={appColors.white} />
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.white} />
         }
         onPress1={() => navigation.goBack()}
       />
@@ -53,7 +54,7 @@ const UserQRCode = ({navigation}: any) => {
         <RowComponent styles={{justifyContent: 'center', marginTop: 20}}>
           <ButtonComponent
             type="action"
-            label="Xem QR"
+            label={t('view_qr')}
             styles={[
               styles.btn,
               {backgroundColor: isFocused ? appColors.white : appColors.blue},
@@ -63,7 +64,7 @@ const UserQRCode = ({navigation}: any) => {
           />
           <ButtonComponent
             type="action"
-            label="Quét QR"
+            label={t('scan_qr')}
             styles={[
               styles.btn,
               {backgroundColor: isFocused ? appColors.blue : appColors.white},
@@ -73,7 +74,7 @@ const UserQRCode = ({navigation}: any) => {
           />
         </RowComponent>
       </View>
-    </LinearGradient>
+    </SafeAreaView>
   );
 };
 
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: StatusBar.currentHeight,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   qrWrapper: {
     backgroundColor: '#FFF',

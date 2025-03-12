@@ -5,6 +5,7 @@ import {themeReducer} from './reducers/themeSlice';
 import {configureStore} from '@reduxjs/toolkit';
 import {authReducer} from './reducers/authReducer';
 import {socketReducer} from './reducers/socketSlice';
+import {languageReducer} from './reducers/languageSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     friends: friendReducer,
     events: eventReducer,
     socket: socketReducer,
+    language: languageReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

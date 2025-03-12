@@ -21,6 +21,7 @@ import {UserInfo} from '../Untils/UserInfo';
 import {friendServices} from '../Services/friendService.';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {MenuChat} from '../../data/MenuItems';
+import {useTranslation} from 'react-i18next';
 
 const FriendScreens = ({navigation}: any) => {
   const [data, setData] = useState<any[]>([]);
@@ -31,6 +32,7 @@ const FriendScreens = ({navigation}: any) => {
   const user = useSelector(friendSelector);
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
+  const {t} = useTranslation();
 
   const dispatch = useDispatch();
   const handleGetAllUserInfo = async () => {
@@ -95,7 +97,7 @@ const FriendScreens = ({navigation}: any) => {
             }}
             userId={item.userId}
             icon={<MoreVerticalIcon size={22} color={colors.icon} />}
-            authori={item.majoring ?? 'chuyên ngành'}
+            authori={item.majoring ?? t('majoring')}
             userName={item.name}
             url={item.avatar}
             onPressMore={() => {}}
@@ -109,8 +111,8 @@ const FriendScreens = ({navigation}: any) => {
               closeModalAction();
             }}
             onPressYes={async () => await handleRemoveFriend(item.userId)}
-            descriptions="Do you really want to remove this friend?"
-            title={`Hủy kết bạn với ${UserInfo.getName(item.name)}`}
+            descriptions={t('remove_friend_confirmation')}
+            title={`${t('unfriend ')}${UserInfo.getName(item.name)}`}
           />
           <ActionModal
             visible={isShowBlockModal}
@@ -118,16 +120,16 @@ const FriendScreens = ({navigation}: any) => {
             onPressYes={async () =>
               await actionBlockUser(auth.userId, item.userId)
             }
-            descriptions={`Do you really want to ${
+            descriptions={
               friendData.block && friendData.block.includes(item.userId)
-                ? ' un'
-                : ''
-            }block this friend?`}
-            title={`Bạn có thực sự muốn${
+                ? t('unblock_friend')
+                : t('block_friend')
+            }
+            title={
               friendData.block && friendData.block.includes(item.userId)
-                ? ' bỏ'
-                : ''
-            } chặn ${UserInfo.getName(item.name)} không`}
+                ? t('confirm_unblock') + UserInfo.getName(item.name)
+                : t('confirm_block') + UserInfo.getName(item.name)
+            }
           />
         </React.Fragment>
       );
@@ -144,7 +146,7 @@ const FriendScreens = ({navigation}: any) => {
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
-        title="Quản lí bạn bè"
+        title={t('manage_friends')}
         iconLeft={<ArrowLeft size={appInfo.sizeIconBold} color={colors.icon} />}
       />
       <FlatList

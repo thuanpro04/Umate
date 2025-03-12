@@ -24,6 +24,7 @@ import {useSelector} from 'react-redux';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
 import {socketSelector} from '../../../redux/reducers/socketSlice';
 import {Notification} from '../../Untils/Notification';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   icon?: React.ReactNode;
@@ -39,6 +40,7 @@ interface Props {
   txtStyles?: StyleProp<TextStyle>;
   type: 'group_voice' | 'group_video' | 'personal_voice' | 'personal_video';
   isDisible: Boolean;
+  blockId: string;
 }
 
 const CustomCallButtonComponent = (props: Props) => {
@@ -54,9 +56,11 @@ const CustomCallButtonComponent = (props: Props) => {
     txtStyles,
     type,
     isDisible,
+    blockId,
   } = props;
   const navigation = useNavigation<any>();
   const socket = useSelector(socketSelector).socket;
+  const {t} = useTranslation();
 
   const profile = useSelector(profileSelector);
 
@@ -67,8 +71,6 @@ const CustomCallButtonComponent = (props: Props) => {
       return;
     }
     try {
-      // Tạo một callID duy nhất
-
       const callData = {
         callID,
         targetId,
@@ -94,7 +96,11 @@ const CustomCallButtonComponent = (props: Props) => {
   };
   const handleToastNotificationBlock = () => {
     if (isDisible) {
-      Notification.showSnackbar('Mở chặn đi gòi nhắn 😏', () => {});
+      if (blockId !== userId) {
+        Notification.showSnackbar(t('unblock_and_call'), () => {});
+      } else {
+        Notification.showSnackbar(t('you_are_blocked'), () => {});
+      }
     }
   };
   return (

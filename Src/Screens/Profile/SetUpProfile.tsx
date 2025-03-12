@@ -1,34 +1,29 @@
 import AsyncStorage, {
   useAsyncStorage,
 } from '@react-native-async-storage/async-storage';
-import storage from '@react-native-firebase/storage';
 import {
   ArrowLeft2,
   ArrowSquareDown,
   Camera,
   Edit2,
   Man,
-  More,
   Woman,
 } from 'iconsax-react-native';
+import {debounce} from 'lodash';
 import React, {useCallback, useState} from 'react';
-import {
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Vibration,
-  View,
-} from 'react-native';
+import {Image, SafeAreaView, ScrollView, View} from 'react-native';
 import {ImageOrVideo} from 'react-native-image-crop-picker';
 import {useDispatch, useSelector} from 'react-redux';
+import {address} from '../../data/address';
+import {majors} from '../../data/majoring';
 import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
-  ContainerComponent,
   HeaderComponent,
   RowComponent,
   SpaceComponent,
@@ -36,18 +31,15 @@ import {
 } from '../Components';
 import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
 import EditUserModal from '../Modal/EditUserModal';
+import LoadingModal from '../Modal/LoadingModal';
+import UpdateInfoModal from '../Modal/UpdateInfoModal';
+import {imageService} from '../Services/imageService';
 import {userServices} from '../Services/userService';
 import {Notification} from '../Untils/Notification';
 import {UserInfo} from '../Untils/UserInfo';
-import LoadingModal from '../Modal/LoadingModal';
-import {imageService} from '../Services/imageService';
-import UpdateInfoModal from '../Modal/UpdateInfoModal';
 import {profileStyles} from './profileStyles';
-import {debounce} from 'lodash';
-import {majors} from '../../data/majoring';
-import {address} from '../../data/address';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
+import FastImage from 'react-native-fast-image';
 interface ProfileType {
   userName: string;
   majoring: string;
@@ -68,6 +60,8 @@ const SetUpProfile = ({navigation}: any) => {
   const [errors, setErrors] = useState({className: '', majoring: '', sex: ''});
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const initialProfile: ProfileType = {
     userName: UserInfo.getName(user.name),
     majoring: user.majoring ?? '',
@@ -142,15 +136,11 @@ const SetUpProfile = ({navigation}: any) => {
 
   const handleNotification = (key: 'error' | 'sucess') => {
     key === 'error'
-      ? Notification.showToast(
-          'error',
-          'Save failed',
-          'Please fill in all information😔',
-        )
+      ? Notification.showToast('error', t('save_failed'), t('fill_all_info'))
       : Notification.showToast(
           'success',
-          'Setup Success',
-          'Welcome to UMate 👋',
+          t('setup_success'),
+          t('welcome_umate'),
         );
   };
 
@@ -191,7 +181,7 @@ const SetUpProfile = ({navigation}: any) => {
     label: string,
     IconComponent: any,
   ) => (
-    <View >
+    <View>
       <ButtonComponent
         type="action"
         iconLeft={
@@ -228,7 +218,7 @@ const SetUpProfile = ({navigation}: any) => {
       style={[profileStyles.container, {backgroundColor: colors.background}]}
       key={refreshKey}>
       <HeaderComponent
-        title="Profile"
+        title={t('profile')}
         iconLeft={
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
@@ -236,8 +226,12 @@ const SetUpProfile = ({navigation}: any) => {
       <SpaceComponent height={12} />
       <ScrollView>
         <View style={profileStyles.centered}>
-          <Image
-            source={{uri: profile.avatar}}
+          <FastImage
+            source={{
+              uri: profile.avatar,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
+            }}
             resizeMode="cover"
             style={[
               globalStyles.userImg,
@@ -259,7 +253,7 @@ const SetUpProfile = ({navigation}: any) => {
         <SpaceComponent height={20} />
         <View style={profileStyles.content}>
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="UserName" styles={globalStyles.label} />
+            <TextComponent label={t('name')} styles={globalStyles.label} />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('userName')}>
@@ -269,7 +263,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
 
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Sex" styles={globalStyles.label} />
+            <TextComponent label={t('sex')} styles={globalStyles.label} />
             <RowComponent styles={profileStyles.genderRow}>
               {renderGenderButton('men', 'Men', Man)}
               {renderGenderButton('woman', 'Women', Woman)}
@@ -277,7 +271,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
 
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Majoring" styles={globalStyles.label} />
+            <TextComponent label={t('majoring')} styles={globalStyles.label} />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('majoring')}>
@@ -293,7 +287,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
           <SpaceComponent height={18} />
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="className" styles={globalStyles.label} />
+            <TextComponent label={t('classname')} styles={globalStyles.label} />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('className')}>
@@ -306,7 +300,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
           <SpaceComponent height={18} />
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Address" styles={globalStyles.label} />
+            <TextComponent label={t('address')} styles={globalStyles.label} />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('address')}>
@@ -323,7 +317,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
           <SpaceComponent height={18} />
           <RowComponent styles={globalStyles.spaceBetween}>
-            <TextComponent label="Link" styles={globalStyles.label} />
+            <TextComponent label={t('link_fb')} styles={globalStyles.label} />
             <RowComponent
               styles={globalStyles.inputRow}
               onPress={() => handleModal('link')}>
@@ -332,7 +326,7 @@ const SetUpProfile = ({navigation}: any) => {
                 color={appColors.grey}
               />
               <Edit2
-                color={errors.majoring ? appColors.red :colors.icon}
+                color={errors.majoring ? appColors.red : colors.icon}
                 size={appInfo.sizeIcon}
               />
             </RowComponent>
@@ -355,7 +349,7 @@ const SetUpProfile = ({navigation}: any) => {
           </RowComponent>
           <SpaceComponent height={50} />
           <ButtonComponent
-            label="Save"
+            label={t('save')}
             styles={{paddingVertical: 8}}
             onPress={debounce(() => {
               setLoading(true);

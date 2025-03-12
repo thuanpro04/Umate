@@ -28,6 +28,7 @@ import {themeSelector} from '../../redux/reducers/themeSlice';
 import {socketSelector} from '../../redux/reducers/socketSlice';
 import Share from 'react-native-share';
 import Mailer from 'react-native-mail';
+import FastImage from 'react-native-fast-image';
 
 interface Props {
   title: string;
@@ -85,7 +86,6 @@ const ShareEventModal = (props: Props) => {
           ...messageData,
           groupId: Id,
         };
-       
 
         socket.emit('send_message', data, (response: any) => {
           console.log(
@@ -194,7 +194,14 @@ const ShareEventModal = (props: Props) => {
           )
         }
         style={{marginRight: 12, alignItems: 'center'}}>
-        <Image source={{uri: item.avatar}} style={globalStyles.userImg} />
+        <FastImage
+          source={{
+            uri: item.avatar,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
+          style={globalStyles.userImg}
+        />
         <SpaceComponent height={6} />
         <TextComponent
           label={

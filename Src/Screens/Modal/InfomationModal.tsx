@@ -9,6 +9,7 @@ import {appColors} from '../../Theme/Colors/appColors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import { useTranslation } from 'react-i18next';
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -17,10 +18,12 @@ interface Props {
   onPressRemove: () => void;
 }
 const InfomationModal = (props: Props) => {
-  const {visible, onClose, onPressAddGroud, listUser,onPressRemove} = props;
+  const {visible, onClose, onPressAddGroud, listUser, onPressRemove} = props;
   const modalizeRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   useEffect(() => {
     if (visible) {
       modalizeRef.current?.open();
@@ -32,7 +35,7 @@ const InfomationModal = (props: Props) => {
     {
       key: 'addgroup',
       icon: <LikeDislike size={appInfo.sizeIconBold} color={colors.icon} />,
-      name: 'Add group',
+      name: t('create_group'),
       onPress: () => onPressAddGroud(),
     },
     {
@@ -44,13 +47,13 @@ const InfomationModal = (props: Props) => {
           color={colors.icon}
         />
       ),
-      name: 'Ghim conversation',
+      name: t('ghim'),
       onPress: () => console.log('hello'),
     },
     {
       key: 'removeconversation',
       icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
-      name: 'Remove conversation',
+      name: t('remove_conversation'),
       onPress: () => onPressRemove(),
     },
   ];

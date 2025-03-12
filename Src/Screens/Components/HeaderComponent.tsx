@@ -10,6 +10,7 @@ import {globalStyles} from '../../Styles/globalStyle';
 import SpaceComponent from './SpaceComponent';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {useSelector} from 'react-redux';
+import FastImage from 'react-native-fast-image';
 interface Props {
   title?: string;
   iconLeft?: ReactNode;
@@ -68,7 +69,16 @@ const HeaderComponent = (props: Props) => {
 
         {image && (
           <>
-            {image && <Image source={{uri: image}} style={localStyles.image} />}
+            {image && (
+              <FastImage
+                source={{
+                  uri: image,
+                  priority: FastImage.priority.high,
+                  cache: FastImage.cacheControl.immutable,
+                }}
+                style={localStyles.image}
+              />
+            )}
             <TextComponent
               label={title ?? ''}
               styles={{

@@ -1,24 +1,21 @@
+import React, {ReactNode, useState} from 'react';
 import {
-  View,
-  Text,
+  Keyboard,
   KeyboardType,
   StyleProp,
-  ViewStyle,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Keyboard,
   TouchableWithoutFeedback,
+  ViewStyle,
 } from 'react-native';
-import React, {ReactNode, useEffect, useRef, useState} from 'react';
-import RowComponent from './RowComponent';
-import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {appInfo} from '../../Theme/appInfo';
-import ButtonComponent from './ButtonComponent';
-import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import ButtonComponent from './ButtonComponent';
+import RowComponent from './RowComponent';
 interface Props {
   value: string;
   onChange: (val: string) => void;
@@ -26,7 +23,7 @@ interface Props {
   placehold?: string;
   placeholdColor?: string;
   subffix?: ReactNode;
-  isPass?: boolean;
+
   allowClear?: boolean;
   type?: KeyboardType;
   onEnd?: () => void;
@@ -53,7 +50,6 @@ const InputComponent = (props: Props) => {
     type,
     styles,
     placehold,
-    isPass,
     onPress,
     isFocused,
     onPressFilter,
@@ -62,8 +58,6 @@ const InputComponent = (props: Props) => {
     onBlur,
     placeholdColor,
   } = props;
-
-  const [isShowPass, setIsShowPass] = useState(isPass ?? false);
 
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -92,7 +86,6 @@ const InputComponent = (props: Props) => {
           blurOnSubmit={false}
           multiline={multiline}
           numberOfLines={numberOfLines}
-          secureTextEntry={isShowPass}
           onChangeText={(element): any => onChange(element)}
           keyboardType={type ?? 'default'}
           autoCapitalize="none"

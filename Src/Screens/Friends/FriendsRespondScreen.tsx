@@ -19,6 +19,7 @@ import {friendServices} from '../Services/friendService.';
 import {messageServices} from '../Services/messageServices';
 import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
+import {useTranslation} from 'react-i18next';
 
 const initialUser = {
   avatar: '',
@@ -40,6 +41,7 @@ const FriendsRespondScreen = () => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
+  const {t} = useTranslation();
   const [useBlock, setUseBlock] = useState<any[]>([]);
   const navigation: any = useNavigation();
   const [isModal, setIsModal] = useState(false);
@@ -141,7 +143,7 @@ const FriendsRespondScreen = () => {
       <React.Fragment key={index}>
         <SpaceComponent height={14} />
         <CarUserComponent
-          majoring={item.majoring ?? 'Chuyên ngành'}
+          majoring={item.majoring ?? t('majoring')}
           key={item.userId}
           img={item.avatar}
           name={UserInfo.getName(item.name)}
@@ -151,15 +153,14 @@ const FriendsRespondScreen = () => {
           onPressPersonal={() => onNavigationaProfile(item.userId)}
           onPressEllipsis={() => handleOpenModal(item)}
         />
-
         <ActionModal
           visible={isShowUnfriendModal}
           onPressNo={() => {
             closeModalAction();
           }}
           onPressYes={async () => await handleRemoveFriend(selectedUser.userId)}
-          descriptions="Do you really want to remove this friend?"
-          title={`Hủy kết bạn với ${UserInfo.getName(item.name)}`}
+          descriptions={t('remove_friend_confirmation')}
+          title={`${t('unfriend')} ${UserInfo.getName(item.name)}`}
         />
       </React.Fragment>
     );
@@ -210,16 +211,16 @@ const FriendsRespondScreen = () => {
         onPressYes={async () =>
           await actionBlockUser(auth.userId, selectedUser.userId)
         }
-        descriptions={`Do you really want to ${
+        descriptions={
           friendData.block && friendData.block.includes(selectedUser.userId)
-            ? ' un'
-            : ''
-        }block this friend?`}
-        title={`Bạn có thực sự muốn${
+            ? t('unblock_friend')
+            : t('block_friend')
+        }
+        title={
           friendData.block && friendData.block.includes(selectedUser.userId)
-            ? ' bỏ'
-            : ''
-        } chặn ${UserInfo.getName(selectedUser.name)} không`}
+            ? t('confirm_unblock') + UserInfo.getName(selectedUser.name)
+            : t('confirm_block') + UserInfo.getName(selectedUser.name)
+        }
       />
     </SafeAreaView>
   );
