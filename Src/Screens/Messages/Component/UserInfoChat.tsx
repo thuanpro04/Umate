@@ -5,6 +5,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {ArrowLeft, CallCalling, Video} from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -40,17 +41,21 @@ import CustomCallButtonComponent from './CustomCallButtonComponent';
 import {groupServices} from '../../Services/groupServices';
 import {useTranslation} from 'react-i18next';
 import FastImage from 'react-native-fast-image';
+import QrCodeModal from '../../Modal/QrCodeModal';
+import {socketSelector} from '../../../redux/reducers/socketSlice';
+import {Notification} from '../../Untils/Notification';
 const UserInfoChat = ({navigation}: any) => {
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
+  const [isVisibleQR, setIsVisibleQR] = useState(false);
   const [isShowBlockModal, setShowBlockModal] = useState(false);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
   const friendData = useSelector(friendSelector);
   const [statusNotification, setStatusNotification] = useState(false);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme ?? 'light'];
+  const colors: any = appColors[converInfo.theme ?? 'light'];
+  const socket = useSelector(socketSelector).socket;
   const dispatch = useDispatch();
   const {t} = useTranslation();
 
@@ -107,9 +112,13 @@ const UserInfoChat = ({navigation}: any) => {
 
   const onPressItems = (key: string) => {
     // xử lí group
+    console.log(key);
+
     switch (key) {
       case 'topic':
-        console.log('Thay đổi chủ đề !!');
+        navigation.navigate('ThemeChatScreen', {
+          converInfo,
+        });
         break;
       case 'nickname':
         navigation.navigate('CustormNickNameScreen', {
@@ -123,6 +132,7 @@ const UserInfoChat = ({navigation}: any) => {
               ? converInfo.conversationId
               : converInfo.groupId,
           type: converInfo.type,
+          theme: converInfo.theme,
         });
         break;
       case 'link':
@@ -132,6 +142,7 @@ const UserInfoChat = ({navigation}: any) => {
               ? converInfo.conversationId
               : converInfo.groupId,
           type: converInfo.type,
+          theme: converInfo.theme,
         });
         break;
       case 'block':
@@ -152,28 +163,85 @@ const UserInfoChat = ({navigation}: any) => {
       case 'outgroup':
         handleOutGroup();
         break;
+      case 'qrcode':
+        setIsVisibleQR(true);
+
+        break;
       default:
         break;
     }
   };
+  const showNotification_QrCode = (time: string, data: any) => {
+    Alert.alert(
+      t('confirm'), // Tiêu đề
+      t('warning_qr') + time + ' ' + t('minutes'), // Nội dung
+      [
+        {
+          text: t('cancel'), // Nút No
+          style: 'cancel', // Kiểu nút
+          onPress: () => setIsVisibleQR(false),
+        },
+        {
+          text: t('agree'), // Nút Yes
+          onPress: () => HandleSendQRForGroup(time, data),
+        },
+      ],
+    );
+  };
+  const HandleSendQRForGroup = async (time: string, data: any) => {
+    try {
+      const messageData = {
+        senderId: auth.userId,
+        content: time.trim(),
+        imagesUrl: [],
+        groupId: converInfo.groupId,
+        qrData: data,
+      };
+
+      socket.emit('send_qrcode', messageData);
+      setIsVisibleQR(false);
+      Notification.showToast('success', t('notification'), t('create_qr'));
+    } catch (error) {}
+  };
 
   const renderObjectCategory = (item: any[]) => {
+    const condition =
+      converInfo.leader.userId === auth.userId ||
+      converInfo.deputyLeader.userId === auth.userId;
+
     return (
       <View style={styles.showItemStyle}>
-        {item.map((element, index) => (
-          <CarfeatureComponent
-            key={index}
-            label={
-              element.id === 5 &&
-              friendData.block &&
-              friendData.block.includes(converInfo.userId)
-                ? t(`unblock`)
-                : t(`${element.label}`)
-            }
-            icon={element.icon}
-            onPress={() => onPressItems(element.id)}
-          />
-        ))}
+        {item.map((element, index) =>
+          element.id === 'qrcode' ? (
+            condition && (
+              <CarfeatureComponent
+                key={index}
+                label={
+                  element.id === 5 &&
+                  friendData.block &&
+                  friendData.block.includes(converInfo.userId)
+                    ? t(`unblock`)
+                    : t(`${element.label}`)
+                }
+                icon={element.icon}
+                onPress={() => onPressItems(element.id)}
+              />
+            )
+          ) : (
+            <CarfeatureComponent
+              key={index}
+              label={
+                element.id === 5 &&
+                friendData.block &&
+                friendData.block.includes(converInfo.userId)
+                  ? t(`unblock`)
+                  : t(`${element.label}`)
+              }
+              icon={element.icon}
+              onPress={() => onPressItems(element.id)}
+            />
+          ),
+        )}
       </View>
     );
   };
@@ -435,6 +503,13 @@ const UserInfoChat = ({navigation}: any) => {
             ? t('unblock_friend') + UserInfo.getName(converInfo.name)
             : t('block_friend') + UserInfo.getName(converInfo.name)
         }`}
+      />
+      <QrCodeModal
+        type={converInfo.type}
+        groupId={converInfo.type === 'group' && converInfo.groupId}
+        visible={isVisibleQR}
+        onClose={() => setIsVisibleQR(false)}
+        onPress={showNotification_QrCode}
       />
     </SafeAreaView>
   );

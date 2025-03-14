@@ -15,6 +15,7 @@ import {
   Image,
   People,
   UserAdd,
+  Message2,
 } from 'iconsax-react-native';
 import {appInfo} from '../Theme/appInfo';
 import {appColors} from '../Theme/Colors/appColors';
@@ -22,14 +23,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Octicons from 'react-native-vector-icons/Octicons';
-import {Flag, ImageIcon, ShieldOff, UserX, ZoomOut} from 'lucide-react-native';
+import {Flag, ImageIcon, ShieldOff, UserCheck, UserX, ZoomOut} from 'lucide-react-native';
 
 const size = appInfo.sizeIcon;
 const color = appColors.blue2;
 const MenuItems = [
   {
-    key: 'profile',
-    title: 'profile',
+    key: 'personal',
+    title: 'personal',
     icon: <User size={size} color={color} variant="Bulk" />,
   },
   {
@@ -160,6 +161,17 @@ const MenuChat = colors => {
             />
           ),
         },
+        {
+          id: 'qrcode',
+          label: 'create_QR',
+          icon: (
+            <MaterialCommunityIcons
+              name="qrcode-scan"
+              color={colors.icon}
+              size={appInfo.sizeIcon}
+            />
+          ),
+        },
       ],
     },
     {
@@ -235,7 +247,11 @@ const MenuChat = colors => {
       name: 'Báo cáo',
       icon: <Flag color={'red'} size={18} />,
     },
-    
+    {
+      id: 'personal',
+      name: 'personal',
+      icon: <UserCheck color={'violet'} size={18} />,
+    },
  
   ];
   const attributeUser = [
@@ -254,6 +270,7 @@ const MenuChat = colors => {
       name: 'block',
       icon: <ShieldOff color={'green'} size={18} />,
     },
+    
   ];
   return {
     ChoiceItems,

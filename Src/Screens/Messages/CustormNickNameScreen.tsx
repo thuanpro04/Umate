@@ -37,9 +37,9 @@ const CustormNickNameScreen = () => {
   const [value, setValue] = useState('');
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
   const [visible, setVisible] = useState(false);
-  const colors = appColors[theme ?? 'light'];
+  const colors: any = appColors[converInfo.theme ?? 'light'];
+
   const key = converInfo.type;
   const {t} = useTranslation();
 

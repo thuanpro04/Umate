@@ -85,7 +85,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
   };
   const handleShowItemMenu = async (key: string) => {
     switch (key) {
-      case 'profile':
+      case 'personal':
         navigation.closeDrawer();
         navigation.navigate('PersonalScreen', {userId: auth.userId});
         break;
@@ -118,13 +118,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
     <View style={[localStyle.container, {backgroundColor: colors.background}]}>
       <StatusBar backgroundColor={appColors.background} />
       <SpaceComponent height={12} />
-      <TouchableOpacity
-        onPress={() => {
-          navigation.closeDrawer();
-          navigation.navigate('Profile', {
-            screen: 'profile',
-          });
-        }}>
+      <TouchableOpacity>
         {user && user.avatar ? (
           <FastImage
             source={{

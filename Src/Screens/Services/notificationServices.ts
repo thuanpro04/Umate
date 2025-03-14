@@ -21,7 +21,8 @@ const inviteToGroup = async (
     id,
     currentUserId,
     userId,
-    content: `Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm ${groupName}cùng trải nghiệm nhé!🔥`,
+    content: 'group_invite_message',
+    title: groupName,
   };
   const res = await notificationAPI.handleNotification(url, data, 'post');
   return res;
@@ -31,7 +32,7 @@ const getNotifications = async (userId: string) => {
   const res = await notificationAPI.handleNotification(url);
   return res;
 };
-const handleDeleteNotification = async (id: string| string[]) => {
+const handleDeleteNotification = async (id: string | string[]) => {
   url = `/delete?id=${id}`;
   const res = await notificationAPI.handleNotification(url);
   return res;

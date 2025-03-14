@@ -7,6 +7,7 @@ import TrashConversation from '../Messages/TrashConversation';
 import YourImagesScreen from '../Messages/YourImagesScreen';
 import YourLinkScreen from '../Messages/YourLinkScreen';
 import CustormNickNameScreen from '../Messages/CustormNickNameScreen';
+import ThemeChatScreen from '../Messages/ThemeChatScreen';
 
 const MessageNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -20,6 +21,7 @@ const MessageNavigator = () => {
       <Stack.Screen name="YourImagesScreen" component={YourImagesScreen} />   
       <Stack.Screen name="YourLinkScreen" component={YourLinkScreen} />
       <Stack.Screen name="CustormNickNameScreen" component={CustormNickNameScreen} />      
+      <Stack.Screen name="ThemeChatScreen" component={ThemeChatScreen} />      
 
 
 

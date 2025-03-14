@@ -1,29 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRoute } from '@react-navigation/native';
-import { ArrowLeft2, HeartCircle, SearchNormal } from 'iconsax-react-native';
-import { debounce } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import {useRoute} from '@react-navigation/native';
+import {ArrowLeft2, HeartCircle, SearchNormal} from 'iconsax-react-native';
+import {debounce} from 'lodash';
+import React, {useEffect, useState} from 'react';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { useSelector } from 'react-redux';
-import { Accelerate, Creativity } from '../../assets/svgs/indexSvg';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {useSelector} from 'react-redux';
+import {Accelerate, Creativity} from '../../assets/svgs/indexSvg';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   CarfeatureComponent,
   CarUserComponent,
   InputComponent,
   RowComponent,
   SpaceComponent,
-  TextComponent
+  TextComponent,
 } from '../Components';
 import CarUserChat from '../Messages/Component/CarUserChat';
-import { messageServices } from '../Services/messageServices';
-import { searchServices } from '../Services/searchServices';
-import { UserInfo } from '../Untils/UserInfo';
+import {messageServices} from '../Services/messageServices';
+import {searchServices} from '../Services/searchServices';
+import {UserInfo} from '../Untils/UserInfo';
+import {useTranslation} from 'react-i18next';
 const SearchScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
   const [messageErr, setMessageErr] = useState('');
@@ -37,15 +38,17 @@ const SearchScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const optionsKey = [
     {
       key: 'friends',
-      title: 'By friends list',
+      title: t('by_friends_list'),
       icon: <HeartCircle size={appInfo.sizeIconBold} color={appColors.blue} />,
     },
     {
       key: 'majorCategory',
-      title: 'By major category',
+      title: t('by_major'),
       icon: (
         <Creativity
           height={appInfo.sizeIconBold}
@@ -56,7 +59,7 @@ const SearchScreen = ({navigation}: any) => {
     },
     {
       key: 'className',
-      title: 'By class',
+      title: t('by_class'),
       icon: (
         <Accelerate
           height={appInfo.sizeIconBold}
@@ -135,7 +138,7 @@ const SearchScreen = ({navigation}: any) => {
           isFriend={isShowIconAddCancel}
           img={item?.avatar}
           isRequestFriend={isShowRequest}
-          majoring={item.majoring ?? 'chuyên ngành'}
+          majoring={item.majoring ?? t('majoring')}
         />
       </View>
     );
@@ -198,7 +201,7 @@ const SearchScreen = ({navigation}: any) => {
         <InputComponent
           styles={{paddingVertical: 3}}
           type="default"
-          placehold="Search ..."
+          placehold={t('search')}
           value={value}
           onChange={text => setValue(text)}
           allowClear
@@ -223,7 +226,7 @@ const SearchScreen = ({navigation}: any) => {
               />
             )
           }
-          onPressFilter={() => setShowFilter(true)}
+          onPressFilter={() => setShowFilter(!showFilter)}
         />
       </RowComponent>
       <SpaceComponent height={4} />

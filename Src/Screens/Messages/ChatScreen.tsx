@@ -42,8 +42,7 @@ const ChatScreen = ({navigation}: any) => {
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
   const auth = useSelector(authSelector);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme ?? 'light'];
+  const colors: any = appColors[converInfo.theme ?? 'light'];
   const currentUserId = auth.userId;
   const [limitPage, setLimitPage] = useState(1);
   const clearReplyMessage = () => setReplyMessage(null);
@@ -66,7 +65,7 @@ const ChatScreen = ({navigation}: any) => {
       }
     };
     fetchData();
-  }, []);
+  }, [converInfo]);
 
   useEffect(() => {
     if (converInfo) {
@@ -74,7 +73,9 @@ const ChatScreen = ({navigation}: any) => {
       handleUpdateStatusMessage();
     }
     //  scrollViewToEnd()
-  }, [converInfo]);
+  }, []);
+
+
 
   const handleUpdateStatusMessage = async () => {
     try {
@@ -89,9 +90,6 @@ const ChatScreen = ({navigation}: any) => {
         converInfo.type,
       );
 
-      if (res) {
-        // console.log(res.data);
-      }
     } catch (error) {
       console.log('update status message fail: ', error);
     }
@@ -226,6 +224,8 @@ const ChatScreen = ({navigation}: any) => {
 
       return (
         <ChatItems
+          conversationInfo={converInfo}
+          theme={converInfo.theme}
           blockId={
             converInfo.block && converInfo.type === 'personal'
               ? converInfo.block[0]

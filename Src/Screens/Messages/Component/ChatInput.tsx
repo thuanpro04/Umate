@@ -1,23 +1,19 @@
-import { Send2 } from 'iconsax-react-native';
-import React, { useCallback, useState } from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
-import { ImageOrVideo } from 'react-native-image-crop-picker';
+import {Send2} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
+import {StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
+import {ImageOrVideo} from 'react-native-image-crop-picker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import io from 'socket.io-client';
-import { authSelector } from '../../../redux/reducers/authReducer';
-import { themeSelector } from '../../../redux/reducers/themeSlice';
-import { appInfo } from '../../../Theme/appInfo';
-import { appColors } from '../../../Theme/Colors/appColors';
-import { imageService } from '../../Services/imageService';
-import { Notification } from '../../Untils/Notification';
+import {authSelector} from '../../../redux/reducers/authReducer';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {appInfo} from '../../../Theme/appInfo';
+import {appColors} from '../../../Theme/Colors/appColors';
+import {imageService} from '../../Services/imageService';
+import {Notification} from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
+import {socketSelector} from '../../../redux/reducers/socketSlice';
 interface Props {
   reply: string;
   isBlock: boolean;
@@ -39,7 +35,7 @@ const ChatInput = (props: Props) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const socket = io(appInfo.BASE_URL);
+  const socket = useSelector(socketSelector).socket;
   function onPressScroll() {
     if (onScroll) {
       onScroll();
@@ -48,7 +44,6 @@ const ChatInput = (props: Props) => {
 
   const handleSendMessageAndImage = useCallback(
     async (urlImage?: string[] | string) => {
-    
       const imagesUrl = Array.isArray(urlImage) ? urlImage : [urlImage];
 
       if (content.trim().length === 0 && imagesUrl.length === 0) {

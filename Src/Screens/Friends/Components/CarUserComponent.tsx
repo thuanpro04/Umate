@@ -34,6 +34,8 @@ interface Props {
   onPressOutGroup?: () => void;
   onPressPosition?: () => void;
   deputyLeaderId?: string;
+  isBorder?: boolean;
+  onNavigationPersonal?: () => void;
 }
 const CarUserComponent = (props: Props) => {
   const {
@@ -56,6 +58,8 @@ const CarUserComponent = (props: Props) => {
     onPressOutGroup,
     onPressPosition,
     deputyLeaderId,
+    onNavigationPersonal,
+    isBorder
   } = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -104,9 +108,14 @@ const CarUserComponent = (props: Props) => {
       case 'position':
         onPressPosition && onPressPosition();
         break;
+      case 'personal':
+        console.log('Hello');
+        onNavigationPersonal && onNavigationPersonal();
+        break;
     }
     setisVisible(false);
   };
+
   const renderMenu = () => {
     return (
       <MenuItem onPress={() => actionMenu('position')} style={styles.menuItem}>
@@ -123,7 +132,7 @@ const CarUserComponent = (props: Props) => {
         {
           backgroundColor: bgColor ? bgColor : 'transparent',
           borderColor: colors.border,
-          borderWidth: 1,
+          borderWidth: isBorder ? 0 : 1,
           borderRadius: 12,
         },
       ]}>

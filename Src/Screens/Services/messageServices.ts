@@ -68,6 +68,20 @@ const updateNickNameConversation = async (data: any) => {
   const res = await chatsAPI.handleChats(url, data, 'post');
   return res;
 };
+const updateThemeConversation = async (
+  id: string,
+  theme: string,
+  key: string,
+) => {
+  url = '/update-theme';
+  const res = await chatsAPI.handleChats(url, {id, theme, key}, 'post');
+  return res;
+};
+const updateAttendedGroup = async (data: any) => {
+  url = '/update-attend';
+  const res = await chatsAPI.handleChats(url, data, 'post');
+  return res;
+};
 export const messageServices = {
   getAllMessagesUser,
   getAllConversationUsers,
@@ -77,4 +91,6 @@ export const messageServices = {
   getImages,
   getLinkYourConversation,
   updateNickNameConversation,
+  updateThemeConversation,
+  updateAttendedGroup,
 };

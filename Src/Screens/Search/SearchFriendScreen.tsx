@@ -23,6 +23,7 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import {friendServices} from '../Services/friendService.';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import { useTranslation } from 'react-i18next';
 
 const SearchFriendScreen = ({navigation}: any) => {
   const [text, setText] = useState('');
@@ -35,6 +36,8 @@ const SearchFriendScreen = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const friendData = useSelector(friendSelector);
+  const {t} = useTranslation();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,7 +95,7 @@ const SearchFriendScreen = ({navigation}: any) => {
       <CarUserComponent
         userId={item.userId}
         key={index}
-        authori={item.majoring ?? 'chuyên ngành ?'}
+        authori={item.majoring ?? t('majoring')}
         addFriend={
           !item.friendRequests.includes(auth.userId) &&
           shouldShowAddFriendIcon(item.userId)
@@ -122,7 +125,7 @@ const SearchFriendScreen = ({navigation}: any) => {
           value={text}
           onChange={setText}
           allowClear
-          placehold="search friend...."
+          placehold={t('search_friend')}
           affix={
             <SearchFavorite size={appInfo.sizeIcon} color={appColors.blue} />
           }

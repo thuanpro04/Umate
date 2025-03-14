@@ -1,6 +1,7 @@
 import {CallIncoming} from 'iconsax-react-native';
 import React, {memo, useCallback, useState} from 'react';
 import {
+  Alert,
   Animated,
   Image,
   StyleSheet,
@@ -21,6 +22,12 @@ import {userServices} from '../../Services/userService';
 import {UserInfo} from '../../Untils/UserInfo';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
 import CustormImageViewing from './CustormImageViewing';
+import CustormQRCode from '../../QRCode/CustormQRCode';
+import QRCode from 'react-native-qrcode-svg';
+import {useTranslation} from 'react-i18next';
+import {Notification} from '../../Untils/Notification';
+import {messageServices} from '../../Services/messageServices';
+import {authSelector} from '../../../redux/reducers/authReducer';
 interface Props {
   currentUserId: string;
   userId?: string | string[];
@@ -32,7 +39,9 @@ interface Props {
   item?: any;
   name: string;
   isBlock: Boolean;
-  blockId:string
+  blockId: string;
+  theme: any;
+  conversationInfo: any;
 }
 const ChatItems = (props: Props) => {
   const {
@@ -46,7 +55,9 @@ const ChatItems = (props: Props) => {
     item,
     name,
     isBlock,
-    blockId
+    blockId,
+    theme,
+    conversationInfo,
   } = props;
   const [imageIndex, setImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -54,8 +65,10 @@ const ChatItems = (props: Props) => {
   const [showTime, setShowTime] = useState<any[]>([]);
   const [user, setUser] = useState<any>('');
   const profile = useSelector(profileSelector);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme ?? 'light'];
+  const auth = useSelector(authSelector);
+  const colors= appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const isNextMyMessage = true;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const condition = item.typeCall;
@@ -196,7 +209,43 @@ const ChatItems = (props: Props) => {
     setImageIndex(imageIndex);
     setIsVisible(true);
   };
+  const showNotificationQrCode = (data: any, messageId: string) => {
+    const decodedData = JSON.parse(atob(data));
+    Alert.alert('Mã điểm danh', 'Bạn có muốn điểm danh không ?', [
+      {text: t('cancel'), style: 'cancel'},
+      {
+        text: t('confirm'),
+        onPress: () => {
+          handleUpdateAttendedGroup(decodedData, messageId);
+        },
+      },
+    ]);
+  };
+  const handleUpdateAttendedGroup = async (qrdata: any, messageId: string) => {
+    try {
+      Notification.showToast(
+        'success',
+        'Quét mã',
+        'Bạn đã điểm danh thành công !!',
+      );
 
+      const data = {
+        ...qrdata,
+        messageId,
+        receiverId: [
+          conversationInfo.leader.userId,
+          conversationInfo.deputyLeader.userId,
+        ],
+        currentUserId: auth.userId,
+      };
+      const res = await messageServices.updateAttendedGroup(data);
+      if (res && res.data) {
+        console.log('Update attended successfully !!', res.data);
+      }
+    } catch (error) {
+      console.log('Atteded group error: ', error);
+    }
+  };
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
     return (
@@ -272,9 +321,7 @@ const ChatItems = (props: Props) => {
                 />
                 <SpaceComponent height={5} />
                 <CustomCallButtonComponent
-                  blockId={
-                    blockId
-                  }
+                  blockId={blockId}
                   isDisible={isBlock}
                   type={condition}
                   styles={{justifyContent: 'center', alignItems: 'center'}}
@@ -309,6 +356,30 @@ const ChatItems = (props: Props) => {
                 {isLink ? (
                   <View style={{height: 255}}>
                     <CustormLinkPreview txtLink={item.content} />
+                  </View>
+                ) : item.QRCode && item.QRCode.qrdata ? (
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <SpaceComponent height={10} />
+                    <QRCode value={item.QRCode.qrdata} size={200} />
+                    <SpaceComponent height={5} />
+                    <View
+                      style={{
+                        backgroundColor: 'grey',
+                        width: '100%',
+                        height: 1,
+                      }}
+                    />
+                    <SpaceComponent height={10} />
+                    <TouchableOpacity
+                      onPress={() =>
+                        showNotificationQrCode(
+                          item.QRCode.qrdata,
+                          item.messageId,
+                        )
+                      }>
+                      <TextComponent label="Quét mã " color={appColors.blue} />
+                    </TouchableOpacity>
                   </View>
                 ) : (
                   <TextComponent

@@ -6,6 +6,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import {authReducer} from './reducers/authReducer';
 import {socketReducer} from './reducers/socketSlice';
 import {languageReducer} from './reducers/languageSlice';
+import {MessThemeReducer} from './reducers/messThemeSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     events: eventReducer,
     socket: socketReducer,
     language: languageReducer,
+    messTheme: MessThemeReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

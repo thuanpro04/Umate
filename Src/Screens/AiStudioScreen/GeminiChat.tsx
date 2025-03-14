@@ -42,11 +42,13 @@ const GeminiChat = ({onFocus, onBlur}: any) => {
       timestamp: new Date().toISOString(),
       isUser: true,
     };
+    console.log(userMessage);
 
     setMessageInfo(prev => [...prev, userMessage]);
     setDisable(true);
 
     try {
+      setUserInput('');
       const aiResponse = await generateAIResponse(userInput);
       const aiMessage = {
         id: Date.now() + 1,
@@ -55,13 +57,13 @@ const GeminiChat = ({onFocus, onBlur}: any) => {
         imagesUrl: [],
         timestamp: new Date().toISOString(),
       };
+      
       setMessageInfo(prev => [...prev, aiMessage]);
     } catch (error) {
       console.log('Error:', error);
     }
 
     setDisable(false);
-    setUserInput('');
   };
 
   return (

@@ -1,5 +1,5 @@
 import {ArrowDown2, SearchNormal1} from 'iconsax-react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   StatusBar,
   StyleProp,
@@ -22,6 +22,7 @@ import InputComponent from './InputComponent';
 import RowComponent from './RowComponent';
 import TextComponent from './TextComponent';
 import {useTranslation} from 'react-i18next';
+import {debounce} from 'lodash';
 interface SelectedUser {
   name: string;
   data?: {
@@ -66,6 +67,7 @@ const DropdownPicker = (props: Props) => {
   }>({});
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
   const [tempSelectedUsers, setTempSelectedUsers] = useState<any>([]);
+  const [userInfo, setUserInfo] = useState<any[]>([]);
   const modalizeRef = useRef<Modalize>(null);
   const {t} = useTranslation();
 
@@ -136,6 +138,22 @@ const DropdownPicker = (props: Props) => {
   const onCloseModalize = () => {
     modalizeRef.current?.close();
   };
+  const searchUsers = () => {
+    const filteredUsers = users.filter((user: any) =>
+      user.name.toLowerCase().includes(value.toLowerCase()),
+    );
+    setUserInfo(filteredUsers);
+  };
+  useEffect(() => {
+    if (userInfo.length === 0) {
+      setUserInfo(users);
+    }
+  }, [users, userInfo]);
+  useEffect(() => {
+    const debounceSearch = debounce(searchUsers, 300);
+    debounceSearch();
+    return () => debounceSearch.cancel();
+  }, [value]);
   const renderFooter = () => {
     return (
       <View
@@ -208,7 +226,11 @@ const DropdownPicker = (props: Props) => {
           affix={<SearchNormal1 size={22} color={appColors.grey} />}
           placehold={t('search')}
         />
-        <ButtonComponent label={t('close')} onPress={onCloseModalize} styles={{}} />
+        <ButtonComponent
+          label={t('close')}
+          onPress={onCloseModalize}
+          styles={{}}
+        />
       </RowComponent>
     );
   };
@@ -263,10 +285,11 @@ const DropdownPicker = (props: Props) => {
           modalStyle={{
             backgroundColor: colors.background,
             paddingHorizontal: 12,
+            minHeight: 320,
           }}
           HeaderComponent={renderHearder()}
           FooterComponent={!(isDeputyLeader || isLeader) && renderFooter()}>
-          {users.map((item: any, index: number) => renderUsers(item, index))}
+          {userInfo.map((item: any, index: number) => renderUsers(item, index))}
         </Modalize>
       </Portal>
     </View>

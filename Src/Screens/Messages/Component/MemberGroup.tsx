@@ -24,6 +24,7 @@ import {UserInfo} from '../../Untils/UserInfo';
 import {MoreVerticalIcon} from 'lucide-react-native';
 import {MenuChat} from '../../../data/MenuItems';
 import {groupServices} from '../../Services/groupServices';
+import {messageServices} from '../../Services/messageServices';
 const MemberGroup = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
@@ -83,12 +84,16 @@ const MemberGroup = ({navigation}: any) => {
       userId: item.userId,
     });
   };
-
+  const onNavigationPersonal = (userId: string) => {
+    navigation.navigate('PersonalScreen', {
+      userId,
+    });
+  };
   const renderUserInfo = useCallback(
     ({item, index}: any) => {
       return (
         <CarUserComponent
-        navigation={navigation}
+          navigation={navigation}
           menuData={MenuChat(colors).attributeMember}
           userId={item.userId}
           authori={
@@ -126,6 +131,7 @@ const MemberGroup = ({navigation}: any) => {
                 : undefined,
             )
           }
+          onNavigationPersonal={() => onNavigationPersonal(item.userId)}
         />
       );
     },
@@ -236,7 +242,7 @@ const MemberGroup = ({navigation}: any) => {
         }
         onPress2={() => navigation.navigate('SearchFriends', {users: userInfo})}
       />
-      <View style={{marginHorizontal: 12}}>
+      <View style={{marginHorizontal: 16}}>
         <TextComponent label="Thành viên" title />
         <SpaceComponent height={18} />
         <FlatList

@@ -6,7 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import {useTranslation} from 'react-i18next';
-import { appColors } from '../../Theme/Colors/appColors';
+import {appColors} from '../../Theme/Colors/appColors';
 
 const ScanBarcode = () => {
   const [scanned, setScanned] = useState(false);
@@ -17,8 +17,8 @@ const ScanBarcode = () => {
       setScanned(true);
       try {
         const dataString = event.nativeEvent.codeStringValue;
-        const data = JSON.parse(dataString);
-        const user = await handleGetUserInfoById(data.userId);
+        const decodedData = JSON.parse(atob(dataString));        
+        const user = await handleGetUserInfoById(decodedData.id);
         Alert.alert(t('qr_found'), `${UserInfo.getName(user.name)}`, [
           {
             text: t('scan_again'),
@@ -27,7 +27,9 @@ const ScanBarcode = () => {
           {
             text: t('next'),
             onPress: () =>
-              navigation.navigate('PersonalScreen', {userId: data.userId}),
+              navigation.navigate('PersonalScreen', {
+                userId: decodedData.id,
+              }),
           },
         ]);
       } catch (error) {

@@ -11,12 +11,15 @@ import {ArrowLeft2} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import CustormLinkPreview from '../Components/CustormLinkPreview';
 import CardLinkComponent from './Component/CardLinkComponent';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const YourLinkScreen = () => {
-  const {id, type} = useRoute().params as {id: string; type: string};
+  const {id, type, theme} = useRoute().params as {
+    id: string;
+    type: string;
+    theme: string;
+  };
   const [links, setLinks] = useState<any[]>([]);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
 
@@ -43,7 +46,7 @@ const YourLinkScreen = () => {
     }, [id]),
   );
   const renderItems = ({item, index}: any) => {
-    return <CardLinkComponent url={item.content} key={index}/>;
+    return <CardLinkComponent url={item.content} key={index} />;
   };
   return (
     <SafeAreaView
@@ -57,7 +60,7 @@ const YourLinkScreen = () => {
       <FlatList
         style={{flex: 1, paddingHorizontal: 12}}
         data={links}
-        keyExtractor={item => item.messageid}
+        keyExtractor={item => item.messageId}
         renderItem={renderItems}
       />
     </SafeAreaView>

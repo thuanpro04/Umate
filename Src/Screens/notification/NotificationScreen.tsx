@@ -1,5 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native';
-import {ArrowLeft2, CallCalling} from 'iconsax-react-native';
+import {ArrowLeft2, Bezier, CallCalling} from 'iconsax-react-native';
 import {Check} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
 import {
@@ -26,13 +26,18 @@ import {groupServices} from '../Services/groupServices';
 import {notificationServices} from '../Services/notificationServices';
 import {UserInfo} from '../Untils/UserInfo';
 import {useTranslation} from 'react-i18next';
+import AttendedModal from '../Modal/AttendedModal';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const NotificationScreen = ({navigation}: any) => {
   const [dataNotifi, setDataNotifi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isTrash, setTrash] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [userIds, setUserIds] = useState([]);
   const [selectItems, setSelectItems] = useState<{[key: string]: Boolean}>({});
   const [selectTrash, setSelectTrash] = useState<string[]>([]);
   const auth = useSelector(authSelector);
+
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
@@ -88,14 +93,27 @@ const NotificationScreen = ({navigation}: any) => {
           setSelectTrash(prev => [...prev, key]);
         }
       };
+      const showModalAttended = () => {
+        setIsVisible(true);
 
+        setUserIds(item.data.notAttended);
+      };
+      const temp = item.content.split(' ');
+      const content =
+        item.type === 'qrcode'
+          ? t(`${temp[0]}`) + temp[1]
+          : t(`${item.content}`);
       return (
         <Animated.View style={{transform: [{scale: scaleAnim}]}}>
           <TouchableOpacity
             activeOpacity={item.type === 'calling' ? 10 : 0.2}
             style={[styles.notificationCard, {backgroundColor: colors.card}]}
             onPress={() =>
-              isTrash ? onChangleItemToTrash(item._id) : handlePress()
+              isTrash
+                ? onChangleItemToTrash(item._id)
+                : item.type === 'qrcode'
+                ? showModalAttended()
+                : handlePress()
             }>
             <View style={styles.iconContainer}>
               {item.type === 'groupInvite' ? (
@@ -106,6 +124,8 @@ const NotificationScreen = ({navigation}: any) => {
                 />
               ) : item.type === 'calling' ? (
                 <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
+              ) : item.type === 'qrcode' ? (
+                <Bezier size={appInfo.sizeIconBold} color="#FFFFFF" />
               ) : (
                 <FontAwesome5
                   name="user-friends"
@@ -116,7 +136,10 @@ const NotificationScreen = ({navigation}: any) => {
             </View>
             <View style={styles.textContainer}>
               <RowComponent>
-                <TextComponent label={item.title} styles={styles.title} />
+                <TextComponent
+                  label={t(`${item.title}`)}
+                  styles={styles.title}
+                />
                 <View style={{}}>
                   {!isTrash ? (
                     <TextComponent
@@ -135,7 +158,7 @@ const NotificationScreen = ({navigation}: any) => {
                   )}
                 </View>
               </RowComponent>
-              <TextComponent label={item.content} styles={styles.content} />
+              <TextComponent label={content} styles={styles.content} />
               {item.type === 'groupInvite' && (
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
@@ -163,6 +186,7 @@ const NotificationScreen = ({navigation}: any) => {
         </Animated.View>
       );
     },
+
     [isTrash, selectItems, selectTrash],
   );
   const fetchNotification = async () => {
@@ -241,6 +265,12 @@ const NotificationScreen = ({navigation}: any) => {
         </View>
       )}
       <LoadingModal visible={isLoading} />
+      <AttendedModal
+        navigation={navigation}
+        visible={isVisible}
+        attendId={userIds}
+        onClose={() => setIsVisible(false)}
+      />
     </SafeAreaView>
   );
 };

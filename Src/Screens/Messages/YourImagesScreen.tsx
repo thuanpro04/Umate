@@ -18,16 +18,18 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {HeaderComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const YourImagesScreen = () => {
-  const {id, type} = useRoute().params as {id: string; type: string};
+  const {id, type, theme} = useRoute().params as {
+    id: string;
+    type: string;
+    theme: string;
+  };
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [converInfo, setConverInfo] = useState<any>('');
   const [visible, setVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
 

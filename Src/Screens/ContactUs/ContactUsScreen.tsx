@@ -65,12 +65,12 @@ const ContactUsScreen = ({navigation}: any) => {
     <ScrollView
       style={[styles.container, {backgroundColor: colors.background}]}
       showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={['#6A11CB', '#2575FC']} style={styles.header}>
+      <LinearGradient colors={['#6A11CB', '#2575FC']} style={[styles.header,]}>
         <ArrowLeft2
           onPress={() => navigation.goBack()}
           color={appColors.orange1}
           size={appInfo.sizeIconBold}
-          style={{position: 'absolute', left: '1%', bottom: '65%'}}
+          style={{position: 'absolute', left: '5%', bottom: '65%'}}
         />
         <SpaceComponent height={20} />
         <Text style={styles.headerTitle}>{'📬' + t('contact')}</Text>

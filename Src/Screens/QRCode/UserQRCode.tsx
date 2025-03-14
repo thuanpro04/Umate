@@ -1,38 +1,28 @@
-import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {ArrowLeft2} from 'iconsax-react-native';
 import React, {useState} from 'react';
-import QRCode from 'react-native-qrcode-svg';
+import {useTranslation} from 'react-i18next';
+import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   HeaderComponent,
   RowComponent,
   SpaceComponent,
 } from '../Components';
-import {ArrowLeft, ArrowLeft2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {globalStyles} from '../../Styles/globalStyle';
-import LinearGradient from 'react-native-linear-gradient';
+import CustormQRCode from './CustormQRCode';
 import ScanBarcode from './ScanBarcode';
-import {useTranslation} from 'react-i18next';
 
-const UserQRCode = ({navigation}: any) => {
+const UserQRCode = () => {
   const auth = useSelector(authSelector);
   const {t} = useTranslation();
-
+  const navigation = useNavigation<any>();
   const [isFocused, setIsFocused] = useState(true);
-  const qrData = JSON.stringify({
-    userId: auth.userId,
-  });
-  const renderQRCodeSvg = () => {
-    return (
-      <View style={styles.qrWrapper}>
-        <Text style={styles.title}>{t('personal_qr')}</Text>
-        <QRCode value={qrData} size={220} />
-      </View>
-    );
-  };
+  const qrdata = JSON.stringify({id: auth.userId});
+  const encrytion = btoa(qrdata);
   const renderScanner = () => {
     return <ScanBarcode />;
   };
@@ -45,9 +35,12 @@ const UserQRCode = ({navigation}: any) => {
         onPress1={() => navigation.goBack()}
       />
 
-      {/* QR Code */}
       <View style={{flex: 1, justifyContent: 'center'}}>
-        {isFocused ? renderQRCodeSvg() : renderScanner()}
+        {isFocused ? (
+          <CustormQRCode title={t('personal_qr')} qrdata={encrytion} />
+        ) : (
+          renderScanner()
+        )}
 
         {/* Button Actions */}
         <SpaceComponent height={40} />
@@ -86,24 +79,7 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight,
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
-  qrWrapper: {
-    backgroundColor: '#FFF',
-    paddingVertical: 30,
-    marginHorizontal: 20,
-    borderRadius: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: appColors.black,
-    marginBottom: 15,
-  },
+
   btn: {
     paddingHorizontal: 20,
     paddingVertical: 12,

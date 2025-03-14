@@ -5,6 +5,7 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -25,7 +26,13 @@ import {
   TextComponent,
 } from '../Components';
 import {profileStyles} from './profileStyles';
-import {Android, ArrowLeft, ArrowLeft2, UserAdd} from 'iconsax-react-native';
+import {
+  Android,
+  ArrowLeft,
+  ArrowLeft2,
+  Message2,
+  UserAdd,
+} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {userServices} from '../Services/userService';
@@ -40,6 +47,8 @@ import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {useTranslation} from 'react-i18next';
 import FastImage from 'react-native-fast-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {messageServices} from '../Services/messageServices';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -190,13 +199,24 @@ const PersonalScreen = ({navigation}: any) => {
           color={appColors.white}
           style={{position: 'absolute', left: '5%', top: '5%'}}
         />
-        {!friendData.friends.includes(userId) && userId !== auth.userId && (
-          <UserAdd
-            onPress={() => handleAddFriend(userId)}
-            size={appInfo.sizeIconBold}
-            color={colors.icon}
-            style={{position: 'absolute', right: '5%', top: '5%'}}
-          />
+        {userId !== auth.userId ? (
+          !friendData.friends.includes(userId) ? (
+            <UserAdd
+              onPress={() => handleAddFriend(userId)}
+              size={appInfo.sizeIconBold}
+              color={appColors.white}
+              style={localStyles.iconHeader}
+            />
+          ) : (
+            <Message2
+              onPress={onNavigationMessage}
+              size={appInfo.sizeIconBold}
+              color={appColors.white}
+              style={localStyles.iconHeader}
+            />
+          )
+        ) : (
+          <></>
         )}
         {userInfo ? (
           isDetail ? (
@@ -300,7 +320,34 @@ const PersonalScreen = ({navigation}: any) => {
       </Animated.View>
     );
   };
+  const onNavigationMessage = async () => {
+    try {
+      setIsLoading(true);
+      const res = await messageServices.checkConversation(
+        auth.userId,
+        userInfo.userId,
+      );
+      res && console.log('res.data', res.data);
 
+      if (res && res.data) {
+        let conversationId = res.data;
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({...userInfo, conversationId}),
+        );
+      } else {
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({...userInfo, type: 'personal'}),
+        );
+      }
+      setIsLoading(false);
+      navigation.navigate('Chat');
+    } catch (error) {
+      console.error('Respond save user error ', error);
+      setIsLoading(false);
+    }
+  };
   return !isLoading ? (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}>
@@ -353,5 +400,7 @@ const PersonalScreen = ({navigation}: any) => {
     <LoadingModal visible={isLoading} />
   );
 };
-
+const localStyles = StyleSheet.create({
+  iconHeader: {position: 'absolute', right: '5%', top: '5%'},
+});
 export default PersonalScreen;
