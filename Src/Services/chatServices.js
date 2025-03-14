@@ -6,7 +6,10 @@ const {
   MessageModel,
 } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/informationUntils");
-const { handleSendNotification } = require("./notificationServices");
+const {
+  handleSendNotification,
+  addNotificationForUser,
+} = require("./notificationServices");
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
   // console.log(req.query);
@@ -248,6 +251,7 @@ const handleGetAllConversationUsers = async (req, res) => {
           conv.message[conv.message.length - 1].status === "sent",
         notification: conv.notification,
         nickNames: conv.nicknames,
+        theme: conv.theme,
       };
     });
     // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
@@ -272,6 +276,7 @@ const handleGetAllConversationUsers = async (req, res) => {
       statusLastMessage:
         !group.message[group.message.length - 1].senderId === currentUserId,
       nickNames: group.nicknames,
+      theme: group.theme,
     }));
 
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
@@ -352,6 +357,7 @@ const actionDeleteConversationForPersonal = async (ids) => {
 const actionDeleteConversationForGroup = async (ids) => {
   return GroupConversationModel.deleteMany({ groupId: { $in: ids } });
 };
+
 const handleDeleteConversation = async (req, res) => {
   const arrConver = req.body;
   const idPersons = arrConver["personal"] || [];
@@ -385,6 +391,7 @@ const getConversation = async (id) => {
 const getGroupConversation = async (id) => {
   return await GroupConversationModel.findOne({ groupId: id });
 };
+
 const handleGetImageForConversation = async (req, res) => {
   const { id, type } = req.query;
   try {
@@ -432,6 +439,7 @@ const handleGetLink = async (req, res) => {
     console.log("Get link error: ", error);
   }
 };
+
 const handleUpdateNickName = async (req, res) => {
   const { userId, value, id, key } = req.body;
   console.log(userId, value, id, key);
@@ -468,6 +476,123 @@ const handleUpdateNickName = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+const handleUpdateThemeConversation = async (req, res) => {
+  const { id, theme, key } = req.body;
+  try {
+    const conversation = await (key === "personal"
+      ? getConversation(id)
+      : getGroupConversation(id));
+    if (!conversation) {
+      return res.status(401).json({
+        message: "Conversation not found ?",
+      });
+    }
+    conversation.theme = theme;
+    await conversation.save();
+    res.status(200).json({
+      message: "update theme conversation successfully !!!",
+      data: theme,
+    });
+  } catch (error) {
+    console.log("update theme conver error: ", error);
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+const sendQRcodeDataForGroup = async (data) => {
+  try {
+    const group = await getGroupConversation(data.groupId);
+    if (!group) {
+      return res.status(401).json({
+        message: "Conversation not found ?",
+      });
+    }
+    const messages = {
+      messageId: data.messageId,
+      senderId: data.senderId,
+      content: data.content,
+      imagesUrl: [],
+      timestamp: new Date(),
+      QRCode: {
+        qrdata: data.qrData,
+        attended: [],
+      },
+    };
+    group.message.push(messages);
+    await group.save();
+    console.log("Save data qrcode successfully !!", messages);
+  } catch (error) {
+    console.log("Save data Qr code error: ", error);
+  }
+};
+const handleUpdateAttendedGroup = async (req, res) => {
+  const { id, type, currentUserId, messageId, receiverId } = req.body;
+  console.log({ id, type, currentUserId, messageId, receiverId });
+
+  try {
+    const group = await getGroupConversation(id);
+    if (!group) {
+      return req.status(401).json({
+        message: "Group not found !!",
+      });
+    }
+    const upMessage = group.message.find(
+      (item) => item.messageId === messageId
+    );
+    if (!upMessage) {
+      return res.status(404).json({ message: "Message not found in group !!" });
+    }
+    if (upMessage.QRCode.attended.includes(currentUserId)) {
+      return res.status(200).json({ message: "User existed!", data: [] });
+    }
+    upMessage.QRCode.attended.push(currentUserId);
+    await group.save();
+    const countUser = group.invitedUsers.length ;
+    const countAttended = upMessage.QRCode.attended.length;
+
+    if (
+      countUser >= 0 &&
+      (countAttended === countUser ||
+        countAttended === Math.floor(countUser / 2))
+    ) {
+      // const notifi = {
+      //   groupId: id,
+      //   senderId: generateUniqueID(),
+      //   receiverId,
+      //   title: "Điểm danh gần hoàn tất!",
+      //   content: `Đã có ${countAttended} thành viên quét mã QR`,
+      //   type: "qrcode",
+      // };
+      const attended = upMessage.QRCode.attended;
+      const notAttended = group.invitedUsers.filter(
+        (item) => !attended.includes(item)
+      );
+      const dataNoti = {
+        attended,
+        notAttended,
+      };
+
+      addNotificationForUser(
+        id,
+        generateUniqueID(),
+        receiverId,
+        `qr_scanned_members ${countAttended}`,
+        "qrcode",
+        "latest_check_in",
+        dataNoti
+      );
+      console.log("Save Notification");
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Updated successfully!", data: upMessage });
+  } catch (error) {
+    console.log("Attended group error: ", error);
+  }
+};
 module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
@@ -479,4 +604,7 @@ module.exports = {
   handleGetLink,
   getConversation,
   handleUpdateNickName,
+  handleUpdateThemeConversation,
+  sendQRcodeDataForGroup,
+  handleUpdateAttendedGroup,
 };

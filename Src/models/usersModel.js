@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema({
   block: [{ type: String, ref: "User" }],
   fcmTokens: { type: [String] },
   theme: { type: String, default: "light" },
-  language: { type: String },
+  language: { type: String, default: "vi" },
   like: { type: Number },
 });
 
@@ -98,6 +98,10 @@ const messageSchema = new mongoose.Schema({
     default: "sent",
   },
   readBy: [{ type: String, ref: "User" }], // Danh sách user đã đọc tin nhắn
+  QRCode: {
+    qrdata: { type: String },
+    attended: [{ type: String, ref: "User" }],
+  },
 });
 
 messageSchema.index({ senderID: 1, timestamp: -1 });
@@ -122,6 +126,7 @@ const groupConversationSchema = new mongoose.Schema(
     type: { type: String },
     notification: [{ type: String, ref: "User" }],
     nicknames: { type: Map, of: String, default: {} },
+    theme: { type: String, default: "light" },
   },
   { timestamps: true }
 );
@@ -136,6 +141,7 @@ const conversationSchema = new mongoose.Schema(
     lastMessageTimestamp: { type: Date, default: Date.now },
     notification: [{ type: String, ref: "User" }],
     nicknames: { type: Map, of: String, default: {} },
+    theme: { type: String, default: "light" },
   },
   {
     timestamps: true,

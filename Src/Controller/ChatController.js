@@ -6,7 +6,10 @@ const {
   handleUpdateStatusMessage,
   handleDeleteConversation,
   handleGetImageForConversation,
-  handleGetLink,handleUpdateNickName
+  handleGetLink,
+  handleUpdateNickName,
+  handleUpdateThemeConversation,
+  handleUpdateAttendedGroup,
 } = require("../Services/chatServices");
 const receiveMessageUsers = async (req, res) => {
   handleReceiveMessageUsers(req, res);
@@ -29,9 +32,15 @@ const getImages = (req, res) => {
 const getLinkYourConversation = async (req, res) => {
   handleGetLink(req, res);
 };
-const updateNickNameConversation=(req,res) =>{
-  handleUpdateNickName(req,res)
-}
+const updateNickNameConversation = (req, res) => {
+  handleUpdateNickName(req, res);
+};
+const updateThemeConversation = (req, res) => {
+  handleUpdateThemeConversation(req, res);
+};
+const updateAttendedGroup = async (req, res) => {
+  handleUpdateAttendedGroup(req, res);
+};
 module.exports = {
   receiveMessageUsers,
   getAllConversationUsers,
@@ -39,5 +48,8 @@ module.exports = {
   updateStatusMessage,
   deleteConversation,
   getImages,
-  getLinkYourConversation,updateNickNameConversation
+  getLinkYourConversation,
+  updateNickNameConversation,
+  updateThemeConversation,
+  updateAttendedGroup,
 };

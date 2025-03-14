@@ -7,7 +7,9 @@ const {
   updateStatusUser,
   actionBlockUser,
   updateFcmTokenForUser,
-  updateThemForUser,actionRemoveUser
+  updateThemForUser,
+  actionRemoveUser,
+  updateLanguageForUser,
 } = require("../Controller/UsersController");
 
 const usersRouter = Router();
@@ -18,7 +20,8 @@ usersRouter.post("/get-list-user", getListUserForHeartEvent);
 usersRouter.get("/update-status", updateStatusUser);
 usersRouter.post("/block-user", actionBlockUser);
 usersRouter.post("/update-fcmtoken", updateFcmTokenForUser);
-usersRouter.post('/update-theme', updateThemForUser)
-usersRouter.get('/remove-user', actionRemoveUser)
-module.exports = usersRouter;
+usersRouter.post("/update-theme", updateThemForUser);
+usersRouter.get("/remove-user", actionRemoveUser);
+usersRouter.post("/update-language", updateLanguageForUser);
 
+module.exports = usersRouter;

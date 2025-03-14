@@ -8,7 +8,9 @@ const {
   handleUpdateStatusUser,
   handleActionBlockUser,
   handleUpdateFcmTokenForUser,
-  handleUpdateThemeForUser,handleActionRemoveUser
+  handleUpdateThemeForUser,
+  handleActionRemoveUser,
+  handleUpdateLanguge
 } = require("../Services/userServices");
 
 const getAllUsers = async (req, res) => {
@@ -55,9 +57,12 @@ const updateFcmTokenForUser = (req, res) => {
 const updateThemForUser = (req, res) => {
   handleUpdateThemeForUser(req, res);
 };
-const actionRemoveUser=(req,res)=>{
-  handleActionRemoveUser(req,res)
-}
+const actionRemoveUser = (req, res) => {
+  handleActionRemoveUser(req, res);
+};
+const updateLanguageForUser = (req, res) => {
+  handleUpdateLanguge(req,res)
+};
 module.exports = {
   getAllUsers,
   setUpProfileInfo,
@@ -68,4 +73,5 @@ module.exports = {
   updateFcmTokenForUser,
   updateThemForUser,
   actionRemoveUser,
+  updateLanguageForUser,
 };

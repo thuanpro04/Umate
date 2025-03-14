@@ -29,7 +29,7 @@ const handleFriendRequestAction = async (req, res, action) => {
       (await addNotificationForUser(
         currentUserId,
         friendUserId,
-        "Đã gửi một lời mời kết bạn đến bạn. Kết nối ngay nào!📩",
+        "friend_request_sent",
         "friendRequest"
       ));
     res.status(200).json({

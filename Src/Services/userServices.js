@@ -115,6 +115,7 @@ const updateOneProfileInfo = async (req, res) => {
     console.log("updateOneProfileInfo", error);
   }
 };
+
 const handleGetUserInfoById = async (req, res) => {
   const { userId } = req.query;
   try {
@@ -128,7 +129,6 @@ const handleGetUserInfoById = async (req, res) => {
     console.log("Fail get user info error", error);
   }
 };
-
 const handleListUserForHeartEvent = async (req, res) => {
   const listUsers = req.body;
   try {
@@ -205,7 +205,6 @@ const handleActionBlockUser = async (req, res) => {
   }
 };
 
-
 const updateFcmToken = async (userId, fcmTokens) => {
   const result = await UserModel.updateOne(
     { userId },
@@ -243,6 +242,24 @@ const handleUpdateThemeForUser = async (req, res) => {
     console.log("update theme error: ", error);
   }
 };
+const handleUpdateLanguge = async (req, res) => {
+  const { id, key } = req.body;
+  try {
+    const result = await UserModel.updateOne(
+      { userId: id },
+      { $set: { language: key } }
+    );
+    
+    console.log("update language successfully!!", id, key);
+
+    res.status(200).json({
+      message: "Update language successfully !!",
+      data: key,
+    });
+  } catch (error) {
+    console.log("update language error: ", error);
+  }
+};
 const handleActionRemoveUser = async (req, res) => {
   const { id } = req.query;
   try {
@@ -275,4 +292,5 @@ module.exports = {
   updateFcmToken,
   handleUpdateThemeForUser,
   handleActionRemoveUser,
+  handleUpdateLanguge,
 };

@@ -9,9 +9,6 @@ const usersRouter = require("./Src/Routers/usersRouters");
 const chatRouter = require("./Src/Routers/ChatRouters");
 const searchRouter = require("./Src/Routers/searchRouters");
 const friendRouter = require("./Src/Routers/friendRouters");
-const {
-  sendMessageToGroupAndPersonal,
-} = require("./Src/Services/chatServices");
 const eventRouter = require("./Src/Routers/eventRouters");
 const groupRouter = require("./Src/Routers/groupRouters");
 const { generateUniqueID } = require("./Src/untils/informationUntils");
@@ -34,6 +31,7 @@ app.use("/notification", notificationRouter);
 // Tạo HTTP server và tích hợp với Socket.IO
 const server = http.createServer(app);
 const io = initializeSocket(server);
+
 server.listen(port, (err) => {
   if (err) {
     console.log(err);

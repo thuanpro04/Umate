@@ -143,33 +143,33 @@ const addNotificationForUser = async (
   userId,
   content,
   type,
-  title
+  title,
+  data
 ) => {
   const user = await findUserById(currentUserId);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
   const userIds = Array.isArray(userId) ? userId : [userId];
   const notifications = userIds.map((receiverId) => ({
     groupId: id,
     senderId: currentUserId,
     receiverId,
-    title: title ?? user.name,
+    title: type === "groupInvite" ? title + user.name : title ?? user.name,
     content,
     type,
+    data,
   }));
   await notificationModel.insertMany(notifications);
   console.log("Notified for user !!");
 };
 const handleActionInviteToGroup = async (req, res) => {
-  const { id, currentUserId, userId, content } = req.body;
+  const { id, currentUserId, userId, content, title } = req.body;
   try {
     await addNotificationForUser(
       id,
       currentUserId,
       userId,
       content,
-      "groupInvite"
+      "groupInvite",
+      title
     );
     res.status(200).json({
       message: "Invite to group successfully",
@@ -199,11 +199,11 @@ const deletedNotification = async (id) => {
   // Nếu id là mảng, giữ nguyên
   if (Array.isArray(id)) {
     idsArray = id;
-  } 
+  }
   // Nếu id là chuỗi có dấu phẩy (danh sách id), tách thành mảng
   else if (typeof id === "string" && id.includes(",")) {
     idsArray = id.split(",");
-  } 
+  }
   // Nếu id là một chuỗi ObjectId duy nhất
   else {
     idsArray = [id];

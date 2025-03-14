@@ -32,6 +32,7 @@ const handleLoginWithGoogle = async (req, res) => {
           theme: existingUser.theme,
           accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
           fcmTokens: existingUser.fcmTokens ?? [],
+          language: existingUser.language ?? "vi",
         },
         profileSlice: {
           name: existingUser.name,
@@ -50,13 +51,13 @@ const handleLoginWithGoogle = async (req, res) => {
           friendRequests: existingUser.friendRequests,
           removeFriends: existingUser.removeFriends,
           block: existingUser.block,
-          like:existingUser.like
+          like: existingUser.like,
         },
         eventSlice: {
           eventShares: existingUser.eventShares,
         },
       };
-      
+
       console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
     } else {
