@@ -62,7 +62,7 @@ const UserInfoChat = ({navigation}: any) => {
   const name =
     converInfo.nickNames && converInfo.nickNames[converInfo.userId]
       ? converInfo.nickNames[converInfo.userId]
-      : UserInfo.getName(converInfo.name);
+      : converInfo.name;
   const onChangeShowItems = (key: any) => {
     setShowItems(prev => ({...prev, [key]: !showItems[key]}));
   };
@@ -74,34 +74,29 @@ const UserInfoChat = ({navigation}: any) => {
     );
   }, []);
   const handleActionNotification = async () => {
-    try {
-      const res = await notificationServices.actionNotificationUser(
-        auth.userId,
-        converInfo.type === 'personal'
-          ? converInfo.conversationId
-          : converInfo.groupId,
-        converInfo.type,
-      );
-    } catch (error) {
-      console.log('Action notification fail error: ', error);
+    const res = await notificationServices.actionNotificationUser(
+      auth.userId,
+      converInfo.type === 'personal'
+        ? converInfo.conversationId
+        : converInfo.groupId,
+      converInfo.type,
+    );
+    if (res && res.data) {
+      console.log('Action notification successfully !!');
     }
   };
   const handleBlockUser = async () => {
     setShowBlockModal(true);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
-    try {
-      const res = await userServices.updateBlockUser(userId, userFriendId);
-      if (res) {
-        console.log('Block successfully !!!', res.data);
-        dispatch(setBlock(res.data));
-        console.log('Sau khi cập nhật:', friendData.block);
-      }
-      setShowBlockModal(false);
-    } catch (error) {
-      console.log('handle block user fail: ', error);
-      setShowBlockModal(false);
+    const res = await userServices.updateBlockUser(userId, userFriendId);
+    if (res) {
+      console.log('Block successfully !!!', res.data);
+      dispatch(setBlock(res.data));
+      console.log('Sau khi cập nhật:', friendData.block);
     }
+    setShowBlockModal(false);
+    
   };
 
   useFocusEffect(
@@ -109,7 +104,7 @@ const UserInfoChat = ({navigation}: any) => {
       getConversationInfo();
     }, []),
   );
-
+  
   const onPressItems = (key: string) => {
     // xử lí group
     console.log(key);
@@ -206,8 +201,9 @@ const UserInfoChat = ({navigation}: any) => {
 
   const renderObjectCategory = (item: any[]) => {
     const condition =
-      converInfo.leader.userId === auth.userId ||
-      converInfo.deputyLeader.userId === auth.userId;
+      converInfo.type === 'group' &&
+      (converInfo.leader.userId === auth.userId ||
+        converInfo.deputyLeader.userId === auth.userId);
 
     return (
       <View style={styles.showItemStyle}>
@@ -294,25 +290,21 @@ const UserInfoChat = ({navigation}: any) => {
     }
   };
   const handleOutGroup = async () => {
-    try {
-      const res = await groupServices.handleOutGroup(
-        auth.userId,
-        converInfo.groupId,
+    const res = await groupServices.handleOutGroup(
+      auth.userId,
+      converInfo.groupId,
+    );
+    if (res && res.data) {
+      console.log('Member: ', res.data);
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({
+          ...converInfo,
+          invitedUsers: res.data,
+        }),
       );
-      if (res && res.data) {
-        console.log('Member: ', res.data);
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({
-            ...converInfo,
-            invitedUsers: res.data,
-          }),
-        );
-        console.log('Out group successfully !!');
-        navigation.navigate('Messages');
-      }
-    } catch (error) {
-      console.log('out group error: ', error);
+      console.log('Out group successfully !!');
+      navigation.navigate('Messages');
     }
   };
 
@@ -375,9 +367,7 @@ const UserInfoChat = ({navigation}: any) => {
                   }
                   avatar={converInfo.avatar}
                   targetName={
-                    converInfo.type === 'personal'
-                      ? name
-                      : UserInfo.getName(converInfo.groupName)
+                    converInfo.type === 'personal' ? name : converInfo.groupName
                   }
                   userId={auth.userId}
                   targetId={
@@ -388,7 +378,7 @@ const UserInfoChat = ({navigation}: any) => {
                           (id: any) => id !== auth.userId,
                         )
                   }
-                  userName={UserInfo.getName(profile.name)}
+                  userName={profile.name}
                   styles={styles.menu}
                   text="call"
                   icon={<CallCalling color="blue" size={22} />}
@@ -412,9 +402,7 @@ const UserInfoChat = ({navigation}: any) => {
                   }
                   avatar={converInfo.avatar}
                   targetName={
-                    converInfo.type === 'personal'
-                      ? name
-                      : UserInfo.getName(converInfo.groupName)
+                    converInfo.type === 'personal' ? name : converInfo.groupName
                   }
                   userId={auth.userId}
                   targetId={
@@ -425,7 +413,7 @@ const UserInfoChat = ({navigation}: any) => {
                           (id: any) => id !== auth.userId,
                         )
                   }
-                  userName={UserInfo.getName(profile.name)}
+                  userName={profile.name}
                   styles={styles.menu}
                   text="video"
                   icon={<Video color="blue" size={22} />}
@@ -495,13 +483,13 @@ const UserInfoChat = ({navigation}: any) => {
         }
         descriptions={`${
           friendData.block && friendData.block.includes(converInfo.userId)
-            ? t('confirm_unblock') + UserInfo.getName(converInfo.name)
-            : t('confirm_block') + UserInfo.getName(converInfo.name)
+            ? t('confirm_unblock') + converInfo.name
+            : t('confirm_block') + converInfo.name
         }`}
         title={`${
           friendData.block && friendData.block.includes(converInfo.userId)
-            ? t('unblock_friend') + UserInfo.getName(converInfo.name)
-            : t('block_friend') + UserInfo.getName(converInfo.name)
+            ? t('unblock_friend') + converInfo.name
+            : t('block_friend') + converInfo.name
         }`}
       />
       <QrCodeModal

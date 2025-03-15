@@ -50,54 +50,45 @@ const SuggestFriend = React.memo(() => {
   // Chưa xử lí
 
   const getUsers = async () => {
-    try {
-      //console.log('res.data', res.data);
-      const res = await userServices.getEquestFriendUsers(
-        auth.userId,
-        'suggestfriend',
-      );
-      const allUsers = res && res.data;
-      if (allUsers) {
-        setUsers(allUsers);
-        allUsers.forEach((item: any) => {
-          if (item.friendRequests.includes(auth.userId)) {
-            handlePressYes(item.userId);
-          }
-        });
-      } else {
-        setMessage('No users found');
-      }
-    } catch (error) {
-      console.log('Get users api:', error);
+    const res = await userServices.getEquestFriendUsers(
+      auth.userId,
+      'suggestfriend',
+    );
+    const allUsers = res && res.data;
+    if (allUsers) {
+      setUsers(allUsers);
+      allUsers.forEach((item: any) => {
+        if (item.friendRequests.includes(auth.userId)) {
+          handlePressYes(item.userId);
+        }
+      });
+    } else {
+      setMessage('No users found');
     }
+    
   };
 
   const handleFriendAction = async (
     friendUserId: string,
     action: 'add' | 'cancel',
   ) => {
-    try {
-      const res = await friendServices.handleFriendActionAdd_Cancel(
-        friendUserId,
-        action,
-        auth.userId,
-      );
+    const res = await friendServices.handleFriendActionAdd_Cancel(
+      friendUserId,
+      action,
+      auth.userId,
+    );
+    if (res && res.data) {
       console.log(res?.data);
-    } catch (error) {
-      console.log('handleFriendAction', error);
     }
   };
 
   const handlePressRemove = debounce(async (userId: string) => {
-    try {
-      const res = await friendServices.handlePressRemoveSuggested(
-        userId,
-        auth.userId,
-      );
-      console.log(res);
+    const res = await friendServices.handlePressRemoveSuggested(
+      userId,
+      auth.userId,
+    );
+    if (res && res.data) {
       getUsers();
-    } catch (error) {
-      console.log('handlePressRemove error', error);
     }
   }, 1000);
   const debounceAddFriend = debounce(async (friendUserId: string) => {

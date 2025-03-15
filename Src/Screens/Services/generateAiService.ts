@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const BASE_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-const API_KEY = 'AIzaSyAbxfbD6MeuGrKqvbJmWOvNJCEXNfFAWdM';
+const API_KEY = 'AIzaSyBhIitZhf0MEkx-oLTKQsKSv3KGzSVQGgE';
 export const generateAIResponse = async (textInput: string) => {
   
 

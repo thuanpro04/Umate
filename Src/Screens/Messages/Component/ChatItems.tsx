@@ -66,7 +66,7 @@ const ChatItems = (props: Props) => {
   const [user, setUser] = useState<any>('');
   const profile = useSelector(profileSelector);
   const auth = useSelector(authSelector);
-  const colors= appColors[theme ?? 'light'];
+  const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
 
   const isNextMyMessage = true;
@@ -74,14 +74,11 @@ const ChatItems = (props: Props) => {
   const condition = item.typeCall;
   const isUser = props?.item.senderId === props?.currentUserId;
   const getUserSenderId = async (senderId: string) => {
-    try {
-      const res = await userServices.getUserInfo(senderId);
-      if (res && res?.data) {
-        setUser(res.data);
-      }
-    } catch (error) {
-      console.log('get user sender id error: ', error);
+    const res = await userServices.getUserInfo(senderId);
+    if (res && res?.data) {
+      setUser(res.data);
     }
+    
   };
   const onChangeImageIndex = (index: number) => {
     setTimeout(() => {
@@ -222,32 +219,30 @@ const ChatItems = (props: Props) => {
     ]);
   };
   const handleUpdateAttendedGroup = async (qrdata: any, messageId: string) => {
-    try {
-      Notification.showToast(
-        'success',
-        'Quét mã',
-        'Bạn đã điểm danh thành công !!',
-      );
+    Notification.showToast(
+      'success',
+      'Quét mã',
+      'Bạn đã điểm danh thành công !!',
+    );
 
-      const data = {
-        ...qrdata,
-        messageId,
-        receiverId: [
-          conversationInfo.leader.userId,
-          conversationInfo.deputyLeader.userId,
-        ],
-        currentUserId: auth.userId,
-      };
-      const res = await messageServices.updateAttendedGroup(data);
-      if (res && res.data) {
-        console.log('Update attended successfully !!', res.data);
-      }
-    } catch (error) {
-      console.log('Atteded group error: ', error);
+    const data = {
+      ...qrdata,
+      messageId,
+      receiverId: [
+        conversationInfo.leader.userId,
+        conversationInfo.deputyLeader.userId,
+      ],
+      currentUserId: auth.userId,
+    };
+    const res = await messageServices.updateAttendedGroup(data);
+    if (res && res.data) {
+      console.log('Update attended successfully !!', res.data);
     }
+ 
   };
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
+
     return (
       <View key={index} style={{flex: 1}}>
         <View
@@ -327,7 +322,7 @@ const ChatItems = (props: Props) => {
                   styles={{justifyContent: 'center', alignItems: 'center'}}
                   targetName={name}
                   userId={currentUserId}
-                  userName={UserInfo.getName(profile.name)}
+                  userName={profile.name}
                   avatar={profile.avatar}
                   targetId={userId}
                   text="Gọi lại"
@@ -409,7 +404,7 @@ const ChatItems = (props: Props) => {
               <View style={{marginLeft: 12}}>
                 {user && user.name && (
                   <TextComponent
-                    label={UserInfo.getName(user ? user.name : '')}
+                    label={user ? user.name : ''}
                     color={appColors.grey2}
                     size={8}
                   />

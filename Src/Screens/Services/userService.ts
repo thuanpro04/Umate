@@ -1,58 +1,84 @@
 import usersAPI from '../../apis/usersApi';
 let url;
 const getEquestFriendUsers = async (currentUserId: string, filter?: string) => {
-  url = `/get-all?currentUserId=${currentUserId}&filter=${filter}`;
-
-  const res = await usersAPI.handleUsers(url);
-  return res;
+  try {
+    url = `/get-all?currentUserId=${currentUserId}&filter=${filter}`;
+    const res = await usersAPI.handleUsers(url);
+    return res;
+  } catch (error) {
+    console.error('Post event get users failed', error);
+  }
 };
 const updateUsersById = async (userInfo: any) => {
-  url = `/update-users`;
-  const res = await usersAPI.handleUsers(url, userInfo, 'post');
-  return res;
+  try {
+    url = `/update-users`;
+    const res = await usersAPI.handleUsers(url, userInfo, 'post');
+    return res;
+  } catch (error) {
+    console.log('Set up profile failed', error);
+  }
 };
 const getUserInfo = async (userId: string) => {
   url = `/get-user?userId=${userId}`;
   try {
     const res = await usersAPI.handleUsers(url);
-
     return res;
   } catch (error) {
     console.log('fail get user info error ', error);
   }
 };
 const getListUserInfo = async (listUsers: string[]) => {
-  url = '/get-list-user';
-  const res = await usersAPI.handleUsers(url, listUsers, 'post');
-  return res;
+  try {
+    url = '/get-list-user';
+    const res = await usersAPI.handleUsers(url, listUsers, 'post');
+    return res;
+  } catch (error) {
+    console.log('Friend get all user fail: ', error);
+  }
 };
 const updateUserStatus = async (userId: string, status: Boolean) => {
-  url = `/update-status?id=${userId}&status=${status}`;
-  const res = await usersAPI.handleUsers(url);
-  return res;
+  try {
+    url = `/update-status?id=${userId}&status=${status}`;
+    const res = await usersAPI.handleUsers(url);
+    return res;
+  } catch (error) {
+    console.log('update status fail: ', error);
+  }
 };
 const updateBlockUser = async (userId: string, userFriendId: string) => {
-  const data = {
-    userId,
-    userFriendId,
-  };
-  url = '/block-user';
-  const res = await usersAPI.handleUsers(url, data, 'post');
-  return res;
+  try {
+    const data = {
+      userId,
+      userFriendId,
+    };
+    url = '/block-user';
+    const res = await usersAPI.handleUsers(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('handle block user fail: ', error);
+  }
 };
 const updateThemeforUser = async (userId: string, theme: string) => {
-  url = '/update-theme';
-  const data = {
-    userId,
-    theme,
-  };
-  const res = await usersAPI.handleUsers(url, data, 'post');
-  return res;
+  try {
+    url = '/update-theme';
+    const data = {
+      userId,
+      theme,
+    };
+    const res = await usersAPI.handleUsers(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('Update state theme error: ', error);
+  }
 };
 const handleRemoveUser = async (userId: string) => {
-  url = `/remove-user?id=${userId}`;
-  const res = usersAPI.handleUsers(url);
-  return res;
+  try {
+    url = `/remove-user?id=${userId}`;
+    const res = usersAPI.handleUsers(url);
+    return res;
+  } catch (error) {
+    console.log('handle remove user fail: ', error);
+  }
 };
 const updateLanguage = async (id: string, key: string) => {
   url = '/update-language';
@@ -68,5 +94,5 @@ export const userServices = {
   updateBlockUser,
   updateThemeforUser,
   handleRemoveUser,
-  updateLanguage
+  updateLanguage,
 };

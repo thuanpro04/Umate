@@ -13,6 +13,8 @@ import {appColors} from '../../../Theme/Colors/appColors';
 import {themeSelector} from '../../../redux/reducers/themeSlice';
 import {UserInfo} from '../../Untils/UserInfo';
 import FastImage from 'react-native-fast-image';
+import {CloseCircle} from 'iconsax-react-native';
+import {appInfo} from '../../../Theme/appInfo';
 interface Props {
   clearReply: any;
   message: any;
@@ -87,9 +89,7 @@ const Replymessage = (props: Props) => {
         {message?.content ? (
           <View>
             <TextComponent
-              label={`Trả lời ${
-                isUser ? 'chính mình' : UserInfo.getName(message.name)
-              }`}
+              label={`Trả lời ${isUser ? 'chính mình' : message.name}`}
               styles={{fontStyle: 'italic'}}
             />
             <TextComponent
@@ -99,7 +99,16 @@ const Replymessage = (props: Props) => {
             />
           </View>
         ) : (
-          urlImg && <FastImage source={{uri: urlImg,priority:FastImage.priority.high, cache:FastImage.cacheControl.immutable}} style={styles.imageReply} />
+          urlImg && (
+            <FastImage
+              source={{
+                uri: urlImg,
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              style={styles.imageReply}
+            />
+          )
         )}
       </View>
       {message && (
@@ -109,12 +118,7 @@ const Replymessage = (props: Props) => {
             toggleBox();
             clearReply();
           }}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/9974/9974058.png',
-            }}
-            style={{width: 28, height: 28}}
-          />
+          <CloseCircle size={appInfo.sizeIconBold} color={colors.icon} />
         </TouchableOpacity>
       )}
     </Animated.View>

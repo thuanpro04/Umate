@@ -32,15 +32,12 @@ const YourLinkScreen = () => {
           return;
         }
 
-        try {
-          const res = await messageServices.getLinkYourConversation(id, type);
-          if (res && res.data) {
-            console.log('res.data: ', res.data);
-            setLinks(res.data);
-          }
-        } catch (error) {
-          console.log('get link error: ', error);
+        const res = await messageServices.getLinkYourConversation(id, type);
+        if (res && res.data) {
+          console.log('res.data: ', res.data);
+          setLinks(res.data);
         }
+      
       };
       getLinkYourConversation();
     }, [id]),

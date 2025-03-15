@@ -171,17 +171,13 @@ const ShareEventModal = (props: Props) => {
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const res = await messageServices.getAllConversationUsers(auth.userId);
-      if (res?.data && res) {
-        setUsers(res?.data);
-        // console.log(res.data, 1234);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('ListChat', error);
-      setIsLoading(false);
+    const res = await messageServices.getAllConversationUsers(auth.userId);
+    if (res?.data && res) {
+      setUsers(res?.data);
+      // console.log(res.data, 1234);
     }
+    setIsLoading(false);
+   
   }, []);
   const renderUserItems = ({item, index}: any) => {
     return (
@@ -204,11 +200,7 @@ const ShareEventModal = (props: Props) => {
         />
         <SpaceComponent height={6} />
         <TextComponent
-          label={
-            item.name
-              ? UserInfo.getName(item.name)
-              : item.groupName.split(' ')[0]
-          }
+          label={item.name ? item.name : item.groupName.split(' ')[0]}
           styles={globalStyles.actionText}
         />
       </TouchableOpacity>

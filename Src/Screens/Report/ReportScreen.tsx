@@ -22,7 +22,7 @@ import {useRoute} from '@react-navigation/native';
 import LoadingModal from '../Modal/LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
 import {profileSelector} from '../../redux/reducers/profileSlice';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const ReportScreen = () => {
   const {name, userId} = useRoute().params as {name: string; userId: string};
@@ -47,7 +47,7 @@ const ReportScreen = () => {
       Alert.alert(t('please_select_reason'));
       return;
     }
-    Alert.alert(`${t('report')} ${UserInfo.getName(name)}`,t('are_you_sure'), [
+    Alert.alert(`${t('report')} ${name}`, t('are_you_sure'), [
       {
         text: t('no'),
         style: 'cancel',
@@ -96,7 +96,7 @@ const ReportScreen = () => {
 
       <View style={styles.content}>
         <Text style={[styles.label, {color: colors.text}]}>
-         {t('select_report_reason')}
+          {t('select_report_reason')}
         </Text>
         <View style={styles.categoryContainer}>
           {categories.map(category => (

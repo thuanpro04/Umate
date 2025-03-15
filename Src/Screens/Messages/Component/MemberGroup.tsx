@@ -47,30 +47,24 @@ const MemberGroup = ({navigation}: any) => {
   );
 
   const fetchUserInfos = async () => {
-    try {
-      const res = await userServices.getListUserInfo(converInfo.invitedUsers);
-      if (res && res.data) {
-        setUserInfo(res.data);
-      }
-    } catch (error) {
-      console.error('fetch use info fail: ', error);
+    const res = await userServices.getListUserInfo(converInfo.invitedUsers);
+    if (res && res.data) {
+      setUserInfo(res.data);
     }
+  
   };
 
   const handleAddFriend = async (friendUserId: string) => {
-    try {
-      setIsLoading(true);
-      const res = await friendServices.handleFriendActionAdd_Cancel(
-        friendUserId,
-        'add',
-        auth.userId,
-      );
+    setIsLoading(true);
+    const res = await friendServices.handleFriendActionAdd_Cancel(
+      friendUserId,
+      'add',
+      auth.userId,
+    );
+    if (res && res.data) {
       setAddedFriends(prev => [...prev, friendUserId]);
-      setIsLoading(false);
-    } catch (error) {
-      console.log('handleFriendAction', error);
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
   const shouldShowAddFriendIcon = (userId: string) => {
     return (
@@ -117,7 +111,7 @@ const MemberGroup = ({navigation}: any) => {
               <MoreVerticalIcon size={22} color={colors.icon} />
             )
           }
-          userName={UserInfo.getName(item.name)}
+          userName={item.name}
           onPress={() => onPressCarUser(item)}
           onPressAdd={() => handleAddFriend(item.userId)}
           onPressOutGroup={() => handleOutGroup(item.userId)}
@@ -139,34 +133,31 @@ const MemberGroup = ({navigation}: any) => {
   );
 
   const handlePosition = async (userId: string, position?: string) => {
-    try {
-      if (!userId) {
-        console.log('UserId or onPressOutGroup no existing!!');
-        return;
-      }
-      const res = await groupServices.handlePosition(
-        userId,
-        converInfo.groupId,
-        position,
-      );
-      if (res && res.data) {
-        const data =
-          position === 'leader'
-            ? {
-                ...converInfo,
-                leader: res.data,
-              }
-            : {
-                ...converInfo,
-                deputyLeader: res.data,
-              };
-        console.log('Position successfully !!', res.data);
-        await AsyncStorage.setItem('ConversationInfo', JSON.stringify(data));
-        setConverInfo(data);
-      }
-    } catch (error) {
-      console.log('Position error: ', error);
+    if (!userId) {
+      console.log('UserId or onPressOutGroup no existing!!');
+      return;
     }
+    const res = await groupServices.handlePosition(
+      userId,
+      converInfo.groupId,
+      position,
+    );
+    if (res && res.data) {
+      const data =
+        position === 'leader'
+          ? {
+              ...converInfo,
+              leader: res.data,
+            }
+          : {
+              ...converInfo,
+              deputyLeader: res.data,
+            };
+      console.log('Position successfully !!', res.data);
+      await AsyncStorage.setItem('ConversationInfo', JSON.stringify(data));
+      setConverInfo(data);
+    }
+    
   };
   const handleOutGroup = async (userId: string) => {
     try {
@@ -196,23 +187,19 @@ const MemberGroup = ({navigation}: any) => {
     }
   };
   const handleInviteToGroup = async (selectUser: string[]) => {
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      const res = await notificationServices.inviteToGroup(
-        converInfo.groupId,
-        selectUser,
-        auth.userId,
-        converInfo.groupName,
-      );
-      if (res && res.data) {
-        console.log(res.data);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('Invite to group error: ', error);
-      setIsLoading(false);
+    const res = await notificationServices.inviteToGroup(
+      converInfo.groupId,
+      selectUser,
+      auth.userId,
+      converInfo.groupName,
+    );
+    if (res && res.data) {
+      console.log(res.data);
     }
+    setIsLoading(false);
+
   };
 
   useEffect(() => {

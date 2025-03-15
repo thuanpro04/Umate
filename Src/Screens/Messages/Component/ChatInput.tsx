@@ -14,6 +14,7 @@ import {Notification} from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
 import {socketSelector} from '../../../redux/reducers/socketSlice';
+import {useTranslation} from 'react-i18next';
 interface Props {
   reply: string;
   isBlock: boolean;
@@ -26,11 +27,21 @@ interface Props {
     imagesUrl?: string[];
     reply?: string;
   }) => void;
+  isNotification: boolean;
 }
 const ChatInput = (props: Props) => {
-  const {reply, clearReply, onScroll, groupId, userId, onSendMessage, isBlock} =
-    props;
+  const {
+    reply,
+    clearReply,
+    onScroll,
+    groupId,
+    userId,
+    onSendMessage,
+    isBlock,
+    isNotification,
+  } = props;
   const [content, setContent] = useState('');
+  const {t} = useTranslation();
 
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -58,6 +69,7 @@ const ChatInput = (props: Props) => {
         imagesUrl: imagesUrl,
         groupId,
         reply,
+        isNotification,
       };
 
       if (messageData.content.length > 0 || messageData.imagesUrl.length > 0) {
@@ -125,12 +137,8 @@ const ChatInput = (props: Props) => {
       const fileName = filePath.split('/').pop();
       const path = `images/${fileName}`;
 
-      try {
-        return await imageService.uploadImageToFirebase(filePath, path);
-      } catch (error) {
-        console.log('Firebase storage error:', error);
-        return null;
-      }
+      const result = await imageService.uploadImageToFirebase(filePath, path);
+      return result ?? '';
     },
     [],
   );
@@ -149,7 +157,7 @@ const ChatInput = (props: Props) => {
   );
   const handleToastNotificationBlock = () => {
     if (isBlock) {
-      Notification.showSnackbar('Mở chặn đi gòi nhắn 😏', () => {});
+      Notification.showSnackbar(t('block_message'), () => {});
     }
   };
 
@@ -176,7 +184,7 @@ const ChatInput = (props: Props) => {
           style={[styles.inputStyles, {color: colors.text}]}
           value={content}
           onChangeText={setContent}
-          placeholder="Type Message ..."
+          placeholder={t('enter_message')}
           placeholderTextColor={'grey'}
           onFocus={() => onPressScroll()}
           onBlur={() => onPressScroll()}

@@ -23,7 +23,7 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import {friendServices} from '../Services/friendService.';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const SearchFriendScreen = ({navigation}: any) => {
   const [text, setText] = useState('');
@@ -59,15 +59,13 @@ const SearchFriendScreen = ({navigation}: any) => {
     }
   };
   const handleAddFriend = async (friendUserId: string) => {
-    try {
-      const res = await friendServices.handleFriendActionAdd_Cancel(
-        friendUserId,
-        'add',
-        auth.userId,
-      );
+    const res = await friendServices.handleFriendActionAdd_Cancel(
+      friendUserId,
+      'add',
+      auth.userId,
+    );
+    if (res && res.data) {
       setAddedFriends(prev => [...prev, friendUserId]);
-    } catch (error) {
-      console.log('handleFriendAction', error);
     }
   };
   const debounceSearchFriends = debounce(searchByNameInGroup, 300);
@@ -103,7 +101,7 @@ const SearchFriendScreen = ({navigation}: any) => {
         onPress={() => onPressCarUser(item.userId)}
         onPressAdd={() => handleAddFriend(item.userId)}
         url={item.avatar}
-        userName={UserInfo.getName(item.name)}
+        userName={item.name}
       />
     ) : (
       <></>

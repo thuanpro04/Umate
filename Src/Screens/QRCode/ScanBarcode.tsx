@@ -17,9 +17,9 @@ const ScanBarcode = () => {
       setScanned(true);
       try {
         const dataString = event.nativeEvent.codeStringValue;
-        const decodedData = JSON.parse(atob(dataString));        
+        const decodedData = JSON.parse(atob(dataString));
         const user = await handleGetUserInfoById(decodedData.id);
-        Alert.alert(t('qr_found'), `${UserInfo.getName(user.name)}`, [
+        Alert.alert(t('qr_found'), `${user.name}`, [
           {
             text: t('scan_again'),
             onPress: () => setScanned(false),
@@ -38,15 +38,12 @@ const ScanBarcode = () => {
     }
   };
   const handleGetUserInfoById = async (userId: string) => {
-    try {
-      const res = await userServices.getUserInfo(userId);
-      if (res && res.data) {
-        console.log('userInfo', res.data);
-        return res.data;
-      }
-    } catch (error) {
-      console.log(error);
+    const res = await userServices.getUserInfo(userId);
+    if (res && res.data) {
+      console.log('userInfo', res.data);
+      return res.data;
     }
+   
   };
   return (
     <View style={styles.container}>

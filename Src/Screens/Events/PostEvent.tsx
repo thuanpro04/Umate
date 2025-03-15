@@ -1,26 +1,26 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { CloseCircle } from 'iconsax-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
-import { ImageOrVideo } from 'react-native-image-crop-picker';
-import { useSelector } from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import {CloseCircle} from 'iconsax-react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Image, ScrollView, StyleSheet, View} from 'react-native';
+import {ImageOrVideo} from 'react-native-image-crop-picker';
+import {useSelector} from 'react-redux';
 import eventApi from '../../apis/eventApi';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   DateTimePickerComponent,
   InputComponent,
   RowComponent,
   SpaceComponent,
-  TextComponent
+  TextComponent,
 } from '../Components';
 import DropdownPicker from '../Components/DropdownPicker';
 import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
-import { imageService } from '../Services/imageService';
-import { userServices } from '../Services/userService';
-import { Validate } from '../Untils/Validate';
+import {imageService} from '../Services/imageService';
+import {userServices} from '../Services/userService';
+import {Validate} from '../Untils/Validate';
 const initValues = {
   content: '',
   photoUrl: '',
@@ -58,40 +58,33 @@ const PostEvent = ({setIsTabBarVisible, navigation}: any) => {
   }, [eventData]);
 
   const getAllUsers = async () => {
-    try {
-      const res = await userServices.getEquestFriendUsers(auth.userID, '');
-      if (res && res.data) {
-        const data = res.data.map((user: any) => ({
-          name: user.name,
-          avatar: user.avatar,
-          userID: user.userID,
-          majorCategory: user.majorCategory,
-        }));
-        setUsers(data);
-      }
-    } catch (error) {
-      console.log('Post event get users failed');
+    const res = await userServices.getEquestFriendUsers(auth.userID, '');
+    if (res && res.data) {
+      const data = res.data.map((user: any) => ({
+        name: user.name,
+        avatar: user.avatar,
+        userID: user.userID,
+        majorCategory: user.majorCategory,
+      }));
+      setUsers(data);
     }
+   
   };
   function getPathImage(filePath: string) {
     const fileName = filePath.split('/').pop();
     return `events/${fileName}`;
   }
   const handleSelected = async (val: ImageOrVideo) => {
-    try {
-      const filePath = val.path;
-      const path = getPathImage(filePath);
-      setPathImage(path);
-      const url = await imageService.uploadImageToFirebase(
-        filePath,
-        getPathImage(filePath),
-      );
-      onChangeValue('photoUrl', {name: url});
-    } catch (error) {
-      console.log('handleSelected', error);
-    }
+    const filePath = val.path;
+    const path = getPathImage(filePath);
+    setPathImage(path);
+    const url = await imageService.uploadImageToFirebase(
+      filePath,
+      getPathImage(filePath),
+    );
+    onChangeValue('photoUrl', {name: url ?? ''});
+  
   };
-  console.log(pathImage);
   const removeImage = async () => {
     try {
       const res = await imageService.deleteImageToFirebase(pathImage);

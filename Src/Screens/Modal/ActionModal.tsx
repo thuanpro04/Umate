@@ -32,7 +32,10 @@ const ActionModal = (props: Props) => {
             <TextComponent label={title} title />
             <SpaceComponent height={5} />
             {descriptions && (
-              <TextComponent label={descriptions} styles={{marginLeft: 4}} />
+              <TextComponent
+                label={descriptions}
+                styles={{marginLeft: 4, fontStyle: 'italic',}}
+              />
             )}
           </View>
           <SpaceComponent height={8} />

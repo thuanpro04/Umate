@@ -23,8 +23,8 @@
   "majoring": "Chuyên ngành",
   "remove_friend_confirmation": "Bạn có thực sự muốn xóa người bạn này không?",
   "unfriend": "Hủy kết bạn với",
-  "confirm_block": "Bạn có thực sự muốn chặn ? ",
-  "confirm_unblock": "Bạn có thực sự muốn bỏ chặn ? ",
+  "confirm_block": "Bạn có thực sự muốn chặn? ",
+  "confirm_unblock": "Bạn có thực sự muốn bỏ chặn? ",
   "block_friend": "Chặn người bạn này",
   "unblock_friend": "Bỏ chặn người bạn này",
   "message": "Tin nhắn",
@@ -160,5 +160,9 @@
   "qr_scanned_members": "Số thành viên đã quét mã QR là: ",
   "friend_request_sent": "Đã gửi một lời mời kết bạn đến bạn. Kết nối ngay nào!📩",
   "group_invite_message": "Mọi cuộc vui đều thiếu sót nếu không có bạn! Vào nhóm cùng trải nghiệm nhé!🔥",
-  "missed_call": "Bạn có 1 cuộc gọi nhỡ !"
+  "missed_call": "Bạn có 1 cuộc gọi nhỡ !",
+  "invite_group": "Mời vào nhóm",
+  "is_connect": "Đang kết nối...",
+  "block_message": "Bỏ chặn đi gòi 😏",
+  "enter_message": "Nhập tin nhắn ..."
 }

@@ -64,21 +64,13 @@ const CarComponent = (props: Props) => {
     return formattedTime;
   };
   const updateUserHeartForEvent = debounce(async (action: any) => {
-    try {
-      const res = await eventSevices.updateUserHeartForEvent(
-        auth.userId,
-        id,
-        action,
-      );
-      if (res?.data) {
-        console.log(res?.data.messages);
-      }
-    } catch (error) {
-      console.error('Heart event error: ', error);
-      // Hoàn tác trạng thái nếu có lỗi
-      setLiked(prev => !prev);
-    } finally {
-      setProcessing(false); // Kết thúc trạng thái xử lý
+    const res = await eventSevices.updateUserHeartForEvent(
+      auth.userId,
+      id,
+      action,
+    );
+    if (res?.data) {
+      console.log(res?.data.messages);
     }
   }, 5000);
   const handleLikeClick = useCallback(() => {

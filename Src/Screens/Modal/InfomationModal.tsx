@@ -9,16 +9,24 @@ import {appColors} from '../../Theme/Colors/appColors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 interface Props {
   visible: boolean;
   onClose: () => void;
   onPressAddGroud: () => void;
   listUser?: [];
   onPressRemove: () => void;
+  onPressGhim: () => void;
 }
 const InfomationModal = (props: Props) => {
-  const {visible, onClose, onPressAddGroud, listUser, onPressRemove} = props;
+  const {
+    visible,
+    onClose,
+    onPressAddGroud,
+    listUser,
+    onPressRemove,
+    onPressGhim,
+  } = props;
   const modalizeRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -39,24 +47,24 @@ const InfomationModal = (props: Props) => {
       onPress: () => onPressAddGroud(),
     },
     {
-      key: 'ghim',
-      icon: (
-        <AntDesign
-          name="pushpino"
-          size={appInfo.sizeIconBold}
-          color={colors.icon}
-        />
-      ),
-      name: t('ghim'),
-      onPress: () => console.log('hello'),
-    },
-    {
       key: 'removeconversation',
       icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
       name: t('remove_conversation'),
       onPress: () => onPressRemove(),
     },
   ];
+  // {
+  //   key: 'ghim',
+  //   icon: (
+  //     <AntDesign
+  //       name="pushpino"
+  //       size={appInfo.sizeIconBold}
+  //       color={colors.icon}
+  //     />
+  //   ),
+  //   name: t('ghim'),
+  //   onPress: () =>onPressGhim(),
+  // },
   return (
     <Portal>
       <Modalize

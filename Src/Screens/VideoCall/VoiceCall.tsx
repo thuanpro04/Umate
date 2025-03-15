@@ -18,6 +18,7 @@ import {
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../redux/reducers/authReducer';
 import { socketSelector } from '../../redux/reducers/socketSlice';
+import { useTranslation } from 'react-i18next';
 const VoiceCall = (props: any) => {
   const {roomID, name, type} = useRoute().params as {
     roomID: string;
@@ -29,6 +30,8 @@ const VoiceCall = (props: any) => {
   const dataCall = useSelector(socketSelector);
   const calls = dataCall.incomingCall;
   const socket = dataCall.socket;
+  const {t} = useTranslation();
+
   const getCallConfig = (type: string) => {
     switch (type) {
       case 'group_voice':
@@ -82,7 +85,7 @@ const VoiceCall = (props: any) => {
           onCallEnd: (callID: any, reason: any, duration: any) => {
             console.log('Lý do kết thúc cuộc gọi:', reason, duration, 3456789);
             handleSaveCallOnData(duration);
-            navigation.navigate('Home');
+            navigation.navigate(t('home'));
             //lưu thông tin cuộc gọi vào data
           },
         }}

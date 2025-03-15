@@ -75,30 +75,26 @@ const CarUserComponent = (props: Props) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handleAdd_CancelFriends = async () => {
     if (userId) {
-      try {
-        setIsShowIcon(!isShowIcon);
-        const action = !isShowIcon ? 'add' : 'cancel';
-        const res = await friendServices.handleFriendActionAdd_Cancel(
-          userId,
-          action,
-          auth.userId,
-        );
+      setIsShowIcon(!isShowIcon);
+      const action = !isShowIcon ? 'add' : 'cancel';
+      const res = await friendServices.handleFriendActionAdd_Cancel(
+        userId,
+        action,
+        auth.userId,
+      );
 
-        if (res) {
+      if (res && res.data) {
+        Animated.spring(scaleAnim, {
+          toValue: 1.15,
+          friction: 3,
+          useNativeDriver: true,
+        }).start(() => {
           Animated.spring(scaleAnim, {
-            toValue: 1.15,
+            toValue: 1,
             friction: 3,
             useNativeDriver: true,
-          }).start(() => {
-            Animated.spring(scaleAnim, {
-              toValue: 1,
-              friction: 3,
-              useNativeDriver: true,
-            }).start();
-          });
-        }
-      } catch (error) {
-        console.log('handleAdd_CancelFriends', error);
+          }).start();
+        });
       }
     }
   };
@@ -109,14 +105,19 @@ const CarUserComponent = (props: Props) => {
         {borderColor: colors.border},
         styles,
       ]}>
-      <FastImage
-        source={{
-          uri: img,
-          priority: FastImage.priority.high,
-          cache: FastImage.cacheControl.immutable,
-        }}
-        style={[globalStyles.userImg, iconAddCancel && {width: 50, height: 50}]}
-      />
+      <TouchableOpacity onPress={onPressImg}>
+        <FastImage
+          source={{
+            uri: img,
+            priority: FastImage.priority.high,
+            cache: FastImage.cacheControl.immutable,
+          }}
+          style={[
+            globalStyles.userImg,
+            iconAddCancel && {width: 50, height: 50},
+          ]}
+        />
+      </TouchableOpacity>
       <View style={{flex: 1}}>
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
@@ -175,7 +176,9 @@ const CarUserComponent = (props: Props) => {
     </RowComponent>
   ) : (
     <RowComponent styles={{flex: 1, justifyContent: 'flex-start'}}>
-      <TouchableOpacity onPress={onPressImg} activeOpacity={0.7}>
+      <TouchableOpacity
+        onPress={() => onPressImg && onPressImg()}
+        activeOpacity={0.7}>
         {img ? (
           <FastImage
             source={{

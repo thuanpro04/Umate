@@ -70,15 +70,12 @@ const YourImagesScreen = () => {
         if (!id) {
           return;
         }
-        try {
-          const res = await messageServices.getImages(id, type);
-          if (res && res.data) {
-            setImages(res.data);
-            console.log('get image successfully ', res.data);
-          }
-        } catch (error) {
-          console.log('Get images fail: ', error);
+        const res = await messageServices.getImages(id, type);
+        if (res && res.data) {
+          setImages(res.data);
+          console.log('get image successfully ', res.data);
         }
+       
       };
       getImageForConversation();
     }, [id]),

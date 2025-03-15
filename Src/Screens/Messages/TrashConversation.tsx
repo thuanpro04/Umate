@@ -69,31 +69,23 @@ const TrashConversation = () => {
       return;
     }
 
-    try {
-      const res = await messageServices.deleteConversation(selectItems);
-      if (res) {
-        console.log('Delete conversation successfully !!!');
-      }
+    const res = await messageServices.deleteConversation(selectItems);
+    if (res) {
+      console.log('Delete conversation successfully !!!');
       setSelectItems({});
       setIsBgUsers({});
       await getAllConversation();
-    } catch (error) {
-      console.log('Delete conversation fail: ', error);
     }
+   
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const res = await messageServices.getAllConversationUsers(auth.userId);
-      if (res?.data && res) {
-        setUserInfo(res?.data);
-        // console.log(res?.data);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('ListChat', error);
-      setIsLoading(false);
+    const res = await messageServices.getAllConversationUsers(auth.userId);
+    if (res?.data && res) {
+      setUserInfo(res?.data);
+      // console.log(res?.data);
     }
+    setIsLoading(false);
   }, [handleDeleteConversation]);
 
   const renderCardItems = useCallback(
@@ -103,7 +95,7 @@ const TrashConversation = () => {
       return (
         <CarUserChat
           key={index}
-          name={item.groupName ?? UserInfo.getName(item.name)}
+          name={item.groupName ?? item.name}
           massv={
             item.type === 'group'
               ? sumUsers

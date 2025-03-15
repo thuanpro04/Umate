@@ -1,4 +1,4 @@
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import React, {useCallback, useMemo, useState} from 'react';
 import {FlatList, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import {useSelector} from 'react-redux';
@@ -19,45 +19,39 @@ const FriendsRequestScreen = () => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const navigation = useNavigation<any>();
   const {t} = useTranslation();
   const getUsers = async () => {
-    try {
-      const res = await userServices.getEquestFriendUsers(
-        auth.userId,
-        'requests',
-      );
-      if (res && res.data) {
-        setUsers(res.data);
-      }
-    } catch (error) {
-      console.log('Get users api:', error);
+    const res = await userServices.getEquestFriendUsers(
+      auth.userId,
+      'requests',
+    );
+    if (res && res.data) {
+      setUsers(res.data);
     }
+   
   };
 
   const handleAgreeFriend = async (friendUserId: string) => {
-    try {
-      const res = await friendServices.handleAgreeFriendShip(
-        auth.userId,
-        friendUserId,
-      );
-      if (res) {
-        console.log('Agree friend successfully !!!');
-      }
+    const res = await friendServices.handleAgreeFriendShip(
+      auth.userId,
+      friendUserId,
+    );
+    if (res && res.data) {
+      console.log('Agree friend successfully !!!');
       getUsers();
-    } catch (error) {
-      console.log('FriendsRequestScreen', error);
     }
+   
   };
   const handleRemoveFriend = async (userId: string) => {
-    try {
-      const res = await friendServices.handlePressRemoveRequest(
-        userId,
-        auth.userId,
-      );
+    const res = await friendServices.handlePressRemoveRequest(
+      userId,
+      auth.userId,
+    );
+    if (res && res.data) {
       getUsers();
-    } catch (error) {
-      console.log('Request remove friend fail: ', error);
     }
+   
   };
   useFocusEffect(
     useCallback(() => {
@@ -67,8 +61,11 @@ const FriendsRequestScreen = () => {
   const renderItems = ({item, index}: any) => {
     return (
       <CarUserComponent
+        onPressImg={() =>
+          navigation.navigate('PersonalScreen', {userId: item.userId})
+        }
         img={item.avatar}
-        name={UserInfo.getName(item.name)}
+        name={item.name}
         sayYes={t('agree')}
         sayNo={t('refuse')}
         key={index}

@@ -63,7 +63,7 @@ const SetUpProfile = ({navigation}: any) => {
   const {t} = useTranslation();
 
   const initialProfile: ProfileType = {
-    userName: UserInfo.getName(user.name),
+    userName: user.name,
     majoring: user.majoring ?? '',
     className: user.className ?? '',
     avatar: user.avatar ?? '',
@@ -121,17 +121,13 @@ const SetUpProfile = ({navigation}: any) => {
     return valid;
   };
   const handleSelected = async (val: ImageOrVideo) => {
-    try {
-      const filePath = val.path;
-      const fileName = filePath.split('/').pop();
-      const path = `avatars/${fileName}`;
-      const urlImage = await imageService.uploadImageToFirebase(filePath, path);
-      console.log(urlImage);
-      onchangeProfile('avatar', urlImage ?? auth.avatar);
-      setRefreshKey(prevKey => prevKey + 1);
-    } catch (error) {
-      console.log('upload failed', error);
-    }
+    const filePath = val.path;
+    const fileName = filePath.split('/').pop();
+    const path = `avatars/${fileName}`;
+    const urlImage = await imageService.uploadImageToFirebase(filePath, path);
+    console.log(urlImage);
+    onchangeProfile('avatar', urlImage ?? auth.avatar);
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   const handleNotification = (key: 'error' | 'sucess') => {
@@ -157,20 +153,15 @@ const SetUpProfile = ({navigation}: any) => {
     // console.log(userInfo);
     const isChanged = UserInfo.compareObject(initialProfile, userInfo);
     if (isChanged) {
-      try {
-        const res = await userServices.updateUsersById(userInfo);
-        if (res.data) {
-          const updatedData = {...res.data, accesstoken: auth.accesstoken};
-          dispatch(addAuth(updatedData));
-          await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
-        }
+      const res = await userServices.updateUsersById(userInfo);
+      if (res && res.data) {
+        const updatedData = {...res.data, accesstoken: auth.accesstoken};
+        dispatch(addAuth(updatedData));
+        await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
         handleNotification('sucess');
-        setLoading(false);
         onNavigation();
-      } catch (error) {
-        console.log('Set up profile failed', error);
-        setLoading(false);
       }
+      setLoading(false);
     } else {
       console.log('Vui lòng thay đổi thông tin');
       setLoading(false);

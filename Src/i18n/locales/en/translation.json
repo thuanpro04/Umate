@@ -23,14 +23,14 @@
   "majoring": "Majoring",
   "remove_friend_confirmation": "Do you really want to remove this friend?",
   "unfriend": "Unfriend with ",
-  "confirm_block": "Do you really want to block ?",
-  "confirm_unblock": "Do you really want to unblock ?",
+  "confirm_block": "Do you really want to block? ",
+  "confirm_unblock": "Do you really want to unblock? ",
   "block_friend": "Block this friend ",
   "unblock_friend": "Unblock this friend ",
   "message": "Messages",
   "comfirm": "Comfirm",
   "cancel": "Cancel",
-  "chat_with": "Chat with ",
+  "chat_with": "Chat with",
   "block": "Block",
   "unblock": "Unblock",
   "remove_friend": "Remove from friends list.",
@@ -160,5 +160,9 @@
   "qr_scanned_members": "The number of members who scanned the QR code is:",
   "friend_request_sent": "A friend request has been sent to you. Connect now!📩",
   "group_invite_message": "Every fun moment is incomplete without you! Join the group and experience it together!🔥",
-  "missed_call": "You have a missed call."
+  "missed_call": "You have a missed call.",
+  "invite_group": "Invite to the group",
+  "is_connect": "is connecting...",
+  "block_message": "Unblock to send message 😏",
+  "enter_message":"Enter message..."
 }

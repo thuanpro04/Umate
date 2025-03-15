@@ -26,17 +26,14 @@ const LikeListModal = (props: Props) => {
   const modalizeRef = useRef<Modalize>();
   const [listUserInfo, setListUserInfo] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme??'light'];
+  const colors = appColors[theme ?? 'light'];
   const getUserForHeartEvent = async () => {
-    try {
-      const res = await userServices.getListUserInfo(listUsers);
-      if (res.data) {
-        console.log(res.data);
-        setListUserInfo(res.data);
-      }
-    } catch (error) {
-      console.error('get user for heart event error: ', error);
+    const res = await userServices.getListUserInfo(listUsers);
+    if (res && res.data) {
+      console.log(res.data);
+      setListUserInfo(res.data);
     }
+  
   };
   const onOpenModal = async () => {
     modalizeRef.current?.open();
@@ -47,7 +44,6 @@ const LikeListModal = (props: Props) => {
   };
 
   const renderItems = ({item, index}: any) => {
-    
     return (
       <CarUserLikeComponent
         item={item}
@@ -66,7 +62,7 @@ const LikeListModal = (props: Props) => {
         <Modalize
           ref={modalizeRef}
           handlePosition="inside"
-          modalStyle={{backgroundColor:colors.background}}
+          modalStyle={{backgroundColor: colors.background}}
           adjustToContentHeight>
           <View
             style={{

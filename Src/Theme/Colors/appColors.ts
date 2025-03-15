@@ -1,4 +1,4 @@
-export const appColors:any = {
+export const appColors: any = {
   light: {
     background: '#F3F4F6',
     card: '#FFFFFF',
@@ -33,109 +33,135 @@ export const appColors:any = {
     bgProfile2: '#37415190',
     bgProfile: '#37415129',
   },
-  bluee: {
-    background: '#90CAF9', // Xanh dương dịu nhẹ
-    card: '#E3F2FD',
-    text: '#0D47A1',
-    icon: '#1565C0',
-    border: '#64B5F6',
-    shadow: '#42A5F5',
+  mintFresh: {
+    background: '#E8F5E9', // Light mint background
+    card: '#C8E6C9', // Mint card
+    text: '#1B5E20', // Dark green text
+    icon: '#43A047', // Medium green icons
+    border: '#81C784', // Light green border
+    shadow: '#66BB6A80', // Semi-transparent green shadow
+    placeholderTextColor: '#4CAF50',
+    bgItem: '#A5D6A7', // Light green items
+    bgItem2: '#81C784', // Medium green items
+    bgProfile: '#2E7D32', // Deep green for profile
+    bgProfile2: '#1B5E20', // Forest green accent
+  },
+  oceanBreeze: {
+    background: '#E3F2FD', // Light blue background
+    card: '#BBDEFB', // Slightly darker blue for cards
+    text: '#1A237E', // Deep blue text for readability
+    icon: '#1976D2', // Medium blue for icons
+    border: '#64B5F6', // Light blue borders
+    shadow: '#42A5F580', // Semi-transparent blue shadow
     placeholderTextColor: '#2196F3',
-    bgItem: '#BBDEFB',
-    bgItem2: '#82B1FF',
-    bgProfile: '#1976D2',
-    bgProfile2: '#1565C0',
+    bgItem: '#90CAF9', // Light blue items
+    bgItem2: '#64B5F6', // Medium blue items
+    bgProfile: '#1565C0', // Deeper blue for profile
+    bgProfile2: '#0D47A1', // Navy blue accent
   },
-  grayMist: {
-    background: '#E0E0E0', // Xám sáng
-    card: '#D6D6D6', // Xám trung tính
-    text: '#424242', // Xám đậm dễ đọc
-    icon: '#616161', // Xám trung tính
-    border: '#BDBDBD', // Xám nhạt
-    shadow: '#9E9E9E80', // Xám với độ trong suốt
-    placeholderTextColor: '#757575', // Xám mờ
-    bgItem: '#B0BEC5', // Xám xanh nhẹ
-    bgItem2: '#90A4AE', // Xám xanh đậm hơn
-    bgProfile: '#78909C', // Xám xanh nhạt
-    bgProfile2: '#607D8B', // Xám xanh đậm
+  lavenderDreams: {
+    background: '#F3E5F5', // Light lavender background
+    card: '#E1BEE7', // Lavender card
+    text: '#4A148C', // Deep purple text
+    icon: '#8E24AA', // Medium purple icons
+    border: '#BA68C8', // Light purple border
+    shadow: '#AB47BC80', // Semi-transparent purple shadow
+    placeholderTextColor: '#9C27B0',
+    bgItem: '#CE93D8', // Light purple items
+    bgItem2: '#BA68C8', // Medium purple items
+    bgProfile: '#7B1FA2', // Deep purple for profile
+    bgProfile2: '#6A1B9A', // Rich purple accent
   },
-  nightOwl: {
-    background: '#011627', // Xanh đậm kiểu đêm
-    card: '#1D3B53',
-    text: '#82AAFF',
-    icon: '#A6ACCD',
-    border: '#4ECDC4',
-    shadow: '#000A12',
-    placeholderTextColor: '#6272A4',
-    bgItem: '#0A2A40',
-    bgItem2: '#133B5C',
-    bgProfile: '#1E4976',
-    bgProfile2: '#0C356A',
+  warmAmber: {
+    background: '#FFF8E1', // Light amber background
+    card: '#FFECB3', // Amber card
+    text: '#E65100', // Deep orange text
+    icon: '#FF8F00', // Medium amber icons
+    border: '#FFD54F', // Light amber border
+    shadow: '#FFC10780', // Semi-transparent amber shadow
+    placeholderTextColor: '#FFA000',
+    bgItem: '#FFE082', // Light amber items
+    bgItem2: '#FFD54F', // Medium amber items
+    bgProfile: '#FF8F00', // Deep amber for profile
+    bgProfile2: '#FF6F00', // Dark amber accent
   },
-  cyberpunk: {
-    background: '#0D0221', // Neon rực rỡ
-    card: '#331155',
-    text: '#FF00FF',
-    icon: '#FF44CC',
-    border: '#FFAA00',
-    shadow: '#FF00AA',
-    placeholderTextColor: '#FF66CC',
-    bgItem: '#FF0099',
-    bgItem2: '#FF6600',
-    bgProfile: '#FF0022',
-    bgProfile2: '#CC00FF',
+  softCoral: {
+    background: '#FFEBEE', // Very light red/pink
+    card: '#FFCDD2', // Light coral card
+    text: '#B71C1C', // Deep red text
+    icon: '#E53935', // Medium red icons
+    border: '#EF9A9A', // Light coral border
+    shadow: '#EF535080', // Semi-transparent red shadow
+    placeholderTextColor: '#F44336',
+    bgItem: '#EF9A9A', // Light coral items
+    bgItem2: '#E57373', // Medium coral items
+    bgProfile: '#D32F2F', // Deep red for profile
+    bgProfile2: '#C62828', // Dark red accent
   },
-  pinkBlossom: {
-    background: '#FFE4E1', // Hồng nhạt pastel
-    card: '#FFC1CC', // Hồng phấn
-    text: '#7D2940', // Đỏ hồng đậm
-    icon: '#D81B60', // Hồng neon
-    border: '#FFB6C1', // Hồng nhẹ
-    shadow: '#D81B6090', // Hồng đậm với độ trong suốt
-    placeholderTextColor: '#BF5F82', // Hồng tím nhẹ
-    bgItem: '#FF85A2', // Hồng tươi cho item
-    bgItem2: '#FF6F91', // Hồng rực rỡ
-    bgProfile: '#FF4081', // Hồng sáng
-    bgProfile2: '#F06292', // Hồng đào
+  modernSlate: {
+    background: '#ECEFF1', // Light blue-gray
+    card: '#CFD8DC', // Blue-gray card
+    text: '#263238', // Very dark blue-gray text
+    icon: '#546E7A', // Medium blue-gray icons
+    border: '#B0BEC5', // Light blue-gray border
+    shadow: '#78909C80', // Semi-transparent blue-gray shadow
+    placeholderTextColor: '#607D8B',
+    bgItem: '#B0BEC5', // Light blue-gray items
+    bgItem2: '#90A4AE', // Medium blue-gray items
+    bgProfile: '#455A64', // Deep blue-gray for profile
+    bgProfile2: '#37474F', // Dark blue-gray accent
   },
-  solarizedDark: {
-    background: '#073642', // Xanh đậm hơn thay vì quá tối
-    card: '#0B4F5F', // Xanh biển sáng hơn
-    text: '#93A1A1', // Màu chữ sáng hơn
-    icon: '#5E8B92',
-    border: '#2AA198',
-    shadow: '#07364280',
-    placeholderTextColor: '#A5B4B9',
-    bgItem: '#137D8B',
-    bgItem2: '#268BD2',
-    bgProfile: '#D33682',
-    bgProfile2: '#CB4B16',
+  tealWave: {
+    background: '#E0F2F1', // Light teal
+    card: '#B2DFDB', // Teal card
+    text: '#004D40', // Deep teal text
+    icon: '#00897B', // Medium teal icons
+    border: '#80CBC4', // Light teal border
+    shadow: '#26A69A80', // Semi-transparent teal shadow
+    placeholderTextColor: '#009688',
+    bgItem: '#80CBC4', // Light teal items
+    bgItem2: '#4DB6AC', // Medium teal items
+    bgProfile: '#00796B', // Deep teal for profile
+    bgProfile2: '#00695C', // Dark teal accent
   },
-  sunset: {
-    background: '#FF6F61', // Đỏ cam hoàng hôn
-    card: '#FFD3B6',
-    text: '#8B0000',
-    icon: '#FF4500',
-    border: '#FF8C00',
-    shadow: '#DC143C',
-    placeholderTextColor: '#FA8072',
-    bgItem: '#E57373',
-    bgItem2: '#FF7043',
-    bgProfile: '#FF6347',
-    bgProfile2: '#FF4500',
+  peachSorbet: {
+    background: '#FFF3E0', // Light peach
+    card: '#FFE0B2', // Peach card
+    text: '#BF360C', // Deep orange-brown text
+    icon: '#F57C00', // Medium orange icons
+    border: '#FFCC80', // Light peach border
+    shadow: '#FF980080', // Semi-transparent orange shadow
+    placeholderTextColor: '#FF9800',
+    bgItem: '#FFCC80', // Light peach items
+    bgItem2: '#FFB74D', // Medium peach items
+    bgProfile: '#F57C00', // Deep orange for profile
+    bgProfile2: '#EF6C00', // Dark orange accent
   },
-  forest: {
-    background: '#2E7D32', // Xanh rừng
-    card: '#66BB6A',
-    text: '#004D40',
-    icon: '#1B5E20',
-    border: '#388E3C',
-    shadow: '#00695C',
-    placeholderTextColor: '#A5D6A7',
-    bgItem: '#4CAF50',
-    bgItem2: '#2E7D32',
-    bgProfile: '#1B5E20',
-    bgProfile2: '#004D40',
+  softSky: {
+    background: '#E1F5FE', // Very light blue
+    card: '#B3E5FC', // Light blue card
+    text: '#01579B', // Deep blue text
+    icon: '#0288D1', // Medium blue icons
+    border: '#81D4FA', // Light blue border
+    shadow: '#29B6F680', // Semi-transparent blue shadow
+    placeholderTextColor: '#03A9F4',
+    bgItem: '#81D4FA', // Light blue items
+    bgItem2: '#4FC3F7', // Medium blue items
+    bgProfile: '#0277BD', // Deep blue for profile
+    bgProfile2: '#01579B', // Dark blue accent
+  },
+  moonlight: {
+    background: '#F5F5F5', // Very light gray, almost white
+    card: '#EEEEEE', // Light gray card
+    text: '#212121', // Very dark gray, almost black text
+    icon: '#616161', // Medium gray icons
+    border: '#E0E0E0', // Light gray border
+    shadow: '#9E9E9E80', // Semi-transparent gray shadow
+    placeholderTextColor: '#757575',
+    bgItem: '#E0E0E0', // Light gray items
+    bgItem2: '#BDBDBD', // Medium gray items
+    bgProfile: '#424242', // Deep gray for profile
+    bgProfile2: '#212121', // Dark gray accent
   },
   blueBack: '#2F2E33',
   coolGray: '#D5D6D2',

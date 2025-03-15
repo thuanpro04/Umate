@@ -67,22 +67,19 @@ const AddGroupScreens = ({navigation}: any) => {
   }, [groupInfo]);
 
   const getAllUsers = async () => {
-    try {
-      const res = await userServices.getEquestFriendUsers(auth.userId, '');
-      if (res) {
-        const data = res.data.map(
-          ({name, avatar, userId, majorCategory}: any) => ({
-            name,
-            avatar,
-            userId,
-            majorCategory,
-          }),
-        );
-        setUsers(data);
-      }
-    } catch (error) {
-      console.error('Post event get users failed', error);
+    const res = await userServices.getEquestFriendUsers(auth.userId, '');
+    if (res) {
+      const data = res.data.map(
+        ({name, avatar, userId, majorCategory}: any) => ({
+          name,
+          avatar,
+          userId,
+          majorCategory,
+        }),
+      );
+      setUsers(data);
     }
+   
   };
   function getAvatar() {
     const temp =
@@ -103,22 +100,19 @@ const AddGroupScreens = ({navigation}: any) => {
     setGroupInfo((prev: any) => ({...prev, [key]: value}));
   };
   const handleSelected = async (val: ImageOrVideo) => {
-    try {
-      const filePath = val.path;
-      const fileName = filePath.split('/').pop();
-      const path = `avatars/${fileName}`;
-      console.log('path: ', path);
+    const filePath = val.path;
+    const fileName = filePath.split('/').pop();
+    const path = `avatars/${fileName}`;
+    console.log('path: ', path);
 
-      const urlImage = await imageService.uploadImageToFirebase(filePath, path);
-      console.log('Url: ', urlImage);
+    const urlImage = await imageService.uploadImageToFirebase(filePath, path);
+    console.log('Url: ', urlImage);
 
-      onChangeGroupInfo('avatar', {
-        name: urlImage,
-        data: {userId: auth.userId},
-      });
-    } catch (error) {
-      console.log('upload failed', error);
-    }
+    onChangeGroupInfo('avatar', {
+      name: urlImage,
+      data: {userId: auth.userId},
+    });
+   
   };
 
   function getDataGroup() {

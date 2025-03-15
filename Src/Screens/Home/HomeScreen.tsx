@@ -1,30 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import { HambergerMenu, Notification } from 'iconsax-react-native';
-import React, { useCallback, useState } from 'react';
+import {HambergerMenu, Notification} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
+import {useDispatch, useSelector} from 'react-redux';
+import {io} from 'socket.io-client';
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
-import { addAuth, authSelector } from '../../redux/reducers/authReducer';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { CarEventComponent, HeaderComponent } from '../Components';
-import { eventSevices } from '../Services/eventService';
-import { userServices } from '../Services/userService';
-import { UserInfo } from '../Untils/UserInfo';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {CarEventComponent, HeaderComponent} from '../Components';
+import {eventSevices} from '../Services/eventService';
+import {userServices} from '../Services/userService';
+import {UserInfo} from '../Untils/UserInfo';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -39,30 +39,25 @@ const HomeScreen = () => {
   const socket = io(appInfo.BASE_URL);
   const getNewEvent = async () => {
     if (isLoading || page > limitPage) return; // Ngăn chặn gọi API khi đang tải hoặc hết trang.
-    try {
-      setIsLoading(true);
-      const res = await eventSevices.getNewEvent(page);
-      if (res?.data) {
-        setEvent(prevEvent => {
-          // Gộp các sự kiện mới với sự kiện cũ
-          const mergedEvents = [...prevEvent, ...res.data.events];
-          // Lọc ra các sự kiện duy nhất dựa trên 'id'
-          const uniqueEvents = mergedEvents.filter(
-            (event, index, self) =>
-              index === self.findIndex(e => e._id === event._id),
-          );
-          // Cập nhật state chỉ với các sự kiện duy nhất
-          return uniqueEvents;
-        });
+    setIsLoading(true);
+    const res = await eventSevices.getNewEvent(page);
+    if (res?.data) {
+      setEvent(prevEvent => {
+        // Gộp các sự kiện mới với sự kiện cũ
+        const mergedEvents = [...prevEvent, ...res.data.events];
+        // Lọc ra các sự kiện duy nhất dựa trên 'id'
+        const uniqueEvents = mergedEvents.filter(
+          (event, index, self) =>
+            index === self.findIndex(e => e._id === event._id),
+        );
+        // Cập nhật state chỉ với các sự kiện duy nhất
+        return uniqueEvents;
+      });
 
-        setLimitPage(res.data.totalPages);
-        setPage(prevPage => prevPage + 1);
-      }
-    } catch (error) {
-      console.error('Home get event fail error: ', error);
-    } finally {
-      setIsLoading(false); // Đặt trạng thái tải lại thành false.
+      setLimitPage(res.data.totalPages);
+      setPage(prevPage => prevPage + 1);
     }
+    setIsLoading(false);
   };
 
   const renderItemEvents = ({item, index}: any) => {
@@ -103,7 +98,6 @@ const HomeScreen = () => {
     }, []),
   );
 
- 
   return (
     <SafeAreaView
       style={[

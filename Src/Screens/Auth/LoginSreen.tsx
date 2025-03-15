@@ -1,26 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  View
-} from 'react-native';
-import { useDispatch } from 'react-redux';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
-import {
-  addAuth,
-  removeAuth
-} from '../../redux/reducers/authReducer';
-import { addEvent } from '../../redux/reducers/eventSlice';
-import { addFriend } from '../../redux/reducers/friendSlice';
-import { setLanguage } from '../../redux/reducers/languageSlice';
-import { addProfile } from '../../redux/reducers/profileSlice';
-import { setTheme } from '../../redux/reducers/themeSlice';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
+import {addEvent} from '../../redux/reducers/eventSlice';
+import {addFriend} from '../../redux/reducers/friendSlice';
+import {setLanguage} from '../../redux/reducers/languageSlice';
+import {addProfile} from '../../redux/reducers/profileSlice';
+import {setTheme} from '../../redux/reducers/themeSlice';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   RowComponent,
@@ -28,10 +20,11 @@ import {
   TextComponent,
 } from '../Components';
 import LoadingModal from '../Modal/LoadingModal';
-import { Auth } from '../Services/authService.';
-import { Notification } from '../Untils/Notification';
-import { Validate } from '../Untils/Validate';
+import {Auth} from '../Services/authService.';
+import {Notification} from '../Untils/Notification';
+import {Validate} from '../Untils/Validate';
 import './../../i18n/i18n';
+import {UserInfo} from '../Untils/UserInfo';
 const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const {t} = useTranslation();
@@ -60,7 +53,6 @@ const LoginSreen = () => {
         familyName: userInfo?.familyName,
         givenName: userInfo?.givenName,
         avatar: userInfo?.photo,
-        access: Validate.Email_Admin(userInfo?.email) ? 'true' : 'false',
       };
       return data;
     } catch (error) {
@@ -77,7 +69,11 @@ const LoginSreen = () => {
       return;
     }
     try {
-      const res = await Auth.loginWithGoogle(data);
+      const res = await Auth.loginWithGoogle({
+        ...data,
+        name: UserInfo.getName(data.name ?? ''),
+      });
+
       dispatch(addAuth(res?.data.authSlice));
       dispatch(addProfile(res.data.profileSlice));
       dispatch(addFriend(res.data.friendSlice));
@@ -114,12 +110,7 @@ const LoginSreen = () => {
     });
   }, []);
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-
-        backgroundColor: appColors.white,
-      }}>
+    <SafeAreaView style={styles.container}>
       <LoadingModal visible={isLoading} />
       <Image
         source={require('../../assets/images/scene-with-young-children-playing-nature-outdoors.jpg')}
@@ -174,7 +165,7 @@ const LoginSreen = () => {
               height={appInfo.size.HEIGHT * 0.04}
             />
           }
-          textStyle={{fontWeight: '600', fontSize: appInfo.size.WIDTH * 0.05}}
+          textStyle={styles.txtBtn}
         />
         <SpaceComponent height={appInfo.size.HEIGHT * 0.02} />
 
@@ -191,10 +182,11 @@ const LoginSreen = () => {
 
 export default LoginSreen;
 const styles = StyleSheet.create({
-  titleStyle: {
-    fontWeight: '700',
-    fontStyle: 'italic',
+  container: {
+    flex: 1,
+    backgroundColor: appColors.white,
   },
+
   bgStyle: {
     width: appInfo.size.WIDTH,
     height: appInfo.size.HEIGHT * 0.6,
@@ -217,7 +209,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontStyle: 'italic',
-    color: appColors.black,
     textAlign: 'center',
   },
   VContainer: {
@@ -237,4 +228,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
   },
+  txtBtn: {fontWeight: '600', fontSize: appInfo.size.WIDTH * 0.05},
 });

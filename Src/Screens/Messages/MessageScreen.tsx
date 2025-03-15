@@ -10,6 +10,7 @@ import {appInfo} from '../../Theme/appInfo';
 import {authSelector} from '../../redux/reducers/authReducer';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
+  CustormLongPress,
   HeaderComponent,
   SearchFriendsComponent,
   SpaceComponent,
@@ -30,19 +31,25 @@ const MessageScreen = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
+  const sortUsersByPinnedStatus = (users: any) => {
+    if (!users || users.length === 0) return [];
+    return [...users].sort((a, b) => {
+      const isAPinned = a.pinnedBy && a.pinnedBy.includes(auth.userId);
+      const isBPinned = b.pinnedBy && b.pinnedBy.includes(auth.userId);
+      if (isAPinned && !isBPinned) return -1;
+      if (!isAPinned && isBPinned) return 1;
+      return 0; // Keep original order if both pinned or both unpinned
+    });
+  };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const res = await messageServices.getAllConversationUsers(auth.userId);
-      if (res?.data && res) {
-        setUsers(res?.data);
-        // console.log(res?.data);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('ListChat', error);
-      setIsLoading(false);
+    const res = await messageServices.getAllConversationUsers(auth.userId);
+    if (res?.data && res) {
+      const sortedUsers = sortUsersByPinnedStatus(res?.data);
+      setUsers(sortedUsers);
+      // console.log(res?.data);
     }
+    setIsLoading(false);
   }, []);
   const onNavigation = async (item: any) => {
     await AsyncStorage.setItem('ConversationInfo', JSON.stringify(item));
@@ -55,41 +62,72 @@ const MessageScreen = ({navigation}: any) => {
     navigation.navigate('AddGroup');
     onCloseModal();
   };
-  useFocusEffect(
-    useCallback(() => {
-      getAllConversation();
-    }, []),
-  );
 
+  const handleGhimConversation = async (user: any) => {
+    const res = await messageServices.actionGhimConversation(
+      user.type === 'personal' ? user.conversationId : user.groupId,
+      auth.userId,
+      user.type,
+    );
+    if (res && res.data) {
+      console.log('Ghim conversation successfully !!!', res.data);
+      setUsers(prevUsers => {
+        const updatedUsers = prevUsers.map(item => {
+          // Check if this is the item we just pinned
+          if ((user.type === 'personal' && item.conversationId === user.conversationId) || 
+              (user.type === 'group' && item.groupId === user.groupId)) {
+            // Create a new object with updated pinnedBy property
+            return {
+              ...item,
+              pinnedBy: res.data.data || [...(item.pinnedBy || []), auth.userId]
+            };
+          }
+          return item;
+        });
+        
+        // Resort the conversations to move pinned ones to the top
+        return sortUsersByPinnedStatus(updatedUsers);
+      });
+    }
+  };
   const renderCardItems = useCallback(
     ({item, index}: any) => {
       const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
       const name =
         item.nickNames && item.nickNames[item.userId]
           ? item.nickNames[item.userId]
-          : UserInfo.getName(item.name);
+          : item.name;
 
       return (
-        <CarUserChat
-          key={index}
-          name={item.groupName ?? name}
-          massv={
-            item.type === 'group'
-              ? sumUsers
-              : UserInfo.getYearOfbirth(item.email)
-          }
-          image={item.avatar}
-          lastMessage={item.lastMessage}
-          onPress={() => onNavigation(item)}
-          lastMessageColor={
-            item.statusLastMessage ? appColors.blueBack : appColors.grey
-          }
-        />
+        <CustormLongPress
+          user={item}
+          handleGhimConversation={() => handleGhimConversation(item)}>
+          <CarUserChat
+            isGhim={item.pinnedBy && item.pinnedBy.includes(auth.userId)}
+            key={index}
+            name={item.groupName ?? name}
+            massv={
+              item.type === 'group'
+                ? sumUsers
+                : UserInfo.getYearOfbirth(item.email)
+            }
+            image={item.avatar}
+            lastMessage={item.lastMessage}
+            onPress={() => onNavigation(item)}
+            lastMessageColor={
+              item.statusLastMessage ? appColors.blueBack : appColors.grey
+            }
+          />
+        </CustormLongPress>
       );
     },
     [users],
   );
-
+  useFocusEffect(
+    useCallback(() => {
+      getAllConversation();
+    }, []),
+  );
   return (
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>
@@ -134,7 +172,7 @@ const MessageScreen = ({navigation}: any) => {
           }
         />
       </View>
-      <SpaceComponent height={12} />
+      <SpaceComponent height={16} />
       {isLoading ? (
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
           <ActivityIndicator />
@@ -167,6 +205,7 @@ const MessageScreen = ({navigation}: any) => {
         </View>
       )}
       <InfomationModal
+        onPressGhim={() => navigation.navigate('GoongMapScreen')}
         onPressRemove={() => {
           setIsVisible(false);
           navigation.navigate('TrashConversation', {users});

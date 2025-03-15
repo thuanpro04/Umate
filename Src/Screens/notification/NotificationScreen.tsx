@@ -46,17 +46,14 @@ const NotificationScreen = ({navigation}: any) => {
     id: string,
     groupId?: string,
   ) => {
-    try {
-      const res =
-        action === 'agree'
-          ? await groupServices.handleAgreeOnGroup(auth.userId, id, groupId)
-          : await notificationServices.handleDeleteNotification(id);
-      if (res) {
-        fetchNotification();
-      }
-    } catch (error) {
-      console.log('action friend error: ', error);
+    const res =
+      action === 'agree'
+        ? await groupServices.handleAgreeOnGroup(auth.userId, id, groupId)
+        : await notificationServices.handleDeleteNotification(id);
+    if (res && res.data) {
+      fetchNotification();
     }
+    
   };
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
@@ -191,16 +188,12 @@ const NotificationScreen = ({navigation}: any) => {
   );
   const fetchNotification = async () => {
     setIsLoading(true);
-    try {
-      const res = await notificationServices.getNotifications(auth.userId);
-      if (res && res.data) {
-        setDataNotifi(res.data);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('fetch notification error: ', error);
-      setIsLoading(false);
+    const res = await notificationServices.getNotifications(auth.userId);
+    if (res && res.data) {
+      setDataNotifi(res.data);
     }
+    setIsLoading(false);
+  
   };
   const handleTrashNotification = async () => {
     if (isTrash) {
@@ -208,20 +201,17 @@ const NotificationScreen = ({navigation}: any) => {
         setTrash(false);
         return;
       }
-      try {
-        const res = await notificationServices.handleDeleteNotification(
-          selectTrash,
-        );
-        if (res) {
-          console.log('Delete successfully !!');
-          fetchNotification();
-        }
+      const res = await notificationServices.handleDeleteNotification(
+        selectTrash,
+      );
+      if (res) {
+        console.log('Delete successfully !!');
+        fetchNotification();
         setSelectItems({});
         setSelectTrash([]);
         setTrash(false);
-      } catch (error) {
-        console.log('Trash notification error: ', error);
       }
+     
     }
     setTrash(true);
   };

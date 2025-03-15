@@ -2,8 +2,6 @@ import eventApi from '../../apis/eventApi';
 let url;
 const getNewEvent = async (page: number) => {
   url = `/new-event?curentPage=${page}&limit=${10}`;
-
-
   try {
     const response = await eventApi.handleEvent(url);
     return response;
@@ -16,9 +14,13 @@ const updateUserHeartForEvent = async (
   id: string,
   action: 'add' | 'cancel',
 ) => {
-  url = `/action-heart?userId=${userId}&id=${id}&key=${action}`;
-  const res = eventApi.handleEvent(url);
-  return res;
+  try {
+    url = `/action-heart?userId=${userId}&id=${id}&key=${action}`;
+    const res = eventApi.handleEvent(url);
+    return res;
+  } catch (error) {
+    console.log('update heart error: ', error);
+  }
 };
 const shareEventMyApp = async (data: any) => {
   url = `/share-event`;

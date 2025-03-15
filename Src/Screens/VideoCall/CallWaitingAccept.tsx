@@ -1,24 +1,25 @@
-import { useRoute } from '@react-navigation/native';
-import { CallCalling } from 'iconsax-react-native';
-import React, { useEffect, useRef } from 'react';
+import {useRoute} from '@react-navigation/native';
+import {CallCalling} from 'iconsax-react-native';
+import React, {useEffect, useRef} from 'react';
 import {
   Animated,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Sound from 'react-native-sound';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSelector } from 'react-redux';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { socketSelector } from '../../redux/reducers/socketSlice';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
-import { RowComponent, SpaceComponent, TextComponent } from '../Components';
-import { UserInfo } from '../Untils/UserInfo';
+import {useSelector} from 'react-redux';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {socketSelector} from '../../redux/reducers/socketSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {RowComponent, SpaceComponent, TextComponent} from '../Components';
+import {UserInfo} from '../Untils/UserInfo';
+import {useTranslation} from 'react-i18next';
 const CallWaitingAccept = ({navigation}: any) => {
   const {avatar, name, callID, targetId, userId, type} = useRoute().params as {
     avatar: string;
@@ -32,6 +33,7 @@ const CallWaitingAccept = ({navigation}: any) => {
   const socket = useSelector(socketSelector).socket;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
   const soundRef = useRef<Sound | null>(null);
+  const {t} = useTranslation();
 
   const hanldeCancelCall = () => {
     if (soundRef.current) {
@@ -115,7 +117,7 @@ const CallWaitingAccept = ({navigation}: any) => {
           <RowComponent>
             <CallCalling size={appInfo.sizeIconBold} color={appColors.green} />
             <TextComponent
-              label={`Đang kết nối ${UserInfo.getName(name)}`}
+              label={`${t('is_connect')} ${name}`}
               styles={{}}
               color="white"
             />

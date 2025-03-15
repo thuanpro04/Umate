@@ -11,13 +11,9 @@ interface Props {
 const CustomHeaderImages = (props: Props) => {
   const {onPressClose, img} = props;
 
-  const downloadImage = async (imageUrl: string) => {
-    try {
-      imageService.downLoadImageForMe(img.uri);
-    } catch (error) {
-      console.error('Lỗi tải ảnh:', error);
-      Alert.alert('Lỗi', 'Không thể tải ảnh!');
-    }
+  const downloadImage = async () => {
+    imageService.downLoadImageForMe(img.uri);
+   
   };
   return (
     <RowComponent styles={{justifyContent: 'flex-end', padding: 16}}>
@@ -25,7 +21,7 @@ const CustomHeaderImages = (props: Props) => {
         name="file-download"
         color={appColors.white}
         size={32}
-        onPress={() => downloadImage(img.uri)}
+        onPress={() => downloadImage()}
       />
       <SpaceComponent width={40} />
       <MaterialIcons

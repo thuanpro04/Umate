@@ -17,33 +17,45 @@ const handleAgreeOnGroup = async (
   id: string,
   groupId?: string,
 ) => {
-  url = '/agree';
-  const data = {
-    userId,
-    id,
-    groupId,
-  };
-  const res = await groupAPI.handleGroup(url, data, 'post');
-  return res;
+  try {
+    url = '/agree';
+    const data = {
+      userId,
+      id,
+      groupId,
+    };
+    const res = await groupAPI.handleGroup(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('action friend error: ', error);
+  }
 };
 const handleOutGroup = async (userId: string, groupId: string) => {
-  url = `/out-group?id=${groupId}&&userId=${userId}`;
-  const res = await groupAPI.handleGroup(url);
-  return res;
+  try {
+    url = `/out-group?id=${groupId}&&userId=${userId}`;
+    const res = await groupAPI.handleGroup(url);
+    return res;
+  } catch (error) {
+    console.log('out group error: ', error);
+  }
 };
 const handlePosition = async (
   userId: string,
   groupId: string,
   position?: string,
 ) => {
-  url = `/position`;
-  const data = {
-    id: groupId,
-    userId,
-    position,
-  };
-  const res = await groupAPI.handleGroup(url, data, 'post');
-  return res;
+  try {
+    url = `/position`;
+    const data = {
+      id: groupId,
+      userId,
+      position,
+    };
+    const res = await groupAPI.handleGroup(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('Position error: ', error);
+  }
 };
 export const groupServices = {
   handelNewGroupUser,

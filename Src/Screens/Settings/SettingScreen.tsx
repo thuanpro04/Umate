@@ -75,20 +75,17 @@ const SettingScreen = () => {
   );
 
   const handleThemeToggle = async () => {
-    try {
-      const newTheme = theme === 'dark' ? 'light' : 'dark';
-      const res = await userServices.updateThemeforUser(
-        auth.userId,
-        theme === 'dark' ? 'light' : 'dark',
-      );
-      if (res && res.data) {
-        dispatch(setTheme(newTheme));
-        console.log('update successfully ', res.data);
-      }
-      setIsDarkMode(!isDarkMode);
-    } catch (error) {
-      console.log('Update state theme error: ', error);
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const res = await userServices.updateThemeforUser(
+      auth.userId,
+      theme === 'dark' ? 'light' : 'dark',
+    );
+    if (res && res.data) {
+      dispatch(setTheme(newTheme));
+      console.log('update successfully ', res.data);
     }
+    setIsDarkMode(!isDarkMode);
+   
   };
   const handleChangeLanguage = async () => {
     const newLanguage = language === 'vi' ? 'en' : 'vi';
@@ -128,15 +125,12 @@ const SettingScreen = () => {
   };
 
   const handleRemoveForUser = async () => {
-    try {
-      const res = await userServices.handleRemoveUser(auth.userId);
-      if (res) {
-        console.log('Remove successfully !!');
-      }
-      await handleLogout();
-    } catch (error) {
-      console.log('handle remove user fail: ', error);
+    const res = await userServices.handleRemoveUser(auth.userId);
+    if (res) {
+      console.log('Remove successfully !!');
     }
+    await handleLogout();
+  
   };
 
   const handleLogout = async () => {

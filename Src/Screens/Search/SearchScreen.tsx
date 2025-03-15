@@ -85,32 +85,26 @@ const SearchScreen = ({navigation}: any) => {
       return;
     }
 
-    try {
-      const res = await searchServices.handleSearchFriends(
-        auth.userId,
-        keySearch,
-        titleSearch,
-      );
-      if (res?.data) {
-        setUsers(res.data);
-      }
+    const res = await searchServices.handleSearchFriends(
+      auth.userId,
+      keySearch,
+      titleSearch,
+    );
+    if (res?.data) {
+      setUsers(res.data);
       setMessageErr('');
-    } catch (error) {
-      console.log('handleSearchFriends', error);
     }
+  
   };
   const handleSearchConversations = async (keySearch: string) => {
-    try {
-      const res = await searchServices.searchConversationUsers(
-        auth.userId,
-        keySearch,
-      );
-      if (res && res.data) {
-        setUsers(res.data);
-      }
-    } catch (error) {
-      console.log('handleSearchConversations', error);
+    const res = await searchServices.searchConversationUsers(
+      auth.userId,
+      keySearch,
+    );
+    if (res && res.data) {
+      setUsers(res.data);
     }
+  
   };
 
   const debouncedFetchUsers =
@@ -131,9 +125,12 @@ const SearchScreen = ({navigation}: any) => {
       <View key={index}>
         <SpaceComponent height={20} />
         <CarUserComponent
+          onPressImg={() =>
+            navigation.navigate('PersonalScreen', {userId: item.userId})
+          }
           userId={item.userId}
           isFind
-          name={UserInfo.getName(item?.name)}
+          name={item?.name}
           iconAddCancel
           isFriend={isShowIconAddCancel}
           img={item?.avatar}
@@ -144,36 +141,33 @@ const SearchScreen = ({navigation}: any) => {
     );
   };
   const onNavigationChat = async (item: any) => {
-    try {
-      const res = await messageServices.checkConversation(
-        auth.userId,
-        item.userId,
-      );
-      res && console.log('res.data', res.data);
+    const res = await messageServices.checkConversation(
+      auth.userId,
+      item.userId,
+    );
+    res && console.log('res.data', res.data);
 
-      if (res && res.data) {
-        let conversationId = res.data;
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...item, conversationId}),
-        );
-      } else {
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...item, type: 'personal'}),
-        );
-      }
-      navigation.navigate('Chat');
-    } catch (error) {
-      console.error('Respond save user error ', error);
+    if (res && res.data) {
+      let conversationId = res.data;
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...item, conversationId}),
+      );
+    } else {
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...item, type: 'personal'}),
+      );
     }
+    navigation.navigate('Chat');
+   
   };
 
   const renderItemsConversation = (item: any, index: number) => {
     return (
       <CarUserChat
         key={item.userId}
-        name={item.groupName ?? UserInfo.getName(item.name)}
+        name={item.groupName ?? item.name}
         massv={
           item.type === 'group'
             ? item.invitedUsers.length

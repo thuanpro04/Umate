@@ -25,7 +25,21 @@ const SocketManager = () => {
       }
     }
   };
-
+  PushNotification.configure({
+    onNotification: function (notification) {
+      console.log('NOTIFICATION:', notification);
+    },
+    popInitialNotification: true,
+    requestPermissions: true, // Yêu cầu quyền trên iOS
+  });
+  const sendNotification = async (data: any) => {
+    PushNotification.localNotification({
+      channelId: 'zego_video_call', // Trùng với channelId đã tạo
+      title: data.title,
+      message: data.content.length === 0 ? 'hình ảnh mới' : data.content,
+      userInfo: {senderId: data.senderId, receiverId: data.receiverId},
+    });
+  };
   useEffect(() => {
     if (!auth.userId) return;
 
@@ -45,11 +59,10 @@ const SocketManager = () => {
         }
       });
     }
-    
 
     socketRef.current.on('feedbackRefused', (data: any) => {
       console.log('callRefused: ', data.callID);
-      if(data.type === 'personal_voice' || data.type === 'personal_viceo'){
+      if (data.type === 'personal_voice' || data.type === 'personal_viceo') {
         navigation.goBack();
       }
       Notification.showToast(
@@ -59,20 +72,23 @@ const SocketManager = () => {
       );
     });
     socketRef.current.on('feedbackCancelCall', data => {
-      Notification.showToast(
-        'info',
-        `Bạn có cuộc gọi nhở từ ${UserInfo.getName(data.name)}`,
-        `${new Date().toLocaleString()}`,
-      );
+      const dataCall = {
+        title: `Bạn có cuộc gọi nhở từ ${data.name}`,
+        content: `${new Date().toLocaleString()}`,
+      };
+      sendNotification(dataCall);
       navigation.goBack();
     });
-    
+    socketRef.current.on('notification_message', (data: any) => {
+      sendNotification({...data, title: 'New message'});
+    });
     return () => {
       if (socketRef.current) {
         socketRef.current.off('incomingCall');
         socketRef.current.off('callRegister');
         socketRef.current.off('feedbackRefused');
         socketRef.current.off('feedbackCancelCall');
+        socketRef.current.off('notification_message');
         dispatch(setSocket(null));
         socketRef.current.disconnect();
         socketRef.current = null;

@@ -83,12 +83,9 @@ const GeminiChat = ({onFocus, onBlur}: any) => {
           <Text style={styles.headerTitle}>Gemini Chat</Text>
         </LinearGradient>
 
-        {/* Chat Box */}
         <View style={styles.chatContainer}>
           <ChatBox messbox={messageInfo} />
         </View>
-
-        {/* Input */}
         <InputGenimi
           onChangeValue={setUserInput}
           isDisable={isDisable}

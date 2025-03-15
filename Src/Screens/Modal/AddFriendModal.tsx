@@ -20,8 +20,9 @@ import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import {searchServices} from '../Services/searchServices';
 import {debounce} from 'lodash';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { useSelector } from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useSelector} from 'react-redux';
+import {useTranslation} from 'react-i18next';
 interface Props {
   userId: string;
   visible: Boolean;
@@ -36,6 +37,8 @@ const AddFriendModal = (props: Props) => {
   const [bgUser, setBgUser] = useState<{[key: string]: Boolean}>({});
   const [selectUser, setSelectUser] = useState<string[]>([]);
   const modalizeRef = useRef<Modalize>(null);
+  const {t} = useTranslation();
+
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   useEffect(() => {
@@ -67,36 +70,31 @@ const AddFriendModal = (props: Props) => {
     });
   };
   const getFriendForUser = async () => {
-    try {
-      const res = await userServices.getEquestFriendUsers(userId, '');
-      if (res) {
-        setAllUsers(res.data);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    const res = await userServices.getEquestFriendUsers(userId, '');
+    if (res) {
+      setAllUsers(res.data);
     }
+    
   };
   const searchFriends = async (value: string) => {
-    try {
-      const res = await searchServices.findFriendForUser(userId, value);
-      if (res && res.data) {
-        setAllUsers(res.data);
-      }
-    } catch (error) {
-      console.log('Find friends fail error: ', error);
+    const res = await searchServices.findFriendForUser(userId, value);
+    if (res && res.data) {
+      setAllUsers(res.data);
     }
+ 
   };
   const debounceFindFriends = debounce(searchFriends, 300);
 
   const renderItemUser = ({item, index}: any) => {
     return index < 7 && !existingUser.includes(item.userId) ? (
       <CarUserComponent
-        authori={item.majoring ?? 'chuyên ngành ?'}
+        userId={item.userId}
+        authori={item.majoring ?? t('majoring')}
         key={index}
         onPress={() => onChangeBgUser(item.userId)}
         onPressAdd={() => {}}
         url={item.avatar}
-        userName={UserInfo.getName(item.name)}
+        userName={item.name}
         bgColor={bgUser[item.userId] ? appColors.grey2 + '8C' : 'transparent'}
       />
     ) : (
@@ -119,14 +117,14 @@ const AddFriendModal = (props: Props) => {
         modalStyle={{
           paddingHorizontal: 12,
           paddingTop: StatusBar.currentHeight,
-          backgroundColor:colors.background
+          backgroundColor: colors.background,
         }}>
         <View style={{flex: 1, alignItems: 'center'}}>
           <InputComponent
             value={text}
             onChange={setText}
             allowClear
-            placehold="search friend"
+            placehold={t('search_friend')}
             affix={
               <SearchFavorite size={appInfo.sizeIconBold} color={colors.icon} />
             }
@@ -134,7 +132,7 @@ const AddFriendModal = (props: Props) => {
           <SpaceComponent height={6} />
           {allUsers.map((item, index) => renderItemUser({item, index}))}
           <ButtonComponent
-            label="Mời vào nhóm"
+            label={t('invite_group')}
             onPress={() => {
               if (onPressInviteToGroup && selectUser.length > 0) {
                 onPressInviteToGroup(selectUser);

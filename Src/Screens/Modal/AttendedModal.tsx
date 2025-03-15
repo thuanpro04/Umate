@@ -42,16 +42,13 @@ const AttendedModal = (props: Props) => {
     if (attendId.length === 0) {
       return;
     }
-    try {
-      const res = await userServices.getListUserInfo(attendId);
-      if (res && res.data) {
-        console.log('Get user info successfully', res.data);
-        setUsers(res.data);
-        setUserInfo(res.data);
-      }
-    } catch (error) {
-      console.log('get user info error: ', error);
+    const res = await userServices.getListUserInfo(attendId);
+    if (res && res.data) {
+      console.log('Get user info successfully', res.data);
+      setUsers(res.data);
+      setUserInfo(res.data);
     }
+   
   };
   useEffect(() => {
     if (visible) {
@@ -85,11 +82,9 @@ const AttendedModal = (props: Props) => {
           }}
           key={index}
           userId={item.userId}
-          icon={<MoreVerticalIcon size={22} color={colors.icon} />}
           authori={item.majoring ?? t('majoring')}
           userName={item.name}
           url={item.avatar}
-          onPressMore={() => {}}
         />
       ))
     );

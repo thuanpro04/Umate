@@ -42,19 +42,14 @@ const ContactUsScreen = ({navigation}: any) => {
         email: profile.email,
         message,
       };
-      try {
-        const res = await notificationServices.handleSendEmail(data);
-        setIsLoading(false);
-        Notification.showToast(
-          'success',
-          `🎉${t('thank_you')}`,
-          t('feedback_appreciation'),
-        );
-        navigation.goBack();
-      } catch (error) {
-        console.log('handle email fail error: ', error);
-        setIsLoading(false);
-      }
+      const res = await notificationServices.handleSendEmail(data);
+      setIsLoading(false);
+      Notification.showToast(
+        'success',
+        `🎉${t('thank_you')}`,
+        t('feedback_appreciation'),
+      );
+      navigation.goBack();
     } else {
       setIsLoading(false);
       return;
@@ -65,7 +60,7 @@ const ContactUsScreen = ({navigation}: any) => {
     <ScrollView
       style={[styles.container, {backgroundColor: colors.background}]}
       showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={['#6A11CB', '#2575FC']} style={[styles.header,]}>
+      <LinearGradient colors={['#6A11CB', '#2575FC']} style={[styles.header]}>
         <ArrowLeft2
           onPress={() => navigation.goBack()}
           color={appColors.orange1}

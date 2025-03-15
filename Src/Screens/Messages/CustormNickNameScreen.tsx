@@ -44,14 +44,11 @@ const CustormNickNameScreen = () => {
   const {t} = useTranslation();
 
   const fetchUserInfos = async () => {
-    try {
-      const res = await userServices.getListUserInfo(converInfo.invitedUsers);
-      if (res && res.data) {
-        setUserInfo(res.data);
-      }
-    } catch (error) {
-      console.error('fetch use info fail: ', error);
+    const res = await userServices.getListUserInfo(converInfo.invitedUsers);
+    if (res && res.data) {
+      setUserInfo(res.data);
     }
+    
   };
   const data = [
     {
@@ -59,7 +56,7 @@ const CustormNickNameScreen = () => {
       name:
         converData.nickNames && converData.nickNames[converData.userId]
           ? converData.nickNames[converData.userId]
-          : UserInfo.getName(converData.name),
+          : converData.name,
       avatar: converData.avatar,
     },
     {
@@ -67,7 +64,7 @@ const CustormNickNameScreen = () => {
       name:
         converData.nickNames && converData.nickNames[auth.userId]
           ? converData.nickNames[auth.userId]
-          : UserInfo.getName(profile.name),
+          : profile.name,
       avatar: profile.avatar,
     },
   ];
@@ -82,31 +79,28 @@ const CustormNickNameScreen = () => {
       return;
     }
     setValue(value);
-    try {
-      const res = await messageServices.updateNickNameConversation({
-        userId,
-        value,
-        id: key === 'personal' ? converInfo.conversationId : converInfo.groupId,
-        key,
-      });
-      if (res && res.data) {
-        console.log('Update nick name successfully!!', res.data);
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...converInfo, nickNames: res.data}),
-        );
-        const updateData = {...converInfo, nickNames: res.data};
-        setConverData(updateData);
-      }
-    } catch (error) {
-      console.log('Update nick name fail: ', error);
+    const res = await messageServices.updateNickNameConversation({
+      userId,
+      value,
+      id: key === 'personal' ? converInfo.conversationId : converInfo.groupId,
+      key,
+    });
+    if (res && res.data) {
+      console.log('Update nick name successfully!!', res.data);
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...converInfo, nickNames: res.data}),
+      );
+      const updateData = {...converInfo, nickNames: res.data};
+      setConverData(updateData);
     }
+   
   };
   const getNameInGroup = (item: any) => {
     if (converData.nickNames && converData.nickNames[item.userId]) {
       return converData.nickNames[item.userId];
     }
-    return UserInfo.getName(item.name);
+    return item.name;
   };
   const renderCard = useCallback(
     ({item, index}: any) => {
@@ -169,7 +163,7 @@ const CustormNickNameScreen = () => {
       <UpdateInfoModal
         isVisible={visible}
         nickName={t('set_nickname')}
-        nameField={UserInfo.getName(selectUser.name)}
+        nameField={selectUser.name}
         onCloseModal={() => setVisible(false)}
         onChangeProfile={(key, value) =>
           handleUpdateNickName(selectUser.userId, value)

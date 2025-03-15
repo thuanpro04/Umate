@@ -53,7 +53,7 @@ const ChatScreen = ({navigation}: any) => {
   const name =
     converInfo.nickNames && converInfo.nickNames[converInfo.userId]
       ? converInfo.nickNames[converInfo.userId]
-      : UserInfo.getName(converInfo.name);
+      : converInfo.name;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,33 +65,33 @@ const ChatScreen = ({navigation}: any) => {
       }
     };
     fetchData();
-  }, [converInfo]);
+  }, []);
 
   useEffect(() => {
-    if (converInfo) {
+    if (converInfo && page === 1) {
       handleLoadMoreMessages();
       handleUpdateStatusMessage();
     }
     //  scrollViewToEnd()
-  }, []);
-
-
+  }, [converInfo, page]);
 
   const handleUpdateStatusMessage = async () => {
-    try {
-      if (!messages || messages.length === 0) {
-        return;
-      }
-      const res = await messageServices.updateStatusMessage(
-        auth.userId,
-        converInfo.type === 'personal'
-          ? converInfo.conversationId
-          : converInfo.groupId,
-        converInfo.type,
-      );
-
-    } catch (error) {
-      console.log('update status message fail: ', error);
+    if (
+      !messages ||
+      messages.length === 0 ||
+      messages[messages.length - 1].senderId === auth.userId
+    ) {
+      return;
+    }
+    const res = await messageServices.updateStatusMessage(
+      auth.userId,
+      converInfo.type === 'personal'
+        ? converInfo.conversationId
+        : converInfo.groupId,
+      converInfo.type,
+    );
+    if (res) {
+      console.log('update status read message');
     }
   };
   const handleLoadMoreMessages = useCallback(async () => {
@@ -102,43 +102,38 @@ const ChatScreen = ({navigation}: any) => {
     if (converInfo.type === 'personal' && !converInfo.conversationId) {
       return;
     }
-    try {
-      const res = await messageServices.getAllMessagesUser(
-        converInfo.type === 'personal'
-          ? converInfo.conversationId
-          : converInfo.groupId,
-        converInfo.type,
-        page,
-      );
-      setMembers(res?.data.invitedUsers);
-      if (res?.data && res.data.messages.length > 0) {
-        // console.log(res.data.messages);
-        setLimitPage(res.data.totalPages);
-        // console.log('limitPage: ', limitPage, 'page: ', page);
-        setMessages(prev => {
-          const newMessages = res.data.messages.reverse();
-          // Kết hợp các tin nhắn mới và cũ
-          const allMessages = [...newMessages, ...prev];
+    const res = await messageServices.getAllMessagesUser(
+      converInfo.type === 'personal'
+        ? converInfo.conversationId
+        : converInfo.groupId,
+      converInfo.type,
+      page,
+    );
+    setMembers(res?.data.invitedUsers);
+    if (res?.data && res.data.messages.length > 0) {
+      // console.log(res.data.messages);
+      setLimitPage(res.data.totalPages);
+      // console.log('limitPage: ', limitPage, 'page: ', page);
+      setMessages(prev => {
+        const newMessages = res.data.messages.reverse();
+        // Kết hợp các tin nhắn mới và cũ
+        const allMessages = [...newMessages, ...prev];
 
-          // Loại bỏ các tin nhắn trùng lặp dựa trên một thuộc tính duy nhất, ví dụ như 'id'
-          return allMessages.filter(
-            (value, index, self) =>
-              index ===
-              self.findIndex(
-                t => t._id === value._id, // Thay 'id' bằng thuộc tính duy nhất của tin nhắn
-              ),
-          );
-        });
-        if (page < limitPage) {
-          setPage(prevPage => prevPage + 1);
-        }
+        // Loại bỏ các tin nhắn trùng lặp dựa trên một thuộc tính duy nhất, ví dụ như 'id'
+        return allMessages.filter(
+          (value, index, self) =>
+            index ===
+            self.findIndex(
+              t => t._id === value._id, // Thay 'id' bằng thuộc tính duy nhất của tin nhắn
+            ),
+        );
+      });
+      if (page < limitPage) {
+        setPage(prevPage => prevPage + 1);
       }
-
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   }, [converInfo, page, isLoading]);
 
   const onSendMessages = useCallback(
@@ -152,43 +147,45 @@ const ChatScreen = ({navigation}: any) => {
           timestamp: new Date().toISOString(),
           reply: val.reply ?? '',
         };
-        let updatedMessages = [...messages];
+        setMessages(prev => {
+          let updatedMessages = [...prev];
+          if (converInfo.type === 'group') {
+            const groupMessages = {
+              ...newMessage,
+              groupName: converInfo.groupName,
+              recipients: getUserIdGroup(),
+              type: 'group',
+            };
+            const isMessageExist = updatedMessages.some(
+              msg =>
+                msg.groupName === groupMessages.groupName &&
+                msg.type === 'group' &&
+                JSON.stringify(msg.recipients) ===
+                  JSON.stringify(groupMessages.recipients) &&
+                msg.content === groupMessages.content, // Thêm điều kiện phù hợp với dữ liệu của bạn
+            );
+            if (!isMessageExist) {
+              updatedMessages.push(groupMessages); // Thêm tin nhắn vào mảng
+            }
+          } else {
+            const personMessages = {
+              ...newMessage,
+              receiverId: converInfo.userId,
+              type: 'personal',
+            };
 
-        if (converInfo.type === 'group') {
-          const groupMessages = {
-            ...newMessage,
-            groupName: converInfo.groupName,
-            recipients: getUserIdGroup(),
-            type: 'group',
-          };
-          const isMessageExist = updatedMessages.some(
-            msg =>
-              msg.groupName === groupMessages.groupName &&
-              msg.type === 'group' &&
-              JSON.stringify(msg.recipients) ===
-                JSON.stringify(groupMessages.recipients) &&
-              msg.content === groupMessages.content, // Thêm điều kiện phù hợp với dữ liệu của bạn
-          );
-          if (!isMessageExist) {
-            updatedMessages.push(groupMessages); // Thêm tin nhắn vào mảng
+            updatedMessages.push(personMessages); // Thêm tin nhắn cá nhân vào
           }
-        } else {
-          const personMessages = {
-            ...newMessage,
-            receiverId: converInfo.userId,
-            type: 'personal',
-          };
+          // Chỉ gọi setMessages một lần
+          console.log(updatedMessages);
 
-          updatedMessages.push(personMessages); // Thêm tin nhắn cá nhân vào
-        }
-        // Chỉ gọi setMessages một lần
-
-        setMessages(updatedMessages);
+          return updatedMessages;
+        });
       }
       scrollViewToEnd();
     },
 
-    [currentUserId, converInfo?.userId, converInfo?.invitedUsers, messages],
+    [currentUserId],
   );
 
   const scrollViewToEnd = () => {
@@ -221,7 +218,6 @@ const ChatScreen = ({navigation}: any) => {
         .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
         .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
         .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
-
       return (
         <ChatItems
           conversationInfo={converInfo}
@@ -253,16 +249,7 @@ const ChatScreen = ({navigation}: any) => {
         />
       );
     },
-    [
-      messages,
-      updateRowRef,
-      navigation,
-      currentUserId,
-      converInfo,
-      members,
-      setReplyMessage,
-      socket,
-    ],
+    [navigation, converInfo, members],
   );
   const ListHeader = () => {
     return isLoading ? <ActivityIndicator /> : <></>;
@@ -270,6 +257,8 @@ const ChatScreen = ({navigation}: any) => {
 
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
+      console.log('receive_message: ', data);
+
       setMessages(prev => {
         if (!prev.some(msg => msg._id === data._id)) {
           return [...prev, data];
@@ -290,9 +279,7 @@ const ChatScreen = ({navigation}: any) => {
       converInfo.block.includes(auth.userId) && (
         <View style={styles.block}>
           <TextComponent
-            label={`${t('you_are_blocked')} ${UserInfo.getName(
-              converInfo.name,
-            )}`}
+            label={`${t('you_are_blocked')} ${converInfo.name}`}
             styles={{fontWeight: '500', fontStyle: 'italic'}}
             color={appColors.white}
           />
@@ -393,6 +380,10 @@ const ChatScreen = ({navigation}: any) => {
         renderViewBlock()
       ) : (
         <ChatInput
+          isNotification={
+            converInfo.notification &&
+            converInfo.notification.includes(converInfo.userId)
+          }
           isBlock={
             friendData.block && friendData.block.includes(converInfo.userId)
           }

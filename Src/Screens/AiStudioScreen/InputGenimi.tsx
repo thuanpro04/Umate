@@ -1,34 +1,19 @@
 import React from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import {StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 interface Props {
   onPress: () => void;
   isDisable: boolean;
   onChangeValue: (value: string) => void;
-  value:string
+  value: string;
 }
 const InputGenimi = (props: Props) => {
-  const {onPress, isDisable, onChangeValue,value} = props;
- 
+  const {onPress, isDisable, onChangeValue, value} = props;
+
   return (
     <View style={styles.inputContainer}>
-      {/* <ButtonImagePicker
-        icon={
-          <MaterialCommunityIcons
-            name="image-multiple-outline"
-            size={appInfo.sizeIcon}
-            color={appColors.blue}
-          />
-        }
-        multiple
-        onSelect={val => {
-          // val.type === 'url'
-          //   ? handleSendMessageAndImage(val.value.toString().trim())
-          //   : handleSelected(val.value as ImageOrVideo);
-        }}
-      /> */}
       <TextInput
         style={styles.inputStyles}
         value={value}
@@ -71,6 +56,6 @@ const styles = StyleSheet.create({
   inputStyles: {
     borderBottomColor: 'grey',
     flex: 1,
-    color:appColors.white
+    color: appColors.white,
   },
 });

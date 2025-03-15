@@ -21,14 +21,16 @@ import LoadingModal from '../Modal/LoadingModal';
 const themes = [
   {id: 'light', name: 'Light'}, // Giao diện tối mặc định
   {id: 'dark', name: 'Dark Theme'}, // Giao diện tối mặc định
-  {id: 'bluee', name: 'Blue Theme'}, // Xanh dương dịu nhẹ
-  {id: 'grayMist', name: 'Gray Mist'}, // Siêu tối
-  {id: 'nightOwl', name: 'Night Owl'}, // Xanh đậm kiểu đêm
-  {id: 'cyberpunk', name: 'Cyberpunk'}, // Neon rực rỡ
-  {id: 'pinkBlossom', name: 'Pink Blossom'}, // Đen tuyệt đối
-  {id: 'solarizedDark', name: 'Solarized Dark'}, // Tông xanh lá - nâu
-  {id: 'sunset', name: 'Sunset Theme'}, // Đỏ cam hoàng hôn
-  {id: 'forest', name: 'Forest Theme'}, // Màu xanh rừng
+  {id: 'mintFresh', name: 'Mint Fresh'}, // Xanh dương dịu nhẹ
+  {id: 'oceanBreeze', name: 'Ocean Breeze'}, // Siêu tối
+  {id: 'lavenderDreams', name: 'Lavender Dreams'}, // Xanh đậm kiểu đêm
+  {id: 'warmAmber', name: 'Warm Amber'}, // Neon rực rỡ
+  {id: 'softCoral', name: 'Soft Coral'}, // Đen tuyệt đối
+  {id: 'modernSlate', name: 'Modern Slate'}, // Tông xanh lá - nâu
+  {id: 'tealWave', name: 'Teal Wave'}, // Đỏ cam hoàng hôn
+  {id: 'peachSorbet', name: 'Peach Sorbet'}, // Màu xanh rừng
+  {id: 'softSky', name: 'Soft Sky'}, // Màu xanh rừng
+  {id: 'moonlight', name: 'Moon Light'}, // Màu xanh rừng
 ];
 const ThemeChatScreen = ({navigation}: any) => {
   const {converInfo} = useRoute().params as {converInfo: any};
@@ -39,22 +41,18 @@ const ThemeChatScreen = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors: any = appColors[theme ?? 'light'];
   const handleApplyTheme = async (item: string) => {
-    try {
-      setIsLoading(true);
-      const res = await messageServices.updateThemeConversation(
-        converInfo.conversationId,
-        item,
-        converInfo.type,
-      );
-      if (res && res.data) {
-        console.log('Update theme conversation successfully !!', res.data);
-        navigation.navigate('Messages');
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log('Theme conversation error: ', error);
-      setIsLoading(false);
+    setIsLoading(true);
+    const res = await messageServices.updateThemeConversation(
+      converInfo.conversationId,
+      item,
+      converInfo.type,
+    );
+    if (res && res.data) {
+      console.log('Update theme conversation successfully !!', res.data);
+      navigation.navigate('Messages');
     }
+    setIsLoading(false);
+    
   };
 
   return (

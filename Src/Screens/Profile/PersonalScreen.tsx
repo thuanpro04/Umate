@@ -86,19 +86,14 @@ const PersonalScreen = ({navigation}: any) => {
     }, [userId]),
   );
   const handleGetUserInfoById = async () => {
-    try {
-      setIsLoading(true);
-      const res = await userServices.getUserInfo(userId);
-      if (res && res.data) {
-        setUserInfo(res.data);
+    setIsLoading(true);
+    const res = await userServices.getUserInfo(userId);
+    if (res && res.data) {
+      setUserInfo(res.data);
 
-        // console.log('userInfo', userInfo);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
+      // console.log('userInfo', userInfo);
     }
+    setIsLoading(false);
   };
 
   const toggleDetail = () => {
@@ -128,14 +123,13 @@ const PersonalScreen = ({navigation}: any) => {
   };
 
   const handleAddFriend = async (friendUserId: string) => {
-    try {
-      const res = await friendServices.handleFriendActionAdd_Cancel(
-        friendUserId,
-        'add',
-        auth.userId,
-      );
-    } catch (error) {
-      console.log('handleFriendAction', error);
+    const res = await friendServices.handleFriendActionAdd_Cancel(
+      friendUserId,
+      'add',
+      auth.userId,
+    );
+    if (res && res.data) {
+      console.log('Add friend sucessfully !!');
     }
   };
 
@@ -223,7 +217,7 @@ const PersonalScreen = ({navigation}: any) => {
             <View style={profileStyles.profileContainer}>
               <TextComponent
                 styles={profileStyles.name}
-                label={UserInfo.getName(userInfo.name)}
+                label={userInfo.name}
               />
               <SpaceComponent height={8} />
               <Animated.View style={[{alignItems: 'flex-start'}]}>
@@ -284,7 +278,7 @@ const PersonalScreen = ({navigation}: any) => {
               </RowComponent>
               <TextComponent
                 styles={profileStyles.name}
-                label={UserInfo.getName(userInfo.name)}
+                label={userInfo.name}
               />
               <SpaceComponent height={6} />
               <TextComponent
@@ -321,32 +315,26 @@ const PersonalScreen = ({navigation}: any) => {
     );
   };
   const onNavigationMessage = async () => {
-    try {
-      setIsLoading(true);
-      const res = await messageServices.checkConversation(
-        auth.userId,
-        userInfo.userId,
-      );
-      res && console.log('res.data', res.data);
+    setIsLoading(true);
+    const res = await messageServices.checkConversation(
+      auth.userId,
+      userInfo.userId,
+    );
 
-      if (res && res.data) {
-        let conversationId = res.data;
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...userInfo, conversationId}),
-        );
-      } else {
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...userInfo, type: 'personal'}),
-        );
-      }
-      setIsLoading(false);
-      navigation.navigate('Chat');
-    } catch (error) {
-      console.error('Respond save user error ', error);
-      setIsLoading(false);
+    if (res && res.data) {
+      let conversationId = res.data;
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...userInfo, conversationId}),
+      );
+    } else {
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...userInfo, type: 'personal'}),
+      );
     }
+    setIsLoading(false);
+    navigation.navigate('Chat');
   };
   return !isLoading ? (
     <SafeAreaView

@@ -33,7 +33,7 @@ const TextComponent = (props: Props) => {
             ? colors.text
             : appColors.black,
           flex: flex ?? 0,
-          fontWeight: title ? font ?? 'bold' : 'regular',
+          fontWeight: title ? font ?? '500' : 'regular',
         },
         styles,
       ]}

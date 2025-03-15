@@ -27,9 +27,13 @@ const searchConversationUsers = async (
   }
 };
 const findFriendForUser = async (userId: string, keyWord: string) => {
-  const url = `/find-friend?userId=${userId}&&keyWord=${keyWord}`;
-  const res = await searchAPI.handleSearch(url);
-  return res;
+  try {
+    const url = `/find-friend?userId=${userId}&&keyWord=${keyWord}`;
+    const res = await searchAPI.handleSearch(url);
+    return res;
+  } catch (error) {
+    console.log('Find friends fail error: ', error);
+  }
 };
 export const searchServices = {
   handleSearchFriends,

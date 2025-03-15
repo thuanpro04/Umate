@@ -1,20 +1,16 @@
-import { useFocusEffect, useRoute } from '@react-navigation/native';
-import { ArrowLeft2, SearchFavorite } from 'iconsax-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, SafeAreaView, StyleSheet, View } from 'react-native';
-import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
-import { appColors } from '../Theme/Colors/appColors';
-import { appInfo } from '../Theme/appInfo';
-import { authSelector } from '../redux/reducers/authReducer';
-import {
-  HeaderComponent,
-  InputComponent,
-  SpaceComponent
-} from './Components';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {ArrowLeft2, SearchFavorite} from 'iconsax-react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {FlatList, Image, SafeAreaView, StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import {io} from 'socket.io-client';
+import {appColors} from '../Theme/Colors/appColors';
+import {appInfo} from '../Theme/appInfo';
+import {authSelector} from '../redux/reducers/authReducer';
+import {HeaderComponent, InputComponent, SpaceComponent} from './Components';
 import CarUserChat from './Messages/Component/CarUserChat';
-import { messageServices } from './Services/messageServices';
-import { UserInfo } from './Untils/UserInfo';
+import {messageServices} from './Services/messageServices';
+import {UserInfo} from './Untils/UserInfo';
 
 const ShareScreen = ({navigation}: any) => {
   const [value, setValue] = useState('');
@@ -22,7 +18,7 @@ const ShareScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const {arrUrlImages, isShare} = useRoute().params as {
     arrUrlImages: string | string[];
-    isShare:boolean
+    isShare: boolean;
   };
   const socket = io(appInfo.BASE_URL);
 
@@ -40,14 +36,10 @@ const ShareScreen = ({navigation}: any) => {
     };
   }, []);
   const getConversation = async () => {
-    try {
-      const res = await messageServices.getAllConversationUsers(auth.userID);
-      if (res) {
-        setConversationUsers(res.data);
-        console.log(conversationUsers);
-      }
-    } catch (error) {
-      console.log('getConversation share screen', error);
+    const res = await messageServices.getAllConversationUsers(auth.userID);
+    if (res && res.data) {
+      setConversationUsers(res.data);
+      console.log(conversationUsers);
     }
   };
   const cardImages = (url: string, index?: number) => {
@@ -99,7 +91,7 @@ const ShareScreen = ({navigation}: any) => {
         iconLeft={
           <ArrowLeft2 color={appColors.blueBack} size={appInfo.sizeIconBold} />
         }
-        title={ 'Share friend'}
+        title={'Share friend'}
       />
       {arrUrlImages && (
         <View style={[styles.container, {}]}>{renderImages()}</View>

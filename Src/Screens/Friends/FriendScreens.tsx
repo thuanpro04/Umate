@@ -36,14 +36,11 @@ const FriendScreens = ({navigation}: any) => {
 
   const dispatch = useDispatch();
   const handleGetAllUserInfo = async () => {
-    try {
-      const res = await userServices.getListUserInfo(user.friends);
-      if (res && res.data) {
-        setData(res.data);
-      }
-    } catch (error) {
-      console.log('Friend get all user fail: ', error);
+    const res = await userServices.getListUserInfo(user.friends);
+    if (res && res.data) {
+      setData(res.data);
     }
+   
   };
 
   useFocusEffect(
@@ -55,32 +52,24 @@ const FriendScreens = ({navigation}: any) => {
     setShowUnfriendModal(false);
   }
   const handleRemoveFriend = async (userId: string) => {
-    try {
-      const res = await friendServices.handleRemoveFriends(userId, auth.userId);
-      // xử lí hàm trả về data là user khỏi phải request lại
-      if (res) {
-        handleGetAllUserInfo();
-      }
-    } catch (error) {
-      console.log('handleRemoveFriends error', error);
+    const res = await friendServices.handleRemoveFriends(userId, auth.userId);
+    // xử lí hàm trả về data là user khỏi phải request lại
+    if (res && res.data) {
+      handleGetAllUserInfo();
     }
   };
   const handleBlockUser = async () => {
     setShowBlockModal(true);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
-    try {
-      const res = await userServices.updateBlockUser(userId, userFriendId);
-      if (res) {
-        console.log('Block successfully !!!', res.data);
-        dispatch(setBlock(res.data));
-        console.log('Sau khi cập nhật:', friendData.block);
-      }
-      setShowBlockModal(false);
-    } catch (error) {
-      console.log('handle block user fail: ', error);
-      setShowBlockModal(false);
+    const res = await userServices.updateBlockUser(userId, userFriendId);
+    if (res) {
+      console.log('Block successfully !!!', res.data);
+      dispatch(setBlock(res.data));
+      console.log('Sau khi cập nhật:', friendData.block);
     }
+    setShowBlockModal(false);
+   
   };
 
   useEffect(() => {
@@ -112,7 +101,7 @@ const FriendScreens = ({navigation}: any) => {
             }}
             onPressYes={async () => await handleRemoveFriend(item.userId)}
             descriptions={t('remove_friend_confirmation')}
-            title={`${t('unfriend ')}${UserInfo.getName(item.name)}`}
+            title={`${t('unfriend ')}${item.name}`}
           />
           <ActionModal
             visible={isShowBlockModal}
@@ -127,8 +116,8 @@ const FriendScreens = ({navigation}: any) => {
             }
             title={
               friendData.block && friendData.block.includes(item.userId)
-                ? t('confirm_unblock') + UserInfo.getName(item.name)
-                : t('confirm_block') + UserInfo.getName(item.name)
+                ? t('confirm_unblock') + item.name
+                : t('confirm_block') + item.name
             }
           />
         </React.Fragment>

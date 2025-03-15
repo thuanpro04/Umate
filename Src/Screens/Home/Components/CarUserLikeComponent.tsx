@@ -13,6 +13,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appInfo} from '../../../Theme/appInfo';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {useNavigation} from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 interface Props {
   item: any;
   navigation: any;
@@ -20,7 +21,7 @@ interface Props {
 }
 const CarUserLikeComponent = (props: Props) => {
   const {item, navigation, onCloseModal} = props;
- 
+  const {t} = useTranslation();
 
   return (
     <RowComponent
@@ -35,13 +36,10 @@ const CarUserLikeComponent = (props: Props) => {
           <Image source={{uri: item.avatar}} style={globalStyles.userImg} />
         </ButtonComponent>
         <View>
-          <TextComponent
-            label={UserInfo.getName(item.name)}
-            styles={globalStyles.label}
-          />
+          <TextComponent label={item.name} styles={globalStyles.label} />
           <SpaceComponent height={10} />
           <TextComponent
-            label={item.majoring ?? 'CNTT'}
+            label={item.majoring ?? t('majoring')}
             styles={{color: appColors.grey, fontSize: 14}}
           />
         </View>

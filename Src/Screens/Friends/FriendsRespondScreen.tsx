@@ -55,27 +55,21 @@ const FriendsRespondScreen = () => {
   // console.log(users);
 
   const fetchUserFriends = async () => {
-    try {
-      const res = await userServices.getEquestFriendUsers(auth.userId, '');
-      if (res) {
-        setUsers(res.data);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    const res = await userServices.getEquestFriendUsers(auth.userId, '');
+    if (res) {
+      setUsers(res.data);
     }
+    
   };
 
   const handleRemoveFriend = async (userId: string) => {
-    try {
-      console.log('userId', userId);
+    console.log('userId', userId);
 
-      const res = await friendServices.handleRemoveFriends(userId, auth.userId);
-      //xử lí thêm xóa trong friend và update người friend người bị xóa
+    const res = await friendServices.handleRemoveFriends(userId, auth.userId);
+    //xử lí thêm xóa trong friend và update người friend người bị xóa
+    if (res && res.data) {
       setIsModal(false);
       fetchUserFriends();
-    } catch (error) {
-      console.log('handleRemoveFriends error', error);
-      setIsModal(false);
     }
   };
 
@@ -91,52 +85,43 @@ const FriendsRespondScreen = () => {
     navigation.navigate('PersonalScreen', {userId});
   };
   const onNavigationMessage = async (item: any) => {
-    try {
-      const res = await messageServices.checkConversation(
-        auth.userId,
-        item.userId,
-      );
-      res && console.log('res.data', res.data);
+    const res = await messageServices.checkConversation(
+      auth.userId,
+      item.userId,
+    );
+    res && console.log('res.data', res.data);
 
-      if (res && res.data) {
-        let conversationId = res.data;
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...item, conversationId}),
-        );
-      } else {
-        await AsyncStorage.setItem(
-          'ConversationInfo',
-          JSON.stringify({...item, type: 'personal'}),
-        );
-      }
-      setIsModal(false);
-      navigation.navigate('Chat');
-    } catch (error) {
-      console.error('Respond save user error ', error);
+    if (res && res.data) {
+      let conversationId = res.data;
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...item, conversationId}),
+      );
+    } else {
+      await AsyncStorage.setItem(
+        'ConversationInfo',
+        JSON.stringify({...item, type: 'personal'}),
+      );
     }
+    setIsModal(false);
+    navigation.navigate('Chat');
   };
   const handleBlockUser = () => {
     setShowBlockModal(true);
     setIsModal(false);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
-    try {
-      setIsLoading(true);
-      const res = await userServices.updateBlockUser(userId, userFriendId);
-      if (res) {
-        console.log('Block successfully !!!', res.data);
-        dispatch(setBlock(res.data));
-        console.log('Sau khi cập nhật:', friendData.block);
-      }
-      setIsLoading(false);
-      setShowBlockModal(false);
-      console.log('auth', friendData.block);
-    } catch (error) {
-      console.log('handle block user fail: ', error);
-      setIsLoading(false);
-      setShowBlockModal(false);
+    setIsLoading(true);
+    const res = await userServices.updateBlockUser(userId, userFriendId);
+    if (res) {
+      console.log('Block successfully !!!', res.data);
+      dispatch(setBlock(res.data));
+      console.log('Sau khi cập nhật:', friendData.block);
     }
+    setIsLoading(false);
+    setShowBlockModal(false);
+    console.log('auth', friendData.block);
+    
   };
   const renderItems = ({item, index}: any) => {
     return (
@@ -146,7 +131,7 @@ const FriendsRespondScreen = () => {
           majoring={item.majoring ?? t('majoring')}
           key={item.userId}
           img={item.avatar}
-          name={UserInfo.getName(item.name)}
+          name={item.name}
           isFind
           iconM
           styles={{borderWidth: 0}}
@@ -160,7 +145,7 @@ const FriendsRespondScreen = () => {
           }}
           onPressYes={async () => await handleRemoveFriend(selectedUser.userId)}
           descriptions={t('remove_friend_confirmation')}
-          title={`${t('unfriend')} ${UserInfo.getName(item.name)}`}
+          title={`${t('unfriend')} ${item.name}`}
         />
       </React.Fragment>
     );
@@ -196,7 +181,7 @@ const FriendsRespondScreen = () => {
         }
         visible={isModal}
         img={selectedUser.avatar}
-        name={UserInfo.getName(selectedUser.name)}
+        name={selectedUser.name}
         onClose={handleCloseModal}
         handleNavigation={async () => {
           await onNavigationMessage({...selectedUser, type: 'personal'});
@@ -218,8 +203,8 @@ const FriendsRespondScreen = () => {
         }
         title={
           friendData.block && friendData.block.includes(selectedUser.userId)
-            ? t('confirm_unblock') + UserInfo.getName(selectedUser.name)
-            : t('confirm_block') + UserInfo.getName(selectedUser.name)
+            ? t('confirm_unblock') + selectedUser.name
+            : t('confirm_block') + selectedUser.name
         }
       />
     </SafeAreaView>

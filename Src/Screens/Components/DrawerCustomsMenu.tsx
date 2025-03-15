@@ -135,7 +135,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
           />
         )}
         <SpaceComponent height={12} />
-        <TextComponent label={UserInfo.getName(user.name)} title size={28} />
+        <TextComponent label={user.name} title size={28} />
       </TouchableOpacity>
       <SpaceComponent height={22} />
       <FlatList

@@ -1,6 +1,6 @@
-import { UserEdit } from 'iconsax-react-native';
+import {UserEdit} from 'iconsax-react-native';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
   Image,
@@ -12,14 +12,14 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSelector } from 'react-redux';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
-import { eventSelector } from '../../redux/reducers/eventSlice';
-import { friendSelector } from '../../redux/reducers/friendSlice';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
+import {useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {eventSelector} from '../../redux/reducers/eventSlice';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import {
   ButtonComponent,
   RowComponent,
@@ -27,9 +27,9 @@ import {
   TextComponent,
 } from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import { eventSevices } from '../Services/eventService';
-import { UserInfo } from '../Untils/UserInfo';
-import { profileStyles } from './profileStyles';
+import {eventSevices} from '../Services/eventService';
+import {UserInfo} from '../Untils/UserInfo';
+import {profileStyles} from './profileStyles';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
@@ -91,10 +91,7 @@ const ProfileScreen = ({navigation}: any) => {
           styles={profileStyles.avatar}
         />
         <View style={[profileStyles.infoContainer]}>
-          <TextComponent
-            styles={[profileStyles.name]}
-            label={UserInfo.getName(userData.name)}
-          />
+          <TextComponent styles={[profileStyles.name]} label={userData.name} />
           <SpaceComponent height={6} />
 
           <TextComponent

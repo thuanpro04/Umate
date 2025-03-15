@@ -12,7 +12,7 @@ import SearchFriendsComponent from './SearchFriendsComponent';
 import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';
 import ToastConfig from './ToastConfig';
-
+import CustormLongPress from './CustormLongPress'
 export {
   ActionIconComponent,
   ButtonComponent,
@@ -20,7 +20,7 @@ export {
   CarfeatureComponent,
   CarUserComponent,
   CircleComponent,
-
+  CustormLongPress,
   DateTimePickerComponent,
   HeaderComponent,
   InputComponent,

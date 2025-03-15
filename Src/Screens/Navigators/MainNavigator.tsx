@@ -57,7 +57,6 @@ const MainNavigator = () => {
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="SupportScreen" component={SupportScreen} />
       <Stack.Screen name="SecurityScreen" component={SecurityScreen} />
-     
       <Stack.Screen name="VoiceCall" component={VoiceCall} />
       <Stack.Screen name="CallWaitingScreen" component={CallWaitingScreen} />
       <Stack.Screen name="CallWaitingAccept" component={CallWaitingAccept} />

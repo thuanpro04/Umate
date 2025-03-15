@@ -18,11 +18,14 @@ messaging().setBackgroundMessageHandler(mess =>
 import PushNotification from 'react-native-push-notification';
 PushNotification.createChannel(
   {
-    channelId: "zego_video_call", // ID kênh thông báo
-    channelName: "zego_video_call", // Tên hiển thị
+    channelId: 'zego_video_call', // ID kênh thông báo
+    channelName: 'zego_video_call', // Tên hiển thị
     importance: 4, // HIGH_PRIORITY
-    vibrate: true, 
+    vibrate: true,
+    playSound: true, // Có phát âm thanh không
+    soundName: 'default', // Âm thanh mặc định
+    
   },
-  (created) => console.log(`🔔 Kênh thông báo đã tạo: ${created}`)
+  created => console.log(`🔔 Kênh thông báo đã tạo: ${created}`),
 );
 AppRegistry.registerComponent(appName, () => App);
