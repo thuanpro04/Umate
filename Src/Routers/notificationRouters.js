@@ -5,6 +5,7 @@ const {
   getNotifications,
   actionDeleteNotification,actionSendEmail
 } = require("../Controller/notificationController");
+
 const notificationRouter = express();
 notificationRouter.post("/action-notifi", actionNotification);
 notificationRouter.post("/invite-group", actionInviteToGroup);

@@ -106,12 +106,11 @@ const handleGetEvent = async (req, res) => {
 
     // const hasNewEvent = await checkForNewEvent();
     const eventPage = await getEvents();
-    
+
     const totalEvents = await EventModel.countDocuments();
     const events = await EventModel.find({})
-    .sort({ timestamp: -1 })  // 🔥 Sắp xếp giảm dần theo timestamp (mới nhất lên đầu)
-    .skip((curentPage - 1) * limit)
-    .limit(Number(limit));
+      .skip((curentPage - 1) * limit)
+      .limit(Number(limit));
     res.status(200).json({
       message: "Get events successfully!",
       data: {

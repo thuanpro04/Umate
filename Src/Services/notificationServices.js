@@ -116,22 +116,23 @@ const updateNotificationPersonal = async (userId, converId) => {
     conv.notification.push(userId);
   }
   await conv.save();
+  return conv.notification;
 };
 const handleActionNotification = async (req, res) => {
   const { userId, converId, key } = req.body;
   console.log(userId, converId, key);
-
+  let result;
   try {
     if (key === "personal") {
-      await updateNotificationPersonal(userId, converId);
+      result = await updateNotificationPersonal(userId, converId);
       console.log("Update personal successfully");
     } else {
-      await updateNotificationGroup(userId, converId);
+      result = await updateNotificationGroup(userId, converId);
       console.log("Update group successfully");
     }
     res.status(200).json({
       message: "update action notification successfully !!",
-      data: [],
+      data: result,
     });
   } catch (error) {
     console.log("Action notification fail error: ", error);

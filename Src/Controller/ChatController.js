@@ -10,6 +10,8 @@ const {
   handleUpdateNickName,
   handleUpdateThemeConversation,
   handleUpdateAttendedGroup,
+  handleActionGhimConversation,
+  
 } = require("../Services/chatServices");
 const receiveMessageUsers = async (req, res) => {
   handleReceiveMessageUsers(req, res);
@@ -41,6 +43,9 @@ const updateThemeConversation = (req, res) => {
 const updateAttendedGroup = async (req, res) => {
   handleUpdateAttendedGroup(req, res);
 };
+const actionGhimConversation = (req, res) => {
+  handleActionGhimConversation(req, res);
+};
 module.exports = {
   receiveMessageUsers,
   getAllConversationUsers,
@@ -52,4 +57,5 @@ module.exports = {
   updateNickNameConversation,
   updateThemeConversation,
   updateAttendedGroup,
+  actionGhimConversation,
 };

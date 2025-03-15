@@ -119,13 +119,17 @@ module.exports = function initializeSocket(server) {
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };
       const targetSocketId = users[userMessages.receiverId];
+      const content = data.content.normalize("NFC");
       console.log("userMessages", userMessages);
       console.log("🎯 targetSocketId: ", targetSocketId, users);
       if (targetSocketId) {
         io.to(targetSocketId).emit("receive_message", data);
+        if (!data.isNotification) {
+          io.to(targetSocketId).emit("notification_message", data);
+        }
         console.log("receive_message id: ", targetSocketId);
       }
-      sendMessageToGroupAndPersonal(userMessages);
+      sendMessageToGroupAndPersonal({ ...userMessages, content });
     });
     socket.on("send_qrcode", async (data) => {
       const messageId = generateUniqueID();

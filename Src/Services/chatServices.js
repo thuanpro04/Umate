@@ -125,7 +125,6 @@ const sendMessageToGroupAndPersonal = async (data) => {
         data.senderId,
         data.receiverId
       );
-
       if (!conversation) {
         conversation = await setConversation(data);
       } else {
@@ -154,6 +153,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
         console.error("Group Id is missing");
         return;
       }
+
       const groupConversations = await GroupConversationModel.findOne({
         groupId: data.groupId,
       });
@@ -204,6 +204,10 @@ const sendMessageToGroupAndPersonal = async (data) => {
     console.log(error);
   }
 };
+const sanitizeString = (str) => {
+  if (typeof str !== "string") return "";
+  return str.normalize("NFC");
+};
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserId } = req.query;
 
@@ -243,7 +247,7 @@ const handleGetAllConversationUsers = async (req, res) => {
       return {
         type: "personal",
         ...user,
-        lastMessage: conv.lastMessage || "",
+        lastMessage: sanitizeString(conv.lastMessage) || "",
         lastMessageTimestamp: conv.lastMessageTimestamp,
         conversationId: conv.conversationId,
         statusLastMessage:
@@ -252,6 +256,7 @@ const handleGetAllConversationUsers = async (req, res) => {
         notification: conv.notification,
         nickNames: conv.nicknames,
         theme: conv.theme,
+        pinnedBy: conv.pinnedBy,
       };
     });
     // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
@@ -264,12 +269,11 @@ const handleGetAllConversationUsers = async (req, res) => {
       groupName: group.groupName,
       groupId: group.groupId,
       avatar: group.avatar,
-      lastMessage: group.lastMessage || "",
+      lastMessage: sanitizeString(group.lastMessage) || "",
       lastMessageTimestamp: group.lastMessageTimestamp,
       invitedUsers: group.invitedUsers,
       leader: group.leader,
       deputyLeader: group.deputyLeader,
-      lastMessage: group.lastMessage,
       messages: group.messages,
       type: group.type,
       notification: group.notification,
@@ -277,6 +281,7 @@ const handleGetAllConversationUsers = async (req, res) => {
         !group.message[group.message.length - 1].senderId === currentUserId,
       nickNames: group.nicknames,
       theme: group.theme,
+      pinnedBy: group.pinnedBy,
     }));
 
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
@@ -489,7 +494,7 @@ const handleUpdateThemeConversation = async (req, res) => {
     }
     conversation.theme = theme;
     await conversation.save();
-    res.status(200).json({
+    return res.status(200).json({
       message: "update theme conversation successfully !!!",
       data: theme,
     });
@@ -523,6 +528,9 @@ const sendQRcodeDataForGroup = async (data) => {
     group.message.push(messages);
     await group.save();
     console.log("Save data qrcode successfully !!", messages);
+    return res.status(200).json({
+      message: "Save data qrcode successfully !!",
+    });
   } catch (error) {
     console.log("Save data Qr code error: ", error);
   }
@@ -549,7 +557,7 @@ const handleUpdateAttendedGroup = async (req, res) => {
     }
     upMessage.QRCode.attended.push(currentUserId);
     await group.save();
-    const countUser = group.invitedUsers.length ;
+    const countUser = group.invitedUsers.length;
     const countAttended = upMessage.QRCode.attended.length;
 
     if (
@@ -593,6 +601,34 @@ const handleUpdateAttendedGroup = async (req, res) => {
     console.log("Attended group error: ", error);
   }
 };
+const handleActionGhimConversation = async (req, res) => {
+  const { id, userId, key } = req.body;
+  console.log(id, userId, key);
+  try {
+    const conv = await (key === "personal"
+      ? getConversation(id)
+      : getGroupConversation(id));
+    if (!conv) {
+      return res.status(401).json({
+        message: "Conv not found !1",
+      });
+    }
+    const existingUser = conv.pinnedBy.includes(userId);
+    if (existingUser) {
+      conv.pinnedBy = conv.pinnedBy.filter((item) => item !== userId);
+    } else {
+      conv.pinnedBy.push(userId);
+    }
+
+    await conv.save();
+
+    return res
+      .status(200)
+      .json({ message: "Handle ghim successfully", data: conv.pinnedBy });
+  } catch (error) {
+    console.log("Ghim fail: ", error);
+  }
+};
 module.exports = {
   handleReceiveMessageUsers,
   sendMessageToGroupAndPersonal,
@@ -607,4 +643,5 @@ module.exports = {
   handleUpdateThemeConversation,
   sendQRcodeDataForGroup,
   handleUpdateAttendedGroup,
+  handleActionGhimConversation,
 };
