@@ -1,29 +1,22 @@
 import {
-  CallCalling,
   Designtools,
-  Heart,
   HuobiToken,
   Link21,
   Logout,
-  Message,
+  People,
   Personalcard,
   SecurityUser,
   Setting2,
   Sms,
-  User,
-  Video,
-  Image,
-  People,
-  UserAdd,
-  Message2,
+  User
 } from 'iconsax-react-native';
-import {appInfo} from '../Theme/appInfo';
-import {appColors} from '../Theme/Colors/appColors';
+import { Flag, ImageIcon, ShieldOff, UserCheck, UserX } from 'lucide-react-native';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Octicons from 'react-native-vector-icons/Octicons';
-import {Flag, ImageIcon, ShieldOff, UserCheck, UserX, ZoomOut} from 'lucide-react-native';
+import { appInfo } from '../Theme/appInfo';
+import { appColors } from '../Theme/Colors/appColors';
 
 const size = appInfo.sizeIcon;
 const color = appColors.blue2;
@@ -281,4 +274,4 @@ const MenuChat = colors => {
   };
 };
 
-export {MenuItems, MenuChat};
+export { MenuChat, MenuItems };

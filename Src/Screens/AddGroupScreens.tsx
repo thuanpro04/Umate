@@ -31,6 +31,7 @@ import {imageService} from './Services/imageService';
 import {userServices} from './Services/userService';
 import {Validate} from './Untils/Validate';
 import {useTranslation} from 'react-i18next';
+import {isArray} from 'lodash';
 const initValues = {
   groupName: '',
   description: '',
@@ -68,8 +69,8 @@ const AddGroupScreens = ({navigation}: any) => {
 
   const getAllUsers = async () => {
     const res = await userServices.getEquestFriendUsers(auth.userId, '');
-    if (res) {
-      const data = res.data.map(
+    if (res && res.data.users) {
+      const data = res.data.users.map(
         ({name, avatar, userId, majorCategory}: any) => ({
           name,
           avatar,
@@ -79,7 +80,6 @@ const AddGroupScreens = ({navigation}: any) => {
       );
       setUsers(data);
     }
-   
   };
   function getAvatar() {
     const temp =
@@ -112,7 +112,6 @@ const AddGroupScreens = ({navigation}: any) => {
       name: urlImage,
       data: {userId: auth.userId},
     });
-   
   };
 
   function getDataGroup() {
@@ -148,25 +147,17 @@ const AddGroupScreens = ({navigation}: any) => {
       },
       type: 'group',
     };
-    // console.log('data ne', dataGroup);
 
     return dataGroup;
   }
   const handleAddGroupUser = async () => {
-    try {
-      console.log(getDataGroup().invitedUsers, 123);
+    setLoading(true);
+    const res = await groupServices.handelNewGroupUser(getDataGroup(), 'post');
 
-      const res = await groupServices.handelNewGroupUser(
-        getDataGroup(),
-        'post',
-      );
-
-      if (res) {
-        navigation.navigate('Messages');
-      }
-    } catch (error) {
-      console.log('handleAddGroupUser', error);
+    if (res) {
+      navigation.navigate(t('message'));
     }
+    setLoading(false);
   };
 
   return (
@@ -193,7 +184,7 @@ const AddGroupScreens = ({navigation}: any) => {
 
           <FastImage
             source={{
-              uri: groupInfo.avatar ? groupInfo.avatar.name : getAvatar(),
+              uri: groupInfo.avatar.name ?? getAvatar(),
               cache: FastImage.cacheControl.immutable,
               priority: FastImage.priority.high,
             }}
@@ -291,14 +282,8 @@ const AddGroupScreens = ({navigation}: any) => {
             <SpaceComponent height={10} />
             <DropdownPicker
               placeHold={t('select')}
-              users={
-                groupInfo.invitedUsers && groupInfo.leader
-                  ? groupInfo.invitedUsers.filter(
-                      (item: any) =>
-                        item.data.userId != groupInfo.leader.data.userId,
-                    )
-                  : groupInfo.invitedUsers
-              }
+              users={groupInfo.invitedUsers}
+              leaderId={groupInfo.leader && groupInfo.leader.data.userId}
               color={
                 messageErrors.includes('deputyLeader') ? 'red' : colors.icon
               }

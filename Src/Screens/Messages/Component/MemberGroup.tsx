@@ -25,6 +25,7 @@ import {MoreVerticalIcon} from 'lucide-react-native';
 import {MenuChat} from '../../../data/MenuItems';
 import {groupServices} from '../../Services/groupServices';
 import {messageServices} from '../../Services/messageServices';
+import {socketSelector} from '../../../redux/reducers/socketSlice';
 const MemberGroup = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
@@ -34,7 +35,7 @@ const MemberGroup = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [converInfo, setConverInfo] = useState<any>('');
   const {getItem} = useAsyncStorage('ConversationInfo');
-  const dispatch = useDispatch();
+  const socket = useSelector(socketSelector).socket;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const getConversationInfo = useCallback(async () => {
@@ -51,7 +52,6 @@ const MemberGroup = ({navigation}: any) => {
     if (res && res.data) {
       setUserInfo(res.data);
     }
-  
   };
 
   const handleAddFriend = async (friendUserId: string) => {
@@ -97,10 +97,8 @@ const MemberGroup = ({navigation}: any) => {
               ? 'Phó nhóm'
               : 'Thành viên'
           }
-          deputyLeaderId={
-            auth.userId === converInfo.deputyLeader.userId ? auth.userId : ''
-          }
-          leaderId={auth.userId === converInfo.leader.userId ? auth.userId : ''}
+          deputyLeaderId={converInfo.deputyLeader.userId}
+          leaderId={converInfo.leader.userId}
           url={item.avatar}
           addFriend={
             !item.friendRequests.includes(auth.userId) &&
@@ -157,7 +155,6 @@ const MemberGroup = ({navigation}: any) => {
       await AsyncStorage.setItem('ConversationInfo', JSON.stringify(data));
       setConverInfo(data);
     }
-    
   };
   const handleOutGroup = async (userId: string) => {
     try {
@@ -181,6 +178,7 @@ const MemberGroup = ({navigation}: any) => {
           }),
         );
         console.log('Out group successfully !!');
+        socket.emit('leave_group', userId);
       }
     } catch (error) {
       console.log('out group error: ', error);
@@ -188,7 +186,6 @@ const MemberGroup = ({navigation}: any) => {
   };
   const handleInviteToGroup = async (selectUser: string[]) => {
     setIsLoading(true);
-
     const res = await notificationServices.inviteToGroup(
       converInfo.groupId,
       selectUser,
@@ -196,12 +193,21 @@ const MemberGroup = ({navigation}: any) => {
       converInfo.groupName,
     );
     if (res && res.data) {
-      console.log(res.data);
+      console.log('Invited successfully: ', res.data);
     }
     setIsLoading(false);
-
   };
-
+  const renderAddFriendModal = useCallback(() => {
+    return (
+      <AddFriendModal
+        userId={auth.userId}
+        visible={isVisible}
+        onPressInviteToGroup={handleInviteToGroup}
+        existingUser={converInfo.invitedUsers}
+        onClose={() => setIsVisible(false)}
+      />
+    );
+  }, [converInfo, isVisible]);
   useEffect(() => {
     if (converInfo) {
       fetchUserInfos();
@@ -238,14 +244,7 @@ const MemberGroup = ({navigation}: any) => {
           renderItem={renderUserInfo}
         />
       </View>
-
-      <AddFriendModal
-        userId={auth.userId}
-        visible={isVisible}
-        onPressInviteToGroup={handleInviteToGroup}
-        existingUser={converInfo.invitedUsers}
-        onClose={() => setIsVisible(false)}
-      />
+      {renderAddFriendModal()}
       <LoadingModal visible={isLoading} />
     </KeyboardAvoidingView>
   );

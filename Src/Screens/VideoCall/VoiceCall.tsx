@@ -1,7 +1,4 @@
-import {
-  useNavigation,
-  useRoute
-} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {
   GROUP_VIDEO_CALL_CONFIG,
   GROUP_VOICE_CALL_CONFIG,
@@ -10,15 +7,11 @@ import {
   ZegoUIKitPrebuiltCall,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import React from 'react';
-import {
-  StatusBar,
-  StyleSheet,
-  View
-} from 'react-native';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { socketSelector } from '../../redux/reducers/socketSlice';
-import { useTranslation } from 'react-i18next';
+import {StatusBar, StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {socketSelector} from '../../redux/reducers/socketSlice';
+import {useTranslation} from 'react-i18next';
 const VoiceCall = (props: any) => {
   const {roomID, name, type} = useRoute().params as {
     roomID: string;
@@ -53,12 +46,24 @@ const VoiceCall = (props: any) => {
         senderId: calls.userId,
         content: `${num} phút ${seconds} giây`,
         imagesUrl: [],
-        receiverId: calls.targetId,
         reply: '',
         typeCall: type,
       };
+      let dataCall;
+      if (calls.type === 'group_video' || calls.type === 'group_voice') {
+        dataCall = {
+          ...data,
+          groupId: calls.groupId,
+          recipients: calls.targetId,
+        };
+      } else {
+        dataCall = {
+          ...data,
+          receiverId: calls.targetId,
+        };
+      }
       try {
-        socket.emit('send_message', data);
+        socket.emit('send_message', dataCall);
         console.log('Save call data successfully!!');
       } catch (error) {
         console.log('Save call data fail: ', error);

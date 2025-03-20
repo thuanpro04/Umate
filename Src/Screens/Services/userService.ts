@@ -1,9 +1,18 @@
 import usersAPI from '../../apis/usersApi';
 let url;
-const getEquestFriendUsers = async (currentUserId: string, filter?: string) => {
+const getEquestFriendUsers = async (
+  currentUserId: string,
+  filter?: string,
+  page?: number,
+) => {
   try {
-    url = `/get-all?currentUserId=${currentUserId}&filter=${filter}`;
-    const res = await usersAPI.handleUsers(url);
+    url = `/get-all`;
+    const data = {
+      currentUserId,
+      filter,
+      page,
+    };
+    const res = await usersAPI.handleUsers(url, data, 'post');
     return res;
   } catch (error) {
     console.error('Post event get users failed', error);

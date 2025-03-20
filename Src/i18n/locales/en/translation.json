@@ -164,5 +164,9 @@
   "invite_group": "Invite to the group",
   "is_connect": "is connecting...",
   "block_message": "Unblock to send message 😏",
-  "enter_message":"Enter message..."
+  "enter_message": "Enter message...",
+  "share_event": "Share event",
+  "mutual_friend": "mutual friend",
+  "attendance_code": "Attendance code",
+  "how_attendance": "Do you want to take attendance? "
 }

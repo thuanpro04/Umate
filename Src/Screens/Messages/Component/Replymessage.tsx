@@ -96,6 +96,7 @@ const Replymessage = (props: Props) => {
               label={message?.content}
               color={colors.text2}
               styles={{marginLeft: 12}}
+              numberOfLine={2}
             />
           </View>
         ) : (

@@ -59,7 +59,7 @@ const CarUserComponent = (props: Props) => {
     onPressPosition,
     deputyLeaderId,
     onNavigationPersonal,
-    isBorder
+    isBorder,
   } = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -77,6 +77,7 @@ const CarUserComponent = (props: Props) => {
 
     switch (key) {
       case 'report':
+        hideMenu();
         navigation.navigate('ReportScreen', {name: userName, userId});
         break;
       case 'delete':
@@ -125,6 +126,21 @@ const CarUserComponent = (props: Props) => {
       </MenuItem>
     );
   };
+  const isCurrentUserLeader = auth.userId === leaderId;
+  const isCurrentUserDeputy = auth.userId === deputyLeaderId;
+
+  // Kiểm tra xem người dùng đang xem có phải là leader hay không
+  const isUserLeader = userId === leaderId;
+
+  // Kiểm tra xem có thể chuyển chức cho người dùng này hay không
+  const canTransferPosition =
+    (isCurrentUserLeader || isCurrentUserDeputy) && leaderId !== userId;
+
+  // Kiểm tra xem có thể kích người dùng này khỏi nhóm hay không
+  const canRemoveFromGroup =
+    (isCurrentUserLeader || (isCurrentUserDeputy && !isUserLeader)) &&
+    auth.userId !== userId;
+
   return (
     <RowComponent
       styles={[
@@ -207,22 +223,34 @@ const CarUserComponent = (props: Props) => {
                 </MenuItem>
               )}
 
-              {leaderId === auth.userId && renderMenu()}
-              {deputyLeaderId === auth.userId && renderMenu()}
+              {canTransferPosition && (
+                <MenuItem
+                  onPress={() => actionMenu('position')}
+                  style={styles.menuItem}>
+                  <Ionicons name="leaf-outline" color={'blue'} size={18} />
+                  <SpaceComponent width={6} />
+                  <TextComponent
+                    label={t('transfer_role')}
+                    styles={styles.menuText}
+                  />
+                </MenuItem>
+              )}
 
-              {leaderId === userId ||
-                (deputyLeaderId === auth.userId && (
-                  <MenuItem
-                    onPress={() => actionMenu('outgroup')}
-                    style={styles.menuItem}>
-                    <Ionicons name="cut-outline" color={'coral'} size={18} />
-                    <SpaceComponent width={6} />
-                    <TextComponent
-                      label={t('remove_from_group')}
-                      styles={styles.menuText}
-                    />
-                  </MenuItem>
-                ))}
+              {/* Hiển thị menu kích người khỏi nhóm nếu:
+                  - Người dùng hiện tại là leader: có thể kích bất kỳ ai (trừ chính mình)
+                  - Người dùng hiện tại là deputy: có thể kích bất kỳ ai NGOẠI TRỪ leader */}
+              {canRemoveFromGroup && (
+                <MenuItem
+                  onPress={() => actionMenu('outgroup')}
+                  style={styles.menuItem}>
+                  <Ionicons name="cut-outline" color={'coral'} size={18} />
+                  <SpaceComponent width={6} />
+                  <TextComponent
+                    label={t('remove_from_group')}
+                    styles={styles.menuText}
+                  />
+                </MenuItem>
+              )}
             </Menu>
           </View>
         )}

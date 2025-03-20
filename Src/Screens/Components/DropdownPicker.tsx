@@ -45,6 +45,7 @@ interface Props {
   userName?: string;
   isDeputyLeader?: boolean;
   color?: string;
+  leaderId?: string;
 }
 
 const DropdownPicker = (props: Props) => {
@@ -59,8 +60,8 @@ const DropdownPicker = (props: Props) => {
     isDeputyLeader,
     styles,
     color,
+    leaderId,
   } = props;
-
   const [value, setValue] = useState('');
   const [backgroundUsers, setBackgroundUsers] = useState<{
     [key: number]: boolean;
@@ -185,35 +186,37 @@ const DropdownPicker = (props: Props) => {
   const renderUsers = (item: any, index: number) => {
     const users = item.data ? item.data : item;
     return (
-      <RowComponent
-        key={index}
-        onPress={() =>
-          optionUsers(
-            users.userId,
-            item.name,
-            users.avatar,
-            users.majorCategory,
-          )
-        }
-        styles={[
-          localStyles.card,
-          {paddingHorizontal: backgroundUsers[item.userId] ? 30 : 8},
-        ]}>
-        {backgroundUsers[item.userId] && (
-          <Entypo
-            name="check"
-            size={appInfo.sizeIconBold}
-            color={appColors.blue}
+      leaderId !== users.userId && (
+        <RowComponent
+          key={index}
+          onPress={() =>
+            optionUsers(
+              users.userId,
+              item.name,
+              users.avatar,
+              users.majorCategory,
+            )
+          }
+          styles={[
+            localStyles.card,
+            {paddingHorizontal: backgroundUsers[item.userId] ? 30 : 8},
+          ]}>
+          {backgroundUsers[item.userId] && (
+            <Entypo
+              name="check"
+              size={appInfo.sizeIconBold}
+              color={appColors.blue}
+            />
+          )}
+          <CarUserComponent
+            name={item.name}
+            isFind
+            majoring={users.majorCategory ?? t('majoring')}
+            styles={{borderWidth: 0, gap: 20}}
+            img={users.avatar}
           />
-        )}
-        <CarUserComponent
-          name={item.name}
-          isFind
-          majoring={users.majorCategory ?? t('majoring')}
-          styles={{borderWidth: 0, gap: 20}}
-          img={users.avatar}
-        />
-      </RowComponent>
+        </RowComponent>
+      )
     );
   };
   const renderHearder = () => {

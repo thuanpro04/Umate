@@ -51,9 +51,7 @@ const UserInfoChat = ({navigation}: any) => {
   const [isShowBlockModal, setShowBlockModal] = useState(false);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const auth = useSelector(authSelector);
-  const profile = useSelector(profileSelector);
   const friendData = useSelector(friendSelector);
-  const [statusNotification, setStatusNotification] = useState(false);
   const colors: any = appColors[converInfo.theme ?? 'light'];
   const socket = useSelector(socketSelector).socket;
   const dispatch = useDispatch();
@@ -69,9 +67,6 @@ const UserInfoChat = ({navigation}: any) => {
 
   const getConversationInfo = useCallback(async () => {
     setConverInfo(await UserInfo.getConversationInfo(getItem));
-    setStatusNotification(
-      converInfo && converInfo.notification.includes(auth.userId),
-    );
   }, []);
   const handleActionNotification = async () => {
     const res = await notificationServices.actionNotificationUser(
@@ -82,21 +77,55 @@ const UserInfoChat = ({navigation}: any) => {
       converInfo.type,
     );
     if (res && res.data) {
-      console.log('Action notification successfully !!');
+      console.log('Action notification successfully !!', res.data);
+
+      if (
+        converInfo.notification &&
+        converInfo.notification.includes(res.data)
+      ) {
+        const notifi = converInfo.notification.filter(
+          (item: any) => item !== res.data,
+        );
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({
+            ...converInfo,
+            notification: notifi,
+          }),
+        );
+        setConverInfo({
+          ...converInfo,
+          notification: notifi,
+        });
+      }
     }
   };
   const handleBlockUser = async () => {
     setShowBlockModal(true);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
-    const res = await userServices.updateBlockUser(userId, userFriendId);
-    if (res) {
+    try {
+      setShowBlockModal(false);
+      const res = await userServices.updateBlockUser(userId, userFriendId);
+      if (!res) return;
+
       console.log('Block successfully !!!', res.data);
-      dispatch(setBlock(res.data));
+
+      // Lấy dữ liệu và cập nhật song song
+      const parsedData = await UserInfo.getUserData();
+
+      parsedData.friend.block = res.data;
+
+      // Lưu AsyncStorage và cập nhật Redux song song
+      await Promise.all([
+        AsyncStorage.setItem('userData', JSON.stringify(parsedData)),
+        dispatch(setBlock(res.data)),
+      ]);
+
       console.log('Sau khi cập nhật:', friendData.block);
+    } catch (error) {
+      console.error('Lỗi khi block user:', error);
     }
-    setShowBlockModal(false);
-    
   };
 
   useFocusEffect(
@@ -104,7 +133,7 @@ const UserInfoChat = ({navigation}: any) => {
       getConversationInfo();
     }, []),
   );
-  
+
   const onPressItems = (key: string) => {
     // xử lí group
     console.log(key);
@@ -273,6 +302,7 @@ const UserInfoChat = ({navigation}: any) => {
       </View>
     ));
   };
+
   const handleChoiceItems = (key: string) => {
     switch (key) {
       case 'personal':
@@ -281,7 +311,6 @@ const UserInfoChat = ({navigation}: any) => {
         });
         break;
       case 'notification':
-        setStatusNotification(!statusNotification);
         handleActionNotification();
         break;
       case 'member':
@@ -315,43 +344,41 @@ const UserInfoChat = ({navigation}: any) => {
         iconLeft={<ArrowLeft size={appInfo.sizeIconBold} color={colors.icon} />}
         onPress1={() => navigation.goBack()}
       />
-      <ScrollView style={{flex: 1}}>
-        <View style={styles.container}>
-          {converInfo ? (
-            <FastImage
-              source={{
-                uri:
-                  converInfo.type === 'personal'
-                    ? converInfo.avatar
-                    : converInfo.avatar,
-                priority: FastImage.priority.high,
-                cache: FastImage.cacheControl.immutable,
-              }}
-              style={styles.avatar}
+      {converInfo && (
+        <ScrollView style={{flex: 1}}>
+          <View style={styles.container}>
+            {converInfo.avatar ? (
+              <FastImage
+                source={{
+                  uri:
+                    converInfo.type === 'personal'
+                      ? converInfo.avatar
+                      : converInfo.avatar,
+                  priority: FastImage.priority.high,
+                  cache: FastImage.cacheControl.immutable,
+                }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Image
+                source={{
+                  uri: 'https://cdn-icons-png.flaticon.com/128/1999/1999625.png',
+                }}
+                style={globalStyles.avatar}
+              />
+            )}
+            <TextComponent
+              label={
+                converInfo.type === 'personal' ? name : converInfo.groupName
+              }
+              title
+              size={28}
             />
-          ) : (
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/128/1999/1999625.png',
-              }}
-              style={globalStyles.avatar}
-            />
-          )}
-          <TextComponent
-            label={converInfo.type === 'personal' ? name : converInfo.groupName}
-            title
-            size={28}
-          />
-          <SpaceComponent height={20} />
-          <RowComponent styles={{gap: 20, marginHorizontal: 12}}>
-            {converInfo && (
+            <SpaceComponent height={20} />
+            <RowComponent styles={{gap: 20, marginHorizontal: 12}}>
               <>
                 <CustomCallButtonComponent
-                  blockId={
-                    converInfo.block && converInfo.type === 'personal'
-                      ? converInfo.block[0]
-                      : ''
-                  }
+                  converInfo={converInfo}
                   isDisible={
                     (converInfo.block &&
                       converInfo.type === 'personal' &&
@@ -365,11 +392,9 @@ const UserInfoChat = ({navigation}: any) => {
                       ? 'personal_voice'
                       : 'group_voice'
                   }
-                  avatar={converInfo.avatar}
                   targetName={
                     converInfo.type === 'personal' ? name : converInfo.groupName
                   }
-                  userId={auth.userId}
                   targetId={
                     converInfo.type === 'personal'
                       ? converInfo.userId
@@ -378,17 +403,12 @@ const UserInfoChat = ({navigation}: any) => {
                           (id: any) => id !== auth.userId,
                         )
                   }
-                  userName={profile.name}
                   styles={styles.menu}
                   text="call"
                   icon={<CallCalling color="blue" size={22} />}
                 />
                 <CustomCallButtonComponent
-                  blockId={
-                    converInfo.block && converInfo.type === 'personal'
-                      ? converInfo.block[0]
-                      : ''
-                  }
+                  converInfo={converInfo}
                   isDisible={
                     (converInfo.block &&
                       converInfo.block.includes(auth.userId)) ||
@@ -400,11 +420,9 @@ const UserInfoChat = ({navigation}: any) => {
                       ? 'personal_video'
                       : 'group_video'
                   }
-                  avatar={converInfo.avatar}
                   targetName={
                     converInfo.type === 'personal' ? name : converInfo.groupName
                   }
-                  userId={auth.userId}
                   targetId={
                     converInfo.type === 'personal'
                       ? converInfo.userId
@@ -413,68 +431,72 @@ const UserInfoChat = ({navigation}: any) => {
                           (id: any) => id !== auth.userId,
                         )
                   }
-                  userName={profile.name}
                   styles={styles.menu}
                   text="video"
                   icon={<Video color="blue" size={22} />}
                 />
               </>
-            )}
-            {MenuChat(colors).ChoiceItems.map((item, index) => (
-              <TouchableOpacity
-                onPress={() =>
-                  handleChoiceItems(
-                    converInfo.type === 'group' && item.key === 'personal'
-                      ? 'member'
-                      : item.key,
-                  )
-                }
-                style={styles.menu}
-                key={index}
-                activeOpacity={0.4}>
-                {item.key === 'notification' ? (
-                  statusNotification ? (
-                    <Ionicons
-                      name="notifications-outline"
+              {MenuChat(colors).ChoiceItems.map((item, index) => (
+                <TouchableOpacity
+                  onPress={() =>
+                    handleChoiceItems(
+                      converInfo.type === 'group' && item.key === 'personal'
+                        ? 'member'
+                        : item.key,
+                    )
+                  }
+                  style={styles.menu}
+                  key={index}
+                  activeOpacity={0.4}>
+                  {item.key === 'notification' ? (
+                    converInfo.notification &&
+                    converInfo.notification.includes(auth.userId) ? (
+                      <Ionicons
+                        name="notifications-outline"
+                        size={appInfo.sizeIconBold}
+                        color={appColors.cobalt}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="notifications-off-outline"
+                        size={appInfo.sizeIconBold}
+                        color={appColors.cobalt}
+                      />
+                    )
+                  ) : converInfo.type === 'group' && item.key === 'personal' ? (
+                    <MaterialCommunityIcons
+                      name="account-group"
                       size={appInfo.sizeIconBold}
                       color={appColors.cobalt}
                     />
                   ) : (
-                    <Ionicons
-                      name="notifications-off-outline"
-                      size={appInfo.sizeIconBold}
-                      color={appColors.cobalt}
-                    />
-                  )
-                ) : converInfo.type === 'group' && item.key === 'personal' ? (
-                  <MaterialCommunityIcons
-                    name="account-group"
-                    size={appInfo.sizeIconBold}
-                    color={appColors.cobalt}
+                    item.icon
+                  )}
+                  <TextComponent
+                    label={
+                      converInfo.type === 'group' && item.key === 'personal'
+                        ? t('member')
+                        : t(`${item?.name}`)
+                    }
+                    size={12}
+                    styles={{fontStyle: 'italic'}}
                   />
-                ) : (
-                  item.icon
-                )}
-                <TextComponent
-                  label={
-                    converInfo.type === 'group' && item.key === 'personal'
-                      ? t('member')
-                      : t(`${item?.name}`)
-                  }
-                  size={12}
-                  styles={{fontStyle: 'italic'}}
-                />
-              </TouchableOpacity>
-            ))}
-          </RowComponent>
-        </View>
-        <SpaceComponent height={100} />
-        <View style={{flex: 1}}>
-          <TextComponent label={t('feature')} title styles={{marginLeft: 12}} />
-          <SpaceComponent height={12} />
-          {renderCategory()}
-        </View>
-      </ScrollView>
+                </TouchableOpacity>
+              ))}
+            </RowComponent>
+          </View>
+          <SpaceComponent height={100} />
+          <View style={{flex: 1}}>
+            <TextComponent
+              label={t('feature')}
+              title
+              styles={{marginLeft: 12}}
+            />
+            <SpaceComponent height={12} />
+            {renderCategory()}
+          </View>
+        </ScrollView>
+      )}
       <ActionModal
         visible={isShowBlockModal}
         onPressNo={() => setShowBlockModal(false)}

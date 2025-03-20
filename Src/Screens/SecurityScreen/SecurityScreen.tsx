@@ -20,7 +20,8 @@ import {useTranslation} from 'react-i18next';
 
 const SecurityScreen = ({navigation}: any) => {
   const {t} = useTranslation();
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme ?? 'light'];
   const SecurityOption = ({icon: Icon, title, description, onPress}: any) => {
     return (
       <TouchableOpacity
@@ -55,8 +56,7 @@ const SecurityScreen = ({navigation}: any) => {
       </TouchableOpacity>
     );
   };
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme ?? 'light'];
+  
   return (
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>

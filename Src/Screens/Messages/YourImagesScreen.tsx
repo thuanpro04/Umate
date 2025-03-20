@@ -5,20 +5,19 @@ import {
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
 import FastImage from 'react-native-fast-image';
 
 import {ArrowLeft2} from 'iconsax-react-native';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import {useTranslation} from 'react-i18next';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
-import {HeaderComponent} from '../Components';
+import {HeaderComponent, TextComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
-import {useTranslation} from 'react-i18next';
 
 const YourImagesScreen = () => {
   const {id, type, theme} = useRoute().params as {
@@ -26,6 +25,7 @@ const YourImagesScreen = () => {
     type: string;
     theme: string;
   };
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
@@ -34,7 +34,7 @@ const YourImagesScreen = () => {
   const {t} = useTranslation();
 
   const columnCount = 4;
-  // const images: any = [
+
   //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
   //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
   //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
@@ -70,12 +70,13 @@ const YourImagesScreen = () => {
         if (!id) {
           return;
         }
+        setIsLoading(true);
         const res = await messageServices.getImages(id, type);
         if (res && res.data) {
           setImages(res.data);
           console.log('get image successfully ', res.data);
         }
-       
+        setIsLoading(false);
       };
       getImageForConversation();
     }, [id]),
@@ -122,14 +123,20 @@ const YourImagesScreen = () => {
         }
         title={t('yourimage')}
       />
-      <FlatList
-        data={images}
-        style={{flex: 1, paddingHorizontal: 12}}
-        numColumns={columnCount}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      {images && images.length > 0 ? (
+        <FlatList
+          data={images}
+          style={{flex: 1, paddingHorizontal: 12}}
+          numColumns={columnCount}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <TextComponent label={t('empty')} />
+        </View>
+      )}
       {images && (
         <CustormImageViewing
           imageIndex={selectedIndex}

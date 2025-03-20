@@ -17,7 +17,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {address} from '../../data/address';
 import {majors} from '../../data/majoring';
 import {addAuth, authSelector} from '../../redux/reducers/authReducer';
-import {profileSelector} from '../../redux/reducers/profileSlice';
+import {addProfile, profileSelector} from '../../redux/reducers/profileSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
@@ -85,7 +85,7 @@ const SetUpProfile = ({navigation}: any) => {
 
   const dispatch = useDispatch();
   const onNavigation = () => {
-    navigation.navigate('Profile');
+    navigation.navigate(t('profile'));
   };
   const onchangeProfile = useCallback((key: string, value: string) => {
     setProfile(prev => ({...prev, [key]: value.trim()}));
@@ -139,6 +139,7 @@ const SetUpProfile = ({navigation}: any) => {
           t('welcome_umate'),
         );
   };
+  console.log(auth);
 
   const setUpProfileUser = async () => {
     if (!validateFields()) {
@@ -150,14 +151,20 @@ const SetUpProfile = ({navigation}: any) => {
       userId: auth.userId,
       name: profile.userName,
     };
-    // console.log(userInfo);
     const isChanged = UserInfo.compareObject(initialProfile, userInfo);
     if (isChanged) {
       const res = await userServices.updateUsersById(userInfo);
       if (res && res.data) {
-        const updatedData = {...res.data, accesstoken: auth.accesstoken};
-        dispatch(addAuth(updatedData));
-        await AsyncStorage.setItem('auth', JSON.stringify(updatedData));
+        dispatch(addProfile(res.data));
+        const existingUserData = await AsyncStorage.getItem('userData');
+        const parsedData = existingUserData ? JSON.parse(existingUserData) : {};
+        await AsyncStorage.setItem(
+          'userData',
+          JSON.stringify({
+            ...parsedData,
+            profile: res?.data,
+          }),
+        );
         handleNotification('sucess');
         onNavigation();
       }
@@ -204,6 +211,19 @@ const SetUpProfile = ({navigation}: any) => {
       />
     </View>
   );
+  const renderImage = useCallback(() => {
+    return (
+      <FastImage
+        source={{
+          uri: profile.avatar ?? user.avatar,
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.immutable,
+        }}
+        resizeMode="cover"
+        style={[globalStyles.userImg, {zIndex: -1, width: 160, height: 160}]}
+      />
+    );
+  },[handleSelected,onchangeProfile])
   return (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}
@@ -217,18 +237,7 @@ const SetUpProfile = ({navigation}: any) => {
       <SpaceComponent height={12} />
       <ScrollView>
         <View style={profileStyles.centered}>
-          <FastImage
-            source={{
-              uri: profile.avatar,
-              priority: FastImage.priority.high,
-              cache: FastImage.cacheControl.immutable,
-            }}
-            resizeMode="cover"
-            style={[
-              globalStyles.userImg,
-              {zIndex: -1, width: 160, height: 160},
-            ]}
-          />
+          {renderImage()}
           <View style={[globalStyles.overlay, {...globalStyles.imgStyles}]}>
             <ButtonImagePicker
               multiple={false}

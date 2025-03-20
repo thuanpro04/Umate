@@ -25,14 +25,16 @@ import ActionModal from '../Modal/ActionModal';
 import {notificationServices} from '../Services/notificationServices';
 import LoadingModal from '../Modal/LoadingModal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 interface Props {
   children: ReactNode;
   user: any;
-  handleGhimConversation:() => void
+  handleGhimConversation: () => void;
+  handleDeleteConversation:() =>void
 }
 
 const CustormLongPress = (props: Props) => {
-  const {children, user,handleGhimConversation} = props;
+  const {children, user, handleGhimConversation,handleDeleteConversation} = props;
   const modalRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -110,8 +112,7 @@ const CustormLongPress = (props: Props) => {
       }, []),
     },
   ];
-  
-  
+
   const actionShowModalBlock = () => {
     setShowBlockModal(true);
   };
@@ -120,7 +121,13 @@ const CustormLongPress = (props: Props) => {
     const res = await userServices.updateBlockUser(auth.userId, user.userId);
     if (res) {
       console.log('Block successfully !!!', res.data);
-      dispatch(setBlock(res.data));
+      const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
+      const parsedData = userData ? JSON.parse(userData) : {};
+      parsedData.friend.block = res.data;
+      await Promise.all([
+        AsyncStorage.setItem('userData', JSON.stringify(parsedData)),
+        dispatch(setBlock(res.data)),
+      ]);
       console.log('Sau khi cập nhật:', friendData.block);
     }
     setIsLoading(false);
@@ -140,17 +147,7 @@ const CustormLongPress = (props: Props) => {
     }
     setIsLoading(false);
   };
-  const handleDeleteConversation = async () => {
-    setIsLoading(true);
-
-    const res = await messageServices.deleteConversation({
-      [user.type]: [user.userId],
-    });
-    if (res) {
-      console.log('Delete conversation successfully !!!');
-    }
-    setIsLoading(false);
-  };
+  
 
   const onOpenModal = useCallback(() => {
     modalRef.current?.open();

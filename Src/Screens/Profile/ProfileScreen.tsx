@@ -46,13 +46,6 @@ const ProfileScreen = ({navigation}: any) => {
     },
   };
 
-  const getEventShared = async () => {
-    const res = await eventSevices.getEventShared(eventData.eventShares);
-    if (res?.data) {
-      console.log(res.data);
-    }
-  };
-
   const renderPost = ({item, index}: any) => {
     return (
       <TouchableOpacity
@@ -84,7 +77,10 @@ const ProfileScreen = ({navigation}: any) => {
       <View
         style={[
           locastyles.header,
-          {backgroundColor: theme === 'light' ? colors.card : colors.card},
+          {
+            backgroundColor: theme === 'light' ? colors.card : colors.card,
+            paddingHorizontal: 12,
+          },
         ]}>
         <ZoomImageComponent
           url={userData.avatar}
@@ -108,14 +104,14 @@ const ProfileScreen = ({navigation}: any) => {
             />
             <TextComponent
               styles={[profileStyles.bio, {color: '#888', flex: 1}]}
-              label={userData.bio ?? t('bio')}
-              numberOfLine={5}
+              label={userData.bio ?? 'bio'}
+              numberOfLine={3}
             />
           </RowComponent>
           <SpaceComponent height={6} />
-          <RowComponent>
+          <RowComponent styles={{paddingHorizontal: 12}}>
             <TouchableOpacity
-              style={locastyles.editButton}
+              style={[locastyles.editButton, {flex: 1}]}
               onPress={() => navigation.navigate('EditProfile')}>
               <UserEdit color={appColors.white} size={appInfo.sizeIcon} />
               <TextComponent
@@ -123,21 +119,21 @@ const ProfileScreen = ({navigation}: any) => {
                 label={t('edit_profile')}
               />
             </TouchableOpacity>
-            <ButtonComponent
-              type="action"
+            <TouchableOpacity
               onPress={() => navigation.navigate('UserQRCode')}
-              styles={{
+              style={{
                 borderWidth: 0.5,
                 padding: 6,
                 borderRadius: 6,
                 borderColor: colors.border,
+                marginTop: 10,
               }}>
               <MaterialIcons
                 name="qr-code-scanner"
                 size={appInfo.sizeIconBold}
                 color={appColors.blue}
               />
-            </ButtonComponent>
+            </TouchableOpacity>
           </RowComponent>
         </View>
       </View>
@@ -174,6 +170,7 @@ const ProfileScreen = ({navigation}: any) => {
         label={t('recently_share')}
       />
       <FlatList
+        style={{flex: 1}}
         data={eventData.eventShares}
         renderItem={renderPost}
         inverted

@@ -15,6 +15,7 @@ import {
 } from '../Components';
 import CustormQRCode from './CustormQRCode';
 import ScanBarcode from './ScanBarcode';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const UserQRCode = () => {
   const auth = useSelector(authSelector);
@@ -23,14 +24,17 @@ const UserQRCode = () => {
   const [isFocused, setIsFocused] = useState(true);
   const qrdata = JSON.stringify({id: auth.userId});
   const encrytion = btoa(qrdata);
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme];
   const renderScanner = () => {
     return <ScanBarcode />;
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, {backgroundColor: colors.background}]}>
       <HeaderComponent
         iconLeft={
-          <ArrowLeft2 size={appInfo.sizeIconBold} color={appColors.white} />
+          <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         onPress1={() => navigation.goBack()}
       />

@@ -45,7 +45,7 @@
         android:value="PYn4enDdHKFzvFbIHOiPiusKLPZylaRoj2FQU1CH" />
       <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="PYn4enDdHKFzvFbIHOiPiusKLPZylaRoj2FQU1CH"/>
+        android:value="AIomNsH6I9ocbIH94d1WKacRGph4O4XPLCwTJCRn"/>
       <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
                     android:value="false"/>
         <meta-data  android:name="com.dieam.reactnativepushnotification.notification_color"

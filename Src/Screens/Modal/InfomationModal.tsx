@@ -3,7 +3,13 @@ import React, {useEffect, useRef} from 'react';
 import {Portal} from 'react-native-portalize';
 import {Modalize} from 'react-native-modalize';
 import {RowComponent, SpaceComponent, TextComponent} from '../Components';
-import {LikeDislike, MessageRemove, Velas} from 'iconsax-react-native';
+import {
+  LikeDislike,
+  Map,
+  Map1,
+  MessageRemove,
+  Velas,
+} from 'iconsax-react-native';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -16,7 +22,7 @@ interface Props {
   onPressAddGroud: () => void;
   listUser?: [];
   onPressRemove: () => void;
-  onPressGhim: () => void;
+  onPresMap: () => void;
 }
 const InfomationModal = (props: Props) => {
   const {
@@ -25,7 +31,7 @@ const InfomationModal = (props: Props) => {
     onPressAddGroud,
     listUser,
     onPressRemove,
-    onPressGhim,
+    onPresMap,
   } = props;
   const modalizeRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -47,24 +53,19 @@ const InfomationModal = (props: Props) => {
       onPress: () => onPressAddGroud(),
     },
     {
+      key: 'googmap',
+      icon: <Map1 size={appInfo.sizeIconBold} color={colors.icon} />,
+      name: 'Map',
+      onPress: () => onPresMap(),
+    },
+    {
       key: 'removeconversation',
       icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
       name: t('remove_conversation'),
       onPress: () => onPressRemove(),
     },
   ];
-  // {
-  //   key: 'ghim',
-  //   icon: (
-  //     <AntDesign
-  //       name="pushpino"
-  //       size={appInfo.sizeIconBold}
-  //       color={colors.icon}
-  //     />
-  //   ),
-  //   name: t('ghim'),
-  //   onPress: () =>onPressGhim(),
-  // },
+  
   return (
     <Portal>
       <Modalize

@@ -24,6 +24,7 @@ import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import FastImage from 'react-native-fast-image';
+import {useTranslation} from 'react-i18next';
 interface Props {
   img?: any;
   name: string;
@@ -44,6 +45,8 @@ interface Props {
   userId?: string;
   isFriend?: boolean;
   isRequestFriend?: boolean;
+  mutualFriend?: number;
+  mutualUser?: any[];
 }
 
 const CarUserComponent = (props: Props) => {
@@ -67,11 +70,15 @@ const CarUserComponent = (props: Props) => {
     userId,
     isFriend,
     isRequestFriend,
+    mutualFriend,
+    mutualUser,
   } = props;
+
   const [isShowIcon, setIsShowIcon] = useState(isRequestFriend ?? false);
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const handleAdd_CancelFriends = async () => {
     if (userId) {
@@ -198,30 +205,24 @@ const CarUserComponent = (props: Props) => {
         <TextComponent label={name} title />
         <RowComponent styles={{gap: 20, paddingVertical: 0}}>
           <RowComponent styles={[localStyle.card, {gap: 0}]}>
-            <FastImage
-              source={{
-                uri:
-                  img ??
-                  'https://www.google.com/imgres?q=clipart%20person%20images&imgurl=https%3A%2F%2Fclipart-library.com%2F8300%2F2368%2Fsuccessful-business-man-clipart-xl.png&imgrefurl=https%3A%2F%2Fclipart-library.com%2Fclipart%2Fclipart-person_56.html&docid=OkUhgGtFeO4JbM&tbnid=Zmddp8xIvMJKSM&vet=12ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECFcQAA..i&w=1906&h=1920&hcb=2&ved=2ahUKEwiY7dGi3O-IAxWrr1YBHfkCEDUQM3oECFcQAA',
-                priority: FastImage.priority.high,
-                cache: FastImage.cacheControl.immutable,
-              }}
-              style={localStyle.imgHint}
-            />
-            <FastImage
-              source={
-                img
-                  ? {
-                      uri: img,
-                      priority: FastImage.priority.high,
-                      cache: FastImage.cacheControl.immutable,
-                    }
-                  : require('../../assets/images/imgBg.jpg')
-              }
-              style={localStyle.imgHint}
-            />
+            {mutualUser?.map(item => (
+              <FastImage
+                key={item.userId}
+                source={{
+                  uri: item.avatar,
+
+                  priority: FastImage.priority.high,
+                  cache: FastImage.cacheControl.immutable,
+                }}
+                style={localStyle.imgHint}
+              />
+            ))}
           </RowComponent>
-          <TextComponent label="7 ban chung" />
+          {mutualFriend && mutualFriend > 0 && (
+            <TextComponent
+              label={mutualFriend.toString() + ' ' + t('mutual_friend')}
+            />
+          )}
         </RowComponent>
         <RowComponent styles={localStyle.card}>
           {!isShowBtn ? (
@@ -230,14 +231,16 @@ const CarUserComponent = (props: Props) => {
                 label={sayYes}
                 styles={{width: '40%'}}
                 onPress={onPressYes}
+                textStyle={{fontSize:10}}
+
               />
               <ButtonComponent
                 label={sayNo}
                 styles={{
                   width: '40%',
                   backgroundColor: colors.icon,
-                  paddingVertical: 1,
                 }}
+                textStyle={{fontSize:10}}
                 onPress={onPressNo}
               />
             </>
@@ -247,8 +250,10 @@ const CarUserComponent = (props: Props) => {
               styles={{
                 backgroundColor: colors.icon,
                 width: '80%',
-                paddingVertical: 5,
+                paddingVertical: 3,
               }}
+              textStyle={{fontSize:14}}
+
               onPress={onPressCancel}
             />
           )}

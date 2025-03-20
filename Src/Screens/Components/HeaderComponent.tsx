@@ -69,16 +69,16 @@ const HeaderComponent = (props: Props) => {
 
         {image && (
           <>
-            {image && (
-              <FastImage
-                source={{
-                  uri: image,
-                  priority: FastImage.priority.high,
-                  cache: FastImage.cacheControl.immutable,
-                }}
-                style={localStyles.image}
-              />
-            )}
+            <FastImage
+              source={{
+                uri:
+                  image ??
+                  'https://cdn-icons-png.flaticon.com/128/3135/3135768.png',
+                priority: FastImage.priority.high,
+                cache: FastImage.cacheControl.immutable,
+              }}
+              style={localStyles.image}
+            />
             <TextComponent
               label={title ?? ''}
               styles={{

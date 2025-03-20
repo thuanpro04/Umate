@@ -24,23 +24,21 @@ import {useSelector} from 'react-redux';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
 import {socketSelector} from '../../../redux/reducers/socketSlice';
 import {Notification} from '../../Untils/Notification';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
+import {authSelector} from '../../../redux/reducers/authReducer';
 
 interface Props {
   icon?: React.ReactNode;
   styles?: StyleProp<ViewStyle>;
   text: string;
   // Thông tin người gọi
-  userId: string;
-  userName: string;
   // Thông tin người được gọi (target)
   targetId: any;
   targetName: string;
-  avatar: string;
   txtStyles?: StyleProp<TextStyle>;
   type: 'group_voice' | 'group_video' | 'personal_voice' | 'personal_video';
   isDisible: Boolean;
-  blockId: string;
+  converInfo: any;
 }
 
 const CustomCallButtonComponent = (props: Props) => {
@@ -48,22 +46,19 @@ const CustomCallButtonComponent = (props: Props) => {
     icon,
     styles,
     text,
-    userId,
-    userName,
     targetId,
     targetName,
-    avatar,
     txtStyles,
     type,
     isDisible,
-    blockId,
+    converInfo,
   } = props;
   const navigation = useNavigation<any>();
   const socket = useSelector(socketSelector).socket;
   const {t} = useTranslation();
-
+  const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
-
+  let userId = auth.userId;
   const callID = `call_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
   const sendCallInvitation = async () => {
@@ -75,28 +70,32 @@ const CustomCallButtonComponent = (props: Props) => {
         callID,
         targetId,
         targetName,
-        userName,
+        userName: profile.name,
         avatar: profile.avatar,
         userId,
         type,
+        groupId: converInfo.groupId ?? undefined,
       };
       socket.emit('sendCallInvitation', callData);
       navigation.navigate('CallWaitingAccept', {
         name: targetName,
-        avatar,
+        avatar: converInfo.avatar,
         callID,
         userId,
         targetId,
         type,
+        groupId: converInfo.groupId ?? undefined,
       });
       return socket.off('sendCallInvitation');
     } catch (error) {
       console.error('❌ Lỗi khi gửi lời mời gọi:', error);
     }
   };
+
+  
   const handleToastNotificationBlock = () => {
     if (isDisible) {
-      if (blockId !== userId) {
+      if (converInfo.block.includes(userId)) {
         Notification.showSnackbar(t('unblock_and_call'), () => {});
       } else {
         Notification.showSnackbar(t('you_are_blocked'), () => {});

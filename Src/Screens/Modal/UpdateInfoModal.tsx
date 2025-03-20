@@ -31,23 +31,23 @@ const UpdateInfoModal = (props: Props) => {
   const optionMenu = [
     {
       key: 'groupName',
-      field: 'Group Name',
+      field: t('group_name'),
     },
     {
       key: 'description',
-      field: 'Description',
+      field: t('description'),
     },
     {
       key: 'userName',
-      field: 'UserName',
+      field: t('name'),
     },
     {
       key: 'majoring',
-      field: 'Majoring',
+      field: t('majoring'),
     },
     {
       key: 'className',
-      field: 'ClassName',
+      field: t('classname'),
     },
     {
       key: 'majorCategory',

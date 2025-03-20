@@ -51,10 +51,13 @@ const NotificationScreen = ({navigation}: any) => {
         ? await groupServices.handleAgreeOnGroup(auth.userId, id, groupId)
         : await notificationServices.handleDeleteNotification(id);
     if (res && res.data) {
-      fetchNotification();
+      console.log(res.data);
+
+      setDataNotifi(prev => prev.filter(item => item._id !== id));
     }
-    
   };
+  console.log(dataNotifi);
+
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
       const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -72,7 +75,7 @@ const NotificationScreen = ({navigation}: any) => {
           }),
         ]).start();
         if (item.type !== 'calling') {
-          navigation.navigate('Friends');
+          navigation.navigate(t('friend'));
         }
       };
       const onChangleItemToTrash = (key: any) => {
@@ -172,7 +175,7 @@ const NotificationScreen = ({navigation}: any) => {
                     style={styles.declineButton}
                     onPress={() => handleActionFriend('cancel', item._id)}>
                     <TextComponent
-                      label={'refuse'}
+                      label={t('refuse')}
                       styles={styles.buttonText}
                     />
                   </TouchableOpacity>
@@ -193,9 +196,11 @@ const NotificationScreen = ({navigation}: any) => {
       setDataNotifi(res.data);
     }
     setIsLoading(false);
-  
   };
   const handleTrashNotification = async () => {
+    if (dataNotifi.length === 0) {
+      return;
+    }
     if (isTrash) {
       if (selectTrash.length < 1) {
         setTrash(false);
@@ -211,7 +216,6 @@ const NotificationScreen = ({navigation}: any) => {
         setSelectTrash([]);
         setTrash(false);
       }
-     
     }
     setTrash(true);
   };

@@ -1,17 +1,15 @@
-import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import React, {useCallback, useState} from 'react';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {messageServices} from '../Services/messageServices';
-import {globalStyles} from '../../Styles/globalStyle';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {appColors} from '../../Theme/Colors/appColors';
-import {HeaderComponent} from '../Components';
 import {ArrowLeft2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import CustormLinkPreview from '../Components/CustormLinkPreview';
-import CardLinkComponent from './Component/CardLinkComponent';
+import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {HeaderComponent, TextComponent} from '../Components';
+import {messageServices} from '../Services/messageServices';
+import CardLinkComponent from './Component/CardLinkComponent';
+import LoadingModal from '../Modal/LoadingModal';
 
 const YourLinkScreen = () => {
   const {id, type, theme} = useRoute().params as {
@@ -22,7 +20,7 @@ const YourLinkScreen = () => {
   const [links, setLinks] = useState<any[]>([]);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
-
+  const [isLoading, setIsLoading] = useState(false);
   useFocusEffect(
     useCallback(() => {
       const getLinkYourConversation = async () => {
@@ -31,19 +29,19 @@ const YourLinkScreen = () => {
 
           return;
         }
-
+        setIsLoading(true);
         const res = await messageServices.getLinkYourConversation(id, type);
         if (res && res.data) {
-          console.log('res.data: ', res.data);
+          // console.log('res.data: ', res.data);
           setLinks(res.data);
         }
-      
+        setIsLoading(false);
       };
       getLinkYourConversation();
     }, [id]),
   );
   const renderItems = ({item, index}: any) => {
-    return <CardLinkComponent url={item.content} key={index} />;
+    return <CardLinkComponent url={item.content} key={item.messageId} />;
   };
   return (
     <SafeAreaView
@@ -54,12 +52,19 @@ const YourLinkScreen = () => {
         }
         title={t('yourlink')}
       />
-      <FlatList
-        style={{flex: 1, paddingHorizontal: 12}}
-        data={links}
-        keyExtractor={item => item.messageId}
-        renderItem={renderItems}
-      />
+      {links && links.length > 0 ? (
+        <FlatList
+          style={{flex: 1, paddingHorizontal: 12}}
+          data={links}
+          keyExtractor={item => item.messageId}
+          renderItem={renderItems}
+        />
+      ) : (
+        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+          <TextComponent label={t('empty')} />
+        </View>
+      )}
+      <LoadingModal visible={isLoading} />
     </SafeAreaView>
   );
 };

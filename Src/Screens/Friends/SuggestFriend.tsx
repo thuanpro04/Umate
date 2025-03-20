@@ -1,5 +1,5 @@
-import {useFocusEffect} from '@react-navigation/native';
-import React, {useCallback, useMemo, useState} from 'react';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
@@ -11,11 +11,17 @@ import {FlatList} from 'react-native';
 import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {friendSelector} from '../../redux/reducers/friendSlice';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
   const [message, setMessage] = useState('');
+  const navigation = useNavigation<any>();
+  const [count, setCount] = useState<{
+    [key: string]: {count: number; mutualFriends: any[]};
+  }>({});
+  const friendData = useSelector(friendSelector);
   const [buttonVisibility, setButtonVisibility] = useState<{
     [key: string]: boolean;
   }>({});
@@ -23,6 +29,7 @@ const SuggestFriend = React.memo(() => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const [mutualUser, setMutualUser] = useState<any[]>([]);
   useFocusEffect(
     useCallback(() => {
       getUsers();
@@ -54,7 +61,7 @@ const SuggestFriend = React.memo(() => {
       auth.userId,
       'suggestfriend',
     );
-    const allUsers = res && res.data;
+    const allUsers = res && res.data.users;
     if (allUsers) {
       setUsers(allUsers);
       allUsers.forEach((item: any) => {
@@ -65,7 +72,6 @@ const SuggestFriend = React.memo(() => {
     } else {
       setMessage('No users found');
     }
-    
   };
 
   const handleFriendAction = async (
@@ -98,10 +104,51 @@ const SuggestFriend = React.memo(() => {
   const handleCancelFriend = debounce(async (friendUserId: string) => {
     handleFriendAction(friendUserId, 'cancel');
   }, 1000);
+  const checkFriend = useCallback(
+    (friends: any[], userId: string) => {
+      if (!friendData.friends || friends.length === 0) {
+        return;
+      }
+      const mutualFriends = friends.filter(item =>
+        friendData.friends.includes(item),
+      );
+      setCount(prev => {
+        // Kiểm tra nếu dữ liệu không thay đổi thì không cập nhật
+        if (prev[userId] && prev[userId].count === mutualFriends.length) {
+          return prev;
+        }
 
+        return {
+          ...prev,
+          [userId]: {
+            count: mutualFriends.length, // Số lượng bạn chung
+            mutualFriends: mutualFriends, // Danh sách userId bạn chung
+          },
+        };
+      });
+    },
+    [friendData],
+  );
+
+  const getMutualFriendInfo = useCallback(async (ids: string[]) => {
+    if (ids === undefined) {
+      return;
+    }
+    const res = await userServices.getListUserInfo(ids);
+    if (res && res.data) {
+      setMutualUser(res.data);
+    }
+    return;
+  }, []);
   const renderItems = ({item, index}: any) => {
     return (
       <CarUserComponent
+    
+        mutualUser={mutualUser.length > 3 ? mutualUser.slice(0, 3) : mutualUser}
+        mutualFriend={count[item.userId]?.count}
+        onPressImg={() =>
+          navigation.navigate('PersonalScreen', {userId: item.userId})
+        }
         iconAddCancel={false}
         key={item.userId}
         img={item.avatar}
@@ -121,6 +168,23 @@ const SuggestFriend = React.memo(() => {
       />
     );
   };
+
+  useEffect(() => {
+    memoUsers?.forEach(user => {
+      checkFriend(user.friends, user.userId);
+    });
+  }, [memoUsers, checkFriend]);
+
+  useEffect(() => {
+    const allMutualIds = Object.values(count)
+      .flatMap(entry => entry.mutualFriends)
+      .filter((value, index, self) => self.indexOf(value) === index); // Loại bỏ trùng lặp
+
+    if (allMutualIds.length > 0) {
+      getMutualFriendInfo(allMutualIds);
+    }
+  }, [count, getMutualFriendInfo]);
+
   return !message && users ? (
     <SafeAreaView
       style={[styles.container, {backgroundColor: colors.background}]}>

@@ -20,15 +20,19 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import {UserInfo} from '../Untils/UserInfo';
 import {useTranslation} from 'react-i18next';
+import {Notification} from '../Untils/Notification';
 const CallWaitingAccept = ({navigation}: any) => {
-  const {avatar, name, callID, targetId, userId, type} = useRoute().params as {
+  const {avatar, name, callID, targetId, userId, type, groupId} = useRoute()
+    .params as {
     avatar: string;
     name: string;
     callID: string;
     targetId: string;
     userId: string;
     type: string;
+    groupId: string;
   };
+
   const profile = useSelector(profileSelector);
   const socket = useSelector(socketSelector).socket;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
@@ -39,11 +43,12 @@ const CallWaitingAccept = ({navigation}: any) => {
     if (soundRef.current) {
       soundRef.current.stop();
     }
-    const data = {userId, targetId, callID, name: profile.name, type};
+    const data = {userId, targetId, callID, name: profile.name, type, groupId};
     socket.emit('cancelCall', data);
-    navigation.goBack();
+    navigation.navigate(t('home'));
     return socket.off('cancelCall');
   };
+
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
@@ -98,7 +103,22 @@ const CallWaitingAccept = ({navigation}: any) => {
         });
       }
     });
+    socket.on('feedbackRefused', (data: any) => {
+      if (soundRef.current) {
+        soundRef.current.stop();
+      }
+      console.log('callRefused: ', data.callID);
+      if (data) {
+        navigation.goBack();
+      }
+      Notification.showToast(
+        'error',
+        `${data.userName} đã từ chối`,
+        'Cuộc gọi của bạn ',
+      );
+    });
     return () => {
+      socket.off('feedbackRefused');
       socket.off('feedbackAccepted');
     };
   }, []);
@@ -110,7 +130,7 @@ const CallWaitingAccept = ({navigation}: any) => {
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <Animated.Image
             source={{uri: avatar}}
-            style={globalStyles.imgStyles}
+            style={[globalStyles.imgStyles, {opacity: opacityAnim}]}
           />
 
           <SpaceComponent height={12} />

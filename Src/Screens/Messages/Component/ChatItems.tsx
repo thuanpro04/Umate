@@ -43,7 +43,7 @@ interface Props {
   theme: any;
   conversationInfo: any;
 }
-const ChatItems = (props: Props) => {
+const ChatItems = memo((props: Props) => {
   const {
     currentUserId,
     userId,
@@ -68,7 +68,6 @@ const ChatItems = (props: Props) => {
   const auth = useSelector(authSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
-
   const isNextMyMessage = true;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const condition = item.typeCall;
@@ -78,7 +77,15 @@ const ChatItems = (props: Props) => {
     if (res && res?.data) {
       setUser(res.data);
     }
-    
+  };
+  const getNameInGroup = (item: any) => {
+    if (
+      conversationInfo.nickNames &&
+      conversationInfo.nickNames[item.senderId]
+    ) {
+      return conversationInfo.nickNames[item.senderId];
+    }
+    return item.name;
   };
   const onChangeImageIndex = (index: number) => {
     setTimeout(() => {
@@ -113,47 +120,45 @@ const ChatItems = (props: Props) => {
       />
     );
   };
-  const renderImage = useCallback(
-    (arrImages: string[], isRight?: boolean) => {
-      const totalImages = arrImages.length;
-      const isStacked = totalImages > 1;
-      return arrImages.map((item, imgIndex) => {
-        return (
-          <RowComponent
-            onPress={() => onPressImg(item)}
-            activeOpacity={0.8}
-            styles={{}}
-            key={imgIndex}>
-            {imgIndex === arrImages.length - 1 &&
-              isRight &&
-              shareDocuments(isStacked, isRight ?? false, arrImages)}
-            <FastImage
-              style={[
-                styles.imageStyle,
-                isStacked && {
-                  position: 'absolute',
-                  left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
-                  right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
-                  top: -imgIndex, // Xếp chồng theo index
-                  zIndex: totalImages - imgIndex,
-                },
-              ]}
-              source={{
-                uri: item,
-                priority: FastImage.priority.high, // Đặt mức ưu tiên cao
-                cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
-              }}
-              resizeMode={FastImage.resizeMode.cover}
-            />
-            {imgIndex === arrImages.length - 1 &&
-              !isRight &&
-              shareDocuments(isStacked, !isRight, arrImages)}
-          </RowComponent>
-        );
-      });
-    },
-    [props?.item.imagesUrl],
-  );
+  const renderImage = useCallback((arrImages: string[], isRight?: boolean) => {
+    const totalImages = arrImages.length;
+    const isStacked = totalImages > 1;
+    return arrImages.map((item, imgIndex) => {
+      return (
+        <RowComponent
+          onPress={() => onPressImg(item)}
+          activeOpacity={0.8}
+          styles={{}}
+          key={imgIndex}>
+          {imgIndex === arrImages.length - 1 &&
+            isRight &&
+            shareDocuments(isStacked, isRight ?? false, arrImages)}
+          <FastImage
+            style={[
+              styles.imageStyle,
+              isStacked && {
+                position: 'absolute',
+                left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
+                right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
+                top: -imgIndex, // Xếp chồng theo index
+                zIndex: totalImages - imgIndex,
+              },
+            ]}
+            source={{
+              uri: item,
+              priority: FastImage.priority.high, // Đặt mức ưu tiên cao
+              cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
+            }}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+          {imgIndex === arrImages.length - 1 &&
+            !isRight &&
+            shareDocuments(isStacked, !isRight, arrImages)}
+        </RowComponent>
+      );
+    });
+  }, []);
+
   const onSwipeableOpenAction = () => {
     if (props.item) {
       setReplyOnSwipeOpen({...props.item, name});
@@ -208,7 +213,7 @@ const ChatItems = (props: Props) => {
   };
   const showNotificationQrCode = (data: any, messageId: string) => {
     const decodedData = JSON.parse(atob(data));
-    Alert.alert('Mã điểm danh', 'Bạn có muốn điểm danh không ?', [
+    Alert.alert(t('attendance_code'), t('how_attendance'), [
       {text: t('cancel'), style: 'cancel'},
       {
         text: t('confirm'),
@@ -238,7 +243,6 @@ const ChatItems = (props: Props) => {
     if (res && res.data) {
       console.log('Update attended successfully !!', res.data);
     }
- 
   };
   const Message = memo(({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
@@ -316,15 +320,23 @@ const ChatItems = (props: Props) => {
                 />
                 <SpaceComponent height={5} />
                 <CustomCallButtonComponent
-                  blockId={blockId}
+                  converInfo={conversationInfo}
                   isDisible={isBlock}
                   type={condition}
                   styles={{justifyContent: 'center', alignItems: 'center'}}
-                  targetName={name}
-                  userId={currentUserId}
-                  userName={profile.name}
-                  avatar={profile.avatar}
-                  targetId={userId}
+                  targetName={
+                    conversationInfo.type === 'personal'
+                      ? name
+                      : conversationInfo.groupName
+                  }
+                  targetId={
+                    conversationInfo.type === 'personal'
+                      ? conversationInfo.userId
+                      : conversationInfo.invitedUsers &&
+                        conversationInfo.invitedUsers.filter(
+                          (id: any) => id !== auth.userId,
+                        )
+                  }
                   text="Gọi lại"
                   txtStyles={{color: appColors.blue, fontSize: 18}}
                 />
@@ -404,7 +416,7 @@ const ChatItems = (props: Props) => {
               <View style={{marginLeft: 12}}>
                 {user && user.name && (
                   <TextComponent
-                    label={user ? user.name : ''}
+                    label={getNameInGroup(item)}
                     color={appColors.grey2}
                     size={8}
                   />
@@ -449,7 +461,7 @@ const ChatItems = (props: Props) => {
           </View>
         )}
       </Swipeable>
-      {displayImgs && (
+      {displayImgs && displayImgs.length > 0 && (
         <CustormImageViewing
           onChangeImageIndex={onChangeImageIndex}
           onClose={() => setIsVisible(false)}
@@ -460,7 +472,7 @@ const ChatItems = (props: Props) => {
       )}
     </GestureHandlerRootView>
   );
-};
+});
 
 export default ChatItems;
 const styles = StyleSheet.create({

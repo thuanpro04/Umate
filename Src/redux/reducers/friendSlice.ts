@@ -31,8 +31,12 @@ const friendSlice = createSlice({
     setBlock: (state, action: PayloadAction<string[]>) => {
       state.block = action.payload; // ✅ Chỉ cập nhật block, không ảnh hưởng dữ liệu khác
     },
+    setFriend: (state, action: PayloadAction<string[]>) => {
+      state.friends = [...state.friends, ...action.payload];
+    },
   },
 });
 export const friendReducer = friendSlice.reducer;
-export const {addFriend, removeFriend, setBlock} = friendSlice.actions;
+export const {addFriend, removeFriend, setBlock, setFriend} =
+  friendSlice.actions;
 export const friendSelector = (state: any) => state.friends;

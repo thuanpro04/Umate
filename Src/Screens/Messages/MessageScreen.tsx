@@ -62,7 +62,25 @@ const MessageScreen = ({navigation}: any) => {
     navigation.navigate('AddGroup');
     onCloseModal();
   };
-
+  const handleDeleteConversation = async (user: any) => {
+    setIsLoading(true);
+    const id = user.type === 'group' ? user.groupId : user.conversationId;
+    const res = await messageServices.deleteConversation({
+      [user.type]: [id],
+    });
+    if (res) {
+      console.log('✅ Delete conversation successfully!');
+      // Cập nhật danh sách users
+      setUsers(prevUsers =>
+        prevUsers.filter(
+          item =>
+            (item.type === 'personal' && item.conversationId !== id) ||
+            (item.type === 'group' && item.groupId !== id),
+        ),
+      );
+    }
+    setIsLoading(false);
+  };
   const handleGhimConversation = async (user: any) => {
     const res = await messageServices.actionGhimConversation(
       user.type === 'personal' ? user.conversationId : user.groupId,
@@ -74,17 +92,23 @@ const MessageScreen = ({navigation}: any) => {
       setUsers(prevUsers => {
         const updatedUsers = prevUsers.map(item => {
           // Check if this is the item we just pinned
-          if ((user.type === 'personal' && item.conversationId === user.conversationId) || 
-              (user.type === 'group' && item.groupId === user.groupId)) {
+          if (
+            (user.type === 'personal' &&
+              item.conversationId === user.conversationId) ||
+            (user.type === 'group' && item.groupId === user.groupId)
+          ) {
             // Create a new object with updated pinnedBy property
             return {
               ...item,
-              pinnedBy: res.data.data || [...(item.pinnedBy || []), auth.userId]
+              pinnedBy: res.data.data || [
+                ...(item.pinnedBy || []),
+                auth.userId,
+              ],
             };
           }
           return item;
         });
-        
+
         // Resort the conversations to move pinned ones to the top
         return sortUsersByPinnedStatus(updatedUsers);
       });
@@ -100,6 +124,7 @@ const MessageScreen = ({navigation}: any) => {
 
       return (
         <CustormLongPress
+          handleDeleteConversation={() => handleDeleteConversation(item)}
           user={item}
           handleGhimConversation={() => handleGhimConversation(item)}>
           <CarUserChat
@@ -205,9 +230,11 @@ const MessageScreen = ({navigation}: any) => {
         </View>
       )}
       <InfomationModal
-        onPressGhim={() => navigation.navigate('GoongMapScreen')}
-        onPressRemove={() => {
+        onPresMap={() => {
           setIsVisible(false);
+          navigation.navigate('GoongMapScreen');
+        }}
+        onPressRemove={() => {
           navigation.navigate('TrashConversation', {users});
         }}
         visible={isVisible}

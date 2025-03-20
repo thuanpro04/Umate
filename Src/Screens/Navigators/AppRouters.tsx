@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, AppState, AppStateStatus} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
@@ -18,6 +18,7 @@ import {
   setLanguage,
 } from '../../redux/reducers/languageSlice';
 import i18next from 'i18next';
+import SocketService from '../Services/SocketService';
 
 const AppRouters = () => {
   const {getItem, setItem} = useAsyncStorage('userData');
@@ -49,9 +50,32 @@ const AppRouters = () => {
 
   useEffect(() => {
     i18next.changeLanguage(language);
-    
-    
   }, [language]);
+  useEffect(() => {
+    // Xử lý trạng thái ứng dụng thay đổi
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (!auth.userId) return;
+
+      if (nextAppState === 'active') {
+        // Kết nối lại socket khi app quay lại foreground nếu chưa kết nối
+        if (!SocketService.isConnected()) {
+          console.log('App trở lại foreground, đang kết nối lại socket...');
+          await SocketService.connect(auth.userId);
+        }
+      }
+    };
+
+    // Lắng nghe sự thay đổi trạng thái ứng dụng
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [auth.userId]);
+
   return (
     <>
       {isShowSplash ? (

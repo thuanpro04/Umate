@@ -14,7 +14,7 @@ import { appColors } from './Src/Theme/Colors/appColors';
 const App = () => {
   useEffect(() => {
     Orientation.lockToPortrait();
-    HandleNotification.checkNotificationPertion();
+    // HandleNotification.checkNotificationPertion();
   }, []);
 
   useEffect(() => {

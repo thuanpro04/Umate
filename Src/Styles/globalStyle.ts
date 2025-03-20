@@ -69,7 +69,6 @@ const globalStyles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 100,
-    backgroundColor:'grey'
   },
   iconImage: {height: 25, width: 25, resizeMode: 'cover'},
   main: {

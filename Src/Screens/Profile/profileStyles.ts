@@ -11,11 +11,13 @@ export const profileStyles = StyleSheet.create({
     borderBottomRightRadius: 30,
     padding: 20,
     alignItems: 'center',
-    height: '35%',
+    height: '40%',
+    
   },
   profileContainer: {
     alignItems: 'center',
     height: '32%',
+    paddingHorizontal:14
   },
   avatar: {
     height: 100,

@@ -72,7 +72,7 @@ const AddFriendModal = (props: Props) => {
   const getFriendForUser = async () => {
     const res = await userServices.getEquestFriendUsers(userId, '');
     if (res) {
-      setAllUsers(res.data);
+      setAllUsers(res.data.users);
     }
     
   };

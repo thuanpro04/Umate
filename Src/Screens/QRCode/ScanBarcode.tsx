@@ -7,11 +7,16 @@ import {userServices} from '../Services/userService';
 import {UserInfo} from '../Untils/UserInfo';
 import {useTranslation} from 'react-i18next';
 import {appColors} from '../../Theme/Colors/appColors';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {SpaceComponent, TextComponent} from '../Components';
 
 const ScanBarcode = () => {
   const [scanned, setScanned] = useState(false);
   const navigation = useNavigation<any>();
   const {t} = useTranslation();
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const colors = appColors[theme];
   const onBarcodeScan = async (event: any) => {
     if (!scanned) {
       setScanned(true);
@@ -43,10 +48,9 @@ const ScanBarcode = () => {
       console.log('userInfo', res.data);
       return res.data;
     }
-   
   };
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <Camera
         style={styles.camera}
         scanBarcode={true}
@@ -59,8 +63,9 @@ const ScanBarcode = () => {
         cameraType={CameraType.Back}
         zoomMode="on"
       />
+      <SpaceComponent height={10}/>
       <View style={styles.instructionContainer}>
-        <Text style={styles.instructionText}>{t('place_qr_in_frame')}</Text>
+        <TextComponent label={t('place_qr_in_frame')} />
       </View>
     </View>
   );

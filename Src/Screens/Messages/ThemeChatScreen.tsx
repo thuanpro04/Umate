@@ -49,7 +49,7 @@ const ThemeChatScreen = ({navigation}: any) => {
     );
     if (res && res.data) {
       console.log('Update theme conversation successfully !!', res.data);
-      navigation.navigate('Messages');
+      navigation.navigate(t('message'));
     }
     setIsLoading(false);
     

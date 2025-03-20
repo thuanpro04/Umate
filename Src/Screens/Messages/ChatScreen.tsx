@@ -1,6 +1,6 @@
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {ArrowLeft, Setting} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
@@ -29,6 +29,9 @@ import {messageServices} from '../Services/messageServices';
 import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {Notification} from '../Untils/Notification';
+import LoadingModal from '../Modal/LoadingModal';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -42,6 +45,7 @@ const ChatScreen = ({navigation}: any) => {
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
   const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
   const colors: any = appColors[converInfo.theme ?? 'light'];
   const currentUserId = auth.userId;
   const [limitPage, setLimitPage] = useState(1);
@@ -54,26 +58,6 @@ const ChatScreen = ({navigation}: any) => {
     converInfo.nickNames && converInfo.nickNames[converInfo.userId]
       ? converInfo.nickNames[converInfo.userId]
       : converInfo.name;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const info = await UserInfo.getConversationInfo(getItem);
-        setConverInfo(info); // Cập nhật thông tin hội thoại
-      } catch (error) {
-        console.error('Error fetching conversation info:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (converInfo && page === 1) {
-      handleLoadMoreMessages();
-      handleUpdateStatusMessage();
-    }
-    //  scrollViewToEnd()
-  }, [converInfo, page]);
 
   const handleUpdateStatusMessage = async () => {
     if (
@@ -99,6 +83,7 @@ const ChatScreen = ({navigation}: any) => {
       if (prev) return true; // Nếu đang loading, không gọi API nữa
       return true;
     });
+    setIsLoading(true);
     if (converInfo.type === 'personal' && !converInfo.conversationId) {
       return;
     }
@@ -177,7 +162,6 @@ const ChatScreen = ({navigation}: any) => {
             updatedMessages.push(personMessages); // Thêm tin nhắn cá nhân vào
           }
           // Chỉ gọi setMessages một lần
-          console.log(updatedMessages);
 
           return updatedMessages;
         });
@@ -211,15 +195,22 @@ const ChatScreen = ({navigation}: any) => {
 
   const keyExtractor = (item: any, index: number) =>
     item.id?.toString() || index.toString();
+  const allUrlImages = useMemo(() => {
+    return messages
+      .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0)
+      .flatMap((item: any) => item.imagesUrl)
+      .filter((imageUrl: any) => imageUrl !== null);
+  }, [messages]);
 
   const renderItemMessages = useCallback(
     (props: any) => {
-      const allUrlImages = messages
-        .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0) // Lọc các phần tử có imagesUrl không rỗng
-        .flatMap((item: any) => item.imagesUrl) // Lấy tất cả ảnh trong imagesUrl
-        .filter((imageUrl: any) => imageUrl !== null); // Loại bỏ các giá trị null
       return (
         <ChatItems
+          name={
+            converInfo.nickNames && converInfo.nickNames[converInfo.userId]
+              ? converInfo.nickNames[converInfo.userId]
+              : converInfo.name
+          }
           conversationInfo={converInfo}
           theme={converInfo.theme}
           blockId={
@@ -245,32 +236,14 @@ const ChatScreen = ({navigation}: any) => {
           members={members}
           urlImages={allUrlImages}
           setReplyOnSwipeOpen={setReplyMessage}
-          name={converInfo.name}
         />
       );
     },
-    [navigation, converInfo, members],
+    [navigation, converInfo, members, allUrlImages],
   );
   const ListHeader = () => {
     return isLoading ? <ActivityIndicator /> : <></>;
   };
-
-  useEffect(() => {
-    socket.on('receive_message', (data: any) => {
-      console.log('receive_message: ', data);
-
-      setMessages(prev => {
-        if (!prev.some(msg => msg._id === data._id)) {
-          return [...prev, data];
-        }
-        return prev;
-      });
-    });
-
-    return () => {
-      socket.off('receive_message');
-    };
-  }, []);
 
   const renderViewBlock = () => {
     return (
@@ -289,6 +262,83 @@ const ChatScreen = ({navigation}: any) => {
       )
     );
   };
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      // Clear existing messages when screen is focused
+      setMessages([]);
+      setPage(1);
+
+      // Fetch fresh conversation info from storage
+      try {
+        const info = await UserInfo.getConversationInfo(getItem);
+        setConverInfo(info);
+      } catch (error) {
+        console.error('Error refreshing conversation info:', error);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  const onScroll = useCallback(
+    ({nativeEvent}: any) => {
+      const yOffSet = nativeEvent.contentOffset.y;
+      const contentHeight = nativeEvent.contentSize.height;
+      const layoutHeight = nativeEvent.layoutMeasurement.height;
+
+      if (yOffSet < 10 && page <= limitPage) {
+        handleLoadMoreMessages();
+      }
+
+      setShowScrollToBottom(yOffSet + layoutHeight < contentHeight - 100);
+    },
+    [page, limitPage, handleLoadMoreMessages],
+  );
+  useEffect(() => {
+    if (converInfo) {
+      handleLoadMoreMessages();
+    }
+    //  scrollViewToEnd()
+  }, [converInfo]);
+  useEffect(() => {
+    socket.on('receive_message', (data: any) => {
+      console.log('receive_message: ', data);
+      setMessages(prev => {
+        if (!prev.some(msg => msg._id === data._id)) {
+          return [...prev, data];
+        }
+        return prev;
+      });
+    });
+
+    return () => {
+      socket.off('receive_message');
+    };
+  }, [converInfo]);
+
+  useEffect(() => {
+    const checkMess = messages && messages[messages.length - 1];
+    if (
+      checkMess &&
+      checkMess.status === 'sent' &&
+      checkMess.senderId !== auth.userId
+    ) {
+      handleUpdateStatusMessage();
+    }
+  }, [messages]);
+  useEffect(() => {
+    socket.on('out_group', (userId: any) => {
+      console.log('out group: ', userId);
+      Notification.showToast(
+        'info',
+        converInfo.groupName,
+        'Bạn đã bị kích khỏi nhóm',
+      );
+      navigation.goBack();
+    });
+    return () => {
+      socket.off('out_group');
+    };
+  }, [converInfo]);
 
   return (
     <KeyboardAvoidingView
@@ -296,13 +346,7 @@ const ChatScreen = ({navigation}: any) => {
       <SafeAreaView style={globalStyles.main}>
         <HeaderComponent
           title={converInfo.type === 'personal' ? name : converInfo.groupName}
-          image={
-            converInfo.type === 'personal'
-              ? converInfo.avatar
-              : converInfo
-              ? converInfo.avatar
-              : 'data:image/png;base64,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'
-          }
+          image={converInfo.avatar}
           iconLeft={
             <ArrowLeft size={appInfo.sizeIconBold} color={colors.icon} />
           }
@@ -321,23 +365,17 @@ const ChatScreen = ({navigation}: any) => {
             style={{flex: 1}}
             renderItem={renderItemMessages}
             // onEndReachedThreshold={0.05}
-            scrollEventThrottle={16} // Tần suất lắng nghe cuộn
+            scrollEventThrottle={50} // Tăng giá trị này để giảm số lần gọi onScroll
             contentContainerStyle={{
               paddingHorizontal: 10,
               paddingTop: 65,
             }}
+            maxToRenderPerBatch={5} // Giảm số lượng item render trong một lần
             initialNumToRender={10}
-            maxToRenderPerBatch={10}
+            removeClippedSubviews={true} // Tách view ngoài màn hình
+            updateCellsBatchingPeriod={50} // Gộp các cập nhật render
             ListHeaderComponent={page < limitPage ? ListHeader : <></>}
-            onScroll={({nativeEvent}) => {
-              const yOffSet = nativeEvent.contentOffset.y;
-              const contentHeight = nativeEvent.contentSize.height;
-              yOffSet < 10 && page <= limitPage ? handleLoadMoreMessages() : '';
-              const layoutHeight = nativeEvent.layoutMeasurement.height;
-              yOffSet + layoutHeight < contentHeight - 100
-                ? setShowScrollToBottom(true)
-                : setShowScrollToBottom(false);
-            }}
+            onScroll={onScroll}
             onContentSizeChange={(width, height) => {
               if (messages.length > 0 && page === 1) {
                 scrollViewRef.current?.scrollToOffset({
@@ -348,10 +386,7 @@ const ChatScreen = ({navigation}: any) => {
             }}
           />
         ) : (
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            {/* <ActivityIndicator size={22} /> */}
-          </View>
+          <></>
         )}
         {showScrollToBottom && (
           <ButtonComponent
@@ -380,6 +415,12 @@ const ChatScreen = ({navigation}: any) => {
         renderViewBlock()
       ) : (
         <ChatInput
+          avatar={converInfo.avatar}
+          name={
+            converInfo.type == 'personal'
+              ? profile.name
+              : `${converInfo.groupName} - ${profile.name}`
+          }
           isNotification={
             converInfo.notification &&
             converInfo.notification.includes(converInfo.userId)
@@ -401,6 +442,7 @@ const ChatScreen = ({navigation}: any) => {
           groupId={converInfo ? converInfo.groupId : undefined}
         />
       )}
+      <LoadingModal visible={isLoading} />
     </KeyboardAvoidingView>
   );
 };

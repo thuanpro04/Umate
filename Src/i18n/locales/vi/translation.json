@@ -25,8 +25,8 @@
   "unfriend": "Hủy kết bạn với",
   "confirm_block": "Bạn có thực sự muốn chặn? ",
   "confirm_unblock": "Bạn có thực sự muốn bỏ chặn? ",
-  "block_friend": "Chặn người bạn này",
-  "unblock_friend": "Bỏ chặn người bạn này",
+  "block_friend": "Chặn người bạn này ",
+  "unblock_friend": "Bỏ chặn người bạn này ",
   "message": "Tin nhắn",
   "comfirm": "Xác nhận",
   "cancel": "Hủy bỏ",
@@ -134,7 +134,7 @@
   "setup_success": "Thiết lập thành công",
   "welcome_umate": "Chào mừng bạn đến với UMate 👋",
   "bio": "Tiểu sử",
-  "edit_profile": "Chỉnh sửa hồ sơ",
+  "edit_profile": "Chỉnh sửa.",
   "home": "Trang chủ",
   "feeback_user": "💡Chúng tôi rất mong nhận được phản hồi từ bạn!",
   "yourname": "Nhập tên của bạn",
@@ -164,5 +164,11 @@
   "invite_group": "Mời vào nhóm",
   "is_connect": "Đang kết nối...",
   "block_message": "Bỏ chặn đi gòi 😏",
-  "enter_message": "Nhập tin nhắn ..."
+  "enter_message": "Nhập tin nhắn ...",
+  "share_event": "Chia sẽ sự kiện",
+  "mutual_friend":"bạn chung",
+  "attendance_code": "Mã điểm danh",
+  "how_attendance":"Bạn có muốn điểm danh không? "
+
+
 }

@@ -1,34 +1,32 @@
 import React, {ReactNode, useCallback, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
-  Image,
   StyleProp,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import Mailer from 'react-native-mail';
 import {Modalize} from 'react-native-modalize';
 import {Portal} from 'react-native-portalize';
+import Share from 'react-native-share';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Icon library
 import {useDispatch, useSelector} from 'react-redux';
-import io from 'socket.io-client';
 import {addAuth, authSelector} from '../../redux/reducers/authReducer';
+import {socketSelector} from '../../redux/reducers/socketSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
-import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {SpaceComponent, TextComponent} from '../Components';
-import {messageServices} from '../Services/messageServices';
-import {UserInfo} from '../Untils/UserInfo';
 import {eventSevices} from '../Services/eventService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {socketSelector} from '../../redux/reducers/socketSlice';
-import Share from 'react-native-share';
-import Mailer from 'react-native-mail';
-import FastImage from 'react-native-fast-image';
+import {messageServices} from '../Services/messageServices';
+import {addEvent, eventSelector} from '../../redux/reducers/eventSlice';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import LoadingModal from './LoadingModal';
 
 interface Props {
   title: string;
@@ -46,10 +44,14 @@ const ShareEventModal = (props: Props) => {
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const auth = useSelector(authSelector);
+  const profile = useSelector(profileSelector);
+  const event = useSelector(eventSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const socket = useSelector(socketSelector).socket;
   const url = `https://tdmu.edu.vn${href}`;
+  const {t} = useTranslation();
+
   const dispatch = useDispatch();
   const onOpenModal = () => {
     modalizeRef.current?.open();
@@ -59,11 +61,20 @@ const ShareEventModal = (props: Props) => {
   const onCloseModal = () => {
     modalizeRef.current?.close();
   };
-  const handleSendEventForUser = async (key: string, Id: string | string[]) => {
+  const handleSendEventForUser = async (
+    key: string,
+    Id: string | string[],
+    avatar: string,
+    name: string,
+    recipients: string[],
+  ) => {
+    setIsLoading(true);
     const messageData = {
       senderId: auth.userId,
       content: url,
       imagesUrl: [],
+      avatar,
+      name,
     };
     try {
       if (key === 'personal') {
@@ -85,8 +96,10 @@ const ShareEventModal = (props: Props) => {
         const data = {
           ...messageData,
           groupId: Id,
+          recipients,
         };
-
+          console.log(data);
+          
         socket.emit('send_message', data, (response: any) => {
           console.log(
             'Message sent to user:',
@@ -101,12 +114,13 @@ const ShareEventModal = (props: Props) => {
     } catch (error) {
       console.log('handle share event error: ', error);
     }
-
-    // socket.emit('send event ', href);
+    setIsLoading(false);
   };
 
   const handlePostEventMyApp = async () => {
     try {
+      setIsLoading(true);
+
       const data = {
         userId: auth.userId,
         eventId,
@@ -117,13 +131,13 @@ const ShareEventModal = (props: Props) => {
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
         const eventShares = res.data.eventShares;
-        dispatch(addAuth({...auth, eventShares}));
-        // await AsyncStorage.setItem('auth', JSON.stringify(res.data));
-        // console.log('res.data', res.data);
+        dispatch(addEvent({...event, eventShares}));
       }
     } catch (error) {
       console.log('share event my app error: ', error);
     }
+    setIsLoading(false)
+
   };
   const handleShare = async (platform: string) => {
     switch (platform) {
@@ -157,6 +171,8 @@ const ShareEventModal = (props: Props) => {
     );
   };
   const handleShareInFacebook = async () => {
+    setIsLoading(true)
+
     const shareOptions: any = {
       title: 'Chia sẽ sự kiện',
       message: `Hãy xem sự kiện này ${url}`,
@@ -168,6 +184,8 @@ const ShareEventModal = (props: Props) => {
     } catch (error) {
       console.log('Error sharing on Facebook:', error);
     }
+    setIsLoading(false)
+
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
@@ -177,9 +195,9 @@ const ShareEventModal = (props: Props) => {
       // console.log(res.data, 1234);
     }
     setIsLoading(false);
-   
   }, []);
   const renderUserItems = ({item, index}: any) => {
+    
     return (
       <TouchableOpacity
         key={item.type === 'personal' ? item.userId : item.groupId}
@@ -187,6 +205,11 @@ const ShareEventModal = (props: Props) => {
           await handleSendEventForUser(
             item.type,
             item.userId ? item.userId : item.groupId,
+            item.avatar,
+            item.type == 'personal'
+              ? profile.name
+              : `${item.groupName} - ${profile.name}`,
+            item.invitedUsers && item.invitedUsers,
           )
         }
         style={{marginRight: 12, alignItems: 'center'}}>
@@ -223,7 +246,10 @@ const ShareEventModal = (props: Props) => {
             {backgroundColor: colors.background},
           ]}>
           <View style={modalStyles.container}>
-            <TextComponent styles={modalStyles.title} label="Share Event" />
+            <TextComponent
+              styles={modalStyles.title}
+              label={t('share_event')}
+            />
             <TextInput
               value={value}
               onChangeText={setValue}
@@ -238,7 +264,10 @@ const ShareEventModal = (props: Props) => {
               maxLength={300}
             />
             <View>
-              <TextComponent label="Gửi message" styles={modalStyles.title} />
+              <TextComponent
+                label={t('send_message')}
+                styles={modalStyles.title}
+              />
               <FlatList
                 data={users.slice(0, 10).reverse()}
                 horizontal
@@ -282,6 +311,7 @@ const ShareEventModal = (props: Props) => {
           </View>
         </Modalize>
       </Portal>
+      <LoadingModal visible={isLoading}/>
     </View>
   );
 };

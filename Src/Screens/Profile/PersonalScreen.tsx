@@ -58,7 +58,6 @@ const PersonalScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
   const {t} = useTranslation();
-
   const bgColor = useSharedValue('#009688');
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -185,6 +184,7 @@ const PersonalScreen = ({navigation}: any) => {
         icon: <Icon name="location-on" size={20} color={appColors.green2} />,
       },
     ];
+
     return (
       <Animated.View style={[profileStyles.header, animatedStyle]}>
         <ArrowLeft
@@ -229,7 +229,7 @@ const PersonalScreen = ({navigation}: any) => {
                     </RowComponent>
                   );
                 })}
-                <RowComponent>
+                <RowComponent styles={{}}>
                   <Image
                     source={{
                       uri: 'https://cdn-icons-png.flaticon.com/128/18438/18438783.png',
@@ -286,7 +286,7 @@ const PersonalScreen = ({navigation}: any) => {
                 label={userInfo.majoring ?? t('majoring')}
               />
               <SpaceComponent height={8} />
-              <RowComponent>
+              <RowComponent styles={{marginHorizontal: 12}}>
                 <Image
                   source={{
                     uri: 'https://cdn-icons-png.flaticon.com/128/18438/18438783.png',
@@ -295,11 +295,12 @@ const PersonalScreen = ({navigation}: any) => {
                 />
                 <TextComponent
                   label={userInfo.bio ?? 'bio'}
-                  styles={profileStyles.bio}
+                  styles={[profileStyles.bio]}
                   color={colors.text2}
+                  numberOfLine={2}
                 />
               </RowComponent>
-              <SpaceComponent height={10} />
+              <SpaceComponent height={18} />
               <ButtonComponent
                 onPress={toggleDetail}
                 type="action"
@@ -325,7 +326,7 @@ const PersonalScreen = ({navigation}: any) => {
       let conversationId = res.data;
       await AsyncStorage.setItem(
         'ConversationInfo',
-        JSON.stringify({...userInfo, conversationId}),
+        JSON.stringify({...userInfo, conversationId, type: 'personal'}),
       );
     } else {
       await AsyncStorage.setItem(

@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {HambergerMenu, Notification} from 'iconsax-react-native';
-import React, {useCallback, useState} from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { HambergerMenu, Notification } from 'iconsax-react-native';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,20 +10,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {io} from 'socket.io-client';
-import * as ZIM from 'zego-zim-react-native';
-import * as ZPNs from 'zego-zpns-react-native';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appColors} from '../../Theme/Colors/appColors';
-import {appInfo} from '../../Theme/appInfo';
-import {addAuth, authSelector} from '../../redux/reducers/authReducer';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {CarEventComponent, HeaderComponent} from '../Components';
-import {eventSevices} from '../Services/eventService';
-import {userServices} from '../Services/userService';
-import {UserInfo} from '../Untils/UserInfo';
+import { useDispatch, useSelector } from 'react-redux';
+import { io } from 'socket.io-client';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appColors } from '../../Theme/Colors/appColors';
+import { appInfo } from '../../Theme/appInfo';
+import { addAuth, authSelector } from '../../redux/reducers/authReducer';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { CarEventComponent, HeaderComponent } from '../Components';
+import { eventSevices } from '../Services/eventService';
+import { userServices } from '../Services/userService';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -36,7 +32,6 @@ const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const socket = io(appInfo.BASE_URL);
   const getNewEvent = async () => {
     if (isLoading || page > limitPage) return; // Ngăn chặn gọi API khi đang tải hoặc hết trang.
     setIsLoading(true);

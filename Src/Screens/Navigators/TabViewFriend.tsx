@@ -42,18 +42,23 @@ const TabViewFriend = () => {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{width: appInfo.size.WIDTH}}
-      renderTabBar={props => (
-        <TabBar
-          {...props}
-          style={{backgroundColor: colors.background}}
-          labelStyle={{
-            color: appColors.grey3, // Màu cam đậm
-            fontWeight: '500',
-            fontStyle: 'italic',
-          }}
-          indicatorStyle={{backgroundColor: appColors.blue2}}
-        />
-      )}
+      renderTabBar={(props: any) => {
+        const {key, ...restProps} = props;
+
+        return (
+          <TabBar
+            {...restProps}
+            key={key}
+            style={{backgroundColor: colors.background}}
+            labelStyle={{
+              color: appColors.grey3, // Màu cam đậm
+              fontWeight: '500',
+              fontStyle: 'italic',
+            }}
+            indicatorStyle={{backgroundColor: appColors.blue2}}
+          />
+        );
+      }}
     />
   );
 };

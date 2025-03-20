@@ -13,7 +13,7 @@ const eventSlice = createSlice({
   initialState,
   reducers: {
     addEvent: (state, action: PayloadAction<EventState>) => {
-      state.eventShares = action.payload.eventShares;
+      state.eventShares = [...state.eventShares, ...action.payload.eventShares];
     },
     removeEvent: state => {
       state.eventShares = [];

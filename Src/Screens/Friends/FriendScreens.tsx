@@ -22,11 +22,14 @@ import {friendServices} from '../Services/friendService.';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {MenuChat} from '../../data/MenuItems';
 import {useTranslation} from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoadingModal from '../Modal/LoadingModal';
 
 const FriendScreens = ({navigation}: any) => {
   const [data, setData] = useState<any[]>([]);
   const [isShowUnfriendModal, setShowUnfriendModal] = useState(false);
   const [isShowBlockModal, setShowBlockModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const user = useSelector(friendSelector);
@@ -36,11 +39,13 @@ const FriendScreens = ({navigation}: any) => {
 
   const dispatch = useDispatch();
   const handleGetAllUserInfo = async () => {
+    if (user.friends.length === 0) {
+      return;
+    }
     const res = await userServices.getListUserInfo(user.friends);
     if (res && res.data) {
       setData(res.data);
     }
-   
   };
 
   useFocusEffect(
@@ -52,24 +57,36 @@ const FriendScreens = ({navigation}: any) => {
     setShowUnfriendModal(false);
   }
   const handleRemoveFriend = async (userId: string) => {
+    setIsLoading(true);
     const res = await friendServices.handleRemoveFriends(userId, auth.userId);
     // xử lí hàm trả về data là user khỏi phải request lại
     if (res && res.data) {
-      handleGetAllUserInfo();
+      const user = data.filter(item => item.userId !== res.data);
+      setData(user);
     }
+    setIsLoading(false);
   };
   const handleBlockUser = async () => {
     setShowBlockModal(true);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
+    setIsLoading(true);
+
     const res = await userServices.updateBlockUser(userId, userFriendId);
     if (res) {
       console.log('Block successfully !!!', res.data);
-      dispatch(setBlock(res.data));
+      // Lấy dữ liệu và cập nhật song song
+      const parsedData = await UserInfo.getUserData();
+      parsedData.friend.block = res.data;
+      await Promise.all([
+        AsyncStorage.setItem('userData', JSON.stringify(parsedData)),
+        dispatch(setBlock(res.data)),
+      ]);
       console.log('Sau khi cập nhật:', friendData.block);
     }
     setShowBlockModal(false);
-   
+    setIsLoading(false)
+
   };
 
   useEffect(() => {
@@ -80,6 +97,9 @@ const FriendScreens = ({navigation}: any) => {
       return (
         <React.Fragment key={item.userId}>
           <CarUserComponent
+            onPress={() =>
+              navigation.navigate('PersonalScreen', {userId: item.userId})
+            }
             menuData={MenuChat(colors).attributeUser}
             onPressUnFriend={() => {
               setShowUnfriendModal(true);
@@ -140,10 +160,11 @@ const FriendScreens = ({navigation}: any) => {
       />
       <FlatList
         data={data}
-        style={{flex: 1, marginHorizontal: 12}}
+        style={{flex: 1, marginHorizontal: 18}}
         keyExtractor={item => item.userId}
         renderItem={renderItem}
       />
+      <LoadingModal visible={isLoading} />
     </SafeAreaView>
   );
 };

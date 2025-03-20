@@ -13,6 +13,7 @@ interface Props {
 }
 const CustormImageViewing = (props: Props) => {
   const {imageIndex, images, isVisible, onChangeImageIndex, onClose} = props;
+  
   return (
     <ImageViewing
       imageIndex={imageIndex}

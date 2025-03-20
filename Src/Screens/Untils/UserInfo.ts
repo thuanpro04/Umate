@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export class UserInfo {
   static getName = (fullName: string) => {
     if (!fullName) {
@@ -56,5 +58,9 @@ export class UserInfo {
     if (res) {
       return JSON.parse(res);
     }
+  };
+  static getUserData = async () => {
+    const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
+    return userData ? JSON.parse(userData) : {};
   };
 }

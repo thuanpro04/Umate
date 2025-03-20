@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useRoute} from '@react-navigation/native';
-import {ArrowLeft2} from 'iconsax-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import { useRoute } from '@react-navigation/native';
+import { ArrowLeft2 } from 'iconsax-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   SafeAreaView,
@@ -10,13 +11,12 @@ import {
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   HeaderComponent,
   RowComponent,
@@ -24,10 +24,8 @@ import {
   TextComponent,
 } from '../Components';
 import UpdateInfoModal from '../Modal/UpdateInfoModal';
-import {messageServices} from '../Services/messageServices';
-import {UserInfo} from '../Untils/UserInfo';
-import {userServices} from '../Services/userService';
-import {useTranslation} from 'react-i18next';
+import { messageServices } from '../Services/messageServices';
+import { userServices } from '../Services/userService';
 
 const CustormNickNameScreen = () => {
   const {converInfo} = useRoute().params as {converInfo: any};
