@@ -1,3 +1,4 @@
+const { notificationModel } = require("../models/notificationModel");
 const { GroupConversationModel } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/informationUntils");
 const { deletedNotification } = require("./notificationServices");
@@ -37,21 +38,21 @@ const handleNewGroupUser = async (req, res) => {
 };
 const handleActionAgreeOnGroup = async (req, res) => {
   const { userId, id, groupId } = req.body;
-  // console.log(userId, id, groupId);
+  console.log(userId, id, groupId);
 
   try {
     await GroupConversationModel.updateOne(
       { groupId },
       { $addToSet: { invitedUsers: userId } }
     );
-    const result = await deletedNotification(id);
+    const result = await notificationModel.deleteOne({ _id: id });
 
     if (result.deletedCount === 0) {
       return res
         .status(404)
         .json({ message: "Không tìm thấy thông báo để xóa." });
     }
-    res.status(200).json({ message: "Xóa thông báo thành công!" });
+    res.status(200).json({ message: "Xóa thông báo thành công!", data: id });
   } catch (error) {
     console.log("Action agree on group error: ", error);
   }

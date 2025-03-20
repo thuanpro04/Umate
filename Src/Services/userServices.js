@@ -22,29 +22,90 @@ const cleanData = (data) => {
   });
   return sanitizedData;
 };
-const filterUsers = async (filter, existingUser) => {
-  const { userId, friends, removeFriends, friendRequests } = existingUser;
+const suggestConnectFriends = async (user) => {
+  try {
+    const potentialFriends = await UserModel.find({
+      userId: {
+        $ne: user.userId,
+        $nin: [...user.friends, ...user.removeFriends, ...user.block],
+      },
+    }).lean();
+    const scoredFriends = potentialFriends.map((item) => {
+      let score = 0;
+      if (user.majoring && item.majoring && user.majoring === item.majoring) {
+        score += 25;
+      }
+      if (
+        item.majorCategory &&
+        user.majorCategory &&
+        item.majorCategory === user.majorCategory
+      ) {
+        score += 15;
+      }
 
+      // Điểm cho cùng lớp học
+      if (
+        item.className &&
+        user.className &&
+        item.className === user.className
+      ) {
+        score += 30;
+      }
+
+      // Điểm cho cùng khu vực/địa chỉ
+      if (item.address && user.address && item.address === user.address) {
+        score += 20;
+      }
+      const commonFriends = user.friends.filter((friendId) => {
+        item.friends.includes(friendId);
+      });
+      score += Math.min(commonFriends.length * 5, 25);
+      return {
+        ...item,
+        similarityScore: score,
+        commonFriendsCount: commonFriends.length,
+      };
+    });
+    scoredFriends.sort((a, b) => b.similarityScore - a.similarityScore);
+    const limit = 10;
+    const recommendations = scoredFriends.slice(0, parseInt(limit));
+
+    return recommendations;
+  } catch (error) {
+    console.error("Error generating friend suggestions:", error);
+    return { success: false, message: "Lỗi khi tạo gợi ý bạn bè" };
+  }
+};
+
+const filterUsers = async (filter, existingUser, page, limitPage) => {
+  const { userId, friends, removeFriends, friendRequests, block } =
+    existingUser;
   switch (filter) {
     case "requests":
       // Lấy người dùng có yêu cầu kết bạn
       return friendRequests.length > 0
         ? await getUsersByIds(friendRequests)
         : null;
-
     case "suggestfriend":
       // Lấy gợi ý bạn bè trừ bạn hiện tại, đã là bạn hoặc đã bị remove
-      return await UserModel.find({
-        userId: { $ne: userId, $nin: [...friends, ...removeFriends] },
-      }).lean();
+      // console.log(result);
+      return await suggestConnectFriends(existingUser);
+
+    // return await UserModel.find({
+    //   userId: { $ne: userId, $nin: [...friends, ...removeFriends] },
+    // }).lean();
 
     default:
       // Mặc định trả về danh sách bạn bè
-      return friends.length > 0
-        ? await UserModel.find({
-            userId: { $in: friends, $nin: removeFriends },
-          }).lean()
-        : null;
+      const users =
+        friends.length > 0
+          ? await UserModel.find({
+              userId: { $in: friends, $nin: removeFriends },
+            })
+              .skip((page - 1) * limitPage)
+              .limit(Number(limitPage))
+          : null;
+      return users;
   }
 };
 
@@ -107,10 +168,21 @@ const updateOneProfileInfo = async (req, res) => {
     if (!updateUsers) {
       return res.status(401).json({ message: "User not found" });
     }
-
+    const result = {
+      name: updateUsers.name,
+      email: updateUsers.email,
+      avatar: updateUsers.avatar,
+      bio: updateUsers.bio,
+      sex: updateUsers.sex,
+      address: updateUsers.address,
+      link: updateUsers.link,
+      className: updateUsers.className,
+      majoring: updateUsers.majoring,
+      majorCategory: updateUsers.majorCategory,
+    };
     res
       .status(200)
-      .json({ message: "User updated successfully", data: updateUsers });
+      .json({ message: "User updated successfully", data: result });
   } catch (error) {
     console.log("updateOneProfileInfo", error);
   }
@@ -195,7 +267,7 @@ const handleActionBlockUser = async (req, res) => {
       });
     }
     const updatedUser = await findUserById(userId);
-    console.log("Block for user successfully !!");
+    console.log("Block for user successfully !!", updatedUser.block);
     res.status(200).json({
       message: "update block user successfully !!",
       data: updatedUser.block,
@@ -249,7 +321,7 @@ const handleUpdateLanguge = async (req, res) => {
       { userId: id },
       { $set: { language: key } }
     );
-    
+
     console.log("update language successfully!!", id, key);
 
     res.status(200).json({

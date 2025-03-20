@@ -8,7 +8,7 @@ const {
 } = require("../models/usersModel");
 const { notificationModel } = require("../models/notificationModel");
 const { text } = require("body-parser");
-
+const mongoose = require("mongoose");
 adminfirebase.initializeApp({
   credential: adminfirebase.credential.cert(serviceAccount),
 });
@@ -132,7 +132,7 @@ const handleActionNotification = async (req, res) => {
     }
     res.status(200).json({
       message: "update action notification successfully !!",
-      data: result,
+      data: userId,
     });
   } catch (error) {
     console.log("Action notification fail error: ", error);
@@ -153,7 +153,8 @@ const addNotificationForUser = async (
     groupId: id,
     senderId: currentUserId,
     receiverId,
-    title: type === "groupInvite" ? title + user.name : title ?? user.name,
+    title:
+      type === "groupInvite" ? `${title} - ${user.name}` : title ?? user.name,
     content,
     type,
     data,
@@ -161,6 +162,7 @@ const addNotificationForUser = async (
   await notificationModel.insertMany(notifications);
   console.log("Notified for user !!");
 };
+
 const handleActionInviteToGroup = async (req, res) => {
   const { id, currentUserId, userId, content, title } = req.body;
   try {
@@ -192,7 +194,7 @@ const handleGetNotifications = async (req, res) => {
     console.log("get notification error: ", error);
   }
 };
-const mongoose = require("mongoose");
+
 
 const deletedNotification = async (id) => {
   let idsArray;

@@ -13,7 +13,7 @@ const eventRouter = require("./Src/Routers/eventRouters");
 const groupRouter = require("./Src/Routers/groupRouters");
 const { generateUniqueID } = require("./Src/untils/informationUntils");
 const notificationRouter = require("./Src/Routers/notificationRouters");
-const initializeSocket = require("./Src/Services/socketService");
+const {initializeSocket} = require("./Src/Services/socketService");
 const app = express();
 app.use(cors());
 const port = process.env.PORT || 3001; // Cung cấp cổng mặc định nếu không có biến môi trường

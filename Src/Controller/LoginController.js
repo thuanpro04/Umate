@@ -11,7 +11,40 @@ const getJsonWebToken = async (email, id) => {
   });
   return token;
 };
-
+const getUserInfo = async (existingUser, email) => {
+  return {
+    authSlice: {
+      userId: existingUser.userId,
+      online: existingUser.online,
+      theme: existingUser.theme ?? "light",
+      accesstoken: await getJsonWebToken(email, existingUser.id),
+      fcmTokens: existingUser.fcmTokens ?? [],
+      language: existingUser.language ?? "vi",
+    },
+    profileSlice: {
+      name: existingUser.name,
+      email: existingUser.email,
+      avatar: existingUser.avatar,
+      bio: existingUser.bio,
+      sex: existingUser.sex,
+      address: existingUser.address,
+      link: existingUser.link,
+      className: existingUser.className,
+      majoring: existingUser.majoring,
+      majorCategory: existingUser.majorCategory,
+    },
+    friendSlice: {
+      friends: existingUser.friends,
+      friendRequests: existingUser.friendRequests,
+      removeFriends: existingUser.removeFriends,
+      block: existingUser.block,
+      like: existingUser.like,
+    },
+    eventSlice: {
+      eventShares: existingUser.eventShares,
+    },
+  };
+};
 const handleLoginWithGoogle = async (req, res) => {
   try {
     const userInfo = req.body;
@@ -25,38 +58,7 @@ const handleLoginWithGoogle = async (req, res) => {
         ...userInfo,
         updateAt: Date.now(),
       });
-      user = {
-        authSlice: {
-          userId: existingUser.userId,
-          online: existingUser.online,
-          theme: existingUser.theme,
-          accesstoken: await getJsonWebToken(userInfo.email, existingUser.id),
-          fcmTokens: existingUser.fcmTokens ?? [],
-          language: existingUser.language ?? "vi",
-        },
-        profileSlice: {
-          name: existingUser.name,
-          email: existingUser.email,
-          avatar: existingUser.avatar,
-          bio: existingUser.bio,
-          sex: existingUser.sex,
-          address: existingUser.address,
-          link: existingUser.link,
-          className: existingUser.className,
-          majoring: existingUser.majoring,
-          majorCategory: existingUser.majorCategory,
-        },
-        friendSlice: {
-          friends: existingUser.friends,
-          friendRequests: existingUser.friendRequests,
-          removeFriends: existingUser.removeFriends,
-          block: existingUser.block,
-          like: existingUser.like,
-        },
-        eventSlice: {
-          eventShares: existingUser.eventShares,
-        },
-      };
+      user =await getUserInfo(existingUser, userInfo.email);
 
       console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
@@ -71,16 +73,13 @@ const handleLoginWithGoogle = async (req, res) => {
         avatar: userInfo.avatar,
         access: userInfo.access,
         online: true,
-        theme,
+        theme: "light",
       });
-      console.log("newUser", newUser);
+      // console.log("newUser", newUser);
 
       await newUser.save();
-      user = {
-        ...newUser._doc,
-        accesstoken: await getJsonWebToken(userInfo.email, newUser.id),
-      };
-      console.log("Create user.");
+      user =await getUserInfo(newUser._doc, userInfo.email);
+      console.log("Create user.", user);
       // Sau khi cập nhật, trả về phản hồi
     }
 

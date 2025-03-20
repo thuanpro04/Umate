@@ -7,9 +7,35 @@ const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
 
 const users = {}; // Danh sách lưu trữ user đang online
+const getMoldMessage = (userId, type, content) => {
+  const messageId = generateUniqueID();
+  return {
+    messageId,
+    senderId: userId,
+    content,
+    imagesUrl: [],
+    reply: "",
+    type:
+      type === "group_voice" || type === "group_video" ? "group" : "personal",
+    typeCall: type,
+  };
+};
+let io; // Lưu trữ đối tượng io
 
-module.exports = function initializeSocket(server) {
-  const io = socketIO(server, {
+const sendNotificationCallToUser = (userId, eventName, data) => {
+  if (userId && users[userId]) {
+    io.to(users[userId]).emit(eventName, data);
+    console.log("Đã gửi đến: ", users[userId]);
+
+    return true;
+  }
+  console.log(
+    `🚫 Không thể gửi thông báo đến user ${userId}: User không online`
+  );
+  return false;
+};
+function initializeSocket(server) {
+  io = socketIO(server, {
     cors: {
       origin: "*", // Cho phép tất cả các nguồn truy cập
     },
@@ -19,19 +45,27 @@ module.exports = function initializeSocket(server) {
       users[userId] = socket.id;
       console.log("📌 User register call: ", users);
     });
+    const sendNotificationCallToUser = (userId, eventName, data) => {
+      if (userId && users[userId]) {
+        io.to(users[userId]).emit(eventName, data);
+        console.log("Đã gửi đến: ", users[userId]);
+
+        return true;
+      }
+      console.log(
+        `🚫 Không thể gửi thông báo đến user ${userId}: User không online`
+      );
+      return false;
+    };
 
     socket.on("sendCallInvitation", (callData) => {
-      let targetSocketId;
       if (callData.type === "group_voice" || callData.type === "group_video") {
         if (callData.targetId.length === 0) {
           console.log("🚫 Lỗi: Không có user nào để gửi cuộc gọi!");
           return;
         }
         callData.targetId.forEach((element) => {
-          targetSocketId = users[element];
-          targetSocketId &&
-            io.to(targetSocketId).emit("incomingCall", callData);
-          console.log("Đã gui den user: ", targetSocketId);
+          sendNotificationCallToUser(element, "incomingCall", callData);
         });
       } else {
         if (!callData.targetId) {
@@ -50,93 +84,117 @@ module.exports = function initializeSocket(server) {
           }
           return;
         }
-        targetSocketId = users[callData.targetId];
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("incomingCall", callData);
-          console.log(`📞 Đã gửi cuộc gọi đến user ${targetSocketId}`);
-        }
+        sendNotificationCallToUser(callData.targetId, "incomingCall", callData);
+
+        console.log(`📞 Đã gửi cuộc gọi đến user`);
       }
     });
     socket.on("callAccepted", (data) => {
-      const targetSocketId = users[data.userId];
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("feedbackAccepted", data);
+      const result = sendNotificationCallToUser(
+        data.userId,
+        "feedbackAccepted",
+        data
+      );
+
+      if (result) {
         console.log("✅ Đã phản hồi cuộc gọi: ", data.callID);
       }
     });
 
     socket.on("callRefused", (data) => {
-      const targetSocketId = users[data.userId];
       console.log(
         "❌ Từ chối cuộc gọi từ:",
         data.userId,
         "-> Socket ID:",
-        targetSocketId
+        users[data.userId]
       );
 
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("feedbackRefused", data);
-        console.log("✅ Đã từ chối cuộc gọi: ", data.callID);
+      console.log("✅ Đã từ chối cuộc gọi: ", data.callID);
+
+      if (data.type !== "group_voice" && data.type !== "group_video") {
+        sendNotificationCallToUser(data.userId, "feedbackRefused", data);
+        sendNotificationCallToUser(data.userId, "receive_message", data);
+        const messageData = getMoldMessage(
+          data.targetId,
+          data.type,
+          "Bạn đã từ chối cuộc gọi"
+        );
+        sendMessageToGroupAndPersonal({
+          ...messageData,
+          receiverId: data.userId,
+        });
       }
     });
 
     socket.on("cancelCall", (data) => {
       const { targetId, userId, type } = data;
-      const targetSocketId = users[targetId];
-      const userSocketId = users[userId];
 
-      console.log("🎯 Target Socket ID:", targetSocketId);
-      console.log("📞 Cancel call for user:", userId);
-
-      const messageId = generateUniqueID();
-      const messageData = {
-        messageId,
-        senderId: userId,
-        content: "Bạn đã hủy cuộc gọi",
-        imagesUrl: [],
-        receiverId: targetId,
-        reply: "",
-        typeCall: type,
+      let targetSocketId;
+      const messageData = getMoldMessage(userId, type, "Bạn đã hủy cuộc gọi");
+      const sendToUser = (id) => {
+        sendNotificationCallToUser(id, "feedbackCancelCall", data);
       };
-
-      // Gửi sự kiện feedbackCancelCall nếu target online
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("feedbackCancelCall", data);
+      const sendForMe = (id) => {
+        sendNotificationCallToUser(data.userId, "receive_message", messageData);
+      };
+      if (type === "group_voice" || type === "group_video") {
+        targetId.forEach((item) => sendToUser(item));
+        sendForMe(userId);
+        sendMessageToGroupAndPersonal({
+          ...messageData,
+          recipients: targetId,
+          groupId: data.groupId,
+        });
+      } else {
+        sendToUser(targetId);
+        sendForMe(userId);
+        sendMessageToGroupAndPersonal({ ...messageData, receiverId: targetId });
       }
-
-      // Gửi tin nhắn hủy đến cả 2 người
-      [targetSocketId, userSocketId].forEach((socketId) => {
-        if (socketId) {
-          io.to(socketId).emit("receive_message", messageData);
-        }
-      });
-
-      // Lưu tin nhắn vào database
-      sendMessageToGroupAndPersonal(messageData);
     });
 
     socket.on("send_message", async (data) => {
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };
-      const targetSocketId = users[userMessages.receiverId];
       const content = data.content.normalize("NFC");
-      console.log("userMessages", userMessages);
-      console.log("🎯 targetSocketId: ", targetSocketId, users);
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("receive_message", data);
-        if (!data.isNotification) {
-          io.to(targetSocketId).emit("notification_message", data);
+
+      const sendToUser = (userId) => {
+        console.log("Đã thông báo: ", users[userId]);
+        sendNotificationCallToUser(userId, "receive_message", userMessages);
+
+        if (!userMessages.isNotification) {
+          sendNotificationCallToUser(
+            userId,
+            "notification_message",
+            userMessages
+          );
         }
-        console.log("receive_message id: ", targetSocketId);
+      };
+
+      if (userMessages.receiverId) {
+        sendToUser(userMessages.receiverId);
+      } else if (
+        userMessages.recipients &&
+        userMessages.recipients.length > 0
+      ) {
+        const ids = userMessages.recipients.filter(
+          (item) => item !== data.senderId
+        );
+
+        ids.forEach((item) => sendToUser(item));
       }
+
+      // Chỉ gọi nếu cần thiết
       sendMessageToGroupAndPersonal({ ...userMessages, content });
     });
+
     socket.on("send_qrcode", async (data) => {
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };
       sendQRcodeDataForGroup(userMessages);
     });
-
+    socket.on("leave_group", (userId) => {
+      sendNotificationCallToUser(userId, "out_group", userId);
+    });
     socket.on("disconnect", () => {
       const userId = Object.keys(users).find((key) => users[key] === socket.id);
       if (userId) {
@@ -147,4 +205,8 @@ module.exports = function initializeSocket(server) {
   });
 
   return io;
+}
+module.exports = {
+  initializeSocket,
+  sendNotificationCallToUser,
 };

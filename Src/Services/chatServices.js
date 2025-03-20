@@ -73,7 +73,7 @@ const handleReceiveMessageUsers = async (req, res) => {
 const getLastMessages = (data) => {
   if (data.content && data.content.trim() !== "") {
     return data.content;
-  } else if (data.imagesUrl && data.imagesUrl.length > 0) {
+  } else if (data.imagesUrl.length > 0) {
     return "Image";
   }
   return "";
@@ -112,11 +112,12 @@ const setConversation = async (data) => {
   console.log("New conversation created");
   return newConversation;
 };
+
 const sendMessageToGroupAndPersonal = async (data) => {
   console.log("dataMessage", data);
   try {
     if (!data.groupId) {
-      if (!data.senderId || !data.receiverId) {
+      if (!data.senderId) {
         console.error("Sender or receiver ID is missing");
         return;
       }
@@ -164,14 +165,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
       const recipients = groupConversations.invitedUsers.map(
         (item) => item.userId
       );
-      const messages = {
-        messageId: data.messageId,
-        senderId: data.senderId,
-        content: data.content,
-        imagesUrl: data.imagesUrl,
-        recipients,
-        timestamp: new Date(),
-      };
+  
       try {
         groupConversations.message.push(data);
         groupConversations.lastMessage = getLastMessages(data);
@@ -210,7 +204,6 @@ const sanitizeString = (str) => {
 };
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserId } = req.query;
-
   try {
     // Lấy tất cả các cuộc trò chuyện cá nhân của người dùng hiện tại
     const personalConversations = await ConversationModel.find({
@@ -643,5 +636,5 @@ module.exports = {
   handleUpdateThemeConversation,
   sendQRcodeDataForGroup,
   handleUpdateAttendedGroup,
-  handleActionGhimConversation,
+  handleActionGhimConversation
 };

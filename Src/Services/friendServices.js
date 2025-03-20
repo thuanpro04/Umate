@@ -1,4 +1,5 @@
 const { UserModel } = require("../models/usersModel");
+const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
 const { updateUserById, findUserById } = require("./userServices");
 
@@ -10,6 +11,12 @@ const handleFriendRequestAction = async (req, res, action) => {
     // Tìm thông tin người dùng
     // Thực hiện hành động thêm hoặc hủy kết bạn
     const user = await findUserById(currentUserId);
+    if (user.removeFriends.includes(friendUserId)) {
+      await UserModel.updateOne(
+        { userId: currentUserId },
+        { $pull: { removeFriends: friendUserId } }
+      );
+    }
     if (user.friends.includes(friendUserId)) {
       return;
     }
@@ -27,6 +34,7 @@ const handleFriendRequestAction = async (req, res, action) => {
 
     action === "add" &&
       (await addNotificationForUser(
+        null,
         currentUserId,
         friendUserId,
         "friend_request_sent",
@@ -47,7 +55,13 @@ const handleFriendRequestAction = async (req, res, action) => {
 const manageFriendship = async (req, res, action) => {
   const { friendUserId, currentUserId } = req.body;
   console.log(req.body);
-
+  const user = await findUserById(currentUserId);
+  if (user.removeFriends.includes(friendUserId)) {
+    await UserModel.updateOne(
+      { userId: currentUserId },
+      { $pull: { removeFriends: friendUserId } }
+    );
+  }
   const updateActions =
     action === "agree"
       ? [
@@ -107,6 +121,7 @@ const manageFriendship = async (req, res, action) => {
         action === "agree"
           ? "Friend request accepted successfully!"
           : "Friend request rejected!",
+      data: friendUserId,
     });
   } catch (error) {
     console.error("Error handling friend request:", error);
@@ -139,7 +154,6 @@ const removeFriendSuggestion = async (req, res) => {
 };
 const processRemoveFriendAction = async (req, res) => {
   const { friendUserId, currentUserId } = req.body;
-  console.log(friendUserId, currentUserId);
 
   const updateActions = [
     {
@@ -173,6 +187,7 @@ const processRemoveFriendAction = async (req, res) => {
 
     return res.status(200).json({
       message: "Delete friend successfully!!!",
+      data: friendUserId,
     });
   } catch (error) {
     console.error("Delete friend fail:", error);

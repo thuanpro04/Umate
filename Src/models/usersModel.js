@@ -126,7 +126,7 @@ const groupConversationSchema = new mongoose.Schema(
     type: { type: String },
     notification: [{ type: String, ref: "User" }],
     nicknames: { type: Map, of: String, default: {} },
-    theme: { type: String, default: "light" },
+    theme: { type: String},
     pinnedBy: [{ type: String , ref:'User'}],
 
   },

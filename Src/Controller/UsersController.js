@@ -10,25 +10,27 @@ const {
   handleUpdateFcmTokenForUser,
   handleUpdateThemeForUser,
   handleActionRemoveUser,
-  handleUpdateLanguge
+  handleUpdateLanguge,
 } = require("../Services/userServices");
-
 const getAllUsers = async (req, res) => {
-  const { currentUserId, filter } = req.query;
+  const { currentUserId, filter, page, limit = 10 } = req.body;
   try {
     const existingUser = await findUserById(currentUserId);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found!" });
     }
     // Lọc danh sách người dùng dựa trên filter
-    const filteredUsers = await filterUsers(filter, existingUser);
+    const filteredUsers = await filterUsers(filter, existingUser, page,limit);
     // Định dạng dữ liệu người dùng trước khi trả về
     const formattedData = transformUserData(filteredUsers);
     // Trả về dữ liệu thành công
 
     res.status(200).json({
       message: "Get users successfully!!!",
-      data: formattedData,
+      data: {
+        users: formattedData,
+        totalPage: Math.ceil(formattedData.length / 10),
+      },
     });
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -61,7 +63,7 @@ const actionRemoveUser = (req, res) => {
   handleActionRemoveUser(req, res);
 };
 const updateLanguageForUser = (req, res) => {
-  handleUpdateLanguge(req,res)
+  handleUpdateLanguge(req, res);
 };
 module.exports = {
   getAllUsers,
