@@ -15,6 +15,7 @@ import {Notification} from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
 import {profileSelector} from '../../../redux/reducers/profileSlice';
+import SocketService from '../../Services/SocketService';
 interface Props {
   reply: string;
   isBlock: boolean;
@@ -30,6 +31,7 @@ interface Props {
   isNotification: boolean;
   name: string;
   avatar: string;
+  theme: string;
 }
 const ChatInput = (props: Props) => {
   const {
@@ -43,14 +45,14 @@ const ChatInput = (props: Props) => {
     isNotification,
     name,
     avatar,
+    theme,
   } = props;
   const [content, setContent] = useState('');
   const {t} = useTranslation();
   const profile = useSelector(profileSelector);
   const auth = useSelector(authSelector);
-  const theme: 'light' | 'dark' = useSelector(themeSelector);
-  const colors = appColors[theme ?? 'light'];
-  const socket = useSelector(socketSelector).socket;
+  const colors = appColors[theme];
+  const socket = SocketService.getSocket();
   function onPressScroll() {
     if (onScroll) {
       onScroll();
@@ -78,46 +80,47 @@ const ChatInput = (props: Props) => {
         avatar,
       };
 
-      if (messageData.content.length > 0 || messageData.imagesUrl.length > 0) {
-        try {
-          if (Array.isArray(userId)) {
-            // Trường hợp gửi cho nhiều userId
+      try {
+        if (Array.isArray(userId)) {
+          // Trường hợp gửi cho nhiều userId
 
-            const data = {
-              ...messageData,
-              recipients: userId,
-            };
+          const data = {
+            ...messageData,
+            recipients: userId,
+          };
+          console.log(data, 155);
 
-            socket.emit('send_message', data, (response: any) => {
-              console.log('Message sent to user:', response);
-            });
-          } else {
-            // Trường hợp gửi cho một userId
-            const data = {
-              ...messageData,
-              receiverId: userId,
-            };
-            socket.emit('send_message', data, (response: any) => {
-              console.log(
-                'Message sent to user:',
-                userId,
-                'server response:',
-                response,
-              );
-            });
-          }
-
-          onSendMessage({
-            content: content ?? '',
-            imagesUrl: imagesUrl as string[],
-            reply,
+          socket?.emit('send_message', data, (response: any) => {
+            console.log('Message sent to user:', response);
           });
-          setContent('');
-        } catch (error) {
-          console.log('Error in handleSendMessageAndImage:', error);
+        } else {
+          // Trường hợp gửi cho một userId
+          const data = {
+            ...messageData,
+            receiverId: userId,
+          };
+
+          socket?.emit('send_message', data, (response: any) => {
+            console.log(
+              'Message sent to user:',
+              userId,
+              'server response:',
+              response,
+            );
+          });
         }
+
+        onSendMessage({
+          content: content ?? '',
+          imagesUrl: imagesUrl as string[],
+          reply,
+        });
+        setContent('');
+        onScroll();
+      } catch (error) {
+        console.log('Error in handleSendMessageAndImage:', error);
       }
-      return socket.off('send_message');
+      return socket?.off('send_message');
     },
     [content, userId, onSendMessage, socket],
   );
@@ -152,6 +155,8 @@ const ChatInput = (props: Props) => {
   const handleSelected = useCallback(
     async (val: ImageOrVideo[] | ImageOrVideo) => {
       const filePaths = getFilePaths(val);
+      console.log(filePaths, 121);
+
       if (filePaths.length > 20) {
         return;
       }
@@ -180,6 +185,8 @@ const ChatInput = (props: Props) => {
               color={colors.icon}
             />
           }
+          handleToastNotificationBlock={handleToastNotificationBlock}
+          isBlock={isBlock}
           multiple
           onSelect={val => {
             val.type === 'url'

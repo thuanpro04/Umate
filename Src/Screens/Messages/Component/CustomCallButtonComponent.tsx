@@ -92,7 +92,6 @@ const CustomCallButtonComponent = (props: Props) => {
     }
   };
 
-  
   const handleToastNotificationBlock = () => {
     if (isDisible) {
       if (converInfo.block.includes(userId)) {

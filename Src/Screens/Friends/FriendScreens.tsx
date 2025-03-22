@@ -2,11 +2,17 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {ArrowLeft} from 'iconsax-react-native';
 import {MoreVerticalIcon} from 'lucide-react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {FlatList, SafeAreaView, StyleSheet} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   addFriend,
   friendSelector,
+  removeFriend,
   setBlock,
 } from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
@@ -30,50 +36,65 @@ const FriendScreens = ({navigation}: any) => {
   const [isShowUnfriendModal, setShowUnfriendModal] = useState(false);
   const [isShowBlockModal, setShowBlockModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limitPage, setLimitPage] = useState(1);
+
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const user = useSelector(friendSelector);
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
   const {t} = useTranslation();
 
   const dispatch = useDispatch();
   const handleGetAllUserInfo = async () => {
-    if (user.friends.length === 0) {
+    if (page > limitPage) {
       return;
     }
-    const res = await userServices.getListUserInfo(user.friends);
+    const res = await userServices.getEquestFriendUsers(auth.userId, '', page);
     if (res && res.data) {
-      setData(res.data);
+      setData(res.data.users);
+      setLimitPage(res.data.totalPage);
+      setPage(prevPage => prevPage + 1);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
       handleGetAllUserInfo();
-    }, [data]),
+    }, []),
   );
   function closeModalAction() {
     setShowUnfriendModal(false);
   }
   const handleRemoveFriend = async (userId: string) => {
     setIsLoading(true);
+    setShowUnfriendModal(false);
     const res = await friendServices.handleRemoveFriends(userId, auth.userId);
     // xử lí hàm trả về data là user khỏi phải request lại
     if (res && res.data) {
-      const user = data.filter(item => item.userId !== res.data);
-      setData(user);
+      setData(prev => prev.filter(item => item.userId !== res.data));
+      const parseData = await UserInfo.getUserData();
+      parseData.friend.friends = parseData.friend.friends.filter(
+        (id: any) => id !== res.data,
+      );
+      await Promise.all([
+        dispatch(removeFriend(res.data)),
+        AsyncStorage.setItem('userData', JSON.stringify(parseData)),
+      ]);
+       console.log('friendData.friend: ', friendData.friends);
+     
     }
     setIsLoading(false);
   };
+  
   const handleBlockUser = async () => {
     setShowBlockModal(true);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
     setIsLoading(true);
-
+    setShowBlockModal(false);
     const res = await userServices.updateBlockUser(userId, userFriendId);
-    if (res) {
+    if (res && res.data) {
       console.log('Block successfully !!!', res.data);
       // Lấy dữ liệu và cập nhật song song
       const parsedData = await UserInfo.getUserData();
@@ -84,11 +105,11 @@ const FriendScreens = ({navigation}: any) => {
       ]);
       console.log('Sau khi cập nhật:', friendData.block);
     }
-    setShowBlockModal(false);
-    setIsLoading(false)
-
+    setIsLoading(false);
   };
-
+  const getIsBlock = (userId: string) => {
+    return friendData.block?.includes(userId);
+  };
   useEffect(() => {
     console.log('Redux state block đã cập nhật:', friendData.block);
   }, [friendData.block]);
@@ -101,9 +122,7 @@ const FriendScreens = ({navigation}: any) => {
               navigation.navigate('PersonalScreen', {userId: item.userId})
             }
             menuData={MenuChat(colors).attributeUser}
-            onPressUnFriend={() => {
-              setShowUnfriendModal(true);
-            }}
+            onPressUnFriend={() => setShowUnfriendModal(true)}
             userId={item.userId}
             icon={<MoreVerticalIcon size={22} color={colors.icon} />}
             authori={item.majoring ?? t('majoring')}
@@ -112,30 +131,26 @@ const FriendScreens = ({navigation}: any) => {
             onPressMore={() => {}}
             navigation={navigation}
             onPressBlock={handleBlockUser}
-            isBlock={friendData.block && friendData.block.includes(item.userId)}
+            isBlock={getIsBlock(item.userId)}
           />
           <ActionModal
             visible={isShowUnfriendModal}
             onPressNo={() => {
               closeModalAction();
             }}
-            onPressYes={async () => await handleRemoveFriend(item.userId)}
+            onPressYes={() => handleRemoveFriend(item.userId)}
             descriptions={t('remove_friend_confirmation')}
             title={`${t('unfriend ')}${item.name}`}
           />
           <ActionModal
             visible={isShowBlockModal}
             onPressNo={() => setShowBlockModal(false)}
-            onPressYes={async () =>
-              await actionBlockUser(auth.userId, item.userId)
-            }
+            onPressYes={() => actionBlockUser(auth.userId, item.userId)}
             descriptions={
-              friendData.block && friendData.block.includes(item.userId)
-                ? t('unblock_friend')
-                : t('block_friend')
+              getIsBlock(item.userId) ? t('unblock_friend') : t('block_friend')
             }
             title={
-              friendData.block && friendData.block.includes(item.userId)
+              getIsBlock(item.userId)
                 ? t('confirm_unblock') + item.name
                 : t('confirm_block') + item.name
             }
@@ -143,13 +158,7 @@ const FriendScreens = ({navigation}: any) => {
         </React.Fragment>
       );
     },
-    [
-      setData,
-      setShowUnfriendModal,
-      isShowUnfriendModal,
-      isShowBlockModal,
-      setShowBlockModal,
-    ],
+    [setData, isShowBlockModal, isShowUnfriendModal],
   );
   return (
     <SafeAreaView
@@ -163,6 +172,11 @@ const FriendScreens = ({navigation}: any) => {
         style={{flex: 1, marginHorizontal: 18}}
         keyExtractor={item => item.userId}
         renderItem={renderItem}
+        extraData={data}
+        ListFooterComponent={() =>
+          page < limitPage ? <ActivityIndicator size={22} /> : null
+        }
+        onEndReached={page <= limitPage ? handleGetAllUserInfo : () => {}}
       />
       <LoadingModal visible={isLoading} />
     </SafeAreaView>

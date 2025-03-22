@@ -94,7 +94,6 @@ const SearchScreen = ({navigation}: any) => {
       setUsers(res.data);
       setMessageErr('');
     }
-  
   };
   const handleSearchConversations = async (keySearch: string) => {
     const res = await searchServices.searchConversationUsers(
@@ -104,13 +103,12 @@ const SearchScreen = ({navigation}: any) => {
     if (res && res.data) {
       setUsers(res.data);
     }
-  
   };
 
   const debouncedFetchUsers =
     key === 'searchFriends'
-      ? debounce(handleSearchFriends, 300)
-      : debounce(handleSearchConversations, 300);
+      ? debounce(handleSearchFriends, 700)
+      : debounce(handleSearchConversations, 700);
   useEffect(() => {
     debouncedFetchUsers(value);
     return () => {
@@ -151,16 +149,17 @@ const SearchScreen = ({navigation}: any) => {
       let conversationId = res.data;
       await AsyncStorage.setItem(
         'ConversationInfo',
-        JSON.stringify({...item, conversationId}),
+        JSON.stringify({...item, conversationId, type: 'personal'}),
       );
     } else {
+      console.log('hell');
+
       await AsyncStorage.setItem(
         'ConversationInfo',
         JSON.stringify({...item, type: 'personal'}),
       );
     }
     navigation.navigate('Chat');
-   
   };
 
   const renderItemsConversation = (item: any, index: number) => {

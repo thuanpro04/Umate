@@ -90,8 +90,8 @@
   "invalid_facebook_url": "URL Facebook không hợp lệ Không hợp lệ. Vui lòng nhập liên kết Facebook hợp lệ.",
   "unblock_and_call": "Mở chặn đi rồi gọi 😏",
   "detail": "Chi tiết",
-  "recently_share": "Chia sẽ gần đây",
-  "share": "Chia sẽ",
+  "recently_share": "Chia sẻ gần đây",
+  "share": "Chia sẻ",
   "like": "Thích",
   "manage_friends": "Quản lí bạn bè",
   "delete_friend": "Xóa bạn",
@@ -163,12 +163,17 @@
   "missed_call": "Bạn có 1 cuộc gọi nhỡ !",
   "invite_group": "Mời vào nhóm",
   "is_connect": "Đang kết nối...",
-  "block_message": "Bỏ chặn đi gòi 😏",
+  "block_message": "Bỏ chặn đi gòi nhắn 😏",
   "enter_message": "Nhập tin nhắn ...",
   "share_event": "Chia sẽ sự kiện",
   "mutual_friend":"bạn chung",
   "attendance_code": "Mã điểm danh",
-  "how_attendance":"Bạn có muốn điểm danh không? "
+  "how_attendance":"Bạn có muốn điểm danh không? ",
+  "picture": "Chụp ảnh.",
+  "from_library": "Từ thư viện.",
+  "from_url":"Từ url."
+
+
 
 
 }

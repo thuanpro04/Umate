@@ -43,7 +43,7 @@ interface Props {
   theme: any;
   conversationInfo: any;
 }
-const ChatItems = memo((props: Props) => {
+const ChatItems = (props: Props) => {
   const {
     currentUserId,
     userId,
@@ -64,9 +64,8 @@ const ChatItems = memo((props: Props) => {
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [showTime, setShowTime] = useState<any[]>([]);
   const [user, setUser] = useState<any>('');
-  const profile = useSelector(profileSelector);
   const auth = useSelector(authSelector);
-  const colors = appColors[theme ?? 'light'];
+  const colors = appColors[theme];
   const {t} = useTranslation();
   const isNextMyMessage = true;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -78,14 +77,9 @@ const ChatItems = memo((props: Props) => {
       setUser(res.data);
     }
   };
+
   const getNameInGroup = (item: any) => {
-    if (
-      conversationInfo.nickNames &&
-      conversationInfo.nickNames[item.senderId]
-    ) {
-      return conversationInfo.nickNames[item.senderId];
-    }
-    return item.name;
+    return conversationInfo.nickNames?.[item.senderId] ?? user.name;
   };
   const onChangeImageIndex = (index: number) => {
     setTimeout(() => {
@@ -133,24 +127,26 @@ const ChatItems = memo((props: Props) => {
           {imgIndex === arrImages.length - 1 &&
             isRight &&
             shareDocuments(isStacked, isRight ?? false, arrImages)}
-          <FastImage
-            style={[
-              styles.imageStyle,
-              isStacked && {
-                position: 'absolute',
-                left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
-                right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
-                top: -imgIndex, // Xếp chồng theo index
-                zIndex: totalImages - imgIndex,
-              },
-            ]}
-            source={{
-              uri: item,
-              priority: FastImage.priority.high, // Đặt mức ưu tiên cao
-              cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
-            }}
-            resizeMode={FastImage.resizeMode.cover}
-          />
+          {item && (
+            <FastImage
+              style={[
+                styles.imageStyle,
+                isStacked && {
+                  position: 'absolute',
+                  left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
+                  right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
+                  top: -imgIndex, // Xếp chồng theo index
+                  zIndex: totalImages - imgIndex,
+                },
+              ]}
+              source={{
+                uri: item,
+                priority: FastImage.priority.high, // Đặt mức ưu tiên cao
+                cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
+              }}
+              resizeMode={FastImage.resizeMode.cover}
+            />
+          )}
           {imgIndex === arrImages.length - 1 &&
             !isRight &&
             shareDocuments(isStacked, !isRight, arrImages)}
@@ -238,14 +234,17 @@ const ChatItems = memo((props: Props) => {
         conversationInfo.deputyLeader.userId,
       ],
       currentUserId: auth.userId,
+      id: conversationInfo.groupId,
     };
     const res = await messageServices.updateAttendedGroup(data);
     if (res && res.data) {
       console.log('Update attended successfully !!', res.data);
     }
   };
-  const Message = memo(({item, index}: any) => {
+
+  const Message = ({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
+    const isQrcode = item.QRCode && item.QRCode?.qrdata;
 
     return (
       <View key={index} style={{flex: 1}}>
@@ -258,7 +257,7 @@ const ChatItems = memo((props: Props) => {
             <View style={{alignSelf: 'center'}}>
               <TextComponent
                 label={UserInfo.getTimePresent(props.item.timestamp)}
-                color={appColors.grey2}
+                color={colors.text2}
                 size={8}
               />
             </View>
@@ -266,9 +265,7 @@ const ChatItems = memo((props: Props) => {
           <TouchableOpacity
             activeOpacity={0.5}
             onPress={() => {
-              item.recipients &&
-                item.recipients.length > 0 &&
-                getUserSenderId(item.senderId);
+              item.recipients?.length > 0 && getUserSenderId(item.senderId);
               onChangeShowTime(index);
             }}
             style={[
@@ -292,6 +289,7 @@ const ChatItems = memo((props: Props) => {
                   <TextComponent
                     key={index}
                     label={item.content}
+                    color={colors.text}
                     styles={[
                       styles.contentStyles,
                       {marginHorizontal: item?.reply ? 15 : 0, fontSize: 16},
@@ -303,6 +301,7 @@ const ChatItems = memo((props: Props) => {
                     <TextComponent
                       key={index}
                       label={'Cuộc gọi thoại'}
+                      color={colors.text}
                       styles={[
                         styles.contentStyles,
                         {marginHorizontal: item?.reply ? 15 : 0},
@@ -332,8 +331,7 @@ const ChatItems = memo((props: Props) => {
                   targetId={
                     conversationInfo.type === 'personal'
                       ? conversationInfo.userId
-                      : conversationInfo.invitedUsers &&
-                        conversationInfo.invitedUsers.filter(
+                      : conversationInfo.invitedUsers?.filter(
                           (id: any) => id !== auth.userId,
                         )
                   }
@@ -356,6 +354,7 @@ const ChatItems = memo((props: Props) => {
                     ]}>
                     <TextComponent
                       styles={{fontSize: 14}}
+                      color={colors.text}
                       label={item?.reply?.content}
                     />
                   </View>
@@ -364,7 +363,7 @@ const ChatItems = memo((props: Props) => {
                   <View style={{height: 255}}>
                     <CustormLinkPreview txtLink={item.content} />
                   </View>
-                ) : item.QRCode && item.QRCode.qrdata ? (
+                ) : isQrcode ? (
                   <View
                     style={{justifyContent: 'center', alignItems: 'center'}}>
                     <SpaceComponent height={10} />
@@ -392,6 +391,7 @@ const ChatItems = memo((props: Props) => {
                   <TextComponent
                     key={index}
                     label={item.content}
+                    color={colors.text}
                     styles={[
                       styles.contentStyles,
                       {marginHorizontal: item?.reply ? 15 : 0},
@@ -414,10 +414,10 @@ const ChatItems = memo((props: Props) => {
             )
           : showTime[index] && (
               <View style={{marginLeft: 12}}>
-                {user && user.name && (
+                {user?.name && (
                   <TextComponent
                     label={getNameInGroup(item)}
-                    color={appColors.grey2}
+                    color={colors.text2}
                     size={8}
                   />
                 )}
@@ -425,7 +425,7 @@ const ChatItems = memo((props: Props) => {
             )}
       </View>
     );
-  });
+  };
 
   return (
     <GestureHandlerRootView>
@@ -472,7 +472,7 @@ const ChatItems = memo((props: Props) => {
       )}
     </GestureHandlerRootView>
   );
-});
+};
 
 export default ChatItems;
 const styles = StyleSheet.create({

@@ -1,34 +1,28 @@
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
+import { ArrowLeft2, SearchFavorite } from 'iconsax-react-native';
+import { debounce } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   KeyboardAvoidingView,
   StatusBar,
-  StyleSheet,
-  Text,
-  View,
+  StyleSheet
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {InputComponent, RowComponent, SpaceComponent} from '../Components';
-import {ArrowLeft2, SearchFavorite} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {globalStyles} from '../../Styles/globalStyle';
-import {UserInfo} from '../Untils/UserInfo';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import {userServices} from '../Services/userService';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { friendSelector } from '../../redux/reducers/friendSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { InputComponent, RowComponent, SpaceComponent } from '../Components';
 import CarUserComponent from '../Friends/Components/CarUserComponent';
-import {useRoute} from '@react-navigation/native';
-import {debounce} from 'lodash';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {friendServices} from '../Services/friendService.';
-import {friendSelector} from '../../redux/reducers/friendSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {useTranslation} from 'react-i18next';
+import { friendServices } from '../Services/friendService.';
+import { UserInfo } from '../Untils/UserInfo';
 
 const SearchFriendScreen = ({navigation}: any) => {
   const [text, setText] = useState('');
-  const [converInfo, setConverInfo] = useState<any>('');
-  const {getItem} = useAsyncStorage('ConversationInfo');
   const {users} = useRoute().params as {users: any[]};
   const [userInfo, setUserInfo] = useState<any[]>(users);
   const auth = useSelector(authSelector);
@@ -38,17 +32,7 @@ const SearchFriendScreen = ({navigation}: any) => {
   const friendData = useSelector(friendSelector);
   const {t} = useTranslation();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const info = await UserInfo.getConversationInfo(getItem);
-        setConverInfo(info); // Cập nhật thông tin hội thoại
-      } catch (error) {
-        console.error('Error fetching conversation info:', error);
-      }
-    };
-    fetchData();
-  }, []);
+ 
   const searchByNameInGroup = (value: string) => {
     if (users) {
       const result = users.filter(

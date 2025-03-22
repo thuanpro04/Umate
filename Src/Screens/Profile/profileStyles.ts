@@ -67,11 +67,9 @@ export const profileStyles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
     marginTop: 5,
   },
   sectionTitle: {

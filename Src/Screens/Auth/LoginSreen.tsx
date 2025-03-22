@@ -29,9 +29,6 @@ const LoginSreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const {t} = useTranslation();
   const dispatch = useDispatch();
-
-  // Hàm hiển thị toast để tái sử dụng
-
   const getDataUserWithGoogle = async () => {
     try {
       const userInfo = await Auth.getDataUserWithGoogle();
@@ -49,7 +46,7 @@ const LoginSreen = () => {
       const data = {
         userId: userInfo?.id,
         email: userInfo?.email,
-        name: userInfo?.name,
+        name: UserInfo.getName(userInfo?.name ?? ''),
         familyName: userInfo?.familyName,
         givenName: userInfo?.givenName,
         avatar: userInfo?.photo,
@@ -71,7 +68,7 @@ const LoginSreen = () => {
     try {
       const res = await Auth.loginWithGoogle({
         ...data,
-        name: UserInfo.getName(data.name ?? ''),
+        name: data.name ?? '',
       });
 
       dispatch(addAuth(res?.data.authSlice));

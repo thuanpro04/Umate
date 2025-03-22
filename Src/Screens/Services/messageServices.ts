@@ -22,8 +22,13 @@ const checkConversation = async (senderId: string, receiverId: string) => {
     console.error('Check conversation fail ', error);
   }
 };
-const getAllConversationUsers = async (currentUserId: string) => {
-  url = `/get-all-conversation?currentUserId=${currentUserId}`;
+const getAllConversationUsers = async (
+  currentUserId: string,
+  page?: number,
+) => {
+  url = `/get-all-conversation?currentUserId=${currentUserId}&&page=${
+    page ?? 1
+  }`;
 
   try {
     const res = await chatsAPI.handleChats(url);
@@ -79,6 +84,9 @@ const getLinkYourConversation = async (
 const updateNickNameConversation = async (data: any) => {
   try {
     url = '/update-nickname';
+    if (!data.id) {
+      return;
+    }
     const res = await chatsAPI.handleChats(url, data, 'post');
     return res;
   } catch (error) {

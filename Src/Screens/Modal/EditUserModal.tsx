@@ -31,6 +31,8 @@ const EditUserModal = (props: Props) => {
   const [messageError, setMessageError] = useState('');
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  
+  
   useEffect(() => {
     if (isVisible) {
       onOpenModal();
@@ -87,11 +89,16 @@ const EditUserModal = (props: Props) => {
   const renderMajoring = ({item, index}: any) => {
     return (
       <List.Section key={index}>
-        <List.Accordion title={item.title}>
+        <List.Accordion
+          title={item.title}
+          titleStyle={{color: colors.text}}
+          style={{backgroundColor: colors.card}}>
           {item.data.map((element: any) => (
             <List.Item
               key={element}
               title={element}
+              titleStyle={{color: colors.text}}
+              style={{}}
               onPress={() => {
                 onChangeProfile(nameField, element);
                 onChangeProfile('majorCategory', item.title.toString());
@@ -103,6 +110,7 @@ const EditUserModal = (props: Props) => {
     );
   };
   const renderItemAddress = ({item, index}: any) => {
+    
     return (
       <TouchableOpacity
         key={index}
@@ -129,10 +137,11 @@ const EditUserModal = (props: Props) => {
           {data.map((item, index) => renderMajoring({item, index}))}
         </ScrollView>
       ) : (
-        <KeyboardAvoidingView style={[styles.container,{backgroundColor: colors.background}]}>
+        <KeyboardAvoidingView
+          style={[styles.container, {backgroundColor: colors.background}]}>
           <SearchComponent onChangeText={onChangeText} text={value} />
           <ScrollView style={{maxHeight: 660}}>
-            {address.map((item, index) => renderItemAddress({item, index}))}
+            {data.map((item, index) => renderItemAddress({item, index}))}
           </ScrollView>
         </KeyboardAvoidingView>
       )}

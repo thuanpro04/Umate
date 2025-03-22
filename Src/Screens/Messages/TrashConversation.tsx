@@ -16,7 +16,7 @@ import {authSelector} from '../../redux/reducers/authReducer';
 import LoadingModal from '../Modal/LoadingModal';
 import {useTranslation} from 'react-i18next';
 
-const TrashConversation = () => {
+const TrashConversation = ({navigation}: any) => {
   const {users} = useRoute().params as {users: any[]};
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const [isBgUsers, setIsBgUsers] = useState<{[key: string]: Boolean}>({});
@@ -35,6 +35,7 @@ const TrashConversation = () => {
       };
       return newItems;
     });
+
     setSelectItems(prev => {
       const newItems = {...prev};
       if (!newItems[type]) {
@@ -55,11 +56,11 @@ const TrashConversation = () => {
     }
     Alert.alert(t('confirm_delete'), t('confirm_delete_chat'), [
       {
-        text: 'Hủy',
+        text: t('cancel'),
         style: 'cancel',
       },
       {
-        text: 'Xóa',
+        text: t('agree'),
         onPress: async () => await handleDeleteConversation(),
       },
     ]);
@@ -68,21 +69,32 @@ const TrashConversation = () => {
     if (Object.keys(selectItems).length === 0) {
       return;
     }
+    console.log(selectItems);
 
     const res = await messageServices.deleteConversation(selectItems);
-    if (res) {
-      console.log('Delete conversation successfully !!!');
+    if (res && res.data) {
+      console.log('Delete conversation successfully !!!', res.data);
+      const result = userInfo.filter(item => {
+        if (item.type === 'personal') {
+          return !res.data.personal.includes(item.conversationId);
+        }
+        if (item.type === 'group') {
+          return !res.data.group.includes(item.groupId);
+        }
+        return true;
+      });
+      setUserInfo(result);
       setSelectItems({});
       setIsBgUsers({});
-      await getAllConversation();
     }
-   
   };
+  // console.log(userInfo);
+
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
     const res = await messageServices.getAllConversationUsers(auth.userId);
     if (res?.data && res) {
-      setUserInfo(res?.data);
+      setUserInfo(res.data?.allConversations);
       // console.log(res?.data);
     }
     setIsLoading(false);
@@ -90,7 +102,7 @@ const TrashConversation = () => {
 
   const renderCardItems = useCallback(
     ({item, index}: any) => {
-      const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
+      const sumUsers = item.invitedUsers?.length ?? 0;
 
       return (
         <CarUserChat
@@ -104,18 +116,13 @@ const TrashConversation = () => {
           image={item.avatar}
           lastMessage={item.lastMessage}
           onPress={() =>
-            onChangeItems(
-              item.type,
-              item.type === 'group' ? item.groupId : item.conversationId,
-            )
+            onChangeItems(item.type, item.groupId ?? item.conversationId)
           }
           lastMessageColor={
             item.statusLastMessage ? appColors.blueBack : appColors.grey
           }
           iconCheck={
-            isBgUsers[
-              item.type === 'group' ? item.groupId : item.conversationId
-            ] ? (
+            isBgUsers[item.groupId ?? item.conversationId] ? (
               <Check size={appInfo.sizeIconBold} color={'red'} />
             ) : null
           }
@@ -135,14 +142,14 @@ const TrashConversation = () => {
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         onPress2={actionDeleteConversation}
+        onPress1={() => navigation.navigate(t('message'))}
       />
-      {userInfo && userInfo.length > 0 && (
+      {userInfo?.length > 0 && (
         <FlatList
           data={userInfo}
           key={'listMessage'}
-          keyExtractor={item =>
-            item.type === 'personal' ? item.conversationId : item.groupId
-          }
+          extraData={userInfo}
+          keyExtractor={item => item.conversationId ?? item.groupId}
           renderItem={renderCardItems}
         />
       )}

@@ -20,15 +20,8 @@ import {eventSelector} from '../../redux/reducers/eventSlice';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import {
-  ButtonComponent,
-  RowComponent,
-  SpaceComponent,
-  TextComponent,
-} from '../Components';
+import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
-import {eventSevices} from '../Services/eventService';
-import {UserInfo} from '../Untils/UserInfo';
 import {profileStyles} from './profileStyles';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
@@ -39,10 +32,9 @@ const ProfileScreen = ({navigation}: any) => {
   const {t} = useTranslation();
   const userInfo = {
     stats: {
-      friends: friendData && friendData.friends ? friendData.friends.length : 0,
-      posts:
-        eventData && eventData.eventShares ? eventData.eventShares.length : 0,
-      likes: (friendData && friendData.like && friendData.like) ?? 0,
+      friends: friendData?.friends?.length ?? 0,
+      posts: eventData?.eventShares?.length ?? 0,
+      likes: friendData?.like ?? 0,
     },
   };
 
@@ -54,7 +46,7 @@ const ProfileScreen = ({navigation}: any) => {
           profileStyles.postContainer,
           {backgroundColor: colors.background},
         ]}
-        key={index}>
+        key={item._id.toString()}>
         <FastImage
           source={{
             uri: item.urlImage,
@@ -65,7 +57,7 @@ const ProfileScreen = ({navigation}: any) => {
         />
         <TextComponent
           styles={profileStyles.postContent}
-          label={item.content ? item.content : '...'}
+          label={item.content ?? '...'}
         />
       </TouchableOpacity>
     );
@@ -145,22 +137,21 @@ const ProfileScreen = ({navigation}: any) => {
             label={userInfo.stats.friends}
             styles={profileStyles.statNumber}
           />
-          <Text style={profileStyles.statLabel}>{t('friend')}</Text>
+          <TextComponent label={t('friend')} styles={profileStyles.statLabel} />
         </View>
         <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
           <TextComponent
             label={userInfo.stats.posts}
             styles={profileStyles.statNumber}
           />
-          <Text style={profileStyles.statLabel}>{t('share')}</Text>
+          <TextComponent label={t('share')} styles={profileStyles.statLabel} />
         </View>
         <View style={[profileStyles.stat, {backgroundColor: colors.card}]}>
           <TextComponent
             label={userInfo.stats.likes.toString()}
             styles={profileStyles.statNumber}
           />
-
-          <Text style={profileStyles.statLabel}>{t('like')}</Text>
+          <TextComponent label={t('like')} styles={profileStyles.statLabel} />
         </View>
       </View>
 
@@ -174,7 +165,7 @@ const ProfileScreen = ({navigation}: any) => {
         data={eventData.eventShares}
         renderItem={renderPost}
         inverted
-        keyExtractor={item => item._id}
+        keyExtractor={item => item._id.toString()}
         contentContainerStyle={profileStyles.postList}
       />
     </SafeAreaView>

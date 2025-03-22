@@ -36,7 +36,6 @@ const MyFriendScreen = ({navigation}: any) => {
         />
       </RowComponent>
       <View style={{flex: 1}}>
-        {/* <TabTopNavigator/> */}
         <TabViewFriend />
       </View>
     </View>

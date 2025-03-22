@@ -168,5 +168,8 @@
   "share_event": "Share event",
   "mutual_friend": "mutual friend",
   "attendance_code": "Attendance code",
-  "how_attendance": "Do you want to take attendance? "
+  "how_attendance": "Do you want to take attendance? ",
+  "picture": "Take a picture.",
+  "from_library.": "From library.",
+  "from_url":"From url."
 }

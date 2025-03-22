@@ -5,6 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 import {useTranslation} from 'react-i18next';
 import {useSelector} from 'react-redux';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import {SpaceComponent, TextComponent} from '../Components';
 
 interface Props {
   qrdata: string;
@@ -20,12 +21,9 @@ const CustormQRCode = (props: Props) => {
 
   return (
     <View
-      style={[
-        localStyle.qrWrapper,
-        {backgroundColor: colors.background},
-        styles,
-      ]}>
-      <Text style={localStyle.title}>{title}</Text>
+      style={[localStyle.qrWrapper, {backgroundColor: colors.card}, styles]}>
+      <TextComponent label={title ?? ''} title />
+      <SpaceComponent height={6} />
       <QRCode value={qrdata} size={size ?? 220} />
     </View>
   );

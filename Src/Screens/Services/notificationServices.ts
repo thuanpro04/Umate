@@ -65,10 +65,20 @@ const handleSendEmail = async (data: any) => {
     console.log('handle email fail error: ', error);
   }
 };
+const checkLastNotificationStatus = async (userId: string) => {
+  url = `/check-noti?userId=${userId}`;
+  try {
+    const res = await notificationAPI.handleNotification(url);
+    return res;
+  } catch (error) {
+    console.log('check notifi error: ', error);
+  }
+};
 export const notificationServices = {
   actionNotificationUser,
   inviteToGroup,
   getNotifications,
   handleDeleteNotification,
   handleSendEmail,
+  checkLastNotificationStatus,
 };

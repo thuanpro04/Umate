@@ -5,7 +5,6 @@ import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {appColors} from '../../Theme/Colors/appColors';
 import {CarUserComponent, TextComponent} from '../Components';
-
 import {debounce} from 'lodash';
 import {FlatList} from 'react-native';
 import {friendServices} from '../Services/friendService.';
@@ -106,11 +105,11 @@ const SuggestFriend = React.memo(() => {
   }, 1000);
   const checkFriend = useCallback(
     (friends: any[], userId: string) => {
-      if (!friendData.friends || friends.length === 0) {
+      if (friendData.friends?.length === 0 || friends?.length === 0) {
         return;
       }
-      const mutualFriends = friends.filter(item =>
-        friendData.friends.includes(item),
+      const mutualFriends = friends?.filter(item =>
+        friendData.friends?.includes(item),
       );
       setCount(prev => {
         // Kiểm tra nếu dữ liệu không thay đổi thì không cập nhật
@@ -131,7 +130,7 @@ const SuggestFriend = React.memo(() => {
   );
 
   const getMutualFriendInfo = useCallback(async (ids: string[]) => {
-    if (ids === undefined) {
+    if (ids?.length === 0) {
       return;
     }
     const res = await userServices.getListUserInfo(ids);
@@ -140,15 +139,16 @@ const SuggestFriend = React.memo(() => {
     }
     return;
   }, []);
+
   const renderItems = ({item, index}: any) => {
     return (
       <CarUserComponent
-    
         mutualUser={mutualUser.length > 3 ? mutualUser.slice(0, 3) : mutualUser}
         mutualFriend={count[item.userId]?.count}
         onPressImg={() =>
           navigation.navigate('PersonalScreen', {userId: item.userId})
         }
+        userId={item.userId}
         iconAddCancel={false}
         key={item.userId}
         img={item.avatar}
@@ -202,7 +202,7 @@ const SuggestFriend = React.memo(() => {
         styles.container,
         {justifyContent: 'center', alignItems: 'center'},
       ]}>
-      <TextComponent label={message} />
+      {message && <TextComponent label={message} />}
     </SafeAreaView>
   );
 });

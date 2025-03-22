@@ -12,6 +12,7 @@ import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {socketSelector} from '../../redux/reducers/socketSlice';
 import {useTranslation} from 'react-i18next';
+import SocketService from '../Services/SocketService';
 const VoiceCall = (props: any) => {
   const {roomID, name, type} = useRoute().params as {
     roomID: string;
@@ -22,7 +23,7 @@ const VoiceCall = (props: any) => {
   const auth = useSelector(authSelector);
   const dataCall = useSelector(socketSelector);
   const calls = dataCall.incomingCall;
-  const socket = dataCall.socket;
+  const socket = SocketService.getSocket();
   const {t} = useTranslation();
 
   const getCallConfig = (type: string) => {
@@ -37,33 +38,37 @@ const VoiceCall = (props: any) => {
         return ONE_ON_ONE_VOICE_CALL_CONFIG;
     }
   };
+  function getDataCall(duration: number) {
+    let num = Math.floor(duration / 60);
+    let seconds = duration % 60;
+    const data = {
+      senderId: calls.userId,
+      content: `${num} phút ${seconds} giây`,
+      imagesUrl: [],
+      reply: '',
+      typeCall: type,
+    };
 
+    let dataCall;
+    if (calls.type === 'group_video' || calls.type === 'group_voice') {
+      dataCall = {
+        ...data,
+        groupId: calls.groupId,
+        recipients: calls.targetId,
+      };
+    } else {
+      dataCall = {
+        ...data,
+        receiverId: calls.targetId,
+      };
+    }
+    return dataCall;
+  }
   const handleSaveCallOnData = (duration: number) => {
     if (calls) {
-      let num = Math.floor(duration / 60);
-      let seconds = duration % 60;
-      const data = {
-        senderId: calls.userId,
-        content: `${num} phút ${seconds} giây`,
-        imagesUrl: [],
-        reply: '',
-        typeCall: type,
-      };
-      let dataCall;
-      if (calls.type === 'group_video' || calls.type === 'group_voice') {
-        dataCall = {
-          ...data,
-          groupId: calls.groupId,
-          recipients: calls.targetId,
-        };
-      } else {
-        dataCall = {
-          ...data,
-          receiverId: calls.targetId,
-        };
-      }
       try {
-        socket.emit('send_message', dataCall);
+        const data = getDataCall(duration);
+        socket?.emit('send_message', data);
         console.log('Save call data successfully!!');
       } catch (error) {
         console.log('Save call data fail: ', error);

@@ -1,4 +1,3 @@
-import ActionIconComponent from './ActionIconComponent';
 import ButtonComponent from './ButtonComponent';
 import CarEventComponent from './CarEventComponent';
 import CarfeatureComponent from './CarfeatureComponent';
@@ -14,7 +13,6 @@ import TextComponent from './TextComponent';
 import ToastConfig from './ToastConfig';
 import CustormLongPress from './CustormLongPress'
 export {
-  ActionIconComponent,
   ButtonComponent,
   CarEventComponent,
   CarfeatureComponent,

@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRoute } from '@react-navigation/native';
-import { ArrowLeft2 } from 'iconsax-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useRoute} from '@react-navigation/native';
+import {ArrowLeft2} from 'iconsax-react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
   SafeAreaView,
@@ -11,12 +11,12 @@ import {
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import {
   HeaderComponent,
   RowComponent,
@@ -24,8 +24,9 @@ import {
   TextComponent,
 } from '../Components';
 import UpdateInfoModal from '../Modal/UpdateInfoModal';
-import { messageServices } from '../Services/messageServices';
-import { userServices } from '../Services/userService';
+import {messageServices} from '../Services/messageServices';
+import {userServices} from '../Services/userService';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const CustormNickNameScreen = () => {
   const {converInfo} = useRoute().params as {converInfo: any};
@@ -36,7 +37,9 @@ const CustormNickNameScreen = () => {
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
   const [visible, setVisible] = useState(false);
-  const colors: any = appColors[converInfo.theme ?? 'light'];
+  const themeGlobal: 'light' | 'dark' = useSelector(themeSelector);
+
+  const colors: any = appColors[converInfo.theme ?? themeGlobal];
 
   const key = converInfo.type;
   const {t} = useTranslation();
@@ -46,7 +49,6 @@ const CustormNickNameScreen = () => {
     if (res && res.data) {
       setUserInfo(res.data);
     }
-    
   };
   const data = [
     {
@@ -70,17 +72,17 @@ const CustormNickNameScreen = () => {
     setSelectUser(item);
     setVisible(true);
   };
+
   const handleUpdateNickName = async (userId: string, value: string) => {
     if (!userId || value.length < 6) {
       console.log('Check user or value not exist');
-
       return;
     }
     setValue(value);
     const res = await messageServices.updateNickNameConversation({
       userId,
       value,
-      id: key === 'personal' ? converInfo.conversationId : converInfo.groupId,
+      id: converInfo.conversationId ?? converInfo.groupId,
       key,
     });
     if (res && res.data) {
@@ -92,13 +94,9 @@ const CustormNickNameScreen = () => {
       const updateData = {...converInfo, nickNames: res.data};
       setConverData(updateData);
     }
-   
   };
   const getNameInGroup = (item: any) => {
-    if (converData.nickNames && converData.nickNames[item.userId]) {
-      return converData.nickNames[item.userId];
-    }
-    return item.name;
+    return converData.nickNames?.[item.userId] ?? item.name;
   };
   const renderCard = useCallback(
     ({item, index}: any) => {
@@ -117,7 +115,7 @@ const CustormNickNameScreen = () => {
             <TouchableOpacity
               style={{flex: 1}}
               onPress={() => onOpenModal(item)}>
-              <TextComponent label={t('alias')} />
+              <TextComponent label={t('alias')} color={colors.text} />
               <SpaceComponent height={3} />
               <TextComponent
                 label={getNameInGroup(item)}
@@ -144,6 +142,7 @@ const CustormNickNameScreen = () => {
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         title={t('nickname')}
+        titleColor={colors.text}
       />
       <View style={{paddingHorizontal: 12}}>
         {!converData.groupId ? (

@@ -18,6 +18,9 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {HeaderComponent, TextComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import LoadingModal from '../Modal/LoadingModal';
 
 const YourImagesScreen = () => {
   const {id, type, theme} = useRoute().params as {
@@ -25,45 +28,17 @@ const YourImagesScreen = () => {
     type: string;
     theme: string;
   };
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
-  const colors = appColors[theme ?? 'light'];
+  const colors = appColors[theme ];
   const {t} = useTranslation();
 
   const columnCount = 4;
 
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354086332.jpg?alt=media&token=238e3e5f-ebcf-45bc-ba52-c6a965909ee5',
-  //   'https://firebasestorage.googleapis.com/v0/b/umate-addb5.appspot.com/o/images%2F1741354204623.jpg?alt=media&token=6764400f-662e-476c-91b3-8c0a67d7c561',
-  // ];
   useFocusEffect(
     useCallback(() => {
       const getImageForConversation = async () => {
@@ -103,7 +78,7 @@ const YourImagesScreen = () => {
         <FastImage
           source={{uri: item, priority: FastImage.priority.high}}
           style={{
-            width: (appInfo.size.WIDTH - 20) / columnCount, // Chia đều chiều rộng
+            width: (appInfo.size.WIDTH - 38) / columnCount, // Chia đều chiều rộng
             height: (appInfo.size.WIDTH - 20) / columnCount, // Vuông ảnh
             margin: 2, // Khoảng cách giữa ảnh
             borderRadius: 5,
@@ -122,6 +97,7 @@ const YourImagesScreen = () => {
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         title={t('yourimage')}
+        titleColor={colors.text}
       />
       {images && images.length > 0 ? (
         <FlatList
@@ -134,7 +110,7 @@ const YourImagesScreen = () => {
         />
       ) : (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <TextComponent label={t('empty')} />
+          <TextComponent label={t('empty')} color={colors.text}/>
         </View>
       )}
       {images && (
@@ -146,6 +122,7 @@ const YourImagesScreen = () => {
           onClose={() => setVisible(false)}
         />
       )}
+      <LoadingModal visible={isLoading}/>
     </SafeAreaView>
   );
 };

@@ -57,7 +57,7 @@ const QrCodeModal = ({visible, onClose, onPress, groupId, type}: Props) => {
               <TouchableOpacity
                 style={styles.timeBox}
                 onPress={() => onPress(item.toString(), encodedData)}>
-                <TextComponent label={`${item} ${t('minutes')}`} />
+                <TextComponent label={`${item} ${t('minutes')}`} color='black'/>
               </TouchableOpacity>
             )}
           />

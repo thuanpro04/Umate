@@ -34,17 +34,7 @@ export class UserInfo {
     });
     return vietnamDate;
   };
-  static getIdUsers = (data: any[]) => {
-    const users = data.map(item => item.userId);
-    return users;
-  };
-  static getUserInfo = (userId: string, allUsers: any[]) => {
-    let temp: any = '';
-    if (allUsers) {
-      temp = allUsers.filter(user => user.userId === userId)[0].userName;
-    }
-    return temp;
-  };
+
   static compareObject = (obj: any, obj2: any) => {
     for (let key in obj) {
       if (obj[key] != obj2[key]) {
@@ -63,4 +53,45 @@ export class UserInfo {
     const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
     return userData ? JSON.parse(userData) : {};
   };
+  static getAvatar() {
+    const temp =
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1newdbzQNEDeE0F8ky3T40yrgWDpsNzX4Rw&s';
+    return temp;
+  }
+  static getDataGroup(groupInfo: any, auth: any) {
+    const member = groupInfo.invitedUsers.map((item: any) => ({
+      ...item.data,
+      userName: item.name,
+    }));
+
+    const currentUser = {
+      userId: auth.userId,
+      userName: auth.name,
+      avatar: auth.avatar,
+      majoring: auth.majoring,
+    };
+    const dataGroup = {
+      authorId: groupInfo.authorId,
+      groupName: groupInfo.groupName,
+      description: groupInfo.description,
+      avatar:
+        groupInfo.avatar &&
+        typeof groupInfo.avatar === 'object' &&
+        groupInfo.avatar.name
+          ? groupInfo.avatar.name
+          : groupInfo.avatar,
+      invitedUsers: [...member, currentUser],
+      leader: {
+        userId: groupInfo.leader.data
+          ? groupInfo.leader.data.userId
+          : auth.userId,
+      },
+      deputyLeader: {
+        userId: groupInfo.deputyLeader.data.userId,
+      },
+      type: 'group',
+    };
+
+    return dataGroup;
+  }
 }

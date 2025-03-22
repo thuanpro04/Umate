@@ -1,38 +1,36 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
+  FlatList,
   Platform,
   StatusBar,
-  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {globalStyles} from '../../Styles/globalStyle';
-import {TouchableOpacity} from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {useDispatch, useSelector} from 'react-redux';
-import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
-import TextComponent from './TextComponent';
+import {globalStyles} from '../../Styles/globalStyle';
 import {appColors} from '../../Theme/Colors/appColors';
 import {MenuItems} from '../../data/MenuItems';
-import RowComponent from './RowComponent';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import LoadingModal from '../Modal/LoadingModal';
-import {UserInfo} from '../Untils/UserInfo';
-import {userServices} from '../Services/userService';
-import {HandleNotification} from '../Untils/HandleNotification';
-import SpaceComponent from './SpaceComponent';
+import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
+import {removeEvent} from '../../redux/reducers/eventSlice';
+import {resetFriend} from '../../redux/reducers/friendSlice';
 import {
   profileSelector,
   removeProfile,
 } from '../../redux/reducers/profileSlice';
-import {removeEvent} from '../../redux/reducers/eventSlice';
-import {removeFriend} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {useTranslation} from 'react-i18next';
-import FastImage from 'react-native-fast-image';
+import LoadingModal from '../Modal/LoadingModal';
+import SocketService from '../Services/SocketService';
+import {userServices} from '../Services/userService';
+import {HandleNotification} from '../Untils/HandleNotification';
+import RowComponent from './RowComponent';
+import SpaceComponent from './SpaceComponent';
+import TextComponent from './TextComponent';
 const DrawerCustomsMenu = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const disPathch = useDispatch();
@@ -50,39 +48,22 @@ const DrawerCustomsMenu = ({navigation}: any) => {
 
   const handleSignOutWithGoogle = async () => {
     try {
-      const fcmToken = await AsyncStorage.getItem('fcmtoken');
-      if (fcmToken) {
-        if (auth.fcmTokens && auth.fcmTokens.length > 0) {
-          // console.log(items);
-          let items = [auth.fcmTokens]; // Copy mảng gốc
-          const index = items.findIndex(e => e === fcmToken);
-
-          if (index !== -1) {
-            items.splice(index, 1);
-          }
-
-          await HandleNotification.update(items, auth.userId);
-        }
-      }
-
       await GoogleSignin.signOut();
       disPathch(removeAuth());
       disPathch(removeEvent());
-      disPathch(removeFriend());
+      disPathch(resetFriend());
       disPathch(removeProfile());
       await AsyncStorage.removeItem('auth');
-      const res = await userServices.updateUserStatus(auth.userId, false);
+      await AsyncStorage.removeItem("ConversationInfo")
       // await onLogoutCallService();
+      SocketService.disconnect();
       setIsLoading(false);
     } catch (error) {
       console.log('Sign out', error);
       setIsLoading(false);
     }
   };
-  const onLogoutCallService = async () => {
-    //xóa cấu hình cuộc gọi
-    return ZegoUIKitPrebuiltCallService.uninit();
-  };
+
   const handleShowItemMenu = async (key: string) => {
     switch (key) {
       case 'personal':

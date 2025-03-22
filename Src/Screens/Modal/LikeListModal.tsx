@@ -28,12 +28,14 @@ const LikeListModal = (props: Props) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const getUserForHeartEvent = async () => {
+    if (listUsers?.length === 0) {
+      return;
+    }
     const res = await userServices.getListUserInfo(listUsers);
     if (res && res.data) {
       console.log(res.data);
       setListUserInfo(res.data);
     }
-  
   };
   const onOpenModal = async () => {
     modalizeRef.current?.open();

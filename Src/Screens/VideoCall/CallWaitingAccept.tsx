@@ -21,6 +21,7 @@ import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import {UserInfo} from '../Untils/UserInfo';
 import {useTranslation} from 'react-i18next';
 import {Notification} from '../Untils/Notification';
+import SocketService from '../Services/SocketService';
 const CallWaitingAccept = ({navigation}: any) => {
   const {avatar, name, callID, targetId, userId, type, groupId} = useRoute()
     .params as {
@@ -34,7 +35,7 @@ const CallWaitingAccept = ({navigation}: any) => {
   };
 
   const profile = useSelector(profileSelector);
-  const socket = useSelector(socketSelector).socket;
+  const socket = SocketService.getSocket();
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
   const soundRef = useRef<Sound | null>(null);
   const {t} = useTranslation();
@@ -44,9 +45,9 @@ const CallWaitingAccept = ({navigation}: any) => {
       soundRef.current.stop();
     }
     const data = {userId, targetId, callID, name: profile.name, type, groupId};
-    socket.emit('cancelCall', data);
+    socket?.emit('cancelCall', data);
     navigation.navigate(t('home'));
-    return socket.off('cancelCall');
+    return socket?.off('cancelCall');
   };
 
   useEffect(() => {
@@ -90,7 +91,7 @@ const CallWaitingAccept = ({navigation}: any) => {
     };
   }, []);
   useEffect(() => {
-    socket.on('feedbackAccepted', (data: any) => {
+    socket?.on('feedbackAccepted', (data: any) => {
       if (soundRef.current) {
         soundRef.current.stop();
       }
@@ -103,7 +104,7 @@ const CallWaitingAccept = ({navigation}: any) => {
         });
       }
     });
-    socket.on('feedbackRefused', (data: any) => {
+    socket?.on('feedbackRefused', (data: any) => {
       if (soundRef.current) {
         soundRef.current.stop();
       }
@@ -118,8 +119,8 @@ const CallWaitingAccept = ({navigation}: any) => {
       );
     });
     return () => {
-      socket.off('feedbackRefused');
-      socket.off('feedbackAccepted');
+      socket?.off('feedbackRefused');
+      socket?.off('feedbackAccepted');
     };
   }, []);
   return (

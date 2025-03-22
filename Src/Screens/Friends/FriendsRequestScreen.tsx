@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {friendSelector, setFriend} from '../../redux/reducers/friendSlice';
+import {addFriend, friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {appColors} from '../../Theme/Colors/appColors';
 import {CarUserComponent} from '../Components';
@@ -50,13 +50,11 @@ const FriendsRequestScreen = () => {
     );
     if (res && res.data) {
       console.log('Agree friend successfully !!!', res.data);
-      // const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
-      const user = users?.filter(item => item !== res.data);
-      setUsers(user);
+      setUsers(prev => prev?.filter((item: any) => item.userId !== res.data));
       const parseData = await UserInfo.getUserData();
       parseData.friend.friends.push(res.data);
       await Promise.all([
-        dispatch(setFriend(res.data)),
+        dispatch(addFriend(res.data)),
         AsyncStorage.setItem('userData', JSON.stringify(parseData)),
       ]);
 
@@ -99,6 +97,7 @@ const FriendsRequestScreen = () => {
     },
     [users],
   );
+
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: colors.background}]}>
@@ -108,9 +107,10 @@ const FriendsRequestScreen = () => {
           keyExtractor={(item: any) => item.userId}
           renderItem={renderItems}
           style={styles.container}
+          extraData={memoUser}
           scrollEventThrottle={16}
           ListFooterComponent={() =>
-            page <= limitPage ? <ActivityIndicator size={22} /> : <></>
+            page <= limitPage ? <ActivityIndicator size={22} /> : null
           }
           onEndReached={page <= limitPage ? getUsers : () => {}}
         />

@@ -37,7 +37,6 @@ const NotificationScreen = ({navigation}: any) => {
   const [selectItems, setSelectItems] = useState<{[key: string]: Boolean}>({});
   const [selectTrash, setSelectTrash] = useState<string[]>([]);
   const auth = useSelector(authSelector);
-
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
@@ -52,14 +51,13 @@ const NotificationScreen = ({navigation}: any) => {
         : await notificationServices.handleDeleteNotification(id);
     if (res && res.data) {
       console.log(res.data);
-
       setDataNotifi(prev => prev.filter(item => item._id !== id));
     }
   };
-  console.log(dataNotifi);
 
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
+      
       const scaleAnim = React.useRef(new Animated.Value(1)).current;
       const handlePress = () => {
         Animated.sequence([
@@ -74,7 +72,7 @@ const NotificationScreen = ({navigation}: any) => {
             useNativeDriver: true,
           }),
         ]).start();
-        if (item.type !== 'calling') {
+        if (type !== 'calling') {
           navigation.navigate(t('friend'));
         }
       };
@@ -99,32 +97,31 @@ const NotificationScreen = ({navigation}: any) => {
         setUserIds(item.data.notAttended);
       };
       const temp = item.content.split(' ');
+      const type = item.type;
       const content =
-        item.type === 'qrcode'
-          ? t(`${temp[0]}`) + temp[1]
-          : t(`${item.content}`);
+        type === 'qrcode' ? t(`${temp[0]}`) + temp[1] : t(`${item.content}`);
       return (
         <Animated.View style={{transform: [{scale: scaleAnim}]}}>
           <TouchableOpacity
-            activeOpacity={item.type === 'calling' ? 10 : 0.2}
+            activeOpacity={type === 'calling' ? 10 : 0.2}
             style={[styles.notificationCard, {backgroundColor: colors.card}]}
             onPress={() =>
               isTrash
                 ? onChangleItemToTrash(item._id)
-                : item.type === 'qrcode'
+                : type === 'qrcode'
                 ? showModalAttended()
                 : handlePress()
             }>
             <View style={styles.iconContainer}>
-              {item.type === 'groupInvite' ? (
+              {type === 'groupInvite' ? (
                 <MaterialCommunityIcons
                   name="lightbulb-group-outline"
                   size={appInfo.sizeIconBold}
                   color="#FFFFFF"
                 />
-              ) : item.type === 'calling' ? (
+              ) : type === 'calling' ? (
                 <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
-              ) : item.type === 'qrcode' ? (
+              ) : type === 'qrcode' ? (
                 <Bezier size={appInfo.sizeIconBold} color="#FFFFFF" />
               ) : (
                 <FontAwesome5
@@ -159,7 +156,7 @@ const NotificationScreen = ({navigation}: any) => {
                 </View>
               </RowComponent>
               <TextComponent label={content} styles={styles.content} />
-              {item.type === 'groupInvite' && (
+              {type === 'groupInvite' && (
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={styles.acceptButton}
@@ -209,9 +206,11 @@ const NotificationScreen = ({navigation}: any) => {
       const res = await notificationServices.handleDeleteNotification(
         selectTrash,
       );
-      if (res) {
-        console.log('Delete successfully !!');
-        fetchNotification();
+      if (res && res.data) {
+        console.log('Delete successfully !!', res.data);
+        setDataNotifi(prev =>
+          prev.filter(item => !res.data.includes(item._id)),
+        );
         setSelectItems({});
         setSelectTrash([]);
         setTrash(false);
@@ -224,6 +223,7 @@ const NotificationScreen = ({navigation}: any) => {
       fetchNotification();
     }, []),
   );
+
   return (
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>

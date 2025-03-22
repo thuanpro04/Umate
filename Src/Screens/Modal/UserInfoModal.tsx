@@ -52,9 +52,9 @@ const UserInfoModal = (props: Props) => {
 
   useEffect(() => {
     if (visible) {
-      modalRef.current?.open(); // Open the modal if visible
+      modalRef.current?.open(); 
     } else {
-      modalRef.current?.close(); // Close the modal if not visible
+      modalRef.current?.close(); 
     }
   }, [visible]);
 

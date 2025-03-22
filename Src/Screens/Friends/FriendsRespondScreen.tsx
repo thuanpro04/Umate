@@ -11,7 +11,12 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {appColors} from '../../Theme/Colors/appColors';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {friendSelector, setBlock} from '../../redux/reducers/friendSlice';
+import {
+  addOneFriend,
+  friendSelector,
+  removeFriend,
+  setBlock,
+} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {CarUserComponent, SpaceComponent} from '../Components';
 import ActionModal from '../Modal/ActionModal';
@@ -49,30 +54,46 @@ const FriendsRespondScreen = () => {
   const [page, setPage] = useState(1);
   const [limitPage, setLimitPage] = useState(1);
 
-  // Reload dữ liệu mỗi khi trang được focus
   useFocusEffect(
     useCallback(() => {
       fetchUserFriends();
     }, []),
   );
-
   const handleRemoveFriend = async (userId: string) => {
     setShowUnfriendModal(false);
     const res = await friendServices.handleRemoveFriends(userId, auth.userId);
     if (res && res.data) {
       console.log('Delete friend successfully !!', res.data);
-      const user = users.filter(item => item.userId !== res.data);
-      setUsers(user);
+      setUsers(prev => prev.filter(item => item.userId !== res.data));
+      const parseData = await UserInfo.getUserData();
+      parseData.friend.friends = parseData.friend.friends.filter(
+        (id: any) => id !== res.data,
+      );
+      await Promise.all([
+        dispatch(removeFriend(res.data)),
+        AsyncStorage.setItem('userData', JSON.stringify(parseData)),
+      ]);
     }
+    console.log('friendData.friend: ', friendData.friends);
   };
+
   const fetchUserFriends = useCallback(async () => {
     if (page > limitPage) {
       return;
     }
 
     const res = await userServices.getEquestFriendUsers(auth.userId, '', page);
-    if (res) {
+    if (res && res.data && res.data.users) {
       setUsers(res.data.users);
+      if (friendData.friends?.length !== res.data.users?.length) {
+        const ids = res.data.users.map((user: any) => user.userId);
+        const parseData = await UserInfo.getUserData();
+        parseData.friend.friends = ids;
+        await Promise.all([
+          dispatch(addOneFriend(ids)),
+          AsyncStorage.setItem('userData', JSON.stringify(parseData)),
+        ]);
+      }
       setLimitPage(res.data.totalPage);
       setPage(prevPage => prevPage + 1);
     }
@@ -98,9 +119,11 @@ const FriendsRespondScreen = () => {
 
     if (res && res.data) {
       let conversationId = res.data;
+      console.log(conversationId);
+      
       await AsyncStorage.setItem(
         'ConversationInfo',
-        JSON.stringify({...item, conversationId}),
+        JSON.stringify({...item, conversationId, type: 'personal'}),
       );
     } else {
       await AsyncStorage.setItem(
@@ -118,9 +141,8 @@ const FriendsRespondScreen = () => {
   const actionBlockUser = async (userId: string, userFriendId: string) => {
     setIsLoading(true);
     const res = await userServices.updateBlockUser(userId, userFriendId);
-    if (res) {
+    if (res && res.data) {
       console.log('Block successfully !!!', res.data);
-      // const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
       const parsedData = await UserInfo.getUserData();
       parsedData.friend.block = res.data;
       await Promise.all([
@@ -151,7 +173,6 @@ const FriendsRespondScreen = () => {
             onPressPersonal={() => onNavigationaProfile(item.userId)}
             onPressEllipsis={() => handleOpenModal(item)}
           />
-
           <ActionModal
             visible={isShowUnfriendModal}
             onPressNo={() => {
@@ -172,7 +193,7 @@ const FriendsRespondScreen = () => {
     handleCloseModal();
     setTimeout(() => {
       openModalAction();
-    },500);
+    }, 500);
   };
   function closeModalAction() {
     setShowUnfriendModal(false);
@@ -189,28 +210,23 @@ const FriendsRespondScreen = () => {
         renderItem={renderItems}
         scrollEventThrottle={16}
         ListFooterComponent={() =>
-          page <= limitPage ? <ActivityIndicator size={22} /> : <></>
+          page < limitPage ? <ActivityIndicator size={22} /> : null
         }
         onEndReached={page <= limitPage ? fetchUserFriends : () => {}}
         style={{marginHorizontal: 6, flex: 1}}
         keyExtractor={(item: any) => item.userId}
       />
-
       <UserInfoModal
-        isBlock={
-          friendData &&
-          friendData.block &&
-          friendData.block.includes(selectedUser.userId)
-        }
+        isBlock={friendData.block?.includes(selectedUser.userId)}
         visible={isModal}
         img={selectedUser.avatar}
         name={selectedUser.name}
         onClose={handleCloseModal}
-        handleNavigation={async () => {
-          await onNavigationMessage({...selectedUser, type: 'personal'});
+        handleNavigation={() => {
+          onNavigationMessage({...selectedUser, type: 'personal'});
         }}
         handleUnFriend={() => actionUnFriend()}
-        handleBlockUser={async () => await handleBlockUser()}
+        handleBlockUser={() => handleBlockUser()}
       />
       <LoadingModal visible={isLoading} />
       <ActionModal

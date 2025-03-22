@@ -1,17 +1,16 @@
-import { getPreviewData } from '@flyerhq/react-native-link-preview';
-import React, { useEffect, useState } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import {getPreviewData} from '@flyerhq/react-native-link-preview';
+import React, {useEffect, useState} from 'react';
+import {Linking, StyleSheet, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { useSelector } from 'react-redux';
-import { themeSelector } from '../../../redux/reducers/themeSlice';
-import { appColors } from '../../../Theme/Colors/appColors';
-import { ButtonComponent, RowComponent, TextComponent } from '../../Components';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {appColors} from '../../../Theme/Colors/appColors';
+import {ButtonComponent, RowComponent, TextComponent} from '../../Components';
 interface Props {
   url: string;
-  key: string;
 }
 const CardLinkComponent = (props: Props) => {
-  const {url, key} = props;
+  const {url} = props;
   const [previewData, setPreviewData] = useState<any>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -22,12 +21,9 @@ const CardLinkComponent = (props: Props) => {
       .catch(console.error);
   }, [url]);
 
-
   return (
-    previewData &&
-    previewData.image &&
-    previewData.image.url && (
-      <View key={key}>
+    previewData.image?.url && (
+      <View>
         <RowComponent
           styles={[
             styles.container,

@@ -32,6 +32,7 @@ import {userServices} from './Services/userService';
 import {Validate} from './Untils/Validate';
 import {useTranslation} from 'react-i18next';
 import {isArray} from 'lodash';
+import {UserInfo} from './Untils/UserInfo';
 const initValues = {
   groupName: '',
   description: '',
@@ -55,7 +56,7 @@ const AddGroupScreens = ({navigation}: any) => {
   const [groupInfo, setGroupInfo] = useState<any>({
     ...initValues,
     authorId: auth.userId,
-    avatar: getAvatar(),
+    avatar: UserInfo.getAvatar(),
   });
 
   useFocusEffect(
@@ -81,11 +82,7 @@ const AddGroupScreens = ({navigation}: any) => {
       setUsers(data);
     }
   };
-  function getAvatar() {
-    const temp =
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1newdbzQNEDeE0F8ky3T40yrgWDpsNzX4Rw&s';
-    return temp;
-  }
+
   const handleModal = (key: string, event?: React.SyntheticEvent) => {
     if (event) {
       event.persist(); // Prevent React from nullifying the event properties
@@ -93,67 +90,31 @@ const AddGroupScreens = ({navigation}: any) => {
     setNameField(key);
     setVisible(true);
   };
+
   const onCloseModal = () => {
     setVisible(false);
   };
   const onChangeGroupInfo = (key: any, value: any) => {
     setGroupInfo((prev: any) => ({...prev, [key]: value}));
   };
+
   const handleSelected = async (val: ImageOrVideo) => {
     const filePath = val.path;
     const fileName = filePath.split('/').pop();
     const path = `avatars/${fileName}`;
     console.log('path: ', path);
-
     const urlImage = await imageService.uploadImageToFirebase(filePath, path);
     console.log('Url: ', urlImage);
-
     onChangeGroupInfo('avatar', {
       name: urlImage,
       data: {userId: auth.userId},
     });
   };
 
-  function getDataGroup() {
-    const member = groupInfo.invitedUsers.map((item: any) => ({
-      ...item.data,
-      userName: item.name,
-    }));
-
-    const currentUser = {
-      userId: auth.userId,
-      userName: auth.name,
-      avatar: auth.avatar,
-      majoring: auth.majoring,
-    };
-    const dataGroup = {
-      authorId: groupInfo.authorId,
-      groupName: groupInfo.groupName,
-      description: groupInfo.description,
-      avatar:
-        groupInfo.avatar &&
-        typeof groupInfo.avatar === 'object' &&
-        groupInfo.avatar.name
-          ? groupInfo.avatar.name
-          : groupInfo.avatar,
-      invitedUsers: [...member, currentUser],
-      leader: {
-        userId: groupInfo.leader.data
-          ? groupInfo.leader.data.userId
-          : auth.userId,
-      },
-      deputyLeader: {
-        userId: groupInfo.deputyLeader.data.userId,
-      },
-      type: 'group',
-    };
-
-    return dataGroup;
-  }
   const handleAddGroupUser = async () => {
     setLoading(true);
-    const res = await groupServices.handelNewGroupUser(getDataGroup(), 'post');
-
+    const data = UserInfo.getDataGroup(groupInfo, auth);
+    const res = await groupServices.handelNewGroupUser(data, 'post');
     if (res) {
       navigation.navigate(t('message'));
     }
@@ -184,7 +145,7 @@ const AddGroupScreens = ({navigation}: any) => {
 
           <FastImage
             source={{
-              uri: groupInfo.avatar.name ?? getAvatar(),
+              uri: groupInfo.avatar.name ?? UserInfo.getAvatar(),
               cache: FastImage.cacheControl.immutable,
               priority: FastImage.priority.high,
             }}

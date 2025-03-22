@@ -51,7 +51,7 @@ const TabViewFriend = () => {
             key={key}
             style={{backgroundColor: colors.background}}
             labelStyle={{
-              color: appColors.grey3, // Màu cam đậm
+              color: appColors.grey3, 
               fontWeight: '500',
               fontStyle: 'italic',
             }}

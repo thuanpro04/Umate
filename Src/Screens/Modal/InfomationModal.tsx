@@ -22,7 +22,7 @@ interface Props {
   onPressAddGroud: () => void;
   listUser?: [];
   onPressRemove: () => void;
-  onPresMap: () => void;
+  
 }
 const InfomationModal = (props: Props) => {
   const {
@@ -31,7 +31,6 @@ const InfomationModal = (props: Props) => {
     onPressAddGroud,
     listUser,
     onPressRemove,
-    onPresMap,
   } = props;
   const modalizeRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -52,12 +51,7 @@ const InfomationModal = (props: Props) => {
       name: t('create_group'),
       onPress: () => onPressAddGroud(),
     },
-    {
-      key: 'googmap',
-      icon: <Map1 size={appInfo.sizeIconBold} color={colors.icon} />,
-      name: 'Map',
-      onPress: () => onPresMap(),
-    },
+   
     {
       key: 'removeconversation',
       icon: <MessageRemove size={appInfo.sizeIconBold} color={colors.icon} />,
@@ -75,7 +69,7 @@ const InfomationModal = (props: Props) => {
         modalStyle={{
           paddingHorizontal: 12,
           paddingTop: 18,
-          backgroundColor: colors.background,
+          backgroundColor: colors.background, 
         }}>
         {listUser
           ? listUser.map(item => {

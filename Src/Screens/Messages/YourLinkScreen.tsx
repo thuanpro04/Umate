@@ -10,6 +10,8 @@ import {HeaderComponent, TextComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CardLinkComponent from './Component/CardLinkComponent';
 import LoadingModal from '../Modal/LoadingModal';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const YourLinkScreen = () => {
   const {id, type, theme} = useRoute().params as {
@@ -17,8 +19,9 @@ const YourLinkScreen = () => {
     type: string;
     theme: string;
   };
+
   const [links, setLinks] = useState<any[]>([]);
-  const colors = appColors[theme ?? 'light'];
+  const colors = appColors[theme];
   const {t} = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   useFocusEffect(
@@ -40,9 +43,13 @@ const YourLinkScreen = () => {
       getLinkYourConversation();
     }, [id]),
   );
-  const renderItems = ({item, index}: any) => {
-    return <CardLinkComponent url={item.content} key={item.messageId} />;
-  };
+  const renderItems = useCallback(
+    ({item, index}: any) => {
+      return <CardLinkComponent url={item.content} key={item._id} />;
+    },
+    [links],
+  );
+
   return (
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>
@@ -51,17 +58,18 @@ const YourLinkScreen = () => {
           <ArrowLeft2 size={appInfo.sizeIconBold} color={colors.icon} />
         }
         title={t('yourlink')}
+        titleColor={colors.text}
       />
-      {links && links.length > 0 ? (
+      {links?.length > 0 ? (
         <FlatList
           style={{flex: 1, paddingHorizontal: 12}}
           data={links}
-          keyExtractor={item => item.messageId}
+          keyExtractor={item => item._id}
           renderItem={renderItems}
         />
       ) : (
         <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <TextComponent label={t('empty')} />
+          <TextComponent label={t('empty')} color={colors.text} />
         </View>
       )}
       <LoadingModal visible={isLoading} />

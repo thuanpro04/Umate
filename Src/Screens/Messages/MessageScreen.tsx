@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {HambergerMenu, More, ScanBarcode} from 'iconsax-react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {ActivityIndicator, FlatList, SafeAreaView, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {globalStyles} from '../../Styles/globalStyle';
@@ -28,6 +28,8 @@ const MessageScreen = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const auth = useSelector(authSelector);
+  const [page, setPage] = useState(1);
+  const [limitPage, setLimitPage] = useState(1);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
@@ -43,11 +45,20 @@ const MessageScreen = ({navigation}: any) => {
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
-    const res = await messageServices.getAllConversationUsers(auth.userId);
+    if (page > limitPage) {
+      return;
+    }
+    const res = await messageServices.getAllConversationUsers(
+      auth.userId,
+      page,
+    );
     if (res?.data && res) {
-      const sortedUsers = sortUsersByPinnedStatus(res?.data);
+      const sortedUsers = sortUsersByPinnedStatus(res?.data.allConversations);
       setUsers(sortedUsers);
-      // console.log(res?.data);
+      setLimitPage(res.data.totalPage);
+      setPage(prevPage => prevPage + 1);
+    } else {
+      setUsers([]);
     }
     setIsLoading(false);
   }, []);
@@ -59,8 +70,8 @@ const MessageScreen = ({navigation}: any) => {
     setIsVisible(false);
   };
   const handleAddGroup = () => {
-    navigation.navigate('AddGroup');
     onCloseModal();
+    navigation.navigate('AddGroup');
   };
   const handleDeleteConversation = async (user: any) => {
     setIsLoading(true);
@@ -98,12 +109,14 @@ const MessageScreen = ({navigation}: any) => {
             (user.type === 'group' && item.groupId === user.groupId)
           ) {
             // Create a new object with updated pinnedBy property
+            let isPinned = item.pinnedBy?.includes(auth.userId);
+            const pinnedBy = isPinned
+              ? item.pinnedBy?.filter((id: any) => id !== auth.userId) // Bỏ ghim
+              : [...(item.pinnedBy || []), auth.userId]; // Ghim
+
             return {
               ...item,
-              pinnedBy: res.data.data || [
-                ...(item.pinnedBy || []),
-                auth.userId,
-              ],
+              pinnedBy,
             };
           }
           return item;
@@ -117,10 +130,7 @@ const MessageScreen = ({navigation}: any) => {
   const renderCardItems = useCallback(
     ({item, index}: any) => {
       const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
-      const name =
-        item.nickNames && item.nickNames[item.userId]
-          ? item.nickNames[item.userId]
-          : item.name;
+      const name = item.nickNames?.[item.userId] ?? item.name;
 
       return (
         <CustormLongPress
@@ -128,7 +138,7 @@ const MessageScreen = ({navigation}: any) => {
           user={item}
           handleGhimConversation={() => handleGhimConversation(item)}>
           <CarUserChat
-            isGhim={item.pinnedBy && item.pinnedBy.includes(auth.userId)}
+            isGhim={item.pinnedBy?.includes(auth.userId)}
             key={index}
             name={item.groupName ?? name}
             massv={
@@ -146,13 +156,12 @@ const MessageScreen = ({navigation}: any) => {
         </CustormLongPress>
       );
     },
-    [users],
+    [users, handleGhimConversation],
   );
-  useFocusEffect(
-    useCallback(() => {
-      getAllConversation();
-    }, []),
-  );
+  useEffect(() => {
+    getAllConversation(); // Cập nhật danh sách khi users thay đổi
+    navigation.addListener('focus', () => getAllConversation());
+  }, []);
   return (
     <SafeAreaView
       style={[globalStyles.container, {backgroundColor: colors.background}]}>
@@ -213,9 +222,15 @@ const MessageScreen = ({navigation}: any) => {
         <FlatList
           data={users}
           key={'listMessage'}
+          style={{flex: 1}}
           keyExtractor={item =>
             item.type === 'personal' ? item.conversationId : item.groupId
           }
+          extraData={users}
+          ListHeaderComponent={() =>
+            page < limitPage ? <ActivityIndicator size={22} /> : null
+          }
+          onEndReached={page <= limitPage ? getAllConversation : () => {}}
           renderItem={renderCardItems}
         />
       ) : (
@@ -230,11 +245,8 @@ const MessageScreen = ({navigation}: any) => {
         </View>
       )}
       <InfomationModal
-        onPresMap={() => {
-          setIsVisible(false);
-          navigation.navigate('GoongMapScreen');
-        }}
         onPressRemove={() => {
+          onCloseModal();
           navigation.navigate('TrashConversation', {users});
         }}
         visible={isVisible}

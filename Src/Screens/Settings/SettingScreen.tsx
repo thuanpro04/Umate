@@ -54,6 +54,7 @@ import {
   setLanguage,
 } from '../../redux/reducers/languageSlice';
 import i18next from 'i18next';
+import {UserInfo} from '../Untils/UserInfo';
 
 const SettingScreen = () => {
   const navigation: any = useNavigation();
@@ -66,6 +67,7 @@ const SettingScreen = () => {
   const friend = useSelector(friendSelector);
   const event = useSelector(eventSelector);
   const {t} = useTranslation();
+  let parsedData;
   const [isDarkMode, setIsDarkMode] = useState(
     theme === 'light' ? false : true,
   );
@@ -81,11 +83,15 @@ const SettingScreen = () => {
       theme === 'dark' ? 'light' : 'dark',
     );
     if (res && res.data) {
-      dispatch(setTheme(newTheme));
+      parsedData = await UserInfo.getUserData();
+      parsedData.auth.theme = newTheme;
+      await Promise.all([
+        dispatch(setTheme(newTheme)),
+        AsyncStorage.setItem('userData', JSON.stringify(parsedData)),
+      ]);
       console.log('update successfully ', res.data);
     }
     setIsDarkMode(!isDarkMode);
-   
   };
   const handleChangeLanguage = async () => {
     const newLanguage = language === 'vi' ? 'en' : 'vi';
@@ -95,16 +101,13 @@ const SettingScreen = () => {
         language === 'vi' ? 'en' : 'vi',
       );
       if (res && res.data) {
-        dispatch(setLanguage(newLanguage));
-        await AsyncStorage.setItem(
-          'userData',
-          JSON.stringify({
-            auth: {...auth, language: newLanguage}, // Cập nhật ngôn ngữ
-            profile,
-            friend,
-            event,
-          }),
-        );
+        parsedData = await UserInfo.getUserData();
+        parsedData.auth.language = newLanguage;
+        await Promise.all([
+          dispatch(setLanguage(newLanguage)),
+          AsyncStorage.setItem('userData', JSON.stringify(parsedData)),
+        ]);
+
         i18next.changeLanguage(newLanguage);
         console.log('update language successfully: ', res.data);
       }
@@ -130,7 +133,6 @@ const SettingScreen = () => {
       console.log('Remove successfully !!');
     }
     await handleLogout();
-  
   };
 
   const handleLogout = async () => {

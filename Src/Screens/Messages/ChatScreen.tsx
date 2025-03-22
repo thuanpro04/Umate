@@ -14,8 +14,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {friendSelector} from '../../redux/reducers/friendSlice';
-import {socketSelector} from '../../redux/reducers/socketSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import {profileSelector} from '../../redux/reducers/profileSlice';
 import {globalStyles} from '../../Styles/globalStyle';
 import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -25,13 +24,14 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
+import LoadingModal from '../Modal/LoadingModal';
 import {messageServices} from '../Services/messageServices';
+import {Notification} from '../Untils/Notification';
 import {UserInfo} from '../Untils/UserInfo';
 import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {Notification} from '../Untils/Notification';
-import LoadingModal from '../Modal/LoadingModal';
+import SocketService from '../Services/SocketService';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -44,20 +44,20 @@ const ChatScreen = ({navigation}: any) => {
   const scrollViewRef = useRef<FlatList>(null);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
-  const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
-  const colors: any = appColors[converInfo.theme ?? 'light'];
-  const currentUserId = auth.userId;
   const [limitPage, setLimitPage] = useState(1);
-  const clearReplyMessage = () => setReplyMessage(null);
-  const socket = useSelector(socketSelector).socket;
-  const {t} = useTranslation();
-
+  const theme: 'light' | 'dark' = useSelector(themeSelector);
+  const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
-  const name =
-    converInfo.nickNames && converInfo.nickNames[converInfo.userId]
-      ? converInfo.nickNames[converInfo.userId]
-      : converInfo.name;
+  const colors: any = appColors[converInfo.theme ?? theme];
+  const currentUserId = auth.userId;
+  const clearReplyMessage = () => setReplyMessage(null);
+  const socket = SocketService.getSocket();
+  const {t} = useTranslation();
+  const isPersonal = converInfo.type === 'personal';
+  const existingBlock = converInfo.block?.length > 0;
+  const name = converInfo.nickNames?.[converInfo.userId] ?? converInfo.name;
+  const checkMess = messages && messages[messages.length - 1];
 
   const handleUpdateStatusMessage = async () => {
     if (
@@ -69,9 +69,7 @@ const ChatScreen = ({navigation}: any) => {
     }
     const res = await messageServices.updateStatusMessage(
       auth.userId,
-      converInfo.type === 'personal'
-        ? converInfo.conversationId
-        : converInfo.groupId,
+      converInfo.conversationId ?? converInfo.groupId,
       converInfo.type,
     );
     if (res) {
@@ -83,19 +81,17 @@ const ChatScreen = ({navigation}: any) => {
       if (prev) return true; // Nếu đang loading, không gọi API nữa
       return true;
     });
-    setIsLoading(true);
-    if (converInfo.type === 'personal' && !converInfo.conversationId) {
+    if (isPersonal && !converInfo.conversationId) {
+      setIsLoading(false);
       return;
     }
     const res = await messageServices.getAllMessagesUser(
-      converInfo.type === 'personal'
-        ? converInfo.conversationId
-        : converInfo.groupId,
+      converInfo.conversationId ?? converInfo.groupId,
       converInfo.type,
       page,
     );
-    setMembers(res?.data.invitedUsers);
-    if (res?.data && res.data.messages.length > 0) {
+    if (res?.data && res.data.messages?.length > 0) {
+      setMembers(res.data?.invitedUsers);
       // console.log(res.data.messages);
       setLimitPage(res.data.totalPages);
       // console.log('limitPage: ', limitPage, 'page: ', page);
@@ -119,7 +115,7 @@ const ChatScreen = ({navigation}: any) => {
     }
 
     setIsLoading(false);
-  }, [converInfo, page, isLoading]);
+  }, [converInfo, page]);
 
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]; reply?: string}) => {
@@ -194,10 +190,10 @@ const ChatScreen = ({navigation}: any) => {
   }, []);
 
   const keyExtractor = (item: any, index: number) =>
-    item.id?.toString() || index.toString();
+    item._id?.toString() || index.toString();
   const allUrlImages = useMemo(() => {
     return messages
-      .filter((item: any) => item.imagesUrl && item.imagesUrl.length > 0)
+      .filter((item: any) => item.imagesUrl?.length > 0)
       .flatMap((item: any) => item.imagesUrl)
       .filter((imageUrl: any) => imageUrl !== null);
   }, [messages]);
@@ -206,32 +202,18 @@ const ChatScreen = ({navigation}: any) => {
     (props: any) => {
       return (
         <ChatItems
-          name={
-            converInfo.nickNames && converInfo.nickNames[converInfo.userId]
-              ? converInfo.nickNames[converInfo.userId]
-              : converInfo.name
-          }
+          name={name}
           conversationInfo={converInfo}
-          theme={converInfo.theme}
-          blockId={
-            converInfo.block && converInfo.type === 'personal'
-              ? converInfo.block[0]
-              : ''
-          }
+          theme={converInfo.theme ?? theme}
+          blockId={existingBlock && isPersonal ? converInfo.block[0] : ''}
           isBlock={
-            (converInfo.block && converInfo.block.includes(auth.userId)) ||
-            (friendData.block && friendData.block.includes(converInfo.userId))
+            converInfo.block?.includes(auth.userId) ||
+            friendData.block?.includes(converInfo.userId)
           }
           updateRowRef={updateRowRef}
           navigation={navigation}
           currentUserId={currentUserId}
-          userId={
-            converInfo.type === 'personal'
-              ? converInfo.userId
-              : converInfo
-              ? converInfo.invitedUsers
-              : ''
-          }
+          userId={converInfo.userId ?? converInfo.invitedUsers}
           {...props}
           members={members}
           urlImages={allUrlImages}
@@ -239,7 +221,7 @@ const ChatScreen = ({navigation}: any) => {
         />
       );
     },
-    [navigation, converInfo, members, allUrlImages],
+    [navigation, converInfo, members, allUrlImages, page, messages],
   );
   const ListHeader = () => {
     return isLoading ? <ActivityIndicator /> : <></>;
@@ -247,19 +229,15 @@ const ChatScreen = ({navigation}: any) => {
 
   const renderViewBlock = () => {
     return (
-      converInfo &&
-      converInfo.block &&
-      converInfo.block.includes(auth.userId) && (
-        <View style={styles.block}>
-          <TextComponent
-            label={`${t('you_are_blocked')} ${converInfo.name}`}
-            styles={{fontWeight: '500', fontStyle: 'italic'}}
-            color={appColors.white}
-          />
-          <SpaceComponent height={8} />
-          <TextComponent label="🤫" size={28} />
-        </View>
-      )
+      <View style={styles.block}>
+        <TextComponent
+          label={`${t('you_are_blocked')} ${converInfo.name}`}
+          styles={{fontWeight: '500', fontStyle: 'italic'}}
+          color={appColors.white}
+        />
+        <SpaceComponent height={8} />
+        <TextComponent label="🤫" size={28} />
+      </View>
     );
   };
   useEffect(() => {
@@ -300,23 +278,45 @@ const ChatScreen = ({navigation}: any) => {
     //  scrollViewToEnd()
   }, [converInfo]);
   useEffect(() => {
-    socket.on('receive_message', (data: any) => {
+    const handleNewMessage = (data: any) => {
       console.log('receive_message: ', data);
+
+      // Chuẩn hóa dữ liệu - bổ sung trường _id nếu không có
+      const normalizedData = {
+        ...data,
+        _id: data._id || data.messageId,
+        // Lọc bỏ null trong imagesUrl
+        imagesUrl: data.imagesUrl?.filter((url: any) => url !== null) || [],
+      };
+
       setMessages(prev => {
-        if (!prev.some(msg => msg._id === data._id)) {
-          return [...prev, data];
+        // Kiểm tra trùng lặp sử dụng messageId hoặc _id
+        const messageExists = prev.some(
+          msg => msg.messageId && msg.messageId === normalizedData.messageId,
+        );
+
+        if (!messageExists) {
+          console.log('Adding new message:', normalizedData);
+          return [...prev, normalizedData];
         }
         return prev;
       });
-    });
+      if (
+        checkMess &&
+        checkMess.status === 'sent' &&
+        checkMess.senderId !== auth.userId
+      ) {
+        handleUpdateStatusMessage();
+      }
+    };
+
+    socket?.on('receive_message', handleNewMessage);
 
     return () => {
-      socket.off('receive_message');
+      socket?.off('receive_message', handleNewMessage);
     };
-  }, [converInfo]);
-
+  }, []);
   useEffect(() => {
-    const checkMess = messages && messages[messages.length - 1];
     if (
       checkMess &&
       checkMess.status === 'sent' &&
@@ -326,7 +326,7 @@ const ChatScreen = ({navigation}: any) => {
     }
   }, [messages]);
   useEffect(() => {
-    socket.on('out_group', (userId: any) => {
+    socket?.on('out_group', (userId: any) => {
       console.log('out group: ', userId);
       Notification.showToast(
         'info',
@@ -336,7 +336,7 @@ const ChatScreen = ({navigation}: any) => {
       navigation.goBack();
     });
     return () => {
-      socket.off('out_group');
+      socket?.off('out_group');
     };
   }, [converInfo]);
 
@@ -345,7 +345,8 @@ const ChatScreen = ({navigation}: any) => {
       style={[styles.container, {backgroundColor: colors.background}]}>
       <SafeAreaView style={globalStyles.main}>
         <HeaderComponent
-          title={converInfo.type === 'personal' ? name : converInfo.groupName}
+          title={isPersonal ? name : converInfo.groupName}
+          titleColor={colors.text}
           image={converInfo.avatar}
           iconLeft={
             <ArrowLeft size={appInfo.sizeIconBold} color={colors.icon} />
@@ -357,12 +358,13 @@ const ChatScreen = ({navigation}: any) => {
           onPress2={() => navigation.navigate('MessageNavigator')}
         />
 
-        {messages && messages.length > 0 ? (
+        {messages?.length > 0 ? (
           <FlatList
             ref={scrollViewRef}
             data={messages}
+            extraData={messages.length}
             keyExtractor={keyExtractor}
-            style={{flex: 1}}
+            style={{flex: 1, marginBottom: 12}}
             renderItem={renderItemMessages}
             // onEndReachedThreshold={0.05}
             scrollEventThrottle={50} // Tăng giá trị này để giảm số lần gọi onScroll
@@ -408,41 +410,30 @@ const ChatScreen = ({navigation}: any) => {
           </ButtonComponent>
         )}
       </SafeAreaView>
-      {converInfo &&
-      converInfo.type === 'personal' &&
-      converInfo.block &&
-      converInfo.block.includes(auth.userId) ? (
+      {!!converInfo.block?.includes(auth.userId) ? (
         renderViewBlock()
       ) : (
         <ChatInput
-          avatar={converInfo.avatar}
+          theme={converInfo.theme ?? theme}
+          avatar={profile.avatar}
           name={
-            converInfo.type == 'personal'
+            isPersonal
               ? profile.name
               : `${converInfo.groupName} - ${profile.name}`
           }
           isNotification={
-            converInfo.notification &&
-            converInfo.notification.includes(converInfo.userId)
+            !!converInfo.notification?.includes(converInfo.userId)
           }
-          isBlock={
-            friendData.block && friendData.block.includes(converInfo.userId)
-          }
+          isBlock={!!friendData.block?.includes(converInfo.userId)}
           onSendMessage={onSendMessages}
           onScroll={() => scrollViewToEnd()}
           clearReply={clearReplyMessage}
           reply={replyMessage}
-          userId={
-            converInfo.type === 'personal'
-              ? converInfo?.userId
-              : converInfo.type === 'group'
-              ? getUserIdGroup()
-              : ''
-          }
+          userId={converInfo.userId ?? getUserIdGroup()}
           groupId={converInfo ? converInfo.groupId : undefined}
         />
       )}
-      <LoadingModal visible={isLoading} />
+      {/* <LoadingModal visible={isLoading} /> */}
     </KeyboardAvoidingView>
   );
 };

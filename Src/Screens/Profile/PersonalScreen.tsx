@@ -49,6 +49,7 @@ import {useTranslation} from 'react-i18next';
 import FastImage from 'react-native-fast-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {messageServices} from '../Services/messageServices';
+import {eventSelector} from '../../redux/reducers/eventSlice';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -59,13 +60,15 @@ const PersonalScreen = ({navigation}: any) => {
   const [isDetail, setDetail] = useState(false);
   const {t} = useTranslation();
   const bgColor = useSharedValue('#009688');
+  const event = useSelector(eventSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+
   const infoUser = {
     stats: {
-      friend: userInfo && userInfo.friends ? userInfo.friends.length : 0,
-      share: userInfo && userInfo.eventShares ? userInfo.eventShares.length : 0,
-      like: 0,
+      friend: userInfo?.friends?.length ?? 0,
+      share: userInfo?.eventShares?.length ?? 0,
+      like: friendData.like ?? 0,
     },
   };
 
@@ -337,6 +340,7 @@ const PersonalScreen = ({navigation}: any) => {
     setIsLoading(false);
     navigation.navigate('Chat');
   };
+  
   return !isLoading ? (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}>
@@ -357,10 +361,14 @@ const PersonalScreen = ({navigation}: any) => {
                     shadowColor: colors.shadow,
                   },
                 ]}>
-                <Text style={profileStyles.statNumber}>{value}</Text>
-                <Text style={profileStyles.statLabel}>
-                  {t(key).toUpperCase()}
-                </Text>
+                <TextComponent
+                  styles={profileStyles.statNumber}
+                  label={value}
+                />
+                <TextComponent
+                  styles={profileStyles.statLabel}
+                  label={t(key).toUpperCase()}
+                /> 
               </View>
             ))}
           </View>

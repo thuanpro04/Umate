@@ -17,8 +17,9 @@ import {Portal} from 'react-native-portalize';
 import {globalStyles} from '../../../Styles/globalStyle';
 import {TouchableOpacity} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { themeSelector } from '../../../redux/reducers/themeSlice';
-import { useSelector } from 'react-redux';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {useSelector} from 'react-redux';
+import {useTranslation} from 'react-i18next';
 interface Props {
   onSelect: (val: {
     type: 'url' | 'file';
@@ -27,33 +28,45 @@ interface Props {
   icon?: ReactNode;
   multiple?: boolean;
   title?: string;
+  isBlock?: boolean;
+  handleToastNotificationBlock?: () => void;
 }
 const ButtonImagePicker = (props: Props) => {
-  const {onSelect, icon, multiple, title} = props;
+  const {
+    onSelect,
+    icon,
+    multiple,
+    title,
+    isBlock,
+    handleToastNotificationBlock,
+  } = props;
   const modalizeRef = useRef<Modalize>();
   const [imageUrl, setImageUrl] = useState('');
   const [isVisibleModalAddUrl, setIsVisibleModalAddUrl] = useState(false);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const {t} = useTranslation();
+
   const choiceImages = [
     {
       key: 'camera',
-      title: 'Take a picture.',
+      title: 'picture',
       icon: <Camera size={appInfo.sizeIcon} color={colors.icon} />,
     },
     {
       key: 'library',
-      title: 'From library.',
+      title: 'from_library',
       icon: (
         <Feather name="image" size={appInfo.sizeIcon} color={colors.icon} />
       ),
     },
     {
       key: 'url',
-      title: 'From url.',
+      title: 'from_url',
       icon: <Link size={appInfo.sizeIcon} color={colors.icon} />,
     },
   ];
+
   const renderItems = (item: {icon: ReactNode; key: string; title: string}) => {
     return (
       <RowComponent
@@ -62,7 +75,7 @@ const ButtonImagePicker = (props: Props) => {
         onPress={() => handleChoiceImages(item.key)}>
         {item.icon}
         <SpaceComponent height={30} />
-        <TextComponent label={item.title} title />
+        <TextComponent label={t(`${item.title}`)} title />
       </RowComponent>
     );
   };
@@ -111,14 +124,18 @@ const ButtonImagePicker = (props: Props) => {
         styles={{marginTop: 10}}
         type="action"
         iconLeft={icon}
-        onPress={() => modalizeRef.current?.open()}>
-        {<TextComponent label={title ?? ''}  />}
+        onPress={() =>
+          isBlock
+            ? handleToastNotificationBlock && handleToastNotificationBlock()
+            : modalizeRef.current?.open()
+        }>
+        {<TextComponent label={title ?? ''} />}
       </ButtonComponent>
       <Portal>
         <Modalize
           adjustToContentHeight
           ref={modalizeRef}
-          modalStyle={{backgroundColor:colors.background}}
+          modalStyle={{backgroundColor: colors.background}}
           handlePosition="inside">
           <View style={{marginVertical: 30, paddingHorizontal: 20}}>
             {choiceImages.map(element => renderItems(element))}
@@ -128,7 +145,7 @@ const ButtonImagePicker = (props: Props) => {
 
       <Modal
         visible={isVisibleModalAddUrl}
-        style={{flex: 1, backgroundColor:colors.background}}
+        style={{flex: 1, backgroundColor: colors.background}}
         statusBarTranslucent
         transparent
         animationType="slide">
@@ -176,9 +193,7 @@ const ButtonImagePicker = (props: Props) => {
                   onSelect({type: 'url', value: imageUrl});
                   setImageUrl('');
                 }}
-                
                 styles={{
-                  
                   paddingHorizontal: 10,
                   paddingVertical: 2,
                 }}

@@ -129,7 +129,7 @@ const CarUserComponent = (props: Props) => {
         <TextComponent label={name} title />
         <SpaceComponent height={8} />
         <TextComponent
-          label={majoring ?? '...'}
+          label={majoring ?? t('majoring')}
           styles={globalStyles.actionText}
         />
       </View>
@@ -154,31 +154,17 @@ const CarUserComponent = (props: Props) => {
         </TouchableOpacity>
       )}
       {iconM && (
-        <RowComponent>
-          <ButtonComponent
-            type="action"
-            iconLeft={
-              <AntDesign
-                name="contacts"
-                size={appInfo.sizeIconBold}
-                color={colors.icon}
-              />
-            }
-            onPress={onPressPersonal}
-          />
-          <SpaceComponent width={5} />
-          <ButtonComponent
-            type="action"
-            iconRight={
-              <AntDesign
-                size={appInfo.sizeIconBold}
-                color={colors.icon}
-                name="ellipsis1"
-              />
-            }
-            onPress={onPressEllipsis}
-          />
-        </RowComponent>
+        <ButtonComponent
+          type="action"
+          iconRight={
+            <AntDesign
+              size={appInfo.sizeIconBold}
+              color={colors.icon}
+              name="ellipsis1"
+            />
+          }
+          onPress={onPressEllipsis}
+        />
       )}
     </RowComponent>
   ) : (
@@ -205,22 +191,25 @@ const CarUserComponent = (props: Props) => {
         <TextComponent label={name} title />
         <RowComponent styles={{gap: 20, paddingVertical: 0}}>
           <RowComponent styles={[localStyle.card, {gap: 0}]}>
-            {mutualUser?.map(item => (
-              <FastImage
-                key={item.userId}
-                source={{
-                  uri: item.avatar,
-
-                  priority: FastImage.priority.high,
-                  cache: FastImage.cacheControl.immutable,
-                }}
-                style={localStyle.imgHint}
-              />
-            ))}
+            {!!mutualFriend &&
+              mutualUser?.map(
+                item =>
+                  item.userId !== userId && (
+                    <FastImage
+                      key={item.userId}
+                      source={{
+                        uri: item.avatar,
+                        priority: FastImage.priority.high,
+                        cache: FastImage.cacheControl.immutable,
+                      }}
+                      style={localStyle.imgHint}
+                    />
+                  ),
+              )}
           </RowComponent>
-          {mutualFriend && mutualFriend > 0 && (
+          {!!mutualFriend && (
             <TextComponent
-              label={mutualFriend.toString() + ' ' + t('mutual_friend')}
+              label={`${mutualFriend?.toString() ?? ''} ${t('mutual_friend')}`}
             />
           )}
         </RowComponent>
@@ -231,8 +220,7 @@ const CarUserComponent = (props: Props) => {
                 label={sayYes}
                 styles={{width: '40%'}}
                 onPress={onPressYes}
-                textStyle={{fontSize:10}}
-
+                textStyle={{fontSize: 10}}
               />
               <ButtonComponent
                 label={sayNo}
@@ -240,7 +228,7 @@ const CarUserComponent = (props: Props) => {
                   width: '40%',
                   backgroundColor: colors.icon,
                 }}
-                textStyle={{fontSize:10}}
+                textStyle={{fontSize: 10}}
                 onPress={onPressNo}
               />
             </>
@@ -252,8 +240,7 @@ const CarUserComponent = (props: Props) => {
                 width: '80%',
                 paddingVertical: 3,
               }}
-              textStyle={{fontSize:14}}
-
+              textStyle={{fontSize: 14}}
               onPress={onPressCancel}
             />
           )}

@@ -86,6 +86,7 @@ const HeaderComponent = (props: Props) => {
                 fontWeight: 'bold',
                 fontStyle: 'italic',
               }}
+              color={titleColor}
             />
           </>
         )}

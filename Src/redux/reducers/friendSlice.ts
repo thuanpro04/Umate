@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {set} from 'lodash';
 
 interface friendState {
   friends: string[];
@@ -22,7 +23,7 @@ const friendSlice = createSlice({
       state.removeFriends = action.payload.removeFriends;
       state.block = action.payload.block;
     },
-    removeFriend: state => {
+    resetFriend: state => {
       state.friends = [];
       state.friendRequests = [];
       state.removeFriends = [];
@@ -31,12 +32,22 @@ const friendSlice = createSlice({
     setBlock: (state, action: PayloadAction<string[]>) => {
       state.block = action.payload; // ✅ Chỉ cập nhật block, không ảnh hưởng dữ liệu khác
     },
-    setFriend: (state, action: PayloadAction<string[]>) => {
-      state.friends = [...state.friends, ...action.payload];
+    addOneFriend: (state, action: PayloadAction<string | string[]>) => {
+      // Thêm friend nếu chưa có
+      if (Array.isArray(action.payload)) {
+        state.friends = action.payload;
+      } else {
+        if (!state.friends.includes(action.payload)) {
+          state.friends.push(action.payload);
+        }
+      }
+    },
+    removeFriend: (state, action: PayloadAction<string>) => {
+      state.friends = state.friends.filter(id => id !== action.payload);
     },
   },
 });
 export const friendReducer = friendSlice.reducer;
-export const {addFriend, removeFriend, setBlock, setFriend} =
+export const {addFriend, resetFriend, setBlock, addOneFriend, removeFriend} =
   friendSlice.actions;
 export const friendSelector = (state: any) => state.friends;

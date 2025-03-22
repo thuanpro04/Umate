@@ -26,6 +26,7 @@ class SocketService {
     PushNotification.configure({
       onNotification: function (notification) {
         console.log('NOTIFICATION:', notification);
+        
       },
       popInitialNotification: true,
       requestPermissions: true,
@@ -119,13 +120,11 @@ class SocketService {
       console.log('Không thể thiết lập sự kiện - socket chưa khởi tạo');
       return;
     }
-
     // Xóa tất cả listener cũ (nếu có) để tránh trùng lặp
     this.socket.off('incomingCall');
     this.socket.off('feedbackCancelCall');
     this.socket.off('notification_message');
     this.socket.off('disconnect');
-
     // Log khi mất kết nối và tự động kết nối lại
     this.socket.on('disconnect', reason => {
       console.log('Socket bị ngắt kết nối:', reason);
@@ -148,11 +147,10 @@ class SocketService {
       };
       this.sendNotification(dataCall);
     });
-
+    
     this.socket.on('notification_message', (data: any) => {
       this.sendNotification(data);
     });
-    
   }
 
   public getSocket(): Socket | null {
@@ -188,6 +186,7 @@ class SocketService {
       this.socket.off(event);
     }
   }
+
   public disconnect() {
     if (this.socket) {
       this.socket.disconnect();

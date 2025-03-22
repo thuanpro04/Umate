@@ -1,7 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { HambergerMenu, Notification } from 'iconsax-react-native';
-import React, { useCallback, useState } from 'react';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {HambergerMenu, Notification} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,22 +9,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appColors } from '../../Theme/Colors/appColors';
-import { appInfo } from '../../Theme/appInfo';
-import { addAuth, authSelector } from '../../redux/reducers/authReducer';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { CarEventComponent, HeaderComponent } from '../Components';
-import { eventSevices } from '../Services/eventService';
-import { userServices } from '../Services/userService';
+import {useDispatch, useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appColors} from '../../Theme/Colors/appColors';
+import {appInfo} from '../../Theme/appInfo';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {CarEventComponent, HeaderComponent} from '../Components';
+import {eventSevices} from '../Services/eventService';
+import {notificationServices} from '../Services/notificationServices';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
+  const [statusNoti, setStatusNoti] = useState(false);
   const auth = useSelector(authSelector);
   const profile = useSelector(profileSelector);
+
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
@@ -80,16 +80,19 @@ const HomeScreen = () => {
 
     return null;
   };
-
+  const checkLastNotificationStatus = async () => {
+    const res = await notificationServices.checkLastNotificationStatus(
+      auth.userId,
+    );
+    if (res && res.data) {
+      console.log('Check notification successfully', res.data.status);
+      setStatusNoti(res.data.status === 'sent');
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       getNewEvent();
-      const setOnline = async () => {
-        await userServices.updateUserStatus(auth.userId, true);
-        const fcmToken = await AsyncStorage.getItem('fcmtoken');
-        dispatch(addAuth({...auth, fcmTokens: fcmToken}));
-      };
-      setOnline();
+      checkLastNotificationStatus();
     }, []),
   );
 
@@ -104,11 +107,19 @@ const HomeScreen = () => {
           <HambergerMenu size={appInfo.sizeIconBold} color={colors.icon} />
         }
         iconRight={
-          // NotificationScreen
           <TouchableOpacity
             onPress={() => navigation.navigate('NotificationScreen')}>
             <Notification color={colors.icon} fontSize={appInfo.sizeIconBold} />
-            <View style={localStyles.notification} />
+            <View
+              style={[
+                localStyles.notification,
+                {
+                  backgroundColor: statusNoti
+                    ? appColors.green
+                    : 'transparent',
+                },
+              ]}
+            />
           </TouchableOpacity>
         }
         onPress1={() => navigation.openDrawer()}
@@ -136,7 +147,6 @@ const HomeScreen = () => {
 export default HomeScreen;
 const localStyles = StyleSheet.create({
   notification: {
-    backgroundColor: appColors.green,
     height: 8,
     width: 8,
     borderRadius: 50,

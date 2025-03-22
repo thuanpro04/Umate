@@ -10,11 +10,12 @@ import {socketSelector} from '../../redux/reducers/socketSlice';
 import {appInfo} from '../../Theme/appInfo';
 import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import {useTranslation} from 'react-i18next';
+import SocketService from '../Services/SocketService';
 const CallWaitingScreen = ({route, navigation}: any) => {
   const {callData} = route.params;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
   const [sound, setSound] = useState<Sound | null>(null);
-  const socket = useSelector(socketSelector).socket;
+  const socket = SocketService.getSocket();
   const auth = useSelector(authSelector);
   const {t} = useTranslation();
   useEffect(() => {
@@ -61,26 +62,25 @@ const CallWaitingScreen = ({route, navigation}: any) => {
     if (sound) {
       sound.stop();
     }
-
     const data = {...callData};
-    socket.emit('callAccepted', data);
+    socket?.emit('callAccepted', data);
     navigation.navigate('VoiceCall', {
       roomID: callData.callID,
       name: callData.userName,
       type: callData.type,
     });
-    return socket.off('callAccepted');
+    return socket?.off('callAccepted');
   };
-  
+
   const refuseCall = () => {
     if (sound) {
       sound.stop();
     }
     const data = {...callData};
-    socket.emit('callRefused', data);
+    socket?.emit('callRefused', data);
     navigation.navigate(t('home'));
     console.log('Bạn đã từ chối cuộc gọi !!!');
-    return socket.off('callRefused');
+    return socket?.off('callRefused');
   };
   const getName = () => {
     if (callData.type === 'personal_voice' || callData === 'personal_video') {
