@@ -22,5 +22,4 @@ usersRouter.post("/update-fcmtoken", updateFcmTokenForUser);
 usersRouter.post("/update-theme", updateThemForUser);
 usersRouter.get("/remove-user", actionRemoveUser);
 usersRouter.post("/update-language", updateLanguageForUser);
-
 module.exports = usersRouter;

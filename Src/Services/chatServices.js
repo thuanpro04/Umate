@@ -1,5 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
-const { getUsersByIds, transformUserData } = require("./userServices");
+const {
+  getUsersByIds,
+  transformUserData,
+  findUserById,
+} = require("./userServices");
 const {
   ConversationModel,
   GroupConversationModel,
@@ -10,6 +14,7 @@ const {
   handleSendNotification,
   addNotificationForUser,
 } = require("./notificationServices");
+
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
   // console.log(req.query);
@@ -118,7 +123,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
   try {
     if (!data.groupId) {
       if (!data.senderId) {
-        console.error("Sender or receiver ID is missing");
+        console.error("Sender ID is missing");
         return;
       }
 
@@ -165,7 +170,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
       const recipients = groupConversations.invitedUsers.map(
         (item) => item.userId
       );
-  
+
       try {
         groupConversations.message.push(data);
         groupConversations.lastMessage = getLastMessages(data);
@@ -203,7 +208,9 @@ const sanitizeString = (str) => {
   return str.normalize("NFC");
 };
 const handleGetAllConversationUsers = async (req, res) => {
-  const { currentUserId } = req.query;
+  const { currentUserId, page } = req.query;
+  const limit = 10; // Số cuộc trò chuyện mỗi trang
+  const skip = (page - 1) * limit;
   try {
     // Lấy tất cả các cuộc trò chuyện cá nhân của người dùng hiện tại
     const personalConversations = await ConversationModel.find({
@@ -271,25 +278,27 @@ const handleGetAllConversationUsers = async (req, res) => {
       type: group.type,
       notification: group.notification,
       statusLastMessage:
-        !group.message[group.message.length - 1].senderId === currentUserId,
+        group.message[group.message.length - 1].senderId !== currentUserId &&
+        group.message[group.message.length - 1].status === "sent",
       nickNames: group.nicknames,
       theme: group.theme,
       pinnedBy: group.pinnedBy,
     }));
-
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
     const allConversations = [
       ...personalConversationsData,
       ...groupConversationsData,
     ];
-
     allConversations.sort(
       (a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp
     );
-
+    const paginatedConversations = allConversations.slice(skip, skip + limit);
     return res.status(200).json({
       message: "Get all conversations successfully!",
-      data: allConversations,
+      data: {
+        allConversations: paginatedConversations,
+        totalPage: Math.ceil(allConversations.length / limit),
+      },
     });
   } catch (error) {
     console.error("handleGetAllConversationUsers Error:", error);
@@ -373,6 +382,10 @@ const handleDeleteConversation = async (req, res) => {
     if (deletePersonal.deletedCount > 0 || deleteGroup.deletedCount > 0) {
       res.status(200).json({
         message: "Delete conversation successfully!! ",
+        data: {
+          personal: idPersons,
+          group: idGroups,
+        },
       });
     } else {
       return res
@@ -503,9 +516,8 @@ const sendQRcodeDataForGroup = async (data) => {
   try {
     const group = await getGroupConversation(data.groupId);
     if (!group) {
-      return res.status(401).json({
-        message: "Conversation not found ?",
-      });
+      console.log("Conversation not found ?");
+      return;
     }
     const messages = {
       messageId: data.messageId,
@@ -514,16 +526,18 @@ const sendQRcodeDataForGroup = async (data) => {
       imagesUrl: [],
       timestamp: new Date(),
       QRCode: {
-        qrdata: data.qrData,
+        qrdata: data.QRCode.qrdata,
         attended: [],
       },
+      lastMessage: "hình ảnh",
     };
     group.message.push(messages);
     await group.save();
-    console.log("Save data qrcode successfully !!", messages);
-    return res.status(200).json({
-      message: "Save data qrcode successfully !!",
-    });
+    console.log(
+      "Save data qrcode successfully !!",
+      data.QRCode,
+      messages.QRCode
+    );
   } catch (error) {
     console.log("Save data Qr code error: ", error);
   }
@@ -534,14 +548,16 @@ const handleUpdateAttendedGroup = async (req, res) => {
 
   try {
     const group = await getGroupConversation(id);
+
     if (!group) {
-      return req.status(401).json({
+      return res.status(401).json({
         message: "Group not found !!",
       });
     }
     const upMessage = group.message.find(
       (item) => item.messageId === messageId
     );
+
     if (!upMessage) {
       return res.status(404).json({ message: "Message not found in group !!" });
     }
@@ -558,14 +574,6 @@ const handleUpdateAttendedGroup = async (req, res) => {
       (countAttended === countUser ||
         countAttended === Math.floor(countUser / 2))
     ) {
-      // const notifi = {
-      //   groupId: id,
-      //   senderId: generateUniqueID(),
-      //   receiverId,
-      //   title: "Điểm danh gần hoàn tất!",
-      //   content: `Đã có ${countAttended} thành viên quét mã QR`,
-      //   type: "qrcode",
-      // };
       const attended = upMessage.QRCode.attended;
       const notAttended = group.invitedUsers.filter(
         (item) => !attended.includes(item)
@@ -586,7 +594,8 @@ const handleUpdateAttendedGroup = async (req, res) => {
       );
       console.log("Save Notification");
     }
-
+    const user = await findUserById(currentUserId);
+   
     return res
       .status(200)
       .json({ message: "Updated successfully!", data: upMessage });
@@ -594,6 +603,7 @@ const handleUpdateAttendedGroup = async (req, res) => {
     console.log("Attended group error: ", error);
   }
 };
+
 const handleActionGhimConversation = async (req, res) => {
   const { id, userId, key } = req.body;
   console.log(id, userId, key);
@@ -636,5 +646,5 @@ module.exports = {
   handleUpdateThemeConversation,
   sendQRcodeDataForGroup,
   handleUpdateAttendedGroup,
-  handleActionGhimConversation
+  handleActionGhimConversation,
 };

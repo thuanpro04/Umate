@@ -5,6 +5,8 @@ const {
 } = require("../Services/chatServices");
 const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
+const { UserModel } = require("../models/usersModel");
+const { updateOneUser } = require("./userServices");
 
 const users = {}; // Danh sách lưu trữ user đang online
 const getMoldMessage = (userId, type, content) => {
@@ -21,8 +23,8 @@ const getMoldMessage = (userId, type, content) => {
   };
 };
 let io; // Lưu trữ đối tượng io
-
 const sendNotificationCallToUser = (userId, eventName, data) => {
+  if (!io) return;
   if (userId && users[userId]) {
     io.to(users[userId]).emit(eventName, data);
     console.log("Đã gửi đến: ", users[userId]);
@@ -34,6 +36,23 @@ const sendNotificationCallToUser = (userId, eventName, data) => {
   );
   return false;
 };
+async function updateOnlineUser(userId, isOnline) {
+  await updateOneUser(userId, "online", isOnline);
+}
+const sendToUser = (userId, userMessages) => {
+  console.log("Đã thông báo: ", users[userId]);
+  sendNotificationCallToUser(userId, "receive_message", userMessages);
+
+  if (!userMessages.isNotification) {
+    sendNotificationCallToUser(userId, "notification_message", {
+      ...userMessages,
+      typeNotifi: "message",
+    });
+  }
+};
+const sendForMe = (id, messageData) => {
+  sendNotificationCallToUser(id, "receive_message", messageData);
+};
 function initializeSocket(server) {
   io = socketIO(server, {
     cors: {
@@ -44,19 +63,8 @@ function initializeSocket(server) {
     socket.on("callRegister", (userId) => {
       users[userId] = socket.id;
       console.log("📌 User register call: ", users);
+      updateOnlineUser(userId, true);
     });
-    const sendNotificationCallToUser = (userId, eventName, data) => {
-      if (userId && users[userId]) {
-        io.to(users[userId]).emit(eventName, data);
-        console.log("Đã gửi đến: ", users[userId]);
-
-        return true;
-      }
-      console.log(
-        `🚫 Không thể gửi thông báo đến user ${userId}: User không online`
-      );
-      return false;
-    };
 
     socket.on("sendCallInvitation", (callData) => {
       if (callData.type === "group_voice" || callData.type === "group_video") {
@@ -89,6 +97,7 @@ function initializeSocket(server) {
         console.log(`📞 Đã gửi cuộc gọi đến user`);
       }
     });
+
     socket.on("callAccepted", (data) => {
       const result = sendNotificationCallToUser(
         data.userId,
@@ -128,18 +137,14 @@ function initializeSocket(server) {
 
     socket.on("cancelCall", (data) => {
       const { targetId, userId, type } = data;
-
-      let targetSocketId;
       const messageData = getMoldMessage(userId, type, "Bạn đã hủy cuộc gọi");
       const sendToUser = (id) => {
         sendNotificationCallToUser(id, "feedbackCancelCall", data);
       };
-      const sendForMe = (id) => {
-        sendNotificationCallToUser(data.userId, "receive_message", messageData);
-      };
+
       if (type === "group_voice" || type === "group_video") {
         targetId.forEach((item) => sendToUser(item));
-        sendForMe(userId);
+        sendForMe(userId, messageData);
         sendMessageToGroupAndPersonal({
           ...messageData,
           recipients: targetId,
@@ -147,31 +152,23 @@ function initializeSocket(server) {
         });
       } else {
         sendToUser(targetId);
-        sendForMe(userId);
+        sendForMe(userId, messageData);
         sendMessageToGroupAndPersonal({ ...messageData, receiverId: targetId });
       }
     });
 
     socket.on("send_message", async (data) => {
+      console.log("Data: ", data);
+
+      if (!data.senderId) {
+        return;
+      }
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };
-      const content = data.content.normalize("NFC");
-
-      const sendToUser = (userId) => {
-        console.log("Đã thông báo: ", users[userId]);
-        sendNotificationCallToUser(userId, "receive_message", userMessages);
-
-        if (!userMessages.isNotification) {
-          sendNotificationCallToUser(
-            userId,
-            "notification_message",
-            userMessages
-          );
-        }
-      };
+      console.log(userMessages);
 
       if (userMessages.receiverId) {
-        sendToUser(userMessages.receiverId);
+        sendToUser(userMessages.receiverId, userMessages);
       } else if (
         userMessages.recipients &&
         userMessages.recipients.length > 0
@@ -180,16 +177,24 @@ function initializeSocket(server) {
           (item) => item !== data.senderId
         );
 
-        ids.forEach((item) => sendToUser(item));
+        ids.forEach((item) => sendToUser(item, userMessages));
       }
 
       // Chỉ gọi nếu cần thiết
-      sendMessageToGroupAndPersonal({ ...userMessages, content });
+      sendMessageToGroupAndPersonal(userMessages);
     });
 
     socket.on("send_qrcode", async (data) => {
       const messageId = generateUniqueID();
       const userMessages = { ...data, messageId };
+      if (userMessages.recipients && userMessages.recipients.length > 0) {
+        const ids = userMessages.recipients.filter(
+          (item) => item !== data.senderId
+        );
+
+        ids.forEach((item) => sendToUser(item, userMessages));
+      }
+      // sendForMe(userMessages.senderId, userMessages);
       sendQRcodeDataForGroup(userMessages);
     });
     socket.on("leave_group", (userId) => {
@@ -200,6 +205,7 @@ function initializeSocket(server) {
       if (userId) {
         delete users[userId];
         console.log(`🚫 User ${userId} đã ngắt kết nối`);
+        updateOnlineUser(userId, false);
       }
     });
   });

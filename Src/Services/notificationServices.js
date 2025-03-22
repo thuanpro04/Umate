@@ -186,6 +186,10 @@ const handleGetNotifications = async (req, res) => {
   const { userId } = req.query;
   try {
     const result = await notificationModel.find({ receiverId: userId });
+    await notificationModel.updateMany(
+      { receiverId: userId, status: { $ne: "read" } },
+      { $set: { status: "read" } }
+    );
     res.status(200).json({
       message: "Notification successfully !!",
       data: result.reverse(),
@@ -194,7 +198,6 @@ const handleGetNotifications = async (req, res) => {
     console.log("get notification error: ", error);
   }
 };
-
 
 const deletedNotification = async (id) => {
   let idsArray;
@@ -216,7 +219,10 @@ const deletedNotification = async (id) => {
   const objectIds = idsArray.map((item) => new mongoose.Types.ObjectId(item));
 
   // Xóa tất cả thông báo theo danh sách ID
-  return await notificationModel.deleteMany({ _id: { $in: objectIds } });
+  const result = await notificationModel.deleteMany({
+    _id: { $in: objectIds },
+  });
+  return result.deletedCount > 0 ? idsArray : [];
 };
 
 const handleActionDeleteNotification = async (req, res) => {
@@ -224,13 +230,15 @@ const handleActionDeleteNotification = async (req, res) => {
   try {
     const result = await deletedNotification(id);
 
-    if (result.deletedCount === 0) {
+    if (result.length === 0) {
       return res
         .status(404)
         .json({ message: "Không tìm thấy thông báo để xóa." });
     }
 
-    res.status(200).json({ message: "Xóa thông báo thành công!" });
+    res
+      .status(200)
+      .json({ message: "Xóa thông báo thành công!", data: result });
   } catch (error) {
     console.log("Delete notification fail error: ", error);
   }
@@ -263,6 +271,28 @@ const handleActionSendEmail = async (req, res) => {
     console.log("Action send email fail error: ", error);
   }
 };
+const handleActionCheckNotification = async (req, res) => {
+  const { userId } = req.query;
+  try {
+    const lastNotification = await notificationModel
+      .findOne({
+        receiverId: userId,
+      })
+      .sort({ timestamp: -1 })
+      .select("status");
+    if (!lastNotification) {
+      return res.status(401).json({
+        message: "No notifications found!",
+      });
+    }
+    return res.status(200).json({
+      message: "Check notification successfully!!",
+      data: lastNotification,
+    });
+  } catch (error) {
+    console.log("Check notifi error: ", error);
+  }
+};
 module.exports = {
   handleSendNotification,
   handleActionNotification,
@@ -272,4 +302,5 @@ module.exports = {
   handleActionDeleteNotification,
   deletedNotification,
   handleActionSendEmail,
+  handleActionCheckNotification,
 };

@@ -31,7 +31,6 @@ app.use("/notification", notificationRouter);
 // Tạo HTTP server và tích hợp với Socket.IO
 const server = http.createServer(app);
 const io = initializeSocket(server);
-
 server.listen(port, (err) => {
   if (err) {
     console.log(err);

@@ -1,6 +1,7 @@
 const { UserModel } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
+const { sendNotificationCallToUser } = require("./socketService");
 const { updateUserById, findUserById } = require("./userServices");
 
 const handleFriendRequestAction = async (req, res, action) => {
@@ -32,14 +33,29 @@ const handleFriendRequestAction = async (req, res, action) => {
         .json({ message: "User not found or no change made!" });
     }
 
-    action === "add" &&
-      (await addNotificationForUser(
+    if (action === "add") {
+      const dataNoti = {
+        name: user.name,
+        content: "Đã gửi lời mời kết bạn 👋",
+        senderId: currentUserId,
+        receiverId: friendUserId,
+        avatar: user.avatar,
+      };
+      action === "add" &&
+        sendNotificationCallToUser(
+          friendUserId,
+          "notification_message",
+          dataNoti
+        );
+      await addNotificationForUser(
         null,
         currentUserId,
         friendUserId,
         "friend_request_sent",
         "friendRequest"
-      ));
+      );
+    }
+
     res.status(200).json({
       message:
         action === "add"
@@ -54,7 +70,6 @@ const handleFriendRequestAction = async (req, res, action) => {
 
 const manageFriendship = async (req, res, action) => {
   const { friendUserId, currentUserId } = req.body;
-  console.log(req.body);
   const user = await findUserById(currentUserId);
   if (user.removeFriends.includes(friendUserId)) {
     await UserModel.updateOne(

@@ -3,13 +3,16 @@ const {
   actionNotification,
   actionInviteToGroup,
   getNotifications,
-  actionDeleteNotification,actionSendEmail
+  actionDeleteNotification,
+  actionSendEmail,
+  actionCheckNotification,
 } = require("../Controller/notificationController");
 
 const notificationRouter = express();
 notificationRouter.post("/action-notifi", actionNotification);
 notificationRouter.post("/invite-group", actionInviteToGroup);
 notificationRouter.get("/get-notifi", getNotifications);
-notificationRouter.get('/delete', actionDeleteNotification)
-notificationRouter.post('/send-email', actionSendEmail)
+notificationRouter.get("/delete", actionDeleteNotification);
+notificationRouter.post("/send-email", actionSendEmail);
+notificationRouter.get("/check-noti", actionCheckNotification);
 module.exports = notificationRouter;

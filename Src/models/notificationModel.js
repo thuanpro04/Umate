@@ -11,6 +11,11 @@ const notificationSchema = new mongoose.Schema({
     notAttended: [{ type: String, ref: "User" }],
   },
   timestamp: { type: Date, default: Date.now },
+  status: {
+    type: String,
+    enum: ["sent", "delivered", "read"],
+    default: "sent",
+  },
 });
 
 const notificationModel = mongoose.model("notification", notificationSchema);

@@ -7,6 +7,7 @@ const getUsersByIds = async (userFriends) => {
   users = await UserModel.find({ userId: { $in: userFriends } }).lean();
   return users;
 };
+
 const updateUserById = async (userId, updateAction) => {
   const result = await UserModel.updateOne({ userId }, updateAction);
   return result;
@@ -204,6 +205,9 @@ const handleGetUserInfoById = async (req, res) => {
 const handleListUserForHeartEvent = async (req, res) => {
   const listUsers = req.body;
   try {
+    if (!Array.isArray(listUsers) || listUsers.length === 0) {
+      return;
+    }
     const userPromises = listUsers.map((userId) => findUserById(userId));
     const listUserInfo = await Promise.all(userPromises);
     const validUsers = listUserInfo.filter(
@@ -348,7 +352,14 @@ const handleActionRemoveUser = async (req, res) => {
     console.log("Remove user fail: ", error);
   }
 };
-
+const updateOneUser = async (userId, key, value) => {
+  try {
+    await UserModel.updateOne({ userId }, { [key]: value });
+    console.log("Update one user successfully!!", key, value);
+  } catch (error) {
+    console.log("Update one user error: ", error);
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -365,4 +376,5 @@ module.exports = {
   handleUpdateThemeForUser,
   handleActionRemoveUser,
   handleUpdateLanguge,
+  updateOneUser,
 };

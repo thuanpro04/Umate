@@ -74,12 +74,20 @@ const handleOutGroup = async (req, res) => {
       return res.status(200).json({ message: "Group deleted successfully!" });
     }
     group.invitedUsers = group.invitedUsers.filter((item) => item !== userId);
-    if (group.leader.userId === userId) {
-      if (group.invitedUsers.length > 0) {
-        group.leader.userId = group.invitedUsers[0]; // Chọn leader mới
-      } else {
-        group.leader = null; // Không còn ai để làm leader
-      }
+    let nextCandidate;
+    if (group.leader?.userId === userId) {
+      nextCandidate = group.invitedUsers.find(
+        (user) => user !== group.deputyLeader.userId
+      );
+      group.leader.userId = group.invitedUsers[0] || null; // Chuyển leader cho người đầu tiên còn lại
+    }
+
+    // Xử lý deputyLeader nếu người rời nhóm là deputyLeader
+    if (group.deputyLeader?.userId === userId) {
+      nextCandidate = group.invitedUsers.find(
+        (user) => user !== group.leader.userId
+      );
+      group.deputyLeader.userId = nextCandidate || null;
     }
     await group.save();
 
