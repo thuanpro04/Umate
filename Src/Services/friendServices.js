@@ -32,7 +32,6 @@ const handleFriendRequestAction = async (req, res, action) => {
         .status(404)
         .json({ message: "User not found or no change made!" });
     }
-
     if (action === "add") {
       const dataNoti = {
         name: user.name,

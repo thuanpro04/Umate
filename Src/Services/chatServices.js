@@ -4,16 +4,14 @@ const {
   transformUserData,
   findUserById,
 } = require("./userServices");
-const {
-  ConversationModel,
-  GroupConversationModel,
-  MessageModel,
-} = require("../models/usersModel");
+
 const { generateUniqueID } = require("../untils/informationUntils");
 const {
   handleSendNotification,
   addNotificationForUser,
 } = require("./notificationServices");
+const { GroupConversationModel } = require("../models/groupConversationModel");
+const { ConversationModel } = require("../models/personalConversationModel");
 
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
@@ -427,7 +425,6 @@ const handleGetImageForConversation = async (req, res) => {
 };
 const handleGetLink = async (req, res) => {
   const { id, type } = req.query;
-
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   try {
     const conver = await (type === "personal"
@@ -439,8 +436,19 @@ const handleGetLink = async (req, res) => {
       });
     }
     console.log(conver);
-    const result = conver.message.filter((item) => urlRegex.test(item.content));
-    console.log("Get link successfully !!!");
+    const result = conver.message
+      .map((item) => {
+        const urls = item?.content?.match(urlRegex);
+        if (!urls) return null; // Không có link thì bỏ qua
+
+        // Lấy phần trước link làm title
+        const title = item.title;
+
+        return urls.map((url) => ({ title, url, _id: item._id }));
+      })
+      .filter((match) => match !== null) // Loại bỏ null
+      .flat(); // Gộp tất cả thành một mảng duy nhất
+    console.log("Get link successfully !!!", result);
 
     res.status(200).json({
       message: "Get link successfully !!!",
@@ -595,7 +603,7 @@ const handleUpdateAttendedGroup = async (req, res) => {
       console.log("Save Notification");
     }
     const user = await findUserById(currentUserId);
-   
+
     return res
       .status(200)
       .json({ message: "Updated successfully!", data: upMessage });

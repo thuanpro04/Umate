@@ -1,47 +1,35 @@
+const { GroupConversationModel } = require("../models/groupConversationModel");
 const {
   UserModel,
-  ConversationModel,
-  GroupConversationModel,
-} = require("../models/usersModel");
-
+} = require("../models/usersModel");  
 
 const { transformUserData, findUserById } = require("./userServices");
 const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
   const user = await findUserById(currentUserId);
-  // Khởi tạo mảng điều kiện tìm kiếm
+  console.log(searchTerm, currentUserId, bySearch);
+
   let searchConditions = [{ name: { $regex: searchTerm, $options: "i" } }];
-  // Nếu có điều kiện tìm kiếm
+
   if (bySearch && bySearch.length > 0) {
-    // Thêm các điều kiện vào searchConditions
-    if (bySearch.includes("className")) {
-      if (!user.className) return []; // Nếu className là undefined, trả về mảng rỗng
+    if (bySearch.includes("className") && user.className) {
       searchConditions.push({ className: user.className });
     }
-    if (bySearch.includes("friends")) {
-      if (!user.friends || user.friends.length === 0) return []; // Nếu friends là undefined hoặc rỗng, trả về mảng rỗng
-      searchConditions.push({ UserId: { $in: user.friends } });
+    if (bySearch.includes("friends") && user.friends && user.friends.length > 0) {
+      searchConditions.push({ userId: { $in: user.friends } });
     }
-    if (bySearch.includes("majorCategory")) {
-      if (!user.majorCategory) return []; // Nếu majorCategory là undefined, trả về mảng rỗng
+    if (bySearch.includes("majorCategory") && user.majorCategory) {
       searchConditions.push({ majorCategory: user.majorCategory });
     }
   }
-  // Nếu không có điều kiện nào, trả về mảng rỗng
+
   if (searchConditions.length === 0 && bySearch.length > 0) return [];
 
-  // Thực hiện truy vấn MongoDB với điều kiện tìm kiếm
   const users = await UserModel.find({
     $and: [
-      ...searchConditions, // Tìm theo các điều kiện đã xác định
-      { userId: { $nin: [currentUserId] } }, // Loại trừ người dùng hiện tại
+      ...searchConditions,
+      { userId: { $nin: [currentUserId] } },
     ],
   });
-  // console.log(users,currentUserId);
-
-  // Nếu không có tìm kiếm, trả về danh sách người dùng
-  if (searchTerm === "") {
-    return transformUserData(users);
-  }
 
   return transformUserData(users);
 };

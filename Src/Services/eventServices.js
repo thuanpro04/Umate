@@ -5,7 +5,6 @@ const url = "https://tdmu.edu.vn/tin-tuc";
 //npm install node-cron gọi event định kì
 const { generateUniqueID } = require("../untils/informationUntils");
 const { EventModel } = require("../models/eventModel");
-const { MetaModel } = require("../models/metaModel");
 const { UserModel } = require("../models/usersModel");
 const { handleSendNotification } = require("./notificationServices");
 const handlePostEvent = async (req, res) => {
@@ -145,6 +144,7 @@ const handleActionHeartForEvent = async (req, res) => {
       res.status(200).json({
         data: {
           messages: "add heart for event successfully !!!",
+          value: 1,
         },
       });
       console.log("add heart for event successfully !!!");
@@ -155,6 +155,7 @@ const handleActionHeartForEvent = async (req, res) => {
       res.status(200).json({
         data: {
           messages: "Heart removed from event successfully!",
+          value: -1,
         },
       });
       console.log("Heart removed from event successfully!");

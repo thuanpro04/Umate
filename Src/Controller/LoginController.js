@@ -18,7 +18,6 @@ const getUserInfo = async (existingUser, email) => {
       online: existingUser.online,
       theme: existingUser.theme ?? "light",
       accesstoken: await getJsonWebToken(email, existingUser.id),
-      fcmTokens: existingUser.fcmTokens ?? [],
       language: existingUser.language ?? "vi",
     },
     profileSlice: {
@@ -38,10 +37,11 @@ const getUserInfo = async (existingUser, email) => {
       friendRequests: existingUser.friendRequests,
       removeFriends: existingUser.removeFriends,
       block: existingUser.block,
-      like: existingUser.like,
     },
     eventSlice: {
       eventShares: existingUser.eventShares,
+      like: existingUser.like,
+
     },
   };
 };

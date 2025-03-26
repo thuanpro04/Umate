@@ -11,7 +11,6 @@ const searchRouter = require("./Src/Routers/searchRouters");
 const friendRouter = require("./Src/Routers/friendRouters");
 const eventRouter = require("./Src/Routers/eventRouters");
 const groupRouter = require("./Src/Routers/groupRouters");
-const { generateUniqueID } = require("./Src/untils/informationUntils");
 const notificationRouter = require("./Src/Routers/notificationRouters");
 const {initializeSocket} = require("./Src/Services/socketService");
 const app = express();
@@ -38,3 +37,4 @@ server.listen(port, (err) => {
     console.log(`Server is running on port ${port}`);
   }
 });
+

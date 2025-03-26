@@ -1,10 +1,13 @@
+const { GroupConversationModel } = require("../models/groupConversationModel");
 const { notificationModel } = require("../models/notificationModel");
-const { GroupConversationModel } = require("../models/usersModel");
 const { generateUniqueID } = require("../untils/informationUntils");
 const { deletedNotification } = require("./notificationServices");
 
 const handleNewGroupUser = async (req, res) => {
   const groupInfo = req.body;
+  if (!Array.isArray(groupInfo.invitedUsers)) {
+    return res.status(400).json({ message: "Invalid invitedUsers format" });
+  }
   // console.log("group", groupInfo);
   const invitedUsers = groupInfo.invitedUsers.flatMap((user) => user.userId);
   // console.log("invitedUsers", invitedUsers);
@@ -40,6 +43,10 @@ const handleActionAgreeOnGroup = async (req, res) => {
   const { userId, id, groupId } = req.body;
   console.log(userId, id, groupId);
 
+  if (!id) {
+    return res.status(400).json({ message: "Notification ID is required" });
+  }
+
   try {
     await GroupConversationModel.updateOne(
       { groupId },
@@ -60,14 +67,18 @@ const handleActionAgreeOnGroup = async (req, res) => {
 const getGroupConversation = async (id) => {
   return await GroupConversationModel.findOne({ groupId: id });
 };
+
 const handleOutGroup = async (req, res) => {
   const { id, userId } = req.query;
+  
   const group = await getGroupConversation(id);
+  console.log(group);
   if (!group) {
     return res.status(401).json({
       message: "Group not found !",
     });
   }
+
   try {
     if (group.invitedUsers.length === 1) {
       await GroupConversationModel.findOneAndDelete({ groupId: id });

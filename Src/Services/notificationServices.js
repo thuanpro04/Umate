@@ -1,14 +1,13 @@
 const adminfirebase = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const serviceAccount = require("./../untils/umatefirebase.json");
-const { findUserById, updateFcmToken } = require("./userServices");
-const {
-  ConversationModel,
-  GroupConversationModel,
-} = require("../models/usersModel");
+const { findUserById } = require("./userServices");
+
 const { notificationModel } = require("../models/notificationModel");
 const { text } = require("body-parser");
 const mongoose = require("mongoose");
+const { GroupConversationModel } = require("../models/groupConversationModel");
+const { ConversationModel } = require("../models/personalConversationModel");
 adminfirebase.initializeApp({
   credential: adminfirebase.credential.cert(serviceAccount),
 });
@@ -121,7 +120,6 @@ const updateNotificationPersonal = async (userId, converId) => {
 const handleActionNotification = async (req, res) => {
   const { userId, converId, key } = req.body;
   console.log(userId, converId, key);
-  let result;
   try {
     if (key === "personal") {
       result = await updateNotificationPersonal(userId, converId);
@@ -298,7 +296,7 @@ module.exports = {
   handleActionNotification,
   handleActionInviteToGroup,
   handleGetNotifications,
-  addNotificationForUser,
+  addNotificationForUser,     
   handleActionDeleteNotification,
   deletedNotification,
   handleActionSendEmail,

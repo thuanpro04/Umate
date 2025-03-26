@@ -53,6 +53,27 @@ const sendToUser = (userId, userMessages) => {
 const sendForMe = (id, messageData) => {
   sendNotificationCallToUser(id, "receive_message", messageData);
 };
+const handleSendMessages = (data) => {
+  if (!data.senderId) {
+    return;
+  }
+  const messageId = generateUniqueID();
+  const userMessages = { ...data, messageId };
+  console.log(userMessages);
+
+  if (userMessages.receiverId) {
+    sendToUser(userMessages.receiverId, userMessages);
+  } else if (userMessages.recipients && userMessages.recipients.length > 0) {
+    const ids = userMessages.recipients.filter(
+      (item) => item !== data.senderId
+    );
+
+    ids.forEach((item) => sendToUser(item, userMessages));
+  }
+
+  // Chỉ gọi nếu cần thiết
+  sendMessageToGroupAndPersonal(userMessages);
+};
 function initializeSocket(server) {
   io = socketIO(server, {
     cors: {
@@ -68,13 +89,17 @@ function initializeSocket(server) {
 
     socket.on("sendCallInvitation", (callData) => {
       if (callData.type === "group_voice" || callData.type === "group_video") {
-        if (callData.targetId.length === 0) {
+        if (
+          callData.targetId.length === 0 ||
+          !Array.isArray(callData.targetId)
+        ) {
           console.log("🚫 Lỗi: Không có user nào để gửi cuộc gọi!");
           return;
         }
-        callData.targetId.forEach((element) => {
+        callData.targetId?.forEach((element) => {
           sendNotificationCallToUser(element, "incomingCall", callData);
         });
+        
       } else {
         if (!callData.targetId) {
           try {
@@ -109,7 +134,6 @@ function initializeSocket(server) {
         console.log("✅ Đã phản hồi cuộc gọi: ", data.callID);
       }
     });
-
     socket.on("callRefused", (data) => {
       console.log(
         "❌ Từ chối cuộc gọi từ:",
@@ -143,7 +167,12 @@ function initializeSocket(server) {
       };
 
       if (type === "group_voice" || type === "group_video") {
-        targetId.forEach((item) => sendToUser(item));
+        console.log(targetId);
+
+        if (!Array.isArray(targetId)) {
+          return;
+        }
+        targetId?.forEach((item) => sendToUser(item));
         sendForMe(userId, messageData);
         sendMessageToGroupAndPersonal({
           ...messageData,
@@ -156,32 +185,16 @@ function initializeSocket(server) {
         sendMessageToGroupAndPersonal({ ...messageData, receiverId: targetId });
       }
     });
-
+    socket.on("call_end", (data) => {
+      console.log("Call_end: ", data);
+      if (data.typeCall === "personal_voice" || data.typeCall === "personal_video") {
+        sendNotificationCallToUser(data.senderId, "feedbackCancelCall", data);
+      }
+      handleSendMessages(data);
+    });
     socket.on("send_message", async (data) => {
       console.log("Data: ", data);
-
-      if (!data.senderId) {
-        return;
-      }
-      const messageId = generateUniqueID();
-      const userMessages = { ...data, messageId };
-      console.log(userMessages);
-
-      if (userMessages.receiverId) {
-        sendToUser(userMessages.receiverId, userMessages);
-      } else if (
-        userMessages.recipients &&
-        userMessages.recipients.length > 0
-      ) {
-        const ids = userMessages.recipients.filter(
-          (item) => item !== data.senderId
-        );
-
-        ids.forEach((item) => sendToUser(item, userMessages));
-      }
-
-      // Chỉ gọi nếu cần thiết
-      sendMessageToGroupAndPersonal(userMessages);
+      handleSendMessages(data);
     });
 
     socket.on("send_qrcode", async (data) => {
