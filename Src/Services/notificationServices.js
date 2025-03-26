@@ -1,6 +1,6 @@
 const adminfirebase = require("firebase-admin");
 const nodemailer = require("nodemailer");
-const serviceAccount = require("./../untils/umatefirebase.json");
+// const serviceAccount = require("./../untils/umatefirebase.json");
 const { findUserById } = require("./userServices");
 
 const { notificationModel } = require("../models/notificationModel");
@@ -8,37 +8,37 @@ const { text } = require("body-parser");
 const mongoose = require("mongoose");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
-adminfirebase.initializeApp({
-  credential: adminfirebase.credential.cert(serviceAccount),
-});
-async function getAccessToken() {
-  const token = await adminfirebase.credential
-    .cert(serviceAccount)
-    .getAccessToken();
-  return token.access_token;
-}
+// adminfirebase.initializeApp({
+//   credential: adminfirebase.credential.cert(serviceAccount),
+// });
+// async function getAccessToken() {
+//   const token = await adminfirebase.credential
+//     .cert(serviceAccount)
+//     .getAccessToken();
+//   return token.access_token;
+// }
 
-const getFcmTokenForUser = async (userId) => {
-  const user = await findUserById(userId);
-  return user;
-};
-const getListFcmTokenUser = async (listId) => {
-  const userPromises = listId.map((userId) => findUserById(userId));
-  const listUserInfo = await Promise.all(userPromises);
-  const validUsers = listUserInfo.filter(
-    (user) => user && user.fcmTokens && user.fcmTokens.length > 0
-  );
-  const fcmTokens = validUsers.flatMap((user) => user.fcmTokens);
-  return { fcmTokens };
-};
-const removeFcmToken = async (userId, token) => {
-  try {
-    await UserModel.updateOne({ userId }, { $pull: { fcmTokens: token } });
-    console.log(`🧹 Token ${token} đã được xóa khỏi user ${userId}.`);
-  } catch (err) {
-    console.log("❗ Lỗi khi xóa FCM token:", err);
-  }
-};
+// const getFcmTokenForUser = async (userId) => {
+//   const user = await findUserById(userId);
+//   return user;
+// };
+// const getListFcmTokenUser = async (listId) => {
+//   const userPromises = listId.map((userId) => findUserById(userId));
+//   const listUserInfo = await Promise.all(userPromises);
+//   const validUsers = listUserInfo.filter(
+//     (user) => user && user.fcmTokens && user.fcmTokens.length > 0
+//   );
+//   const fcmTokens = validUsers.flatMap((user) => user.fcmTokens);
+//   return { fcmTokens };
+// };
+// const removeFcmToken = async (userId, token) => {
+//   try {
+//     await UserModel.updateOne({ userId }, { $pull: { fcmTokens: token } });
+//     console.log(`🧹 Token ${token} đã được xóa khỏi user ${userId}.`);
+//   } catch (err) {
+//     console.log("❗ Lỗi khi xóa FCM token:", err);
+//   }
+// };
 const handleSendNotification = async (
   userId,
   content,
