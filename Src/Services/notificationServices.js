@@ -4,7 +4,6 @@ const nodemailer = require("nodemailer");
 const { findUserById } = require("./userServices");
 
 const { notificationModel } = require("../models/notificationModel");
-const { text } = require("body-parser");
 const mongoose = require("mongoose");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
@@ -39,53 +38,53 @@ const { ConversationModel } = require("../models/personalConversationModel");
 //     console.log("❗ Lỗi khi xóa FCM token:", err);
 //   }
 // };
-const handleSendNotification = async (
-  userId,
-  content,
-  key,
-  currentUserId,
-  title
-) => {
-  const user =
-    key === "personal"
-      ? await getFcmTokenForUser(userId)
-      : await getListFcmTokenUser(userId);
-  const userInfo = await findUserById(currentUserId);
-  if (user && user.fcmTokens && user.fcmTokens.length > 0) {
-    for (const token of user.fcmTokens) {
-      const messages = {
-        token: token,
-        notification: {
-          title: title ? `${title} ${userInfo.name}` : userInfo.name,
-          body: content ?? "",
-        },
-      };
-      try {
-        await adminfirebase.messaging().send(messages);
-        console.log("Successfully sent message to:", token);
-      } catch (error) {
-        console.log("Error sending message:", error);
-        if (
-          error?.errorInfo?.code ===
-          "messaging/registration-token-not-registered"
-        ) {
-          console.log("⚠️ FCM token not registered. Removing token:", token);
-          // 👉 Xóa token không hợp lệ
-          await removeFcmToken(userId, token);
-          // 👉 Yêu cầu cập nhật token mới nếu có
-          const updatedToken = await getFcmTokenForUser(userId);
-          if (updatedToken && updatedToken.fcmTokens.length > 0) {
-            console.log("🔄 Cập nhật FCM token mới:", updatedToken.fcmTokens);
-          } else {
-            console.log("🚫 Không tìm thấy FCM token mới.");
-          }
-        }
-      }
-    }
-  } else {
-    console.log("No FCM tokens found for user:", userId);
-  }
-};
+// const handleSendNotification = async (
+//   userId,
+//   content,
+//   key,
+//   currentUserId,
+//   title
+// ) => {
+//   const user =
+//     key === "personal"
+//       ? await getFcmTokenForUser(userId)
+//       : await getListFcmTokenUser(userId);
+//   const userInfo = await findUserById(currentUserId);
+//   if (user && user.fcmTokens && user.fcmTokens.length > 0) {
+//     for (const token of user.fcmTokens) {
+//       const messages = {
+//         token: token,
+//         notification: {
+//           title: title ? `${title} ${userInfo.name}` : userInfo.name,
+//           body: content ?? "",
+//         },
+//       };
+//       try {
+//         await adminfirebase.messaging().send(messages);
+//         console.log("Successfully sent message to:", token);
+//       } catch (error) {
+//         console.log("Error sending message:", error);
+//         if (
+//           error?.errorInfo?.code ===
+//           "messaging/registration-token-not-registered"
+//         ) {
+//           console.log("⚠️ FCM token not registered. Removing token:", token);
+//           // 👉 Xóa token không hợp lệ
+//           await removeFcmToken(userId, token);
+//           // 👉 Yêu cầu cập nhật token mới nếu có
+//           const updatedToken = await getFcmTokenForUser(userId);
+//           if (updatedToken && updatedToken.fcmTokens.length > 0) {
+//             console.log("🔄 Cập nhật FCM token mới:", updatedToken.fcmTokens);
+//           } else {
+//             console.log("🚫 Không tìm thấy FCM token mới.");
+//           }
+//         }
+//       }
+//     }
+//   } else {
+//     console.log("No FCM tokens found for user:", userId);
+//   }
+// };
 
 const updateNotificationGroup = async (userId, converId) => {
   const groupConv = await GroupConversationModel.findOne({
@@ -292,7 +291,6 @@ const handleActionCheckNotification = async (req, res) => {
   }
 };
 module.exports = {
-  handleSendNotification,
   handleActionNotification,
   handleActionInviteToGroup,
   handleGetNotifications,

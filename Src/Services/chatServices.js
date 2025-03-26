@@ -6,10 +6,7 @@ const {
 } = require("./userServices");
 
 const { generateUniqueID } = require("../untils/informationUntils");
-const {
-  handleSendNotification,
-  addNotificationForUser,
-} = require("./notificationServices");
+const { addNotificationForUser } = require("./notificationServices");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
 
@@ -145,12 +142,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
         Array.isArray(conversation.notification) &&
         !conversation.notification.includes(mess.receiverId)
       ) {
-        handleSendNotification(
-          mess.receiverId,
-          mess.content,
-          "personal",
-          mess.senderId
-        );
+        // thông báo cho người nhận
       }
     } else {
       if (!data.groupId) {
@@ -181,13 +173,7 @@ const sendMessageToGroupAndPersonal = async (data) => {
           mess.status === "sent" &&
           !groupConversations.notification.includes(mess.receiverId)
         ) {
-          handleSendNotification(
-            mess.recipients,
-            mess.content,
-            "group",
-            mess.senderId,
-            groupConversations.groupName
-          );
+          // thông báo cho người nhận
         }
       } catch (error) {
         console.error("Error saving groupConversations:", error);
