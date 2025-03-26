@@ -36,8 +36,8 @@ const CallWaitingAccept = ({navigation}: any) => {
 
   const profile = useSelector(profileSelector);
   const socket = SocketService.getSocket();
-  const opacityAnim = useRef(new Animated.Value(0.3)).current;
-  const soundRef = useRef<Sound | null>(null);
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const soundRef = useRef<any>(null);
   const {t} = useTranslation();
 
   const hanldeCancelCall = () => {

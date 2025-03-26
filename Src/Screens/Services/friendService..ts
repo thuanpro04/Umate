@@ -4,12 +4,14 @@ import {userServices} from './userService';
 import {authSelector} from '../../redux/reducers/authReducer';
 import friendsAPI from '../../apis/friendsApi';
 
+let url: string;
+
 const handlePressRemoveSuggested = async (
   userId: string,
   currentUserId: string,
 ) => {
   try {
-    const url = '/remove-suggested';
+    url = '/remove-suggested';
     const data = {friendUserId: userId, currentUserId};
     const res = await friendsAPI.handleFriendsApi(url, data, 'post');
     return res;
@@ -22,7 +24,7 @@ const handlePressRemoveRequest = async (
   currentUserId: string,
 ) => {
   try {
-    const url = '/remove-request';
+    url = '/remove-request';
     const data = {friendUserId: userId, currentUserId};
     const res = await friendsAPI.handleFriendsApi(url, data, 'post');
     return res;
@@ -32,7 +34,7 @@ const handlePressRemoveRequest = async (
 };
 const handleRemoveFriends = async (userId: string, currentUserId: string) => {
   try {
-    const url = '/remove';
+    url = '/remove';
     const data = {friendUserId: userId, currentUserId};
     const res = await friendsAPI.handleFriendsApi(url, data, 'post');
     return res;
@@ -59,7 +61,7 @@ const handleAgreeFriendShip = async (
   friendUserId: string,
 ) => {
   try {
-    const url = `/agree`;
+    url = `/agree`;
     const data = {currentUserId, friendUserId};
     const res = await friendsAPI.handleFriendsApi(url, data, 'post');
     return res;

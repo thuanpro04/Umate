@@ -171,5 +171,6 @@
   "how_attendance": "Do you want to take attendance? ",
   "picture": "Take a picture.",
   "from_library.": "From library.",
-  "from_url":"From url."
+  "from_url":"From url.",
+  "remove": "Remove"
 }

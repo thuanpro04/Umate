@@ -45,7 +45,9 @@ const YourLinkScreen = () => {
   );
   const renderItems = useCallback(
     ({item, index}: any) => {
-      return <CardLinkComponent url={item.content} key={item._id} />;
+      return (
+        <CardLinkComponent url={item.url} key={item._id} title={item.title} />
+      );
     },
     [links],
   );

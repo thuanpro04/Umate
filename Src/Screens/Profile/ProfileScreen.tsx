@@ -1,5 +1,5 @@
 import {UserEdit} from 'iconsax-react-native';
-import React from 'react';
+import React, {useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   FlatList,
@@ -23,6 +23,7 @@ import {themeSelector} from '../../redux/reducers/themeSlice';
 import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {profileStyles} from './profileStyles';
+import {use} from 'i18next';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
@@ -34,34 +35,37 @@ const ProfileScreen = ({navigation}: any) => {
     stats: {
       friends: friendData?.friends?.length ?? 0,
       posts: eventData?.eventShares?.length ?? 0,
-      likes: friendData?.like ?? 0,
+      likes: eventData?.like ?? 0,
     },
   };
 
-  const renderPost = ({item, index}: any) => {
-    return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
-        style={[
-          profileStyles.postContainer,
-          {backgroundColor: colors.background},
-        ]}
-        key={item._id.toString()}>
-        <FastImage
-          source={{
-            uri: item.urlImage,
-            priority: FastImage.priority.high,
-            cache: FastImage.cacheControl.immutable,
-          }}
-          style={profileStyles.postImage}
-        />
-        <TextComponent
-          styles={profileStyles.postContent}
-          label={item.content ?? '...'}
-        />
-      </TouchableOpacity>
-    );
-  };
+  const renderPost = useCallback(
+    ({item, index}: any) => {
+      return (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
+          style={[
+            profileStyles.postContainer,
+            {backgroundColor: colors.background},
+          ]}
+          key={item.eventId}>
+          <FastImage
+            source={{
+              uri: item.urlImage,
+              priority: FastImage.priority.high,
+              cache: FastImage.cacheControl.immutable,
+            }}
+            style={profileStyles.postImage}
+          />
+          <TextComponent
+            styles={profileStyles.postContent}
+            label={item.content ?? '...'}
+          />
+        </TouchableOpacity>
+      );
+    },
+    [eventData],
+  );
 
   return (
     <SafeAreaView
@@ -164,8 +168,7 @@ const ProfileScreen = ({navigation}: any) => {
         style={{flex: 1}}
         data={eventData.eventShares}
         renderItem={renderPost}
-        inverted
-        keyExtractor={item => item._id.toString()}
+        keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={profileStyles.postList}
       />
     </SafeAreaView>

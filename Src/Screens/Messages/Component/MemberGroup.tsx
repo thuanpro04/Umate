@@ -68,9 +68,9 @@ const MemberGroup = ({navigation}: any) => {
   };
   const shouldShowAddFriendIcon = (userId: string) => {
     return (
-      !friendData.friends.includes(userId) &&
+      !friendData.friends?.includes(userId) &&
       auth.userId !== userId &&
-      !addedFriends.includes(userId)
+      !addedFriends?.includes(userId)
     );
   };
   const onPressCarUser = (item: any) => {

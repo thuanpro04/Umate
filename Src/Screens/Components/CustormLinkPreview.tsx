@@ -7,9 +7,12 @@ import TextComponent from './TextComponent';
 import FastImage from 'react-native-fast-image';
 interface Props {
   txtLink: string;
+  title: string;
+  theme: string;
 }
 const CustormLinkPreview = memo((props: Props) => {
-  const {txtLink} = props;
+  const {txtLink, title, theme} = props;
+  const colors = appColors[theme];
   const renderImage = useCallback(
     (image: any) => {
       if (!image?.url) return <View style={styles.imagePlaceholder} />; // Hiển thị placeholder nếu không có ảnh
@@ -33,7 +36,21 @@ const CustormLinkPreview = memo((props: Props) => {
       text={txtLink}
       containerStyle={{flex: 1, minHeight: appInfo.size.HEIGHT * 0.02}}
       renderText={text => (
-        <TextComponent label={text} color={appColors.blue3} numberOfLine={2} />
+        <>
+          {title && (
+            <TextComponent
+              label={`${title}: `}
+              color={colors.text}
+              numberOfLine={2}
+            />
+          )}
+
+          <TextComponent
+            label={text}
+            color={appColors.blue3}
+            numberOfLine={2}
+          />
+        </>
       )}
       renderImage={renderImage}
       metadataContainerStyle={styles.metadataContainer}

@@ -28,23 +28,19 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../../Components';
-import UpdateInfoModal from '../../Modal/UpdateInfoModal';
 import {notificationServices} from '../../Services/notificationServices';
 import {UserInfo} from '../../Untils/UserInfo';
-// import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {MenuChat} from '../../../data/MenuItems';
-import {friendSelector, setBlock} from '../../../redux/reducers/friendSlice';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
-import ActionModal from '../../Modal/ActionModal';
-import {userServices} from '../../Services/userService';
-import CustomCallButtonComponent from './CustomCallButtonComponent';
-import {groupServices} from '../../Services/groupServices';
 import {useTranslation} from 'react-i18next';
 import FastImage from 'react-native-fast-image';
+import {MenuChat} from '../../../data/MenuItems';
+import {friendSelector, setBlock} from '../../../redux/reducers/friendSlice';
+import ActionModal from '../../Modal/ActionModal';
 import QrCodeModal from '../../Modal/QrCodeModal';
-import {socketSelector} from '../../../redux/reducers/socketSlice';
-import {Notification} from '../../Untils/Notification';
+import {groupServices} from '../../Services/groupServices';
 import SocketService from '../../Services/SocketService';
+import {userServices} from '../../Services/userService';
+import {Notification} from '../../Untils/Notification';
+import CustomCallButtonComponent from './CustomCallButtonComponent';
 const UserInfoChat = ({navigation}: any) => {
   const [showItems, setShowItems] = useState<any[]>([]);
   const [converInfo, setConverInfo] = useState<any>('');
@@ -143,7 +139,6 @@ const UserInfoChat = ({navigation}: any) => {
 
   const onPressItems = (key: string) => {
     // xử lí group
-    console.log(key);
 
     switch (key) {
       case 'topic':
@@ -175,8 +170,8 @@ const UserInfoChat = ({navigation}: any) => {
         break;
       case 'report':
         navigation.navigate('ReportScreen', {
-          name: isPersonal ? converInfo.name : converInfo.groupName,
-          userId: isPersonal ? idConver : idConver,
+          name: converInfo.name ?? converInfo.groupName,
+          userId: idConver,
         });
         break;
       case 'outgroup':
@@ -218,7 +213,7 @@ const UserInfoChat = ({navigation}: any) => {
         QRCode: {qrdata: data, attended: []},
         recipients: converInfo.invitedUsers,
       };
-      
+
       socket?.emit('send_qrcode', messageData);
       setIsVisibleQR(false);
       Notification.showToast('success', t('notification'), t('create_qr'));
@@ -239,7 +234,8 @@ const UserInfoChat = ({navigation}: any) => {
               <CarfeatureComponent
                 key={index}
                 label={
-                  element.id === 5 && !!friendData.block?.includes(idConver)
+                  element.id === 5 &&
+                  !!(friendData.block ?? []).includes(idConver)
                     ? t(`unblock`)
                     : t(`${element.label}`)
                 }
@@ -252,7 +248,8 @@ const UserInfoChat = ({navigation}: any) => {
             <CarfeatureComponent
               key={index}
               label={
-                element.id === 5 && !!friendData.block?.includes(idConver)
+                element.id === 5 &&
+                !!(friendData.block ?? []).includes(idConver)
                   ? t(`unblock`)
                   : t(`${element.label}`)
               }
@@ -317,15 +314,20 @@ const UserInfoChat = ({navigation}: any) => {
     const res = await groupServices.handleOutGroup(auth.userId, idConver);
     if (res && res.data) {
       console.log('Member: ', res.data);
-      await AsyncStorage.setItem(
-        'ConversationInfo',
-        JSON.stringify({
-          ...converInfo,
-          invitedUsers: res.data,
-        }),
-      );
-      console.log('Out group successfully !!');
+      if (converInfo.invitedUsers.length === 1) {
+        await AsyncStorage.removeItem('ConversationInfo');
+      } else {
+        await AsyncStorage.setItem(
+          'ConversationInfo',
+          JSON.stringify({
+            ...converInfo,
+            invitedUsers: res.data,
+          }),
+        );
+      }
       navigation.navigate(t('message'));
+
+      console.log('Out group successfully !!');
     }
   };
 
@@ -369,48 +371,41 @@ const UserInfoChat = ({navigation}: any) => {
                   txtStyles={{color: colors.text}}
                   converInfo={converInfo}
                   isDisible={
-                    (converInfo.block &&
-                      isPersonal &&
-                      converInfo.block.includes(auth.userId)) ||
-                    (friendData.block &&
-                      isPersonal &&
-                      friendData.block.includes(idConver))
+                    (converInfo.block ?? []).includes(auth.userId) ||
+                    (friendData.block ?? []).includes(idConver)
                   }
                   type={isPersonal ? 'personal_voice' : 'group_voice'}
                   targetName={isPersonal ? name : converInfo.groupName}
                   targetId={
                     isPersonal
                       ? idConver
-                      : converInfo.invitedUsers &&
-                        converInfo.invitedUsers.filter(
+                      : (converInfo?.invitedUsers ?? []).filter(
                           (id: any) => id !== auth.userId,
                         )
                   }
                   styles={styles.menu}
                   text="call"
-                  icon={<CallCalling color="blue" size={22} />}
+                  icon={<CallCalling color={colors.icon} size={22} />}
                 />
                 <CustomCallButtonComponent
                   txtStyles={{color: colors.text}}
                   converInfo={converInfo}
                   isDisible={
-                    (converInfo.block &&
-                      converInfo.block.includes(auth.userId)) ||
-                    (friendData.block && friendData.block.includes(idConver))
+                    (converInfo.block ?? []).includes(auth.userId) ||
+                    (friendData.block ?? []).includes(idConver)
                   }
                   type={isPersonal ? 'personal_video' : 'group_video'}
-                  targetName={isPersonal ? name : converInfo.groupName}
+                  targetName={name ?? converInfo.groupName}
                   targetId={
                     isPersonal
                       ? idConver
-                      : converInfo.invitedUsers &&
-                        converInfo.invitedUsers.filter(
+                      : (converInfo?.invitedUsers ?? []).filter(
                           (id: any) => id !== auth.userId,
                         )
                   }
                   styles={styles.menu}
                   text="video"
-                  icon={<Video color="blue" size={22} />}
+                  icon={<Video color={colors.icon} size={22} />}
                 />
               </>
               {MenuChat(colors).ChoiceItems.map((item, index) => (
@@ -472,19 +467,19 @@ const UserInfoChat = ({navigation}: any) => {
         onPressNo={() => setShowBlockModal(false)}
         onPressYes={async () => await actionBlockUser(auth.userId, idConver)}
         descriptions={`${
-          friendData.block && friendData.block.includes(idConver)
-            ? t('confirm_unblock') + converInfo.name
-            : t('confirm_block') + converInfo.name
+          (friendData?.block ?? []).includes(idConver)
+            ? `${t('confirm_unblock')} ${converInfo.name}`
+            : `${t('confirm_block')} ${converInfo.name}`
         }`}
         title={`${
-          friendData.block && friendData.block.includes(idConver)
-            ? t('unblock_friend') + converInfo.name
-            : t('block_friend') + converInfo.name
+          (friendData?.block ?? []).includes(idConver)
+            ? `${t('unblock_friend')} ${converInfo.name}`
+            : `${t('block_friend')} ${converInfo.name}`
         }`}
       />
       <QrCodeModal
         type={converInfo.type}
-        groupId={isPersonal && idConver}
+        groupId={idConver}
         visible={isVisibleQR}
         onClose={() => setIsVisibleQR(false)}
         onPress={showNotification_QrCode}

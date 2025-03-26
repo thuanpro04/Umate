@@ -30,11 +30,12 @@ interface Props {
   children: ReactNode;
   user: any;
   handleGhimConversation: () => void;
-  handleDeleteConversation:() =>void
+  handleDeleteConversation: () => void;
 }
 
 const CustormLongPress = (props: Props) => {
-  const {children, user, handleGhimConversation,handleDeleteConversation} = props;
+  const {children, user, handleGhimConversation, handleDeleteConversation} =
+    props;
   const modalRef = useRef<Modalize>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -44,7 +45,6 @@ const CustormLongPress = (props: Props) => {
   const auth = useSelector(authSelector);
   const dispatch = useDispatch();
   const friendData = useSelector(friendSelector);
-
   const menu = [
     {
       key: 'ghim',
@@ -147,7 +147,6 @@ const CustormLongPress = (props: Props) => {
     }
     setIsLoading(false);
   };
-  
 
   const onOpenModal = useCallback(() => {
     modalRef.current?.open();

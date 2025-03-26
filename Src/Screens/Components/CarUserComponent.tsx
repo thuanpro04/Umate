@@ -234,7 +234,7 @@ const CarUserComponent = (props: Props) => {
             </>
           ) : (
             <ButtonComponent
-              label={'Cancel'}
+              label={t('cancel')}
               styles={{
                 backgroundColor: colors.icon,
                 width: '80%',

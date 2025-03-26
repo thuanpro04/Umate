@@ -35,7 +35,6 @@ const themes = [
 const ThemeChatScreen = ({navigation}: any) => {
   const {converInfo} = useRoute().params as {converInfo: any};
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch();
   const {t} = useTranslation();
   const numColumn = 2;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -52,7 +51,6 @@ const ThemeChatScreen = ({navigation}: any) => {
       navigation.navigate(t('message'));
     }
     setIsLoading(false);
-    
   };
 
   return (

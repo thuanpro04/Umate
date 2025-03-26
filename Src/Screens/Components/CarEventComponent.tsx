@@ -1,21 +1,23 @@
-import { DirectRight } from 'iconsax-react-native';
-import { debounce } from 'lodash';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {DirectRight} from 'iconsax-react-native';
+import {debounce} from 'lodash';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Foundation from 'react-native-vector-icons/Foundation';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
+import {useDispatch, useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import LikeListModal from '../Modal/LikeListModal';
 import ShareEventModal from '../Modal/ShareEventModal';
-import { eventSevices } from '../Services/eventService';
-import { RowComponent, SpaceComponent, TextComponent } from './index';
+import {eventSevices} from '../Services/eventService';
+import {RowComponent, SpaceComponent, TextComponent} from './index';
+import {setLikeEvent} from '../../redux/reducers/eventSlice';
+import {UserInfo} from '../Untils/UserInfo';
 interface Props {
   img: string;
   content: string;
@@ -51,7 +53,7 @@ const CarComponent = (props: Props) => {
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-
+  const dispatch = useDispatch();
   const getTime = () => {
     const timePart: any = timeStamp.split('-')[0].trim();
     const [date, time, ampm] = timePart.split(' ');
@@ -70,25 +72,30 @@ const CarComponent = (props: Props) => {
       action,
     );
     if (res?.data) {
-      console.log(res?.data.messages);
+      console.log(res?.data.messages, res.data.value);
+      const parseData = await UserInfo.getUserData();
+      const value: number = parseInt(res.data.value);
+      parseData.event.like += value;
+      await Promise.all([
+        dispatch(setLikeEvent(value)),
+        await UserInfo.setUserData(parseData),
+      ]);
     }
   }, 5000);
-  const handleLikeClick = useCallback(() => {
-    if (isProcessing) return; // Nếu đang xử lý, không cho phép bấm
+
+  const handleLikeClick = useCallback(async () => {
+    if (isProcessing) return; // If already processing, do nothing
 
     setProcessing(true);
     const newLikedState = !isLiked;
     setLiked(newLikedState);
 
-    // Tính toán giá trị mới của count
     const newCount = newLikedState ? count + 1 : count > 0 ? count - 1 : 0;
+    setCount(newCount);
 
-    setCount(newCount); // Cập nhật count
-
-    let action = newLikedState ? 'add' : 'cancel';
-    console.log(newLikedState, newCount);
-
-    updateUserHeartForEvent(action);
+    const action = newLikedState ? 'add' : 'cancel';
+    await updateUserHeartForEvent(action); // Await the debounced function
+    setProcessing(false);
   }, [count, isLiked, isProcessing]);
 
   return (

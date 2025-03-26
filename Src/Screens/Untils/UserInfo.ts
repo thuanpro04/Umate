@@ -53,6 +53,11 @@ export class UserInfo {
     const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
     return userData ? JSON.parse(userData) : {};
   };
+  static setUserData=async(data:any)=>{
+    await AsyncStorage.setItem('userData', JSON.stringify(data));
+    console.log('Set user data successfully');
+    
+  }
   static getAvatar() {
     const temp =
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1newdbzQNEDeE0F8ky3T40yrgWDpsNzX4Rw&s';

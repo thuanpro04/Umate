@@ -43,7 +43,11 @@ import {SpaceComponent} from '../Components';
 import {HandleNotification} from '../Untils/HandleNotification';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {eventSelector, removeEvent} from '../../redux/reducers/eventSlice';
-import {friendSelector, removeFriend} from '../../redux/reducers/friendSlice';
+import {
+  friendSelector,
+  removeFriend,
+  resetFriend,
+} from '../../redux/reducers/friendSlice';
 import {
   profileSelector,
   removeProfile,
@@ -55,6 +59,7 @@ import {
 } from '../../redux/reducers/languageSlice';
 import i18next from 'i18next';
 import {UserInfo} from '../Untils/UserInfo';
+import SocketService from '../Services/SocketService';
 
 const SettingScreen = () => {
   const navigation: any = useNavigation();
@@ -152,10 +157,11 @@ const SettingScreen = () => {
       await GoogleSignin.signOut();
       dispatch(removeAuth());
       dispatch(removeEvent());
-      dispatch(removeFriend());
+      dispatch(resetFriend());
       dispatch(removeProfile());
       await AsyncStorage.removeItem('auth');
-      const res = await userServices.updateUserStatus(auth.userId, false);
+      await AsyncStorage.removeItem('ConversationInfo');
+      SocketService.disconnect();
       setIsLoading(false);
     } catch (error) {
       console.log('setting log out error: ', error);

@@ -33,6 +33,7 @@ const handleAgreeOnGroup = async (
 const handleOutGroup = async (userId: string, groupId: string) => {
   try {
     url = `/out-group?id=${groupId}&&userId=${userId}`;
+    
     const res = await groupAPI.handleGroup(url);
     return res;
   } catch (error) {

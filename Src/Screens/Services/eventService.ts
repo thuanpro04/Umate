@@ -1,5 +1,5 @@
 import eventApi from '../../apis/eventApi';
-let url;
+let url: string;
 const getNewEvent = async (page: number) => {
   url = `/new-event?curentPage=${page}&limit=${10}`;
   try {

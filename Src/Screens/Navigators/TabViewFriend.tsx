@@ -43,15 +43,12 @@ const TabViewFriend = () => {
       onIndexChange={setIndex}
       initialLayout={{width: appInfo.size.WIDTH}}
       renderTabBar={(props: any) => {
-        const {key, ...restProps} = props;
-
         return (
           <TabBar
-            {...restProps}
-            key={key}
+            {...props}
             style={{backgroundColor: colors.background}}
             labelStyle={{
-              color: appColors.grey3, 
+              color: appColors.grey3,
               fontWeight: '500',
               fontStyle: 'italic',
             }}

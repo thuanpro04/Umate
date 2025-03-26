@@ -1,15 +1,20 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import {ArrowLeft, Message2, UserAdd} from 'iconsax-react-native';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   Alert,
   FlatList,
   Image,
+  Linking,
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -18,6 +23,11 @@ import Animated, {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
+import {eventSelector} from '../../redux/reducers/eventSlice';
+import {friendSelector} from '../../redux/reducers/friendSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
 import {appColors} from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
@@ -25,31 +35,12 @@ import {
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {profileStyles} from './profileStyles';
-import {
-  Android,
-  ArrowLeft,
-  ArrowLeft2,
-  Message2,
-  UserAdd,
-} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {useFocusEffect, useRoute} from '@react-navigation/native';
-import {userServices} from '../Services/userService';
-import LoadingModal from '../Modal/LoadingModal';
-import {UserInfo} from '../Untils/UserInfo';
-import {globalStyles} from '../../Styles/globalStyle';
-import {Linking} from 'react-native';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
+import LoadingModal from '../Modal/LoadingModal';
 import {friendServices} from '../Services/friendService.';
-import {Notification} from '../Untils/Notification';
-import {friendSelector} from '../../redux/reducers/friendSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {useTranslation} from 'react-i18next';
-import FastImage from 'react-native-fast-image';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {messageServices} from '../Services/messageServices';
-import {eventSelector} from '../../redux/reducers/eventSlice';
+import {userServices} from '../Services/userService';
+import {profileStyles} from './profileStyles';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -326,10 +317,13 @@ const PersonalScreen = ({navigation}: any) => {
     );
 
     if (res && res.data) {
-      let conversationId = res.data;
       await AsyncStorage.setItem(
         'ConversationInfo',
-        JSON.stringify({...userInfo, conversationId, type: 'personal'}),
+        JSON.stringify({
+          ...userInfo,
+          conversationId: res.data,
+          type: 'personal',
+        }),
       );
     } else {
       await AsyncStorage.setItem(
@@ -340,7 +334,7 @@ const PersonalScreen = ({navigation}: any) => {
     setIsLoading(false);
     navigation.navigate('Chat');
   };
-  
+
   return !isLoading ? (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}>
@@ -368,7 +362,7 @@ const PersonalScreen = ({navigation}: any) => {
                 <TextComponent
                   styles={profileStyles.statLabel}
                   label={t(key).toUpperCase()}
-                /> 
+                />
               </View>
             ))}
           </View>

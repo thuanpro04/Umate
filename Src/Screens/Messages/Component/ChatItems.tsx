@@ -272,7 +272,6 @@ const ChatItems = (props: Props) => {
               styles.container,
               {
                 backgroundColor: isUser ? colors.bgItem : colors.bgItem2,
-
                 borderBottomLeftRadius: !isUser ? 0 : 20,
                 paddingTop: item?.reply ? 2 : 8,
                 borderBottomRightRadius: !isUser ? 20 : 0,
@@ -360,8 +359,12 @@ const ChatItems = (props: Props) => {
                   </View>
                 )}
                 {isLink ? (
-                  <View style={{height: 255}}>
-                    <CustormLinkPreview txtLink={item.content} />
+                  <View style={{height: item.title ? 275 : 255}}>
+                    <CustormLinkPreview
+                      theme={theme}
+                      txtLink={item.content}
+                      title={item.title}
+                    />
                   </View>
                 ) : isQrcode ? (
                   <View

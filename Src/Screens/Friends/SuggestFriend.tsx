@@ -11,12 +11,14 @@ import {friendServices} from '../Services/friendService.';
 import {userServices} from '../Services/userService';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {friendSelector} from '../../redux/reducers/friendSlice';
+import {useTranslation} from 'react-i18next';
 
 const SuggestFriend = React.memo(() => {
   const [showTabBar, setshowTabBar] = useState(false);
   const [users, setUsers] = useState<any[]>();
   const [message, setMessage] = useState('');
   const navigation = useNavigation<any>();
+  const {t} = useTranslation();
   const [count, setCount] = useState<{
     [key: string]: {count: number; mutualFriends: any[]};
   }>({});
@@ -153,8 +155,8 @@ const SuggestFriend = React.memo(() => {
         key={item.userId}
         img={item.avatar}
         name={item.name}
-        sayYes="Add Friend"
-        sayNo="Remove"
+        sayYes={t('add_friend')}
+        sayNo={t('remove')}
         isShowBtn={buttonVisibility[item.userId]}
         onPressYes={async () => {
           handlePressYes(item.userId);

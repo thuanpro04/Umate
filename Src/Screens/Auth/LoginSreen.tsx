@@ -6,7 +6,7 @@ import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 import {useDispatch} from 'react-redux';
 import Google from '../../assets/svgs/Google.svg';
 import {addAuth, removeAuth} from '../../redux/reducers/authReducer';
-import {addEvent} from '../../redux/reducers/eventSlice';
+import {addEvent, setLikeEvent} from '../../redux/reducers/eventSlice';
 import {addFriend} from '../../redux/reducers/friendSlice';
 import {setLanguage} from '../../redux/reducers/languageSlice';
 import {addProfile} from '../../redux/reducers/profileSlice';
@@ -77,6 +77,7 @@ const LoginSreen = () => {
       dispatch(addEvent(res.data.eventSlice));
       dispatch(setTheme(res.data.authSlice.theme));
       dispatch(setLanguage(res.data.authSlice.language));
+      dispatch(setLikeEvent(res.data.eventSlice.like));
       await AsyncStorage.setItem(
         'userData',
         JSON.stringify({
@@ -137,7 +138,12 @@ const LoginSreen = () => {
           <View style={styles.Vtext}>
             <TextComponent
               label={t('umate_slogan')}
-              styles={{fontWeight: 'bold', fontSize: 18, fontStyle: 'italic'}}
+              styles={{
+                fontWeight: 'bold',
+                fontSize: 18,
+                fontStyle: 'italic',
+                color: appColors.black,
+              }}
             />
             <SpaceComponent height={6} />
             <TextComponent
@@ -207,6 +213,7 @@ const styles = StyleSheet.create({
   text: {
     fontStyle: 'italic',
     textAlign: 'center',
+    color: appColors.black,
   },
   VContainer: {
     backgroundColor: appColors.white,

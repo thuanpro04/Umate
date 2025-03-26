@@ -2,16 +2,21 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 interface EventState {
   eventShares: string[];
+  like:number
 }
 
 const initialState: EventState = {
   eventShares: [],
+  like:0
 };
 
 const eventSlice = createSlice({
   name: 'event',
   initialState,
   reducers: {
+    setLikeEvent: (state, action: PayloadAction<number>) => {
+      state.like += action.payload;
+    },
     addEvent: (state, action: PayloadAction<EventState>) => {
       state.eventShares = [...state.eventShares, ...action.payload.eventShares];
     },
@@ -23,5 +28,5 @@ const eventSlice = createSlice({
 });
 
 export const eventReducer = eventSlice.reducer;
-export const {addEvent, removeEvent, resetEvents} = eventSlice.actions;
+export const {addEvent, removeEvent, resetEvents,setLikeEvent} = eventSlice.actions;
 export const eventSelector = (state: any) => state.events;

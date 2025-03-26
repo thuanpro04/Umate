@@ -18,8 +18,8 @@ import {appColors} from '../../Theme/Colors/appColors';
 import {HeaderComponent, TextComponent} from '../Components';
 import {messageServices} from '../Services/messageServices';
 import CustormImageViewing from './Component/CustormImageViewing';
-import { useSelector } from 'react-redux';
-import { themeSelector } from '../../redux/reducers/themeSlice';
+import {useSelector} from 'react-redux';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import LoadingModal from '../Modal/LoadingModal';
 
 const YourImagesScreen = () => {
@@ -34,7 +34,7 @@ const YourImagesScreen = () => {
   const [visible, setVisible] = useState(false);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
-  const colors = appColors[theme ];
+  const colors = appColors[theme];
   const {t} = useTranslation();
 
   const columnCount = 4;
@@ -99,7 +99,7 @@ const YourImagesScreen = () => {
         title={t('yourimage')}
         titleColor={colors.text}
       />
-      {images && images.length > 0 ? (
+      {images?.length > 0 ? (
         <FlatList
           data={images}
           style={{flex: 1, paddingHorizontal: 12}}
@@ -110,7 +110,7 @@ const YourImagesScreen = () => {
         />
       ) : (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <TextComponent label={t('empty')} color={colors.text}/>
+          <TextComponent label={t('empty')} color={colors.text} />
         </View>
       )}
       {images && (
@@ -122,7 +122,7 @@ const YourImagesScreen = () => {
           onClose={() => setVisible(false)}
         />
       )}
-      <LoadingModal visible={isLoading}/>
+      <LoadingModal visible={isLoading} />
     </SafeAreaView>
   );
 };

@@ -75,6 +75,7 @@ const ShareEventModal = (props: Props) => {
       imagesUrl: [],
       avatar,
       name,
+      title: value && value,
     };
     try {
       if (key === 'personal') {
@@ -98,8 +99,8 @@ const ShareEventModal = (props: Props) => {
           groupId: Id,
           recipients,
         };
-          console.log(data);
-          
+        console.log(data);
+
         socket.emit('send_message', data, (response: any) => {
           console.log(
             'Message sent to user:',
@@ -136,8 +137,7 @@ const ShareEventModal = (props: Props) => {
     } catch (error) {
       console.log('share event my app error: ', error);
     }
-    setIsLoading(false)
-
+    setIsLoading(false);
   };
   const handleShare = async (platform: string) => {
     switch (platform) {
@@ -171,7 +171,7 @@ const ShareEventModal = (props: Props) => {
     );
   };
   const handleShareInFacebook = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     const shareOptions: any = {
       title: 'Chia sẽ sự kiện',
@@ -184,32 +184,30 @@ const ShareEventModal = (props: Props) => {
     } catch (error) {
       console.log('Error sharing on Facebook:', error);
     }
-    setIsLoading(false)
-
+    setIsLoading(false);
   };
   const getAllConversation = useCallback(async () => {
     setIsLoading(true);
     const res = await messageServices.getAllConversationUsers(auth.userId);
     if (res?.data && res) {
-      setUsers(res?.data);
-      // console.log(res.data, 1234);
+      setUsers(res?.data.allConversations);
+      console.log(res.data, 1234);
     }
     setIsLoading(false);
   }, []);
   const renderUserItems = ({item, index}: any) => {
-    
     return (
       <TouchableOpacity
-        key={item.type === 'personal' ? item.userId : item.groupId}
+        key={item.userId ?? item.groupId}
         onPress={async () =>
           await handleSendEventForUser(
             item.type,
-            item.userId ? item.userId : item.groupId,
+            item.userId ?? item.groupId,
             item.avatar,
             item.type == 'personal'
               ? profile.name
               : `${item.groupName} - ${profile.name}`,
-            item.invitedUsers && item.invitedUsers,
+            item?.invitedUsers,
           )
         }
         style={{marginRight: 12, alignItems: 'center'}}>
@@ -268,15 +266,17 @@ const ShareEventModal = (props: Props) => {
                 label={t('send_message')}
                 styles={modalStyles.title}
               />
-              <FlatList
-                data={users.slice(0, 10).reverse()}
-                horizontal
-                keyExtractor={item =>
-                  item.type === 'personal' ? item.userId : item.groupId
-                }
-                style={{flex: 1}}
-                renderItem={renderUserItems}
-              />
+              {users.length > 0 && (
+                <FlatList
+                  data={users.slice(0, 10).reverse()}
+                  horizontal
+                  keyExtractor={item =>
+                    item.type === 'personal' ? item.userId : item.groupId
+                  }
+                  style={{flex: 1}}
+                  renderItem={renderUserItems}
+                />
+              )}
             </View>
             <SpaceComponent height={12} />
             <View style={modalStyles.shareOptions}>
@@ -311,7 +311,7 @@ const ShareEventModal = (props: Props) => {
           </View>
         </Modalize>
       </Portal>
-      <LoadingModal visible={isLoading}/>
+      <LoadingModal visible={isLoading} />
     </View>
   );
 };

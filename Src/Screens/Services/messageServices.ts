@@ -1,5 +1,5 @@
 import chatsAPI from '../../apis/chatApi';
-let url;
+let url: string;
 const getAllMessagesUser = async (id: any, key: string, page: number) => {
   try {
     url = `/receive-messages?id=${id}&key=${key}&page=${page}`;

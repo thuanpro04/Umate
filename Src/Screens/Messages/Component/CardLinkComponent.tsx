@@ -8,9 +8,10 @@ import {appColors} from '../../../Theme/Colors/appColors';
 import {ButtonComponent, RowComponent, TextComponent} from '../../Components';
 interface Props {
   url: string;
+  title: string;
 }
 const CardLinkComponent = (props: Props) => {
-  const {url} = props;
+  const {url, title} = props;
   const [previewData, setPreviewData] = useState<any>(null);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
@@ -22,12 +23,16 @@ const CardLinkComponent = (props: Props) => {
   }, [url]);
 
   return (
-    previewData.image?.url && (
-      <View>
+    previewData?.image?.url && (
+      <View style={{marginBottom: 16}}>
         <RowComponent
           styles={[
             styles.container,
-            {borderColor: colors.border, backgroundColor: colors.card},
+            {
+              borderColor: colors.border,
+              backgroundColor: colors.card,
+              minHeight: 160,
+            },
           ]}>
           <FastImage
             source={{
@@ -42,12 +47,16 @@ const CardLinkComponent = (props: Props) => {
               borderRadius: 8,
             }}
           />
-          <ButtonComponent
-            type="action"
-            styles={{flex: 1}}
-            onPress={() => Linking.openURL(url)}>
-            <TextComponent label={url} size={14} color={appColors.blue} />
-          </ButtonComponent>
+          <View
+            style={{flex: 1,marginTop:12}}>
+            {title && <TextComponent label={`${title}`} />}
+            <ButtonComponent
+              type="action"
+              styles={{flex: 1}}
+              onPress={() => Linking.openURL(url)}>
+              <TextComponent label={url} size={14} color={appColors.blue} />
+            </ButtonComponent>
+          </View>
         </RowComponent>
       </View>
     )

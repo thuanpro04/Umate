@@ -165,15 +165,12 @@
   "is_connect": "Đang kết nối...",
   "block_message": "Bỏ chặn đi gòi nhắn 😏",
   "enter_message": "Nhập tin nhắn ...",
-  "share_event": "Chia sẽ sự kiện",
-  "mutual_friend":"bạn chung",
+  "share_event": "Chia sẻ sự kiện",
+  "mutual_friend": "bạn chung",
   "attendance_code": "Mã điểm danh",
-  "how_attendance":"Bạn có muốn điểm danh không? ",
+  "how_attendance": "Bạn có muốn điểm danh không? ",
   "picture": "Chụp ảnh.",
   "from_library": "Từ thư viện.",
-  "from_url":"Từ url."
-
-
-
-
+  "from_url": "Từ url.",
+  "remove": "Xóa"
 }

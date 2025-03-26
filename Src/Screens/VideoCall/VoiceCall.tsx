@@ -7,12 +7,16 @@ import {
   ZegoUIKitPrebuiltCall,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import React from 'react';
-import {StatusBar, StyleSheet, View} from 'react-native';
+import {Image, StatusBar, StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {socketSelector} from '../../redux/reducers/socketSlice';
+import {
+  setIncomingCall,
+  socketSelector,
+} from '../../redux/reducers/socketSlice';
 import {useTranslation} from 'react-i18next';
 import SocketService from '../Services/SocketService';
+import store from '../../redux/store';
 const VoiceCall = (props: any) => {
   const {roomID, name, type} = useRoute().params as {
     roomID: string;
@@ -25,7 +29,7 @@ const VoiceCall = (props: any) => {
   const calls = dataCall.incomingCall;
   const socket = SocketService.getSocket();
   const {t} = useTranslation();
-
+  let appID: number = parseInt(process.env.APPID as string);
   const getCallConfig = (type: string) => {
     switch (type) {
       case 'group_voice':
@@ -68,20 +72,21 @@ const VoiceCall = (props: any) => {
     if (calls) {
       try {
         const data = getDataCall(duration);
+        // socket?.emit('call_end', data);
         socket?.emit('send_message', data);
+        store.dispatch(setIncomingCall(null));
         console.log('Save call data successfully!!');
       } catch (error) {
         console.log('Save call data fail: ', error);
       }
     }
   };
+
   return (
     <View style={styles.container}>
       <ZegoUIKitPrebuiltCall
-        appID={869126873}
-        appSign={
-          'fa5f0ebaabd60e8769aa6a5792f6330c188ffad58dd5b60a840e40a16fd545da'
-        }
+        appID={appID}
+        appSign={process.env.APPSIGN}
         userID={auth.userId} // userID can be something like a phone number or the user id on your own user system.
         userName={name}
         callID={roomID} // callID can be any unique string.
@@ -94,10 +99,22 @@ const VoiceCall = (props: any) => {
           },
           onCallEnd: (callID: any, reason: any, duration: any) => {
             console.log('Lý do kết thúc cuộc gọi:', reason, duration, 3456789);
-            handleSaveCallOnData(duration);
             navigation.navigate(t('home'));
+            handleSaveCallOnData(duration);
             //lưu thông tin cuộc gọi vào data
           },
+          avatarBuilder: ({userInfo}: any) => {
+            return (
+              <View style={{width: '100%', height: '100%'}}>
+                <Image
+                  style={{width: '100%', height: '100%'}}
+                  resizeMode="cover"
+                  source={{uri: `https://robohash.org/${userInfo.userID}.png`}}
+                />
+              </View>
+            );
+          },
+          hangUpWhenAllUserLeave: true,
         }}
       />
     </View>

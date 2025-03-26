@@ -26,7 +26,6 @@ class SocketService {
     PushNotification.configure({
       onNotification: function (notification) {
         console.log('NOTIFICATION:', notification);
-        
       },
       popInitialNotification: true,
       requestPermissions: true,
@@ -139,7 +138,10 @@ class SocketService {
       console.log('📞 Nhận cuộc gọi từ:', callData);
       store.dispatch(setIncomingCall(callData));
     });
-
+    this.socket.on('call_end', () => {
+      store.dispatch(setIncomingCall(null));
+      console.log('Cuộc gọi đã kết thúc, đã xóa dữ liệu cuộc gọi');
+    });
     this.socket.on('feedbackCancelCall', (data: any) => {
       const dataCall = {
         title: `Bạn có cuộc gọi nhỡ từ ${data.name}`,
@@ -147,12 +149,14 @@ class SocketService {
       };
       this.sendNotification(dataCall);
     });
-    
+
     this.socket.on('notification_message', (data: any) => {
       this.sendNotification(data);
     });
   }
-
+  public resetCallState() {
+    store.dispatch(setIncomingCall(null));
+  }
   public getSocket(): Socket | null {
     return this.socket;
   }

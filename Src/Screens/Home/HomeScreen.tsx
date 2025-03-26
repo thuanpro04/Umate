@@ -24,14 +24,12 @@ const HomeScreen = () => {
   const [limitPage, setLimitPage] = useState(1);
   const [statusNoti, setStatusNoti] = useState(false);
   const auth = useSelector(authSelector);
-  const profile = useSelector(profileSelector);
-
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+
   const getNewEvent = async () => {
     if (isLoading || page > limitPage) return; // Ngăn chặn gọi API khi đang tải hoặc hết trang.
     setIsLoading(true);

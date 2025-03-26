@@ -1,5 +1,5 @@
 import usersAPI from '../../apis/usersApi';
-let url;
+let url: string;
 const getEquestFriendUsers = async (
   currentUserId: string,
   filter?: string,
