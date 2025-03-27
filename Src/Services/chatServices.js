@@ -9,13 +9,9 @@ const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
-
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
-  // console.log(req.query);
   try {
-    // console.log("Page", page, "Limit", limit * page);
-
     let data, messages;
 
     if (id !== "undefined" && key === "personal") {
@@ -586,9 +582,9 @@ const handleUpdateAttendedGroup = async (req, res) => {
         "latest_check_in",
         dataNoti
       );
+
       console.log("Save Notification");
     }
-    const user = await findUserById(currentUserId);
 
     return res
       .status(200)

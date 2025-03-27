@@ -204,7 +204,6 @@ function initializeSocket(server) {
         const ids = userMessages.recipients.filter(
           (item) => item !== data.senderId
         );
-
         ids.forEach((item) => sendToUser(item, userMessages));
       }
       // sendForMe(userMessages.senderId, userMessages);
