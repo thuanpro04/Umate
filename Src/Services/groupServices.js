@@ -1,13 +1,16 @@
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { notificationModel } = require("../models/notificationModel");
 const { generateUniqueID } = require("../untils/informationUntils");
-const { deletedNotification } = require("./notificationServices");
-
+const {
+  handleNotificationSocket,
+} = require("../untils/notificationSocketUntil");
+const { addNotificationForUser } = require("./notificationServices");
 const handleNewGroupUser = async (req, res) => {
   const groupInfo = req.body;
   if (!Array.isArray(groupInfo.invitedUsers)) {
     return res.status(400).json({ message: "Invalid invitedUsers format" });
   }
+
   // console.log("group", groupInfo);
   const invitedUsers = groupInfo.invitedUsers.flatMap((user) => user.userId);
   // console.log("invitedUsers", invitedUsers);
@@ -64,13 +67,14 @@ const handleActionAgreeOnGroup = async (req, res) => {
     console.log("Action agree on group error: ", error);
   }
 };
+
 const getGroupConversation = async (id) => {
   return await GroupConversationModel.findOne({ groupId: id });
 };
 
 const handleOutGroup = async (req, res) => {
   const { id, userId } = req.query;
-  
+
   const group = await getGroupConversation(id);
   console.log(group);
   if (!group) {
@@ -137,12 +141,7 @@ const handleActionPosition = async (req, res) => {
 
     return res.status(200).json({
       message: `Successfully updated ${position}!`,
-      data:
-        position === "leader"
-          ? group.leader
-          : position === "deputyLeader"
-          ? group.deputyLeader
-          : undefined,
+      data: position === "leader" ? group.leader : group.deputyLeader,
     });
   } catch (error) {
     console.error("Error changing position:", error);
@@ -151,10 +150,78 @@ const handleActionPosition = async (req, res) => {
       .json({ message: "Error changing position", error: error.message });
   }
 };
+
+const handleUpdateAttendedGroup = async (req, res) => {
+  const { id, type, currentUserId, messageId, receiverId } = req.body;
+  console.log({ id, type, currentUserId, messageId, receiverId });
+
+  try {
+    const group = await getGroupConversation(id);
+
+    if (!group) {
+      return res.status(401).json({
+        message: "Group not found !!",
+      });
+    }
+    const upMessage = group.message.find(
+      (item) => item.messageId === messageId
+    );
+
+    if (!upMessage) {
+      return res.status(404).json({ message: "Message not found in group !!" });
+    }
+    if (upMessage.QRCode.attended.includes(currentUserId)) {
+      return res.status(200).json({ message: "User existed!", data: [] });
+    }
+    upMessage.QRCode.attended.push(currentUserId);
+    await group.save();
+    const countUser = group.invitedUsers.length;
+    const countAttended = upMessage.QRCode.attended.length;
+
+    if (
+      countUser >= 0 &&
+      (countAttended === countUser ||
+        countAttended === Math.floor(countUser / 2))
+    ) {
+      const attended = upMessage.QRCode.attended;
+      const notAttended = group.invitedUsers.filter(
+        (item) => !attended.includes(item)
+      );
+      const dataNoti = {
+        attended,
+        notAttended,
+      };
+
+      addNotificationForUser(
+        id,
+        generateUniqueID(),
+        receiverId,
+        `qr_scanned_members ${countAttended}`,
+        "qrcode",
+        "latest_check_in",
+        dataNoti
+      );
+      handleNotificationSocket({
+        name: `qr_scanned_members ${countAttended}`,
+        receiverId,
+        type: "qrcode",
+        senderId: currentUserId,
+      });
+      console.log("Save Notification");
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Updated successfully!", data: upMessage });
+  } catch (error) {
+    console.log("Attended group error: ", error);
+  }
+};
 module.exports = {
   handleNewGroupUser,
   handleActionAgreeOnGroup,
   handleOutGroup,
   getGroupConversation,
   handleActionPosition,
+  handleUpdateAttendedGroup,
 };

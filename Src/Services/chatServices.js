@@ -532,67 +532,6 @@ const sendQRcodeDataForGroup = async (data) => {
     console.log("Save data Qr code error: ", error);
   }
 };
-const handleUpdateAttendedGroup = async (req, res) => {
-  const { id, type, currentUserId, messageId, receiverId } = req.body;
-  console.log({ id, type, currentUserId, messageId, receiverId });
-
-  try {
-    const group = await getGroupConversation(id);
-
-    if (!group) {
-      return res.status(401).json({
-        message: "Group not found !!",
-      });
-    }
-    const upMessage = group.message.find(
-      (item) => item.messageId === messageId
-    );
-
-    if (!upMessage) {
-      return res.status(404).json({ message: "Message not found in group !!" });
-    }
-    if (upMessage.QRCode.attended.includes(currentUserId)) {
-      return res.status(200).json({ message: "User existed!", data: [] });
-    }
-    upMessage.QRCode.attended.push(currentUserId);
-    await group.save();
-    const countUser = group.invitedUsers.length;
-    const countAttended = upMessage.QRCode.attended.length;
-
-    if (
-      countUser >= 0 &&
-      (countAttended === countUser ||
-        countAttended === Math.floor(countUser / 2))
-    ) {
-      const attended = upMessage.QRCode.attended;
-      const notAttended = group.invitedUsers.filter(
-        (item) => !attended.includes(item)
-      );
-      const dataNoti = {
-        attended,
-        notAttended,
-      };
-
-      addNotificationForUser(
-        id,
-        generateUniqueID(),
-        receiverId,
-        `qr_scanned_members ${countAttended}`,
-        "qrcode",
-        "latest_check_in",
-        dataNoti
-      );
-
-      console.log("Save Notification");
-    }
-
-    return res
-      .status(200)
-      .json({ message: "Updated successfully!", data: upMessage });
-  } catch (error) {
-    console.log("Attended group error: ", error);
-  }
-};
 
 const handleActionGhimConversation = async (req, res) => {
   const { id, userId, key } = req.body;
@@ -635,6 +574,6 @@ module.exports = {
   handleUpdateNickName,
   handleUpdateThemeConversation,
   sendQRcodeDataForGroup,
-  handleUpdateAttendedGroup,
   handleActionGhimConversation,
+  getGroupConversation
 };

@@ -2,7 +2,8 @@ const {
   handleNewGroupUser,
   handleActionAgreeOnGroup,
   handleOutGroup,
-  handleActionPosition
+  handleActionPosition,
+  handleUpdateAttendedGroup
 } = require("../Services/groupServices");
 
 
@@ -19,9 +20,13 @@ const actionOutGroup = (req, res) => {
 const actionPosition = async (req, res) => {
   handleActionPosition(req, res);
 };
+const updateAttendedGroup = async (req, res) => {
+  handleUpdateAttendedGroup(req, res);
+};
 module.exports = {
   handleAddGroupUser,
   actionAgreeOnGroup,
   actionOutGroup,
   actionPosition,
+  updateAttendedGroup
 };

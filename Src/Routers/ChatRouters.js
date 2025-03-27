@@ -9,7 +9,6 @@ const {
   getLinkYourConversation,
   updateNickNameConversation,
   updateThemeConversation,
-  updateAttendedGroup,
   actionGhimConversation,
 } = require("../Controller/ChatController");
 const chatRouter = Router();
@@ -22,6 +21,5 @@ chatRouter.get("/get-images", getImages);
 chatRouter.get("/get-link", getLinkYourConversation);
 chatRouter.post("/update-nickname", updateNickNameConversation);
 chatRouter.post("/update-theme", updateThemeConversation);
-chatRouter.post("/update-attend", updateAttendedGroup);
 chatRouter.post("/ghim", actionGhimConversation);
 module.exports = chatRouter;
