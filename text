@@ -1,3 +1,2 @@
 git rm -r --cached .
 xóa cache
-ngrok http 3000
