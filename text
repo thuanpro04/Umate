@@ -1,2 +1,7 @@
 git rm -r --cached .
 xóa cache
+
+# Chuyển đổi cấu trúc dự án sang mô hình MVC:
+# - Đặt các tệp liên quan đến logic ứng dụng vào thư mục Controllers.
+# - Đặt các tệp liên quan đến dữ liệu vào thư mục Models.
+# - Đặt các tệp giao diện vào thư mục Views.
