@@ -99,7 +99,6 @@ const ShareEventModal = (props: Props) => {
           groupId: Id,
           recipients,
         };
-        console.log(data);
 
         socket.emit('send_message', data, (response: any) => {
           console.log(
@@ -131,7 +130,9 @@ const ShareEventModal = (props: Props) => {
       };
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
-        const eventShares = res.data.eventShares;
+        const eventShares = res.data;
+        console.log(eventShares);
+
         dispatch(addEvent({...event, eventShares}));
       }
     } catch (error) {
@@ -191,7 +192,6 @@ const ShareEventModal = (props: Props) => {
     const res = await messageServices.getAllConversationUsers(auth.userId);
     if (res?.data && res) {
       setUsers(res?.data.allConversations);
-      console.log(res.data, 1234);
     }
     setIsLoading(false);
   }, []);

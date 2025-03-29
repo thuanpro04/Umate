@@ -19,6 +19,7 @@ import {themeSelector} from '../../redux/reducers/themeSlice';
 import {CarEventComponent, HeaderComponent} from '../Components';
 import {eventSevices} from '../Services/eventService';
 import {notificationServices} from '../Services/notificationServices';
+import SocketService from '../Services/SocketService';
 const HomeScreen = () => {
   const [event, setEvent] = useState<any[]>([]);
   const [limitPage, setLimitPage] = useState(1);
@@ -91,6 +92,7 @@ const HomeScreen = () => {
     useCallback(() => {
       getNewEvent();
       checkLastNotificationStatus();
+      SocketService.setNavigation(navigation);
     }, []),
   );
 
@@ -112,9 +114,7 @@ const HomeScreen = () => {
               style={[
                 localStyles.notification,
                 {
-                  backgroundColor: statusNoti
-                    ? appColors.green
-                    : 'transparent',
+                  backgroundColor: statusNoti ? appColors.green : 'transparent',
                 },
               ]}
             />

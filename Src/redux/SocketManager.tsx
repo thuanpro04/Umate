@@ -43,18 +43,18 @@ const SocketManager = () => {
             navigation.goBack();
           }
         };
-        const handleDisplayScreenOnCLickNotification = (data: any) => {
-          console.log('Data notification: ', data);
-          if (data.typeNotifi === 'message') {
-            console.log('Chuyển màng hình message');
-          } else {
-            console.log('Chuyển màng hình home');
-          }
-        };
-        SocketService.addCustomEventListener(
-          'notification_message',
-          handleDisplayScreenOnCLickNotification,
-        );
+        // const handleDisplayScreenOnCLickNotification = (data: any) => {
+        //   console.log('Data notification: ', data);
+        //   if (data.typeNotifi === 'message') {
+        //     console.log('Chuyển màng hình message');
+        //   } else {
+        //     console.log('Chuyển màng hình home');
+        //   }
+        // };
+        // SocketService.addCustomEventListener(
+        //   'notification_message',
+        //   handleDisplayScreenOnCLickNotification,
+        // );
         // Đăng ký các sự kiện liên quan đến điều hướng
         SocketService.addCustomEventListener(
           'incomingCall',

@@ -1,65 +1,47 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Switch,
-  StyleSheet,
-  Alert,
-  StatusBar,
-} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import {
-  Sun,
-  Moon,
-  User,
-  Lock,
-  LogOut,
   Globe,
   HelpCircle,
+  Lock,
+  LogOut,
+  Moon,
+  Sun,
   Trash,
+  User,
 } from 'lucide-react-native';
-import AsyncStorage, {
-  useAsyncStorage,
-} from '@react-native-async-storage/async-storage';
+import React, {useEffect, useState} from 'react';
+import {
+  Alert,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {
-  setTheme,
-  themeSelector,
-  toggleTheme,
-} from '../../redux/reducers/themeSlice';
-import {appColors} from '../../Theme/Colors/appColors';
-import {userServices} from '../Services/userService';
-import {
-  addAuth,
-  authSelector,
-  removeAuth,
-} from '../../redux/reducers/authReducer';
-import LoadingModal from '../Modal/LoadingModal';
-import {ArrowLeft} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {SpaceComponent} from '../Components';
-import {HandleNotification} from '../Untils/HandleNotification';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {eventSelector, removeEvent} from '../../redux/reducers/eventSlice';
-import {
-  friendSelector,
-  removeFriend,
-  resetFriend,
-} from '../../redux/reducers/friendSlice';
-import {
-  profileSelector,
-  removeProfile,
-} from '../../redux/reducers/profileSlice';
+import i18next from 'i18next';
+import {ArrowLeft} from 'iconsax-react-native';
 import {useTranslation} from 'react-i18next';
+import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
+import {removeEvent} from '../../redux/reducers/eventSlice';
+import {resetFriend} from '../../redux/reducers/friendSlice';
 import {
   languageSelecter,
   setLanguage,
 } from '../../redux/reducers/languageSlice';
-import i18next from 'i18next';
-import {UserInfo} from '../Untils/UserInfo';
+import {removeProfile} from '../../redux/reducers/profileSlice';
+import {setTheme, themeSelector} from '../../redux/reducers/themeSlice';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {SpaceComponent} from '../Components';
+import LoadingModal from '../Modal/LoadingModal';
 import SocketService from '../Services/SocketService';
+import {userServices} from '../Services/userService';
+import {UserInfo} from '../Untils/UserInfo';
 
 const SettingScreen = () => {
   const navigation: any = useNavigation();
@@ -68,9 +50,6 @@ const SettingScreen = () => {
   const dispatch = useDispatch();
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme];
-  const profile = useSelector(profileSelector);
-  const friend = useSelector(friendSelector);
-  const event = useSelector(eventSelector);
   const {t} = useTranslation();
   let parsedData;
   const [isDarkMode, setIsDarkMode] = useState(
@@ -136,24 +115,13 @@ const SettingScreen = () => {
     const res = await userServices.handleRemoveUser(auth.userId);
     if (res) {
       console.log('Remove successfully !!');
+      await handleLogout();
     }
-    await handleLogout();
   };
 
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      const fcmToken = await AsyncStorage.getItem('fcmtoken');
-      if (fcmToken) {
-        if (auth.fcmTokens && auth.fcmTokens.length > 0) {
-          let items = [auth.fcmToken];
-          const index = items.findIndex(e => e === fcmToken);
-          if (index !== -1) {
-            items.splice(index, 1);
-          }
-          await HandleNotification.update(items, auth.userId);
-        }
-      }
       await GoogleSignin.signOut();
       dispatch(removeAuth());
       dispatch(removeEvent());
@@ -161,6 +129,7 @@ const SettingScreen = () => {
       dispatch(removeProfile());
       await AsyncStorage.removeItem('auth');
       await AsyncStorage.removeItem('ConversationInfo');
+      await AsyncStorage.removeItem('userData');
       SocketService.disconnect();
       setIsLoading(false);
     } catch (error) {

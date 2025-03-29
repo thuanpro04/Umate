@@ -49,6 +49,7 @@ const PersonalScreen = ({navigation}: any) => {
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
+  const eventData = useSelector(eventSelector);
   const {t} = useTranslation();
   const bgColor = useSharedValue('#009688');
   const event = useSelector(eventSelector);
@@ -59,7 +60,7 @@ const PersonalScreen = ({navigation}: any) => {
     stats: {
       friend: userInfo?.friends?.length ?? 0,
       share: userInfo?.eventShares?.length ?? 0,
-      like: friendData.like ?? 0,
+      like: eventData?.like ?? 0,
     },
   };
 

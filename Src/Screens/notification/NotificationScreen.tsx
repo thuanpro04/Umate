@@ -57,7 +57,6 @@ const NotificationScreen = ({navigation}: any) => {
 
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
-      
       const scaleAnim = React.useRef(new Animated.Value(1)).current;
       const handlePress = () => {
         Animated.sequence([
@@ -110,6 +109,8 @@ const NotificationScreen = ({navigation}: any) => {
                 ? onChangleItemToTrash(item._id)
                 : type === 'qrcode'
                 ? showModalAttended()
+                : type === 'groupInvite'
+                ? () => {}
                 : handlePress()
             }>
             <View style={styles.iconContainer}>

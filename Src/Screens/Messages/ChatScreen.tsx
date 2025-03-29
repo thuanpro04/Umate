@@ -174,7 +174,7 @@ const ChatScreen = ({navigation}: any) => {
 
   const getUserIdGroup = () => {
     return converInfo.type === 'group'
-      ? converInfo.invitedUsers.filter(
+      ? converInfo.invitedUsers?.filter(
           (item: any) => item.userId !== currentUserId,
         )
       : '';
@@ -200,6 +200,7 @@ const ChatScreen = ({navigation}: any) => {
 
   const renderItemMessages = useCallback(
     (props: any) => {
+      
       return (
         <ChatItems
           name={name}
@@ -414,23 +415,14 @@ const ChatScreen = ({navigation}: any) => {
         renderViewBlock()
       ) : (
         <ChatInput
+          converInfo={converInfo}
           theme={converInfo.theme ?? theme}
-          avatar={profile.avatar}
-          name={
-            isPersonal
-              ? profile.name
-              : `${converInfo.groupName} - ${profile.name}`
-          }
-          isNotification={
-            !!converInfo.notification?.includes(converInfo.userId)
-          }
           isBlock={!!friendData.block?.includes(converInfo.userId)}
           onSendMessage={onSendMessages}
           onScroll={() => scrollViewToEnd()}
           clearReply={clearReplyMessage}
           reply={replyMessage}
           userId={converInfo.userId ?? getUserIdGroup()}
-          groupId={converInfo ? converInfo.groupId : undefined}
         />
       )}
       {/* <LoadingModal visible={isLoading} /> */}

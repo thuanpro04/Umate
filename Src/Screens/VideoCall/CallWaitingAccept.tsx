@@ -23,7 +23,7 @@ import {useTranslation} from 'react-i18next';
 import {Notification} from '../Untils/Notification';
 import SocketService from '../Services/SocketService';
 const CallWaitingAccept = ({navigation}: any) => {
-  const {avatar, name, callID, targetId, userId, type, groupId} = useRoute()
+  const {avatar, name, callID, targetId, userId, type, groupId,targetAvatar} = useRoute()
     .params as {
     avatar: string;
     name: string;
@@ -32,6 +32,7 @@ const CallWaitingAccept = ({navigation}: any) => {
     userId: string;
     type: string;
     groupId: string;
+    targetAvatar:string
   };
 
   const profile = useSelector(profileSelector);
@@ -46,7 +47,7 @@ const CallWaitingAccept = ({navigation}: any) => {
     }
     const data = {userId, targetId, callID, name: profile.name, type, groupId};
     socket?.emit('cancelCall', data);
-    navigation.navigate(t('home'));
+    navigation.goBack();
     return socket?.off('cancelCall');
   };
 
@@ -101,6 +102,8 @@ const CallWaitingAccept = ({navigation}: any) => {
           roomID: data.callID,
           name: data.userName,
           type: data.type,
+          avatar: data.avatar,
+          targetAvatar: data.targetAvatar,
         });
       }
     });
@@ -130,7 +133,7 @@ const CallWaitingAccept = ({navigation}: any) => {
       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <Animated.Image
-            source={{uri: avatar}}
+            source={{uri: targetAvatar}}
             style={[globalStyles.imgStyles, {opacity: opacityAnim}]}
           />
 

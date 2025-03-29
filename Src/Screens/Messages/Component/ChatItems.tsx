@@ -1,5 +1,6 @@
 import {CallIncoming} from 'iconsax-react-native';
-import React, {memo, useCallback, useState} from 'react';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   Alert,
   Animated,
@@ -10,24 +11,21 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
+import QRCode from 'react-native-qrcode-svg';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {appInfo} from '../../../Theme/appInfo';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {authSelector} from '../../../redux/reducers/authReducer';
 import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
 import CustormLinkPreview from '../../Components/CustormLinkPreview';
+import {messageServices} from '../../Services/messageServices';
 import {userServices} from '../../Services/userService';
+import {Notification} from '../../Untils/Notification';
 import {UserInfo} from '../../Untils/UserInfo';
 import CustomCallButtonComponent from './CustomCallButtonComponent';
 import CustormImageViewing from './CustormImageViewing';
-import CustormQRCode from '../../QRCode/CustormQRCode';
-import QRCode from 'react-native-qrcode-svg';
-import {useTranslation} from 'react-i18next';
-import {Notification} from '../../Untils/Notification';
-import {messageServices} from '../../Services/messageServices';
-import {authSelector} from '../../../redux/reducers/authReducer';
+import {groupServices} from '../../Services/groupServices';
 interface Props {
   currentUserId: string;
   userId?: string | string[];
@@ -207,19 +205,42 @@ const ChatItems = (props: Props) => {
     setImageIndex(imageIndex);
     setIsVisible(true);
   };
-  const showNotificationQrCode = (data: any, messageId: string) => {
+  const showNotificationQrCode = (
+    data: any,
+    messageId: string,
+    content: string,
+    timestamp: any,
+  ) => {
     const decodedData = JSON.parse(atob(data));
     Alert.alert(t('attendance_code'), t('how_attendance'), [
       {text: t('cancel'), style: 'cancel'},
       {
         text: t('confirm'),
         onPress: () => {
-          handleUpdateAttendedGroup(decodedData, messageId);
+          handleUpdateAttendedGroup(decodedData, messageId, content, timestamp);
         },
       },
     ]);
   };
-  const handleUpdateAttendedGroup = async (qrdata: any, messageId: string) => {
+  const checkLimitQRcode = (content: string, timestamp: any) => {
+    const time = new Date(timestamp);
+    const expirationDate = new Date(time.getTime() + Number(content) * 60000);
+    const now = new Date();
+    if (now > expirationDate) {
+      return true;
+    }
+    return false;
+  };
+  const handleUpdateAttendedGroup = async (
+    qrdata: any,
+    messageId: string,
+    content: string,
+    timestamp: any,
+  ) => {
+    if (checkLimitQRcode(content, timestamp)) {
+      Notification.showToast('error', 'Quét mã', 'Mã đã hết hạn !!');
+      return;
+    }
     Notification.showToast(
       'success',
       'Quét mã',
@@ -236,7 +257,7 @@ const ChatItems = (props: Props) => {
       currentUserId: auth.userId,
       id: conversationInfo.groupId,
     };
-    const res = await messageServices.updateAttendedGroup(data);
+    const res = await groupServices.updateAttendedGroup(data);
     if (res && res.data) {
       console.log('Update attended successfully !!', res.data);
     }
@@ -245,6 +266,7 @@ const ChatItems = (props: Props) => {
   const Message = ({item, index}: any) => {
     const isLink = urlRegex.test(item.content);
     const isQrcode = item.QRCode && item.QRCode?.qrdata;
+    const text = isQrcode && item.content.split(' ')[3];
 
     return (
       <View key={index} style={{flex: 1}}>
@@ -385,6 +407,8 @@ const ChatItems = (props: Props) => {
                         showNotificationQrCode(
                           item.QRCode.qrdata,
                           item.messageId,
+                          text,
+                          item.timestamp,
                         )
                       }>
                       <TextComponent label="Quét mã " color={appColors.blue} />

@@ -38,9 +38,11 @@ const ProfileScreen = ({navigation}: any) => {
       likes: eventData?.like ?? 0,
     },
   };
-
+  console.log(eventData);
   const renderPost = useCallback(
     ({item, index}: any) => {
+      console.log(index, item);
+
       return (
         <TouchableOpacity
           onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
@@ -65,6 +67,11 @@ const ProfileScreen = ({navigation}: any) => {
       );
     },
     [eventData],
+  );
+
+  const uniqueEventShares = eventData.eventShares.filter(
+    (item: any, index: any, self: any) =>
+      self.findIndex((e: any) => e._id === item._id) === index,
   );
 
   return (
@@ -166,9 +173,9 @@ const ProfileScreen = ({navigation}: any) => {
       />
       <FlatList
         style={{flex: 1}}
-        data={eventData.eventShares}
+        data={uniqueEventShares}
         renderItem={renderPost}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => item._id.toString()}
         contentContainerStyle={profileStyles.postList}
       />
     </SafeAreaView>

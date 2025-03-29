@@ -207,11 +207,12 @@ const UserInfoChat = ({navigation}: any) => {
     try {
       const messageData = {
         senderId: auth.userId,
-        content: time.trim(),
+        content: `Điểm danh - ${time.trim()} phút`,
         imagesUrl: [],
         groupId: idConver,
         QRCode: {qrdata: data, attended: []},
         recipients: converInfo.invitedUsers,
+        lastMessage:"Mã QR điểm danh"
       };
 
       socket?.emit('send_qrcode', messageData);
@@ -375,7 +376,7 @@ const UserInfoChat = ({navigation}: any) => {
                     (friendData.block ?? []).includes(idConver)
                   }
                   type={isPersonal ? 'personal_voice' : 'group_voice'}
-                  targetName={isPersonal ? name : converInfo.groupName}
+                  targetName={ name ?? converInfo.groupName}
                   targetId={
                     isPersonal
                       ? idConver

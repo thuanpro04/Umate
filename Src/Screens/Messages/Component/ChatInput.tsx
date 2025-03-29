@@ -6,46 +6,38 @@ import {ImageOrVideo} from 'react-native-image-crop-picker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {authSelector} from '../../../redux/reducers/authReducer';
-import {socketSelector} from '../../../redux/reducers/socketSlice';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {profileSelector} from '../../../redux/reducers/profileSlice';
 import {appInfo} from '../../../Theme/appInfo';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {imageService} from '../../Services/imageService';
+import SocketService from '../../Services/SocketService';
 import {Notification} from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
-import SocketService from '../../Services/SocketService';
 interface Props {
   reply: string;
   isBlock: boolean;
   clearReply: any;
   onScroll?: any;
-  groupId?: string;
   userId?: string | string[];
   onSendMessage: (val: {
     content?: string;
     imagesUrl?: string[];
     reply?: string;
   }) => void;
-  isNotification: boolean;
-  name: string;
-  avatar: string;
   theme: string;
+  converInfo: any;
 }
 const ChatInput = (props: Props) => {
   const {
     reply,
     clearReply,
     onScroll,
-    groupId,
     userId,
     onSendMessage,
     isBlock,
-    isNotification,
-    name,
-    avatar,
     theme,
+    converInfo,
   } = props;
   const [content, setContent] = useState('');
   const {t} = useTranslation();
@@ -53,6 +45,7 @@ const ChatInput = (props: Props) => {
   const auth = useSelector(authSelector);
   const colors = appColors[theme];
   const socket = SocketService.getSocket();
+  const isPersonal = converInfo.type === 'personal';
   function onPressScroll() {
     if (onScroll) {
       onScroll();
@@ -73,11 +66,14 @@ const ChatInput = (props: Props) => {
         senderId: auth.userId,
         content: content.trim(),
         imagesUrl: imagesUrl,
-        groupId,
         reply,
-        isNotification,
-        name: name,
-        avatar,
+        groupId: converInfo.groupId,
+        isNotification: !!converInfo.notification?.includes(converInfo.userId),
+        name: isPersonal
+          ? profile.name
+          : `${converInfo.groupName} - ${profile.name}`,
+        avatar: isPersonal ? profile.avatar : converInfo.avatar,
+        converInfo,
       };
 
       try {
@@ -88,7 +84,6 @@ const ChatInput = (props: Props) => {
             ...messageData,
             recipients: userId,
           };
-          console.log(data, 155);
 
           socket?.emit('send_message', data, (response: any) => {
             console.log('Message sent to user:', response);
@@ -120,7 +115,6 @@ const ChatInput = (props: Props) => {
       } catch (error) {
         console.log('Error in handleSendMessageAndImage:', error);
       }
-      return socket?.off('send_message');
     },
     [content, userId, onSendMessage, socket],
   );

@@ -8,24 +8,13 @@ import { Host } from 'react-native-portalize';
 import { Provider } from 'react-redux';
 import store from './Src/redux/store';
 import AppRouters from './Src/Screens/Navigators/AppRouters';
-import { HandleNotification } from './Src/Screens/Untils/HandleNotification';
 import { Notification } from './Src/Screens/Untils/Notification';
 import { appColors } from './Src/Theme/Colors/appColors';
 const App = () => {
   useEffect(() => {
     Orientation.lockToPortrait();
-    // HandleNotification.checkNotificationPertion();
   }, []);
 
-  useEffect(() => {
-    messaging().onMessage(async mess => {
-      Notification.showToast(
-        'info',
-        mess.notification?.title ?? '',
-        mess.notification?.body ?? '',
-      );
-    });
-  }, []);
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <Provider store={store}>

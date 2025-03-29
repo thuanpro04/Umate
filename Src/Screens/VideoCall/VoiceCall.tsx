@@ -18,10 +18,12 @@ import {useTranslation} from 'react-i18next';
 import SocketService from '../Services/SocketService';
 import store from '../../redux/store';
 const VoiceCall = (props: any) => {
-  const {roomID, name, type} = useRoute().params as {
+  const {roomID, name, type, avatar, targetAvatar} = useRoute().params as {
     roomID: string;
     name: string;
     type: string;
+    avatar: string;
+    targetAvatar: string;
   };
   const navigation = useNavigation<any>();
   const auth = useSelector(authSelector);
@@ -29,6 +31,8 @@ const VoiceCall = (props: any) => {
   const calls = dataCall.incomingCall;
   const socket = SocketService.getSocket();
   const {t} = useTranslation();
+  console.log(name,124);
+  
   let appID: number = parseInt(process.env.APPID as string);
   const getCallConfig = (type: string) => {
     switch (type) {
@@ -104,12 +108,17 @@ const VoiceCall = (props: any) => {
             //lưu thông tin cuộc gọi vào data
           },
           avatarBuilder: ({userInfo}: any) => {
+            const avatarUrl =
+              userInfo.userID === auth.userId
+                ? avatar // Use the authenticated user's avatar if available
+                : targetAvatar ||
+                  `https://robohash.org/${userInfo.userID}.png`; // Use the incoming call's avatar or fallback to a default
             return (
               <View style={{width: '100%', height: '100%'}}>
                 <Image
                   style={{width: '100%', height: '100%'}}
                   resizeMode="cover"
-                  source={{uri: `https://robohash.org/${userInfo.userID}.png`}}
+                  source={{uri: avatarUrl}}
                 />
               </View>
             );

@@ -4,14 +4,12 @@ interface authState {
   userId: string;
   theme: string;
   accesstoken: string;
-  fcmTokens: string[];
   online: boolean;
 }
 const initialState: authState = {
   userId: '',
   theme: '',
   accesstoken: '',
-  fcmTokens: [],
   online: false,
 };
 const authSlice = createSlice({

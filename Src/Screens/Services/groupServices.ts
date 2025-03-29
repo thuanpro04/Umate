@@ -58,9 +58,20 @@ const handlePosition = async (
     console.log('Position error: ', error);
   }
 };
+const updateAttendedGroup = async (data: any) => {
+  try {
+    url = '/update-attend';
+    const res = await groupAPI.handleGroup(url, data, 'post');
+    return res;
+  } catch (error) {
+    console.log('Atteded group error: ', error);
+  }
+};
 export const groupServices = {
   handelNewGroupUser,
   handleAgreeOnGroup,
   handleOutGroup,
   handlePosition,
+  updateAttendedGroup
+
 };

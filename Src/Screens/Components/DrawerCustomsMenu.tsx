@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FlatList,
   Platform,
@@ -12,22 +11,20 @@ import {
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {useDispatch, useSelector} from 'react-redux';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appColors} from '../../Theme/Colors/appColors';
-import {MenuItems} from '../../data/MenuItems';
-import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
-import {removeEvent} from '../../redux/reducers/eventSlice';
-import {resetFriend} from '../../redux/reducers/friendSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appColors } from '../../Theme/Colors/appColors';
+import { MenuItems } from '../../data/MenuItems';
+import { authSelector, removeAuth } from '../../redux/reducers/authReducer';
+import { removeEvent } from '../../redux/reducers/eventSlice';
+import { resetFriend } from '../../redux/reducers/friendSlice';
 import {
   profileSelector,
   removeProfile,
 } from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
 import LoadingModal from '../Modal/LoadingModal';
 import SocketService from '../Services/SocketService';
-import {userServices} from '../Services/userService';
-import {HandleNotification} from '../Untils/HandleNotification';
 import RowComponent from './RowComponent';
 import SpaceComponent from './SpaceComponent';
 import TextComponent from './TextComponent';

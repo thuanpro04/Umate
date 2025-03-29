@@ -1,31 +1,18 @@
-import React, {useEffect, useRef, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
-  Image,
-  StatusBar,
   StyleProp,
-  StyleSheet,
   TextStyle,
   TouchableOpacity,
-  View,
-  ViewStyle,
+  ViewStyle
 } from 'react-native';
-import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
-import {useNavigation} from '@react-navigation/native';
-import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {io, Socket} from 'socket.io-client';
-import {appInfo} from '../../../Theme/appInfo';
-import LinearGradient from 'react-native-linear-gradient';
-import {CallCalling} from 'iconsax-react-native';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {globalStyles} from '../../../Styles/globalStyle';
-import {UserInfo} from '../../Untils/UserInfo';
-import {useSelector} from 'react-redux';
-import {profileSelector} from '../../../redux/reducers/profileSlice';
-import {socketSelector} from '../../../redux/reducers/socketSlice';
-import {Notification} from '../../Untils/Notification';
-import {useTranslation} from 'react-i18next';
-import {authSelector} from '../../../redux/reducers/authReducer';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../../redux/reducers/authReducer';
+import { profileSelector } from '../../../redux/reducers/profileSlice';
+import { socketSelector } from '../../../redux/reducers/socketSlice';
+import { TextComponent } from '../../Components';
+import { Notification } from '../../Untils/Notification';
 
 interface Props {
   icon?: React.ReactNode;
@@ -75,16 +62,19 @@ const CustomCallButtonComponent = (props: Props) => {
         userId,
         type,
         groupId: converInfo.groupId ?? undefined,
+        targetAvatar: converInfo.avatar,
       };
       socket.emit('sendCallInvitation', callData);
       navigation.navigate('CallWaitingAccept', {
         name: targetName,
-        avatar: converInfo.avatar,
+        avatar: auth.avatar,
         callID,
         userId,
         targetId,
         type,
         groupId: converInfo.groupId ?? undefined,
+        targetAvatar: converInfo.avatar,
+
       });
       return socket.off('sendCallInvitation');
     } catch (error) {

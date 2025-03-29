@@ -5,11 +5,14 @@ import {Platform, PermissionsAndroid} from 'react-native';
 import {setIncomingCall, setSocket} from '../../redux/reducers/socketSlice';
 import store from '../../redux/store';
 import {appInfo} from '../../Theme/appInfo';
+import {NavigationProp} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class SocketService {
   private static instance: SocketService;
   private socket: Socket | null = null;
   private userId: string | null = null;
+  private navigation: NavigationProp<any> | null = null;
 
   private constructor() {
     // Khởi tạo kênh thông báo
@@ -22,13 +25,39 @@ class SocketService {
       },
       created => console.log(`Channel created: ${created}`),
     );
-
+    const self = this;
     PushNotification.configure({
-      onNotification: function (notification) {
-        console.log('NOTIFICATION:', notification);
+      onNotification: async function (notification) {
+        console.log('NOTIFICATION:', {
+          ...notification.data.converInfo,
+          typeNotifi: notification.data.typeNotifi,
+        });
+        self.handleNotification({
+          ...notification.data.converInfo,
+          typeNotifi: notification.data.typeNotifi,
+        });
       },
       popInitialNotification: true,
       requestPermissions: true,
+    });
+  }
+  public handleNotification(data: any) {
+    if (data.typeNotifi === 'message') {
+      AsyncStorage.setItem('ConversationInfo', JSON.stringify({...data}));
+      this.navigation?.navigate('Chat');
+    } else {
+      this.navigation?.navigate('NotificationScreen');
+    }
+  }
+  public sendNotification(data: any) {
+    PushNotification.localNotification({
+      channelId: 'zego_video_call',
+      title: data.name,
+      message: data.content?.length === 0 ? 'hình ảnh mới' : data.content,
+      userInfo: {
+        ...data,
+      },
+      largeIconUrl: data.avatar,
     });
   }
 
@@ -38,7 +67,12 @@ class SocketService {
     }
     return SocketService.instance;
   }
-
+  public setNavigation(navigation: NavigationProp<any>) {
+    this.navigation = navigation;
+  }
+  public getNavigation() {
+    return this.navigation;
+  }
   private async requestNotificationPermission() {
     if (Platform.OS === 'android') {
       const granted = await PermissionsAndroid.request(
@@ -48,16 +82,6 @@ class SocketService {
         console.log('⚠️ Quyền thông báo bị từ chối');
       }
     }
-  }
-
-  public sendNotification(data: any) {
-    PushNotification.localNotification({
-      channelId: 'zego_video_call',
-      title: data.name,
-      message: data.content?.length === 0 ? 'hình ảnh mới' : data.content,
-      userInfo: {senderId: data.senderId, receiverId: data.receiverId},
-      largeIconUrl: data.avatar,
-    });
   }
 
   public async connect(userId: string) {
@@ -132,7 +156,12 @@ class SocketService {
         setTimeout(() => this.connect(this.userId as string), 1000);
       }
     });
-
+    this.socket.on('reconnect', attemptNumber => {
+      console.log('Đã kết nối lại socket sau', attemptNumber, 'lần thử');
+      if (this.userId) {
+        this.socket?.emit('callRegister', this.userId);
+      }
+    });
     // Thêm lại các listener mới
     this.socket.on('incomingCall', (callData: any) => {
       console.log('📞 Nhận cuộc gọi từ:', callData);
