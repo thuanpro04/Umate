@@ -25,11 +25,21 @@ const Replymessage = (props: Props) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const isUser = message?.receiverId !== auth.userId;
+  
   const boxHeight = useSharedValue(0);
   const urlImg = message?.imagesUrl
     ? message.imagesUrl[message?.imagesUrl.length - 1]
     : undefined;
-
+    const getContent = (text: string) => {
+      let content = '';
+      try {
+        const decodedString = atob(text);
+        content = JSON.parse(decodedString).content;
+      } catch (error) {
+        console.error('Error decoding Base64 string:', error);
+      }
+      return content;
+    };
   const toggleBox = (status?: any) => {
     boxHeight.value = withTiming(status ? 65 : 0, {duration: 300});
   };
@@ -93,7 +103,7 @@ const Replymessage = (props: Props) => {
               styles={{fontStyle: 'italic'}}
             />
             <TextComponent
-              label={message?.content}
+              label={getContent(message?.content)}
               color={colors.text2}
               styles={{marginLeft: 12}}
               numberOfLine={2}

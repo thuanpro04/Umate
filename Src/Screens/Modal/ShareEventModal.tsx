@@ -69,9 +69,10 @@ const ShareEventModal = (props: Props) => {
     recipients: string[],
   ) => {
     setIsLoading(true);
+    let content = btoa(JSON.stringify({content: url}));
     const messageData = {
       senderId: auth.userId,
-      content: url,
+      content,
       imagesUrl: [],
       avatar,
       name,

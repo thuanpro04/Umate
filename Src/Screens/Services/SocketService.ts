@@ -49,11 +49,26 @@ class SocketService {
       this.navigation?.navigate('NotificationScreen');
     }
   }
+  public getContent = (text: string) => {
+    let content = '';
+    try {
+      const decodedString = atob(text);
+      content = JSON.parse(decodedString).content;
+    } catch (error) {
+      console.error('Error decoding Base64 string:', error);
+    }
+    return content;
+  };
   public sendNotification(data: any) {
+    console.log(data, 123);
+
     PushNotification.localNotification({
       channelId: 'zego_video_call',
       title: data.name,
-      message: data.content?.length === 0 ? 'hình ảnh mới' : data.content,
+      message:
+        data.content?.length === 0
+          ? 'hình ảnh mới'
+          : this.getContent(data.content),
       userInfo: {
         ...data,
       },

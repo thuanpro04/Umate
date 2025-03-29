@@ -31,8 +31,8 @@ const VoiceCall = (props: any) => {
   const calls = dataCall.incomingCall;
   const socket = SocketService.getSocket();
   const {t} = useTranslation();
-  console.log(name,124);
-  
+  console.log(name, 124);
+
   let appID: number = parseInt(process.env.APPID as string);
   const getCallConfig = (type: string) => {
     switch (type) {
@@ -49,9 +49,12 @@ const VoiceCall = (props: any) => {
   function getDataCall(duration: number) {
     let num = Math.floor(duration / 60);
     let seconds = duration % 60;
+    let content = btoa(
+      JSON.stringify({content: `${num} phút ${seconds} giây`}),
+    );
     const data = {
       senderId: calls.userId,
-      content: `${num} phút ${seconds} giây`,
+      content,
       imagesUrl: [],
       reply: '',
       typeCall: type,
@@ -111,8 +114,7 @@ const VoiceCall = (props: any) => {
             const avatarUrl =
               userInfo.userID === auth.userId
                 ? avatar // Use the authenticated user's avatar if available
-                : targetAvatar ||
-                  `https://robohash.org/${userInfo.userID}.png`; // Use the incoming call's avatar or fallback to a default
+                : targetAvatar || `https://robohash.org/${userInfo.userID}.png`; // Use the incoming call's avatar or fallback to a default
             return (
               <View style={{width: '100%', height: '100%'}}>
                 <Image

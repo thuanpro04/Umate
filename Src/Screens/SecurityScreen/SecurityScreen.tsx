@@ -1,22 +1,19 @@
+import { ArrowLeft2 } from 'iconsax-react-native';
+import { LogOut, Smartphone, Trash2 } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  ScrollView,
-  Text,
   Alert,
-  TouchableOpacity,
-  StatusBar,
   SafeAreaView,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import {Smartphone, LogOut, Trash2, icons} from 'lucide-react-native';
-import {View} from 'react-native';
-import {HeaderComponent, SpaceComponent, TextComponent} from '../Components';
-import {globalStyles} from '../../Styles/globalStyle';
-import {ArrowLeft2} from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {appColors} from '../../Theme/Colors/appColors';
-import {useTranslation} from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { HeaderComponent, SpaceComponent, TextComponent } from '../Components';
 
 const SecurityScreen = ({navigation}: any) => {
   const {t} = useTranslation();

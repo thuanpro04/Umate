@@ -2,13 +2,12 @@ import axios from 'axios';
 
 const BASE_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-const API_KEY = 'AIzaSyBhIitZhf0MEkx-oLTKQsKSv3KGzSVQGgE';
 export const generateAIResponse = async (textInput: string) => {
   
 
   try {
     const response = await axios.post(
-      `${BASE_URL}?key=${API_KEY}`,
+      `${BASE_URL}?key=${process.env.API_KEY}`,
       {
         contents: [
           {

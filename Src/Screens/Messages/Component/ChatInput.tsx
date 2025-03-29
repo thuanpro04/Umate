@@ -60,11 +60,11 @@ const ChatInput = (props: Props) => {
         console.log('Message is empty, nothing to send.');
         return;
       }
-
+      let value = btoa(JSON.stringify({content: content.trim()}));
       // Định nghĩa nội dung tin nhắn
       const messageData = {
         senderId: auth.userId,
-        content: content.trim(),
+        content: value,
         imagesUrl: imagesUrl,
         reply,
         groupId: converInfo.groupId,
@@ -106,7 +106,7 @@ const ChatInput = (props: Props) => {
         }
 
         onSendMessage({
-          content: content ?? '',
+          content: value ?? '',
           imagesUrl: imagesUrl as string[],
           reply,
         });

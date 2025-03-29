@@ -262,12 +262,21 @@ const ChatItems = (props: Props) => {
       console.log('Update attended successfully !!', res.data);
     }
   };
-
+  const getContent = (text: string) => {
+    let content = '';
+    try {
+      const decodedString = atob(text);
+      content = JSON.parse(decodedString).content;
+    } catch (error) {
+      console.error('Error decoding Base64 string:', error);
+    }
+    return content;
+  };
   const Message = ({item, index}: any) => {
-    const isLink = urlRegex.test(item.content);
+    const content = getContent(item.content);
+    const isLink = urlRegex.test(content);
     const isQrcode = item.QRCode && item.QRCode?.qrdata;
-    const text = isQrcode && item.content.split(' ')[3];
-
+    const text = isQrcode && content.split(' ')[3];
     return (
       <View key={index} style={{flex: 1}}>
         <View
@@ -309,7 +318,7 @@ const ChatItems = (props: Props) => {
                   }}>
                   <TextComponent
                     key={index}
-                    label={item.content}
+                    label={content}
                     color={colors.text}
                     styles={[
                       styles.contentStyles,
@@ -376,7 +385,7 @@ const ChatItems = (props: Props) => {
                     <TextComponent
                       styles={{fontSize: 14}}
                       color={colors.text}
-                      label={item?.reply?.content}
+                      label={getContent(item.reply.content)}
                     />
                   </View>
                 )}
@@ -384,7 +393,7 @@ const ChatItems = (props: Props) => {
                   <View style={{height: item.title ? 275 : 255}}>
                     <CustormLinkPreview
                       theme={theme}
-                      txtLink={item.content}
+                      txtLink={content}
                       title={item.title}
                     />
                   </View>
@@ -417,7 +426,7 @@ const ChatItems = (props: Props) => {
                 ) : (
                   <TextComponent
                     key={index}
-                    label={item.content}
+                    label={content}
                     color={colors.text}
                     styles={[
                       styles.contentStyles,
