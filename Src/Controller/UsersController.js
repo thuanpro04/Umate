@@ -10,7 +10,7 @@ const {
   handleUpdateFcmTokenForUser,
   handleUpdateThemeForUser,
   handleActionRemoveUser,
-  handleUpdateLanguge,
+  handleUpdateLanguge,handleMyloveUser
 } = require("../Services/userServices");
 const getAllUsers = async (req, res) => {
   const { currentUserId, filter, page, limit = 10 } = req.body;
@@ -65,6 +65,9 @@ const actionRemoveUser = (req, res) => {
 const updateLanguageForUser = (req, res) => {
   handleUpdateLanguge(req, res);
 };
+const actionMyloveUser=(req,res) =>{
+  handleMyloveUser(req,res);
+}
 module.exports = {
   getAllUsers,
   setUpProfileInfo,
@@ -75,5 +78,5 @@ module.exports = {
   updateFcmTokenForUser,
   updateThemForUser,
   actionRemoveUser,
-  updateLanguageForUser,
+  updateLanguageForUser,actionMyloveUser
 };

@@ -31,6 +31,7 @@ const getUserInfo = async (existingUser, email) => {
       className: existingUser.className,
       majoring: existingUser.majoring,
       majorCategory: existingUser.majorCategory,
+      myLove: existingUser.myLove ?? [],
     },
     friendSlice: {
       friends: existingUser.friends,
@@ -40,8 +41,7 @@ const getUserInfo = async (existingUser, email) => {
     },
     eventSlice: {
       eventShares: existingUser.eventShares,
-      like: existingUser.like ?? 0
-
+      like: existingUser.like ?? 0,
     },
   };
 };
@@ -58,7 +58,7 @@ const handleLoginWithGoogle = async (req, res) => {
         ...userInfo,
         updateAt: Date.now(),
       });
-      user =await getUserInfo(existingUser, userInfo.email);
+      user = await getUserInfo(existingUser, userInfo.email);
 
       console.log("Update Done.", user);
       // Người dùng mới, tạo tài khoản mới
@@ -78,7 +78,7 @@ const handleLoginWithGoogle = async (req, res) => {
       // console.log("newUser", newUser);
 
       await newUser.save();
-      user =await getUserInfo(newUser._doc, userInfo.email);
+      user = await getUserInfo(newUser._doc, userInfo.email);
       console.log("Create user.", user);
       // Sau khi cập nhật, trả về phản hồi
     }

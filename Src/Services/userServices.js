@@ -360,6 +360,29 @@ const updateOneUser = async (userId, key, value) => {
     console.log("Update one user error: ", error);
   }
 };
+const handleMyloveUser = async (req, res) => {
+  const { userId, currentUserId, isHeart } = req.body;
+  try {
+    let user = await findUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const updateQuery = user.myLove?.includes(currentUserId)
+      ? { $pull: { myLove: currentUserId } } // Nếu đã tồn tại thì xóa
+      : { $addToSet: { myLove: currentUserId } }; // Nếu chưa có thì thêm vào
+
+    await UserModel.updateOne({ userId }, updateQuery);
+
+    const updatedUser = await findUserById(userId);
+    res.status(200).json({
+      message: "Update myLove user successfully !!",
+      data: updatedUser.myLove,
+    });
+  } catch (error) {
+    console.log("Error updating myLove user:", error);
+  }
+};
 module.exports = {
   findUserById,
   getUsersByIds,
@@ -377,4 +400,5 @@ module.exports = {
   handleActionRemoveUser,
   handleUpdateLanguge,
   updateOneUser,
+  handleMyloveUser,
 };

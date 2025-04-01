@@ -70,6 +70,7 @@ const userSchema = new mongoose.Schema({
   theme: { type: String, default: "light" },
   language: { type: String, default: "vi" },
   like: { type: Number },
+  myLove: [{ type: String, ref: "User" }],
 });
 const UserModel = mongoose.model("User", userSchema);
 module.exports = {

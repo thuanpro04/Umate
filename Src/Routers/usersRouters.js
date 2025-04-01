@@ -9,7 +9,7 @@ const {
   updateFcmTokenForUser,
   updateThemForUser,
   actionRemoveUser,
-  updateLanguageForUser,
+  updateLanguageForUser,actionMyloveUser
 } = require("../Controller/UsersController");
 const usersRouter = Router();
 usersRouter.post("/get-all", getAllUsers);
@@ -22,4 +22,5 @@ usersRouter.post("/update-fcmtoken", updateFcmTokenForUser);
 usersRouter.post("/update-theme", updateThemForUser);
 usersRouter.get("/remove-user", actionRemoveUser);
 usersRouter.post("/update-language", updateLanguageForUser);
+usersRouter.post("/mylove", actionMyloveUser);
 module.exports = usersRouter;
