@@ -94,6 +94,23 @@ const updateLanguage = async (id: string, key: string) => {
   const res = usersAPI.handleUsers(url, {id, key}, 'post');
   return res;
 };
+const handleMylove = async (
+  userId: string,
+  currentUserId: string,
+  isHeart: boolean,
+) => {
+  url = '/mylove';
+  try {
+    const res = await usersAPI.handleUsers(
+      url,
+      {userId, currentUserId, isHeart},
+      'post',
+    );
+    return res;
+  } catch (error) {
+    console.log('handle my love error: ', error);
+  }
+};
 export const userServices = {
   getEquestFriendUsers,
   updateUsersById,
@@ -104,4 +121,5 @@ export const userServices = {
   updateThemeforUser,
   handleRemoveUser,
   updateLanguage,
+  handleMylove,
 };

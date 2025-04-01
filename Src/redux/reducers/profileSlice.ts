@@ -1,4 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 interface profileState {
   name: string;
@@ -11,6 +11,7 @@ interface profileState {
   className: string;
   majoring: string;
   majorCategory: string;
+  myLove: string[];
 }
 const initialState: profileState = {
   name: '',
@@ -23,6 +24,7 @@ const initialState: profileState = {
   className: '',
   majoring: '',
   majorCategory: '',
+  myLove: [],
 };
 const profileSlice = createSlice({
   name: 'profile',
@@ -36,8 +38,21 @@ const profileSlice = createSlice({
     removeProfile: state => {
       state.profileData = initialState;
     },
+    setMylove: (state, action: PayloadAction<string | string[]>) => {
+      if (Array.isArray(action.payload)) {
+        state.profileData.myLove = action.payload;
+      } else {
+        if (!state.profileData.myLove.includes(action.payload)) {
+          state.profileData.myLove.push(action.payload);
+        } else {
+          state.profileData.myLove = state.profileData.myLove.filter(
+            item => item !== action.payload,
+          );
+        }
+      }
+    },
   },
 });
 export const profileReducer = profileSlice.reducer;
-export const {addProfile, removeProfile} = profileSlice.actions;
+export const {addProfile, removeProfile,setMylove} = profileSlice.actions;
 export const profileSelector = (state: any) => state.profileReducer.profileData;

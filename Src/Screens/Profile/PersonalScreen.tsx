@@ -3,6 +3,7 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {ArrowLeft, Message2, UserAdd} from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+
 import {
   Alert,
   FlatList,
@@ -21,7 +22,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
 import {eventSelector} from '../../redux/reducers/eventSlice';
 import {friendSelector} from '../../redux/reducers/friendSlice';
@@ -41,11 +42,18 @@ import {friendServices} from '../Services/friendService.';
 import {messageServices} from '../Services/messageServices';
 import {userServices} from '../Services/userService';
 import {profileStyles} from './profileStyles';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import {profileSelector, setMylove} from '../../redux/reducers/profileSlice';
+import {debounce} from 'lodash';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
   const friendData = useSelector(friendSelector);
   const [userInfo, setUserInfo] = useState<any>(null);
+  const profile = useSelector(profileSelector);
+  const [isHeart, setIsHeart] = useState(
+    profile?.myLove?.includes(auth.userId),
+  );
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
@@ -55,12 +63,14 @@ const PersonalScreen = ({navigation}: any) => {
   const event = useSelector(eventSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const dispatch = useDispatch();
+  console.log(profile);
 
   const infoUser = {
     stats: {
       friend: userInfo?.friends?.length ?? 0,
       share: userInfo?.eventShares?.length ?? 0,
-      like: eventData?.like ?? 0,
+      like: profile?.myLove?.length ?? 0,
     },
   };
 
@@ -126,7 +136,14 @@ const PersonalScreen = ({navigation}: any) => {
       console.log('Add friend sucessfully !!');
     }
   };
-
+  const onPressMyLove = debounce(async () => {
+    setIsHeart(!isHeart);
+    const res = await userServices.handleMylove(userId, auth.userId, isHeart);
+    if (res && res.data) {
+      console.log('Add my love sucessfully !!', res.data);
+      dispatch(setMylove(res.data));
+    }
+  }, 1000);
   const renderHeader = () => {
     const dataUser = [
       {
@@ -250,13 +267,28 @@ const PersonalScreen = ({navigation}: any) => {
           ) : (
             <View style={profileStyles.profileContainer}>
               <RowComponent>
+                <TouchableOpacity
+                  onPress={onPressMyLove}
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    zIndex: 1,
+                    left: '13%',
+                    transform: [{rotate: '-180deg'}],
+                  }}>
+                  {isHeart ? (
+                    <AntDesign name="heart" size={22} color="red" />
+                  ) : (
+                    <AntDesign name="hearto" size={22} color="pink" />
+                  )}
+                </TouchableOpacity>
                 <ZoomImageComponent
                   url={
                     userInfo.avatar
                       ? userInfo.avatar
                       : 'https://via.placeholder.com/150'
                   }
-                  styles={profileStyles.avatar}
+                  styles={[profileStyles.avatar, {zIndex: -1}]}
                 />
                 {userInfo.online && (
                   <View
@@ -271,6 +303,7 @@ const PersonalScreen = ({navigation}: any) => {
                   />
                 )}
               </RowComponent>
+              <SpaceComponent height={20} />
               <TextComponent
                 styles={profileStyles.name}
                 label={userInfo.name}
