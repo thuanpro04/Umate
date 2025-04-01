@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import CryptoJS from 'react-native-crypto-js';
 export class UserInfo {
   static getName = (fullName: string) => {
     if (!fullName) {
@@ -49,15 +49,33 @@ export class UserInfo {
       return JSON.parse(res);
     }
   };
+  static encryptText = (text: string) => {
+    const secretKey: any = process.env.SECRETKEY ?? 'hahaha';
+    return CryptoJS.AES.encrypt(text, secretKey).toString();
+  };
+  static decryptText = (encryptedText: string) => {
+    const secretKey: any = process.env.SECRETKEY ?? 'hahaha';
+    const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  };
+  static getContent = (text: string) => {
+    let content = '';
+    try {
+      const decodedString = atob(text);
+      content = JSON.parse(decodedString).content;
+    } catch (error) {
+      console.error('Error decoding Base64 string:', error);
+    }
+    return content;
+  };
   static getUserData = async () => {
     const [userData] = await Promise.all([AsyncStorage.getItem('userData')]);
     return userData ? JSON.parse(userData) : {};
   };
-  static setUserData=async(data:any)=>{
+  static setUserData = async (data: any) => {
     await AsyncStorage.setItem('userData', JSON.stringify(data));
     console.log('Set user data successfully');
-    
-  }
+  };
   static getAvatar() {
     const temp =
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1newdbzQNEDeE0F8ky3T40yrgWDpsNzX4Rw&s';

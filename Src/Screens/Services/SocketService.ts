@@ -7,6 +7,7 @@ import store from '../../redux/store';
 import {appInfo} from '../../Theme/appInfo';
 import {NavigationProp} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {UserInfo} from '../Untils/UserInfo';
 
 class SocketService {
   private static instance: SocketService;
@@ -49,18 +50,8 @@ class SocketService {
       this.navigation?.navigate('NotificationScreen');
     }
   }
-  public getContent = (text: string) => {
-    let content = '';
-    try {
-      const decodedString = atob(text);
-      content = JSON.parse(decodedString).content;
-    } catch (error) {
-      console.error('Error decoding Base64 string:', error);
-    }
-    return content;
-  };
+
   public sendNotification(data: any) {
-    console.log(data, 123);
 
     PushNotification.localNotification({
       channelId: 'zego_video_call',
@@ -68,7 +59,7 @@ class SocketService {
       message:
         data.content?.length === 0
           ? 'hình ảnh mới'
-          : this.getContent(data.content),
+          : UserInfo.decryptText(data.content),
       userInfo: {
         ...data,
       },
@@ -189,7 +180,7 @@ class SocketService {
     this.socket.on('feedbackCancelCall', (data: any) => {
       const dataCall = {
         title: `Bạn có cuộc gọi nhỡ từ ${data.name}`,
-        content: `${new Date().toLocaleString()}`,
+        content: UserInfo.encryptText(`${new Date().toLocaleString()}`),
       };
       this.sendNotification(dataCall);
     });

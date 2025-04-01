@@ -17,6 +17,8 @@ import {
 import {useTranslation} from 'react-i18next';
 import SocketService from '../Services/SocketService';
 import store from '../../redux/store';
+import {User} from 'iconsax-react-native';
+import {UserInfo} from '../Untils/UserInfo';
 const VoiceCall = (props: any) => {
   const {roomID, name, type, avatar, targetAvatar} = useRoute().params as {
     roomID: string;
@@ -49,9 +51,7 @@ const VoiceCall = (props: any) => {
   function getDataCall(duration: number) {
     let num = Math.floor(duration / 60);
     let seconds = duration % 60;
-    let content = btoa(
-      JSON.stringify({content: `${num} phút ${seconds} giây`}),
-    );
+    let content = UserInfo.encryptText(`${num} phút ${seconds} giây`);
     const data = {
       senderId: calls.userId,
       content,

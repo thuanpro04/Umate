@@ -12,6 +12,7 @@ import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import {useTranslation} from 'react-i18next';
 import SocketService from '../Services/SocketService';
 import {profileSelector} from '../../redux/reducers/profileSlice';
+import {UserInfo} from '../Untils/UserInfo';
 const CallWaitingScreen = ({route, navigation}: any) => {
   const {callData} = route.params;
   const opacityAnim = useRef(new Animated.Value(0.3)).current;
@@ -65,8 +66,8 @@ const CallWaitingScreen = ({route, navigation}: any) => {
       sound.stop();
     }
     const data = {...callData};
-    socket?.emit('callAccepted', data,124);
-    console.log('Bạn đã nhận cuộc gọi !!!',data);
+    socket?.emit('callAccepted', data, 124);
+    console.log('Bạn đã nhận cuộc gọi !!!', data);
     navigation.navigate('VoiceCall', {
       roomID: callData.callID,
       name: profile.name,
@@ -81,7 +82,10 @@ const CallWaitingScreen = ({route, navigation}: any) => {
     if (sound) {
       sound.stop();
     }
-    const data = {...callData};
+    const data = {
+      ...callData,
+      content: UserInfo.encryptText('Bạn đã từ chối cuộc gọi'),
+    };
     socket?.emit('callRefused', data);
     navigation.navigate(t('home'));
     console.log('Bạn đã từ chối cuộc gọi !!!');
@@ -89,7 +93,10 @@ const CallWaitingScreen = ({route, navigation}: any) => {
   };
 
   const getName = () => {
-    if (callData.type === 'personal_voice' || callData.type === 'personal_video') {
+    if (
+      callData.type === 'personal_voice' ||
+      callData.type === 'personal_video'
+    ) {
       return callData.userName;
     }
     return callData.targetName;

@@ -14,6 +14,7 @@ import SocketService from '../../Services/SocketService';
 import {Notification} from '../../Untils/Notification';
 import ButtonImagePicker from './ButtonImagePicker';
 import Replymessage from './Replymessage';
+import {UserInfo} from '../../Untils/UserInfo';
 interface Props {
   reply: string;
   isBlock: boolean;
@@ -60,7 +61,7 @@ const ChatInput = (props: Props) => {
         console.log('Message is empty, nothing to send.');
         return;
       }
-      let value = btoa(JSON.stringify({content: content.trim()}));
+      let value = UserInfo.encryptText(content.trim());
       // Định nghĩa nội dung tin nhắn
       const messageData = {
         senderId: auth.userId,

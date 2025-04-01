@@ -23,17 +23,17 @@ import {useTranslation} from 'react-i18next';
 import {Notification} from '../Untils/Notification';
 import SocketService from '../Services/SocketService';
 const CallWaitingAccept = ({navigation}: any) => {
-  const {avatar, name, callID, targetId, userId, type, groupId,targetAvatar} = useRoute()
-    .params as {
-    avatar: string;
-    name: string;
-    callID: string;
-    targetId: string;
-    userId: string;
-    type: string;
-    groupId: string;
-    targetAvatar:string
-  };
+  const {avatar, name, callID, targetId, userId, type, groupId, targetAvatar} =
+    useRoute().params as {
+      avatar: string;
+      name: string;
+      callID: string;
+      targetId: string;
+      userId: string;
+      type: string;
+      groupId: string;
+      targetAvatar: string;
+    };
 
   const profile = useSelector(profileSelector);
   const socket = SocketService.getSocket();
@@ -45,7 +45,15 @@ const CallWaitingAccept = ({navigation}: any) => {
     if (soundRef.current) {
       soundRef.current.stop();
     }
-    const data = {userId, targetId, callID, name: profile.name, type, groupId};
+    const data = {
+      userId,
+      targetId,
+      callID,
+      name: profile.name,
+      type,
+      groupId,
+      content: UserInfo.encryptText('Bạn đã hủy cuộc gọi'),
+    };
     socket?.emit('cancelCall', data);
     navigation.goBack();
     return socket?.off('cancelCall');

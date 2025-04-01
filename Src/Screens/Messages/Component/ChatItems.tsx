@@ -262,21 +262,13 @@ const ChatItems = (props: Props) => {
       console.log('Update attended successfully !!', res.data);
     }
   };
-  const getContent = (text: string) => {
-    let content = '';
-    try {
-      const decodedString = atob(text);
-      content = JSON.parse(decodedString).content;
-    } catch (error) {
-      console.error('Error decoding Base64 string:', error);
-    }
-    return content;
-  };
+
   const Message = ({item, index}: any) => {
-    const content = getContent(item.content);
+    const content = UserInfo.decryptText(item.content);
     const isLink = urlRegex.test(content);
     const isQrcode = item.QRCode && item.QRCode?.qrdata;
     const text = isQrcode && content.split(' ')[3];
+
     return (
       <View key={index} style={{flex: 1}}>
         <View
@@ -385,7 +377,7 @@ const ChatItems = (props: Props) => {
                     <TextComponent
                       styles={{fontSize: 14}}
                       color={colors.text}
-                      label={getContent(item.reply.content)}
+                      label={UserInfo.getContent(item.reply.content)}
                     />
                   </View>
                 )}

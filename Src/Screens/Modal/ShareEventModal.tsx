@@ -27,6 +27,7 @@ import {messageServices} from '../Services/messageServices';
 import {addEvent, eventSelector} from '../../redux/reducers/eventSlice';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import LoadingModal from './LoadingModal';
+import {UserInfo} from '../Untils/UserInfo';
 
 interface Props {
   title: string;
@@ -69,7 +70,7 @@ const ShareEventModal = (props: Props) => {
     recipients: string[],
   ) => {
     setIsLoading(true);
-    let content = btoa(JSON.stringify({content: url}));
+    let content = UserInfo.encryptText(url);
     const messageData = {
       senderId: auth.userId,
       content,
