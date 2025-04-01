@@ -6,7 +6,7 @@ const getJsonWebToken = async (email, id) => {
     email,
     id,
   };
-  const token = jwt.sign(payload, process.env.SECRET_KEY, {
+  const token = jwt.sign(payload, process.env.SECRETKEY, {
     expiresIn: "7d",
   });
   return token;
@@ -40,7 +40,7 @@ const getUserInfo = async (existingUser, email) => {
     },
     eventSlice: {
       eventShares: existingUser.eventShares,
-      like: existingUser.like,
+      like: existingUser.like ?? 0
 
     },
   };

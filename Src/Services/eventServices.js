@@ -191,7 +191,7 @@ const handleShareEventMyApp = async (req, res) => {
     console.log("Người dùng đã được cập nhật:", updatedUser);
     res.status(200).json({
       message: "Share event successfully !!!!",
-      data: updatedUser,
+      data: updatedUser.eventShares,
     });
   } catch (error) {
     console.log("Share event error: ", error);

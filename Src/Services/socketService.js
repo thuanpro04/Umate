@@ -99,7 +99,6 @@ function initializeSocket(server) {
         callData.targetId?.forEach((element) => {
           sendNotificationCallToUser(element, "incomingCall", callData);
         });
-        
       } else {
         if (!callData.targetId) {
           try {
@@ -150,7 +149,7 @@ function initializeSocket(server) {
         const messageData = getMoldMessage(
           data.targetId,
           data.type,
-          "Bạn đã từ chối cuộc gọi"
+          data.content
         );
         sendMessageToGroupAndPersonal({
           ...messageData,
@@ -161,7 +160,7 @@ function initializeSocket(server) {
 
     socket.on("cancelCall", (data) => {
       const { targetId, userId, type } = data;
-      const messageData = getMoldMessage(userId, type, "Bạn đã hủy cuộc gọi");
+      const messageData = getMoldMessage(userId, type, data.content);
       const sendToUser = (id) => {
         sendNotificationCallToUser(id, "feedbackCancelCall", data);
       };
@@ -187,7 +186,10 @@ function initializeSocket(server) {
     });
     socket.on("call_end", (data) => {
       console.log("Call_end: ", data);
-      if (data.typeCall === "personal_voice" || data.typeCall === "personal_video") {
+      if (
+        data.typeCall === "personal_voice" ||
+        data.typeCall === "personal_video"
+      ) {
         sendNotificationCallToUser(data.senderId, "feedbackCancelCall", data);
       }
       handleSendMessages(data);

@@ -4,11 +4,11 @@ const {
   transformUserData,
   findUserById,
 } = require("./userServices");
-
 const { generateUniqueID } = require("../untils/informationUntils");
 const { addNotificationForUser } = require("./notificationServices");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
+const CryptoJS = require("crypto-js");
 const handleReceiveMessageUsers = async (req, res) => {
   const { id, page, limit = 20, key } = req.query;
   try {
@@ -184,8 +184,15 @@ const sendMessageToGroupAndPersonal = async (data) => {
   }
 };
 const sanitizeString = (str) => {
-  if (typeof str !== "string") return "";
-  return str.normalize("NFC");
+  if (typeof str !== "string" || str.trim() === "") return "";
+  try {
+    const bytes = CryptoJS.AES.decrypt(str, process.env.SECRETKEY);
+    const content = bytes.toString(CryptoJS.enc.Utf8);
+    return content.normalize("NFC");
+  } catch (error) {
+    console.error("Error in sanitizeString:", error);
+    return "";
+  }
 };
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserId, page } = req.query;
@@ -222,6 +229,7 @@ const handleGetAllConversationUsers = async (req, res) => {
       const otherUserId = conv.participants.find(
         (userId) => userId !== currentUserId
       );
+
       const user = formatData.find((user) => user.userId === otherUserId);
 
       return {
@@ -575,5 +583,5 @@ module.exports = {
   handleUpdateThemeConversation,
   sendQRcodeDataForGroup,
   handleActionGhimConversation,
-  getGroupConversation
+  getGroupConversation,
 };
