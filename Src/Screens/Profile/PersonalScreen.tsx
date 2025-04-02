@@ -64,7 +64,6 @@ const PersonalScreen = ({navigation}: any) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const dispatch = useDispatch();
-  console.log(profile);
 
   const infoUser = {
     stats: {

@@ -53,18 +53,12 @@ const CustormNickNameScreen = () => {
   const data = [
     {
       userId: converData.userId,
-      name:
-        converData.nickNames && converData.nickNames[converData.userId]
-          ? converData.nickNames[converData.userId]
-          : converData.name,
+      name: converData.nickNames[converData.userId] ?? converData.name,
       avatar: converData.avatar,
     },
     {
       userId: auth.userId,
-      name:
-        converData.nickNames && converData.nickNames[auth.userId]
-          ? converData.nickNames[auth.userId]
-          : profile.name,
+      name: converData.nickNames[auth.userId] ?? profile.name,
       avatar: profile.avatar,
     },
   ];
@@ -157,15 +151,7 @@ const CustormNickNameScreen = () => {
           />
         )}
       </View>
-      <UpdateInfoModal
-        isVisible={visible}
-        nickName={t('set_nickname')}
-        nameField={selectUser.name}
-        onCloseModal={() => setVisible(false)}
-        onChangeProfile={(key, value) =>
-          handleUpdateNickName(selectUser.userId, value)
-        }
-      />
+      
     </SafeAreaView>
   );
 };

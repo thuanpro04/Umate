@@ -5,7 +5,7 @@ export const appInfo = {
     WIDTH: Dimensions.get('window').width,
     HEIGHT: Dimensions.get('window').height,
   },
-  BASE_URL: 'http://192.168.1.8:3004',
+  BASE_URL: 'http://192.168.1.11:3004',
   sizeIcon: 22,
   sizeText: Dimensions.get('window').width * 0.045,
   sizeTitle: Dimensions.get('window').width * 0.055,

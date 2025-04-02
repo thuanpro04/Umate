@@ -22,6 +22,7 @@ import {UserInfo} from '../Untils/UserInfo';
 import CarUserChat from './Component/CarUserChat';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {useTranslation} from 'react-i18next';
+import UpdateInfoModal from '../Modal/UpdateInfoModal';
 
 const MessageScreen = ({navigation}: any) => {
   const [users, setUsers] = useState<any[]>([]);
@@ -127,16 +128,19 @@ const MessageScreen = ({navigation}: any) => {
       });
     }
   };
+ 
   const renderCardItems = useCallback(
     ({item, index}: any) => {
-      const sumUsers = item.invitedUsers ? item.invitedUsers.length : 0;
+      const sumUsers =  item?.invitedUsers?.length ?? 0;
       const name = item.nickNames?.[item.userId] ?? item.name;
 
       return (
         <CustormLongPress
           handleDeleteConversation={() => handleDeleteConversation(item)}
           user={item}
-          handleGhimConversation={() => handleGhimConversation(item)}>
+          handleGhimConversation={() => handleGhimConversation(item)}
+          onGroupNameUpdated={getAllConversation} // Truyền callback để tải lại danh sách
+        >
           <CarUserChat
             isGhim={item.pinnedBy?.includes(auth.userId)}
             key={index}
@@ -253,6 +257,7 @@ const MessageScreen = ({navigation}: any) => {
         onClose={onCloseModal}
         onPressAddGroud={handleAddGroup}
       />
+      
     </SafeAreaView>
   );
 };

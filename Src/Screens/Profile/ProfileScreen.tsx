@@ -28,6 +28,7 @@ const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
   const friendData = useSelector(friendSelector);
+  const profile = useSelector(profileSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
@@ -35,10 +36,9 @@ const ProfileScreen = ({navigation}: any) => {
     stats: {
       friends: friendData?.friends?.length ?? 0,
       posts: eventData?.eventShares?.length ?? 0,
-      likes: eventData?.like ?? 0,
+      likes: profile?.myLove?.length ?? 0,
     },
   };
-  console.log(eventData);
   const renderPost = useCallback(
     ({item, index}: any) => {
       console.log(index, item);
