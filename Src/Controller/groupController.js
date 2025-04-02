@@ -3,9 +3,10 @@ const {
   handleActionAgreeOnGroup,
   handleOutGroup,
   handleActionPosition,
-  handleUpdateAttendedGroup
+  handleUpdateAttendedGroup,
+  handleActionEditGroupName,
+  handleActionUploadAvatarGroup,
 } = require("../Services/groupServices");
-
 
 const handleAddGroupUser = (req, res) => {
   handleNewGroupUser(req, res);
@@ -23,10 +24,18 @@ const actionPosition = async (req, res) => {
 const updateAttendedGroup = async (req, res) => {
   handleUpdateAttendedGroup(req, res);
 };
+const actionEditGroupName = (req, res) => {
+  handleActionEditGroupName(req, res);
+};
+const actionUploadAvatarGroup = (req, res) => {
+  handleActionUploadAvatarGroup(req, res);
+};
 module.exports = {
   handleAddGroupUser,
   actionAgreeOnGroup,
   actionOutGroup,
   actionPosition,
-  updateAttendedGroup
+  updateAttendedGroup,
+  actionEditGroupName,
+  actionUploadAvatarGroup,
 };

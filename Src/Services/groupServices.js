@@ -209,12 +209,67 @@ const handleUpdateAttendedGroup = async (req, res) => {
       });
       console.log("Save Notification");
     }
-
     return res
       .status(200)
       .json({ message: "Updated successfully!", data: upMessage });
   } catch (error) {
     console.log("Attended group error: ", error);
+  }
+};
+const handleActionEditGroupName = async (req, res) => {
+  const { id, name } = req.query;
+
+  // Kiểm tra đầu vào
+  if (!id || !name) {
+    return res.status(400).json({
+      message: "Missing required parameters: id or name",
+    });
+  }
+
+  try {
+    const result = await GroupConversationModel.updateOne(
+      { groupId: id },
+      { groupName: name }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({
+        message: "Group not found or name not updated",
+      });
+    }
+
+    res.status(200).json({
+      message: "Edit group name successfully!",
+      data: name,
+    });
+  } catch (error) {
+    console.error("edit name group error: ", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+const handleActionUploadAvatarGroup = async (req, res) => {
+  const { id, urlImg } = req.body;
+  try {
+    if (!id || !urlImg) {
+      return res.status(400).json({
+        message: "Missing required parameter id or urlImg",
+      });
+    }
+    const result = await GroupConversationModel.updateOne(
+      { groupId: id },
+      { avatar: urlImg }
+    ).lean();
+    if (result.modifiedCount === 0) {
+      console.log("Upload avatar fail!!");
+    }
+    res.status(200).json({
+      message: "Upload avatar successfully !!!",
+      data: urlImg,
+    });
+  } catch (error) {
+    console.log("upload avatar fail: ", error);
   }
 };
 module.exports = {
@@ -224,4 +279,6 @@ module.exports = {
   getGroupConversation,
   handleActionPosition,
   handleUpdateAttendedGroup,
+  handleActionEditGroupName,
+  handleActionUploadAvatarGroup,
 };

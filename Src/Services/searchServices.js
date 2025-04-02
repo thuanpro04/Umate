@@ -2,14 +2,12 @@ const { GroupConversationModel } = require("../models/groupConversationModel");
 const {
   UserModel,
 } = require("../models/usersModel");  
-
 const { transformUserData, findUserById } = require("./userServices");
 const handleSearchByName = async (searchTerm, currentUserId, bySearch) => {
   const user = await findUserById(currentUserId);
   console.log(searchTerm, currentUserId, bySearch);
 
   let searchConditions = [{ name: { $regex: searchTerm, $options: "i" } }];
-
   if (bySearch && bySearch.length > 0) {
     if (bySearch.includes("className") && user.className) {
       searchConditions.push({ className: user.className });
