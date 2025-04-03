@@ -9,10 +9,48 @@ const { addNotificationForUser } = require("./notificationServices");
 const { GroupConversationModel } = require("../models/groupConversationModel");
 const { ConversationModel } = require("../models/personalConversationModel");
 const CryptoJS = require("crypto-js");
+const checkUserDeleteConversation = (conv, currentUserId) => {
+  const deletedEntry = conv.deletedBy?.find(
+    (item) => item.userId === currentUserId
+  );
+  if (!deletedEntry) {
+    return false;
+  }
+  if (
+    conv.lastMessageTimestamp.getTime() === deletedEntry.deletedAt.getTime() ||
+    conv.lastMessageTimestamp.getTime() < deletedEntry.deletedAt.getTime()
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const getMessageForUser = (conv, page, limit, currentUserId) => {
+  const deletedEntry = conv.deletedBy?.find(
+    (item) => item.userId === currentUserId
+  );
+  const deletedAt = deletedEntry ? deletedEntry.deletedAt.getTime() : 0;
+
+  const filteredMessages = conv.message.filter(
+    (msg) => new Date(msg.timestamp).getTime() > deletedAt
+  );
+
+  const messages = filteredMessages
+    .reverse()
+    .slice((page - 1) * limit, page * limit);
+
+  return {
+    messages,
+    totalMessages: filteredMessages.length,
+    currentPage: page,
+    totalPages: Math.ceil(filteredMessages.length / limit),
+  };
+};
+
 const handleReceiveMessageUsers = async (req, res) => {
-  const { id, page, limit = 20, key } = req.query;
+  const { id, page, limit = 20, key, currentUserId } = req.body;
   try {
-    let data, messages;
+    let data;
 
     if (id !== "undefined" && key === "personal") {
       const conversation = await ConversationModel.findOne({
@@ -22,30 +60,13 @@ const handleReceiveMessageUsers = async (req, res) => {
         return res.status(404).json({ message: "Conversation not found" });
       }
       // Lấy tin nhắn trong cuộc trò chuyện cá nhân
-      messages = conversation.message
-        .reverse()
-        .slice((page - 1) * limit, page * limit);
-      data = {
-        messages,
-        totalMessages: conversation.message.length,
-        currentPage: page,
-        totalPages: Math.ceil(conversation.message.length / limit),
-      };
+      data = getMessageForUser(conversation, page, limit, currentUserId);
     } else if (id !== "undefined" && key === "group") {
       // Lấy tin nhắn trong nhóm
       const groupConversation = await GroupConversationModel.findOne({
         groupId: id,
       });
-      messages = groupConversation.message
-        .reverse()
-        .slice((page - 1) * limit, page * limit);
-      //0
-      data = {
-        messages,
-        totalMessages: groupConversation.message.length,
-        currentPage: page,
-        totalPages: Math.ceil(groupConversation.message.length / limit),
-      };
+      data = getMessageForUser(groupConversation, page, limit, currentUserId);
     }
 
     // Nếu có dữ liệu tin nhắn
@@ -194,6 +215,7 @@ const sanitizeString = (str) => {
     return "";
   }
 };
+
 const handleGetAllConversationUsers = async (req, res) => {
   const { currentUserId, page } = req.query;
   const limit = 10; // Số cuộc trò chuyện mỗi trang
@@ -205,6 +227,7 @@ const handleGetAllConversationUsers = async (req, res) => {
     })
       .sort({ lastMessageTimestamp: -1 })
       .exec();
+
     const groupConversations = await GroupConversationModel.find({
       invitedUsers: { $in: [currentUserId] },
     }).sort({ lastMessageTimestamp: -1 });
@@ -224,54 +247,58 @@ const handleGetAllConversationUsers = async (req, res) => {
     const usersInfo = await getUsersByIds(usersID); // Hàm này lấy thông tin nhiều user
     const formatData = transformUserData(usersInfo);
 
-    // Chuẩn bị dữ liệu cho các cuộc trò chuyện cá nhân
     const personalConversationsData = personalConversations.map((conv) => {
+      const isDeleted = checkUserDeleteConversation(conv, currentUserId);
+
       const otherUserId = conv.participants.find(
         (userId) => userId !== currentUserId
       );
 
       const user = formatData.find((user) => user.userId === otherUserId);
-
-      return {
-        type: "personal",
-        ...user,
-        lastMessage: sanitizeString(conv.lastMessage) || "",
-        lastMessageTimestamp: conv.lastMessageTimestamp,
-        conversationId: conv.conversationId,
-        statusLastMessage:
-          conv.message[conv.message.length - 1].receiverId === currentUserId &&
-          conv.message[conv.message.length - 1].status === "sent",
-        notification: conv.notification,
-        nickNames: conv.nicknames,
-        theme: conv.theme,
-        pinnedBy: conv.pinnedBy,
-      };
+      return !isDeleted
+        ? {
+            type: "personal",
+            ...user,
+            lastMessage: sanitizeString(conv.lastMessage) || "",
+            lastMessageTimestamp: conv.lastMessageTimestamp,
+            conversationId: conv.conversationId,
+            statusLastMessage:
+              conv.message[conv.message.length - 1].receiverId ===
+                currentUserId &&
+              conv.message[conv.message.length - 1].status === "sent",
+            notification: conv.notification,
+            nickNames: conv.nicknames,
+            theme: conv.theme,
+            pinnedBy: conv.pinnedBy,
+          }
+        : {};
     });
-    // Lấy tất cả các cuộc trò chuyện nhóm mà người dùng hiện tại tham gia
-
-    // Chuẩn bị dữ liệu cho các cuộc trò chuyện nhóm
-    // console.log("groupConversations",groupConversations);
-
-    const groupConversationsData = groupConversations.map((group) => ({
-      type: "group",
-      groupName: group.groupName,
-      groupId: group.groupId,
-      avatar: group.avatar,
-      lastMessage: sanitizeString(group.lastMessage) || "",
-      lastMessageTimestamp: group.lastMessageTimestamp,
-      invitedUsers: group.invitedUsers,
-      leader: group.leader,
-      deputyLeader: group.deputyLeader,
-      messages: group.messages,
-      type: group.type,
-      notification: group.notification,
-      statusLastMessage:
-        group.message[group.message.length - 1].senderId !== currentUserId &&
-        group.message[group.message.length - 1].status === "sent",
-      nickNames: group.nicknames,
-      theme: group.theme,
-      pinnedBy: group.pinnedBy,
-    }));
+    const groupConversationsData = groupConversations.map((group) => {
+      const isDeleted = checkUserDeleteConversation(group, currentUserId);
+      return !isDeleted
+        ? {
+            type: "group",
+            groupName: group.groupName,
+            groupId: group.groupId,
+            avatar: group.avatar,
+            lastMessage: sanitizeString(group.lastMessage) || "",
+            lastMessageTimestamp: group.lastMessageTimestamp,
+            invitedUsers: group.invitedUsers,
+            leader: group.leader,
+            deputyLeader: group.deputyLeader,
+            messages: group.messages,
+            type: group.type,
+            notification: group.notification,
+            statusLastMessage:
+              group.message[group.message.length - 1].senderId !==
+                currentUserId &&
+              group.message[group.message.length - 1].status === "sent",
+            nickNames: group.nicknames,
+            theme: group.theme,
+            pinnedBy: group.pinnedBy,
+          }
+        : {};
+    });
     // Kết hợp và sắp xếp tất cả các cuộc trò chuyện
     const allConversations = [
       ...personalConversationsData,
@@ -346,42 +373,92 @@ const handleUpdateStatusMessage = async (req, res) => {
     console.log("update status message fail: ", error);
   }
 };
-const actionDeleteConversationForPersonal = async (ids) => {
-  return await ConversationModel.deleteMany({ conversationId: { $in: ids } });
+const actionDeleteConversationForPersonal = async (ids, userId) => {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    console.error("Invalid or empty 'ids' parameter");
+    return [];
+  }
+  return Promise.all(
+    ids.map(async (id) => {
+      const conversation = await ConversationModel.findOne({
+        conversationId: id,
+      });
+
+      if (!conversation) return;
+
+      const existingEntry = conversation.deletedBy.find(
+        (entry) => entry.userId === userId
+      );
+
+      if (existingEntry) {
+        // Update the deletedAt timestamp if userId already exists
+        existingEntry.deletedAt = new Date();
+      } else {
+        // Add a new entry if userId does not exist
+        conversation.deletedBy.push({ userId, deletedAt: new Date() });
+      }
+
+      await conversation.save();
+    })
+  );
 };
-const actionDeleteConversationForGroup = async (ids) => {
-  return GroupConversationModel.deleteMany({ groupId: { $in: ids } });
+
+const actionDeleteConversationForGroup = async (ids, userId) => {
+  if (!Array.isArray(ids) || ids.length === 0) {
+    console.error("Invalid or empty 'ids' parameter");
+    return [];
+  }
+  return Promise.all(
+    ids.map(async (id) => {
+      const groupConversation = await GroupConversationModel.findOne({
+        groupId: id,
+      });
+
+      if (!groupConversation) return;
+
+      const existingEntry = groupConversation.deletedBy.find(
+        (entry) => entry.userId === userId
+      );
+
+      if (existingEntry) {
+        // Update the deletedAt timestamp if userId already exists
+        existingEntry.deletedAt = new Date();
+      } else {
+        // Add a new entry if userId does not exist
+        groupConversation.deletedBy.push({ userId, deletedAt: new Date() });
+      }
+
+      await groupConversation.save();
+    })
+  );
 };
 
 const handleDeleteConversation = async (req, res) => {
-  const arrConver = req.body;
-  const idPersons = arrConver["personal"] || [];
-  const idGroups = arrConver["group"] || [];
-  if (idGroups.length === 0 && idPersons.length === 0) {
+  const { personal, userId, group } = req.body;
+  console.log(personal, userId, group);
+
+  if (group?.length === 0 && personal?.length === 0) {
     return res
       .status(400)
       .json({ message: "Không có cuộc trò chuyện nào để xóa!" });
   }
   try {
     const [deletePersonal, deleteGroup] = await Promise.all([
-      actionDeleteConversationForPersonal(idPersons),
-      actionDeleteConversationForGroup(idGroups),
+      actionDeleteConversationForPersonal(personal, userId),
+      actionDeleteConversationForGroup(group, userId),
     ]);
-    if (deletePersonal.deletedCount > 0 || deleteGroup.deletedCount > 0) {
-      res.status(200).json({
-        message: "Delete conversation successfully!! ",
-        data: {
-          personal: idPersons,
-          group: idGroups,
-        },
-      });
-    } else {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy cuộc trò chuyện nào để xóa!" });
-    }
+    console.log("Delete conversation successfully!!");
+
+    res.status(200).json({
+      message: "Delete conversation successfully!!",
+      data: {
+        personal,
+        group,
+      },
+    });
   } catch (error) {
     console.log("Delete conversation error: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 const getConversation = async (id) => {

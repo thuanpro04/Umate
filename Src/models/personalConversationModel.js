@@ -13,6 +13,12 @@ const conversationSchema = new mongoose.Schema(
     nicknames: { type: Map, of: String, default: {} },
     theme: { type: String, default: "light" },
     pinnedBy: [{ type: String, ref: "User" }],
+    deletedBy: [
+      {
+        userId: { type: String, ref: "User" },
+        deletedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
