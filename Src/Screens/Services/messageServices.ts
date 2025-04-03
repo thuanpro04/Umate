@@ -1,9 +1,18 @@
 import chatsAPI from '../../apis/chatApi';
 let url: string;
-const getAllMessagesUser = async (id: any, key: string, page: number) => {
+const getAllMessagesUser = async (
+  id: any,
+  key: string,
+  page: number,
+  currentUserId: string,
+) => {
   try {
-    url = `/receive-messages?id=${id}&key=${key}&page=${page}`;
-    const res = await chatsAPI.handleChats(url);
+    url = `/receive-messages`;
+    const res = await chatsAPI.handleChats(
+      url,
+      {id, key, page, currentUserId},
+      'post',
+    );
     return res;
   } catch (error) {
     console.log('getAllMessagesUser', error);
@@ -51,10 +60,11 @@ const updateStatusMessage = async (userId: string, id: string, key: string) => {
     console.log('update status message fail: ', error);
   }
 };
-const deleteConversation = async (arrConver: any) => {
+const deleteConversation = async (arrConver: any, userId: string) => {
   try {
     url = '/delete-conver';
-    const res = await chatsAPI.handleChats(url, arrConver, 'post');
+
+    const res = await chatsAPI.handleChats(url, {...arrConver, userId}, 'post');
     return res;
   } catch (error) {
     console.log('Delete conversation fail: ', error);

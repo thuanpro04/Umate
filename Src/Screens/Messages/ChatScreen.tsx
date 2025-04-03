@@ -89,6 +89,7 @@ const ChatScreen = ({navigation}: any) => {
       converInfo.conversationId ?? converInfo.groupId,
       converInfo.type,
       page,
+      currentUserId,
     );
     if (res?.data && res.data.messages?.length > 0) {
       setMembers(res.data?.invitedUsers);
@@ -116,7 +117,6 @@ const ChatScreen = ({navigation}: any) => {
 
     setIsLoading(false);
   }, [converInfo, page]);
-
   const onSendMessages = useCallback(
     (val: {content?: string; imagesUrl?: string[]; reply?: string}) => {
       setReplyMessage(null);
@@ -128,6 +128,8 @@ const ChatScreen = ({navigation}: any) => {
           timestamp: new Date().toISOString(),
           reply: val.reply ?? '',
         };
+        console.log(val.content);
+
         setMessages(prev => {
           let updatedMessages = [...prev];
           if (converInfo.type === 'group') {
@@ -200,7 +202,6 @@ const ChatScreen = ({navigation}: any) => {
 
   const renderItemMessages = useCallback(
     (props: any) => {
-      
       return (
         <ChatItems
           name={name}

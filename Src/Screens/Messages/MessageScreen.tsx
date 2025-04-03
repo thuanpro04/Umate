@@ -54,7 +54,11 @@ const MessageScreen = ({navigation}: any) => {
       page,
     );
     if (res?.data && res) {
-      const sortedUsers = sortUsersByPinnedStatus(res?.data.allConversations);
+      // Filter out empty objects
+      const filteredConversations = res?.data.allConversations.filter(
+        (conversation: any) => Object.keys(conversation).length > 0,
+      );
+      const sortedUsers = sortUsersByPinnedStatus(filteredConversations);
       setUsers(sortedUsers);
       setLimitPage(res.data.totalPage);
       setPage(prevPage => prevPage + 1);
@@ -76,10 +80,11 @@ const MessageScreen = ({navigation}: any) => {
   };
   const handleDeleteConversation = async (user: any) => {
     setIsLoading(true);
-    const id = user.type === 'group' ? user.groupId : user.conversationId;
-    const res = await messageServices.deleteConversation({
-      [user.type]: [id],
-    });
+    const id = user.groupId ?? user.conversationId;
+    const res = await messageServices.deleteConversation(
+      {[user.type]: [id]},
+      auth.userId,
+    );
     if (res) {
       console.log('✅ Delete conversation successfully!');
       // Cập nhật danh sách users
@@ -128,10 +133,10 @@ const MessageScreen = ({navigation}: any) => {
       });
     }
   };
- 
+
   const renderCardItems = useCallback(
     ({item, index}: any) => {
-      const sumUsers =  item?.invitedUsers?.length ?? 0;
+      const sumUsers = item?.invitedUsers?.length ?? 0;
       const name = item.nickNames?.[item.userId] ?? item.name;
 
       return (
@@ -257,7 +262,6 @@ const MessageScreen = ({navigation}: any) => {
         onClose={onCloseModal}
         onPressAddGroud={handleAddGroup}
       />
-      
     </SafeAreaView>
   );
 };

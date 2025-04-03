@@ -69,17 +69,18 @@ const TrashConversation = ({navigation}: any) => {
     if (Object.keys(selectItems).length === 0) {
       return;
     }
-    console.log(selectItems);
-
-    const res = await messageServices.deleteConversation(selectItems);
+    const res = await messageServices.deleteConversation(
+      selectItems,
+      auth.userId,
+    );
     if (res && res.data) {
       console.log('Delete conversation successfully !!!', res.data);
       const result = userInfo.filter(item => {
         if (item.type === 'personal') {
-          return !res.data.personal.includes(item.conversationId);
+          return !res.data.personal?.includes(item.conversationId);
         }
         if (item.type === 'group') {
-          return !res.data.group.includes(item.groupId);
+          return !res.data.group?.includes(item.groupId);
         }
         return true;
       });

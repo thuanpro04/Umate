@@ -268,11 +268,13 @@ const CustormLongPress = (props: Props) => {
               <SpaceComponent height={10} />
               <RowComponent>
                 <TextComponent label={user.name ?? user.groupName} title />
-                <Pencil
-                  size={16}
-                  color={colors.icon}
-                  onPress={onPressEditGroupName}
-                />
+                {isGroup && (
+                  <Pencil
+                    size={16}
+                    color={colors.icon}
+                    onPress={onPressEditGroupName}
+                  />
+                )}
               </RowComponent>
             </View>
             <SpaceComponent height={10} />
