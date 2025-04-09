@@ -272,7 +272,7 @@ const PersonalScreen = ({navigation}: any) => {
                     position: 'absolute',
                     top: '100%',
                     zIndex: 1,
-                    left: '13%',
+                    left: '12.5%',
                     transform: [{rotate: '-180deg'}],
                   }}>
                   {isHeart ? (

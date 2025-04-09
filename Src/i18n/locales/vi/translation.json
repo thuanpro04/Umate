@@ -172,5 +172,13 @@
   "picture": "Chụp ảnh.",
   "from_library": "Từ thư viện.",
   "from_url": "Từ url.",
-  "remove": "Xóa"
+  "remove": "Xóa",
+  "post": "Bài đăng",
+  "create_post": "Tạo bài viết",
+  "post_action": "Đăng bài",
+  "feeling_now": "đang cảm thấy",
+  "what_are_you_thinking": "Bạn đang nghĩ gì?",
+  "add_to_post": "Thêm vào bài viết",
+  "images":"Hình ảnh",
+  "feeling":"Cảm xúc"
 }

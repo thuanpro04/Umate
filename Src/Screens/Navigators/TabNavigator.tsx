@@ -1,23 +1,18 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Message, People, Profile} from 'iconsax-react-native';
 import React, {ReactNode, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Platform} from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {appColors} from '../../Theme/Colors/appColors';
-import {CircleComponent, TextComponent} from '../Components/index';
-import {
-  HomeScreen,
-  MessageScreen,
-  MyFriendScreen,
-  ProfileScreen,
-} from '../index';
-import GeminiChat from '../AiStudioScreen/GeminiChat';
 import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
 import {themeSelector} from '../../redux/reducers/themeSlice';
-import { useTranslation } from 'react-i18next';
-
+import {appColors} from '../../Theme/Colors/appColors';
+import GeminiChat from '../AiStudioScreen/GeminiChat';
+import {CircleComponent, TextComponent} from '../Components/index';
+import {HomeScreen, MessageScreen, MyFriendScreen} from '../index';
+import MyPostScreen from '../MyPost/MyPostScreen';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const TabNavigator = () => {
   const Tab = createBottomTabNavigator();
   const [isTabBarVisible, setIsTabBarVisible] = useState(true);
@@ -38,7 +33,7 @@ const TabNavigator = () => {
           borderTopRightRadius: theme === 'light' ? 12 : 0,
           backgroundColor: colors.background,
           display: isTabBarVisible ? 'flex' : 'none',
-          borderTopColor:colors.background
+          borderTopColor: colors.background,
         },
         tabBarIcon: ({focused, color, size}) => {
           let icon: ReactNode;
@@ -48,8 +43,8 @@ const TabNavigator = () => {
             case t('home'):
               icon = <Ionicons name="home-outline" size={size} color={color} />;
               break;
-            case t('profile'):
-              icon = <Profile size={size} color={color} />;
+            case t('post'):
+              icon = <MaterialIcons name="compost" size={size} color={color} />;
               break;
             case 'GeminiChat':
               icon = (
@@ -86,7 +81,7 @@ const TabNavigator = () => {
         },
       })}>
       <Tab.Screen name={t('home')} component={HomeScreen} />
-      <Tab.Screen name={t('friend')} component={MyFriendScreen} />
+      <Tab.Screen name={t('post')} component={MyPostScreen} />
       <Tab.Screen
         name="GeminiChat"
         children={() => (
@@ -97,7 +92,7 @@ const TabNavigator = () => {
         )}
       />
       <Tab.Screen name={t('message')} component={MessageScreen} />
-      <Tab.Screen name={t('profile')} component={ProfileScreen} />
+      <Tab.Screen name={t('friend')} component={MyFriendScreen} />
     </Tab.Navigator>
   );
 };

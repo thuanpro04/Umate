@@ -1,4 +1,12 @@
-import {Keyboard, Modal, StyleSheet, Text, View} from 'react-native';
+import {
+  Keyboard,
+  Modal,
+  StyleProp,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from 'react-native';
 import React, {ReactNode, useRef, useState} from 'react';
 import ImageCropPicker, {ImageOrVideo} from 'react-native-image-crop-picker';
 import {appColors} from '../../../Theme/Colors/appColors';
@@ -30,6 +38,7 @@ interface Props {
   title?: string;
   isBlock?: boolean;
   handleToastNotificationBlock?: () => void;
+  styles?: StyleProp<ViewStyle>;
 }
 const ButtonImagePicker = (props: Props) => {
   const {
@@ -39,6 +48,7 @@ const ButtonImagePicker = (props: Props) => {
     title,
     isBlock,
     handleToastNotificationBlock,
+    styles,
   } = props;
   const modalizeRef = useRef<Modalize>();
   const [imageUrl, setImageUrl] = useState('');
@@ -121,7 +131,7 @@ const ButtonImagePicker = (props: Props) => {
   return (
     <View>
       <ButtonComponent
-        styles={{marginTop: 10}}
+        styles={[{marginTop: 10}, styles]}
         type="action"
         iconLeft={icon}
         onPress={() =>

@@ -1,8 +1,6 @@
-import {StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 import {appInfo} from '../../Theme/appInfo';
-import {first} from 'lodash';
 import SuggestFriend from '../Friends/SuggestFriend';
 import FriendsRequestScreen from '../Friends/FriendsRequestScreen';
 import {appColors} from '../../Theme/Colors/appColors';
@@ -43,9 +41,11 @@ const TabViewFriend = () => {
       onIndexChange={setIndex}
       initialLayout={{width: appInfo.size.WIDTH}}
       renderTabBar={(props: any) => {
+        const {navigationState, ...restProps} = props; // Destructure props
         return (
           <TabBar
-            {...props}
+            navigationState={navigationState} // Pass navigationState explicitly
+            {...restProps} // Spread the remaining props
             style={{backgroundColor: colors.background}}
             labelStyle={{
               color: appColors.grey3,
@@ -61,5 +61,3 @@ const TabViewFriend = () => {
 };
 
 export default TabViewFriend;
-
-const styles = StyleSheet.create({});

@@ -22,7 +22,7 @@
   "suggest": "Suggest",
   "majoring": "Majoring",
   "remove_friend_confirmation": "Do you really want to remove this friend?",
-  "unfriend": "Unfriend with ",
+  "unfriend": "Unfriend with",
   "confirm_block": "Do you really want to block? ",
   "confirm_unblock": "Do you really want to unblock? ",
   "block_friend": "Block this friend ",
@@ -171,6 +171,15 @@
   "how_attendance": "Do you want to take attendance? ",
   "picture": "Take a picture.",
   "from_library.": "From library.",
-  "from_url":"From url.",
-  "remove": "Remove"
+  "from_url": "From url.",
+  "remove": "Remove",
+  "post": "Post",
+  "create_post": "Create Post",
+  "post_action": "Post",
+  "feeling_now": "feeling",
+  "what_are_you_thinking": "What's on your mind?",
+  "add_to_post": "Add to post",
+  "images":"Images",
+  "feeling":"Feeling"
+
 }

@@ -44,8 +44,12 @@ const HomeScreen = () => {
           (event, index, self) =>
             index === self.findIndex(e => e._id === event._id),
         );
-        // Cập nhật state chỉ với các sự kiện duy nhất
-        return uniqueEvents;
+        // Sắp xếp sự kiện theo timestamp (mới nhất lên đầu)
+        const sortedEvents = uniqueEvents.sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+        );
+        // Cập nhật state với các sự kiện đã sắp xếp
+        return sortedEvents;
       });
 
       setLimitPage(res.data.totalPages);

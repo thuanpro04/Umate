@@ -32,6 +32,7 @@ import ChatInput from './Component/ChatInput';
 import ChatItems from './Component/ChatItems';
 import SocketService from '../Services/SocketService';
 import {themeSelector} from '../../redux/reducers/themeSlice';
+import BlockViewComponent from './Component/BlockViewComponent';
 
 const ChatScreen = ({navigation}: any) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -44,7 +45,6 @@ const ChatScreen = ({navigation}: any) => {
   const scrollViewRef = useRef<FlatList>(null);
   const {getItem} = useAsyncStorage('ConversationInfo');
   const SwipeableRowRef = useRef<any>(null);
-  const profile = useSelector(profileSelector);
   const [limitPage, setLimitPage] = useState(1);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const auth = useSelector(authSelector);
@@ -53,7 +53,6 @@ const ChatScreen = ({navigation}: any) => {
   const currentUserId = auth.userId;
   const clearReplyMessage = () => setReplyMessage(null);
   const socket = SocketService.getSocket();
-  const {t} = useTranslation();
   const isPersonal = converInfo.type === 'personal';
   const existingBlock = converInfo.block?.length > 0;
   const name = converInfo.nickNames?.[converInfo.userId] ?? converInfo.name;
@@ -223,31 +222,17 @@ const ChatScreen = ({navigation}: any) => {
         />
       );
     },
-    [navigation, converInfo, members, allUrlImages, page, messages],
+    [navigation, converInfo, members, allUrlImages, page],
   );
   const ListHeader = () => {
     return isLoading ? <ActivityIndicator /> : <></>;
   };
 
-  const renderViewBlock = () => {
-    return (
-      <View style={styles.block}>
-        <TextComponent
-          label={`${t('you_are_blocked')} ${converInfo.name}`}
-          styles={{fontWeight: '500', fontStyle: 'italic'}}
-          color={appColors.white}
-        />
-        <SpaceComponent height={8} />
-        <TextComponent label="🤫" size={28} />
-      </View>
-    );
-  };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       // Clear existing messages when screen is focused
       setMessages([]);
       setPage(1);
-
       // Fetch fresh conversation info from storage
       try {
         const info = await UserInfo.getConversationInfo(getItem);
@@ -413,7 +398,7 @@ const ChatScreen = ({navigation}: any) => {
         )}
       </SafeAreaView>
       {!!converInfo.block?.includes(auth.userId) ? (
-        renderViewBlock()
+        <BlockViewComponent name={converInfo.name} />
       ) : (
         <ChatInput
           converInfo={converInfo}
@@ -443,14 +428,5 @@ const styles = StyleSheet.create({
     borderRadius: 25,
 
     width: '10%',
-  },
-  block: {
-    backgroundColor: '#81C784',
-    height: 145,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    alignItems: 'center',
-
-    justifyContent: 'center',
   },
 });

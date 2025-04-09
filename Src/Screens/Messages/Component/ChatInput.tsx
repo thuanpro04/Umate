@@ -61,7 +61,7 @@ const ChatInput = (props: Props) => {
         console.log('Message is empty, nothing to send.');
         return;
       }
-      let value = UserInfo.encryptText(content.trim());
+      let value = content && UserInfo.encryptText(content.trim());
       // Định nghĩa nội dung tin nhắn
       const messageData = {
         senderId: auth.userId,

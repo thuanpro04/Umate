@@ -18,6 +18,7 @@ import {eventSevices} from '../Services/eventService';
 import {RowComponent, SpaceComponent, TextComponent} from './index';
 import {setLikeEvent} from '../../redux/reducers/eventSlice';
 import {UserInfo} from '../Untils/UserInfo';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 interface Props {
   img: string;
   content: string;
@@ -158,11 +159,11 @@ const CarComponent = (props: Props) => {
                 })
               }>
               <TextComponent
-                label={'Đi đến'}
+                label={t('next')}
                 styles={localStyles.link}
                 size={15}
               />
-              <DirectRight color={colors.icon} size={appInfo.sizeIcon} />
+              <MaterialCommunityIcons name='arrow-right-bold' color={colors.icon} size={appInfo.sizeIcon} />
             </RowComponent>
           </View>
         )}

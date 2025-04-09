@@ -1,4 +1,3 @@
-import {CallIncoming} from 'iconsax-react-native';
 import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
@@ -11,49 +10,46 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
-import QRCode from 'react-native-qrcode-svg';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {useSelector} from 'react-redux';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {appInfo} from '../../../Theme/appInfo';
 import {authSelector} from '../../../redux/reducers/authReducer';
-import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
+import {RowComponent, TextComponent} from '../../Components';
 import CustormLinkPreview from '../../Components/CustormLinkPreview';
-import {messageServices} from '../../Services/messageServices';
+import {groupServices} from '../../Services/groupServices';
 import {userServices} from '../../Services/userService';
 import {Notification} from '../../Untils/Notification';
 import {UserInfo} from '../../Untils/UserInfo';
-import CustomCallButtonComponent from './CustomCallButtonComponent';
 import CustormImageViewing from './CustormImageViewing';
-import {groupServices} from '../../Services/groupServices';
+import ReplyComponent from './ReplyComponent';
+import ShowTimeMessage from './ShowTimeMessage';
+import ShowViewCall from './ShowViewCall';
+import ShowViewQrCode from './ShowViewQrCode';
+import ShareDocuments from './ShareDocuments';
+import RenderImageMess from './RenderImageMess';
 interface Props {
   currentUserId: string;
-  userId?: string | string[];
   urlImages?: any[];
   navigation?: any;
-  members?: any[];
   updateRowRef: any;
   setReplyOnSwipeOpen: any;
   item?: any;
   name: string;
-  isBlock: Boolean;
-  blockId: string;
+  isBlock: boolean;
   theme: any;
   conversationInfo: any;
 }
 const ChatItems = (props: Props) => {
   const {
     currentUserId,
-    userId,
     urlImages,
     navigation,
-    members,
     updateRowRef,
     setReplyOnSwipeOpen,
     item,
     name,
     isBlock,
-    blockId,
     theme,
     conversationInfo,
   } = props;
@@ -62,7 +58,7 @@ const ChatItems = (props: Props) => {
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [showTime, setShowTime] = useState<any[]>([]);
   const [user, setUser] = useState<any>('');
-  const auth = useSelector(authSelector);
+
   const colors = appColors[theme];
   const {t} = useTranslation();
   const isNextMyMessage = true;
@@ -87,71 +83,6 @@ const ChatItems = (props: Props) => {
   const onChangeShowTime = (key: any) => {
     setShowTime(prev => ({...prev, [key]: !showTime[key]}));
   };
-  const shareDocuments = (
-    isStacked: boolean,
-    isRight: boolean,
-    arrImages: string[],
-  ) => {
-    return (
-      <EvilIcons
-        name="share-google"
-        color={appColors.blueBack}
-        size={appInfo.sizeIconBold}
-        style={{
-          position: isStacked ? 'absolute' : 'relative',
-          left: isRight ? undefined : appInfo.size.WIDTH * 0.57, // Điều chỉnh khoảng cách từ trái
-          right: isRight && isStacked ? appInfo.size.WIDTH * 0.57 : 0,
-          top: isStacked ? appInfo.size.HEIGHT * 0.12 : 0,
-        }}
-        onPress={() =>
-          navigation.navigate('ShareScreen', {
-            arrUrlImages: arrImages,
-            isShare: true,
-          })
-        }
-      />
-    );
-  };
-  const renderImage = useCallback((arrImages: string[], isRight?: boolean) => {
-    const totalImages = arrImages.length;
-    const isStacked = totalImages > 1;
-    return arrImages.map((item, imgIndex) => {
-      return (
-        <RowComponent
-          onPress={() => onPressImg(item)}
-          activeOpacity={0.8}
-          styles={{}}
-          key={imgIndex}>
-          {imgIndex === arrImages.length - 1 &&
-            isRight &&
-            shareDocuments(isStacked, isRight ?? false, arrImages)}
-          {item && (
-            <FastImage
-              style={[
-                styles.imageStyle,
-                isStacked && {
-                  position: 'absolute',
-                  left: isRight ? undefined : imgIndex * 5, // Điều chỉnh khoảng cách từ trái
-                  right: isRight ? imgIndex * 5 : undefined, // Điều chỉnh khoảng cách từ phải
-                  top: -imgIndex, // Xếp chồng theo index
-                  zIndex: totalImages - imgIndex,
-                },
-              ]}
-              source={{
-                uri: item,
-                priority: FastImage.priority.high, // Đặt mức ưu tiên cao
-                cache: FastImage.cacheControl.immutable, // Cache vĩnh viễn cho URL không thay đổi
-              }}
-              resizeMode={FastImage.resizeMode.cover}
-            />
-          )}
-          {imgIndex === arrImages.length - 1 &&
-            !isRight &&
-            shareDocuments(isStacked, !isRight, arrImages)}
-        </RowComponent>
-      );
-    });
-  }, []);
 
   const onSwipeableOpenAction = () => {
     if (props.item) {
@@ -254,7 +185,7 @@ const ChatItems = (props: Props) => {
         conversationInfo.leader.userId,
         conversationInfo.deputyLeader.userId,
       ],
-      currentUserId: auth.userId,
+      currentUserId: currentUserId,
       id: conversationInfo.groupId,
     };
     const res = await groupServices.updateAttendedGroup(data);
@@ -277,13 +208,10 @@ const ChatItems = (props: Props) => {
             marginVertical: 4,
           }}>
           {showTime[index] && (
-            <View style={{alignSelf: 'center'}}>
-              <TextComponent
-                label={UserInfo.getTimePresent(props.item.timestamp)}
-                color={colors.text2}
-                size={8}
-              />
-            </View>
+            <ShowTimeMessage
+              color={colors.text2}
+              timestamp={props.item.timestamp}
+            />
           )}
           <TouchableOpacity
             activeOpacity={0.5}
@@ -302,84 +230,27 @@ const ChatItems = (props: Props) => {
               },
             ]}>
             {condition ? (
-              <View>
-                <View
-                  style={{
-                    alignItems: 'flex-start',
-                    justifyContent: 'flex-start',
-                  }}>
-                  <TextComponent
-                    key={index}
-                    label={content}
-                    color={colors.text}
-                    styles={[
-                      styles.contentStyles,
-                      {marginHorizontal: item?.reply ? 15 : 0, fontSize: 16},
-                    ]}
-                    title
-                  />
-                  <RowComponent>
-                    <CallIncoming size={12} color={colors.icon} />
-                    <TextComponent
-                      key={index}
-                      label={'Cuộc gọi thoại'}
-                      color={colors.text}
-                      styles={[
-                        styles.contentStyles,
-                        {marginHorizontal: item?.reply ? 15 : 0},
-                      ]}
-                      size={12}
-                    />
-                  </RowComponent>
-                </View>
-                <SpaceComponent height={5} />
-                <SpaceComponent
-                  bgCrossBar="grey"
-                  width={'100%'}
-                  isCrossBar
-                  height={0.5}
-                />
-                <SpaceComponent height={5} />
-                <CustomCallButtonComponent
-                  converInfo={conversationInfo}
-                  isDisible={isBlock}
-                  type={condition}
-                  styles={{justifyContent: 'center', alignItems: 'center'}}
-                  targetName={
-                    conversationInfo.type === 'personal'
-                      ? name
-                      : conversationInfo.groupName
-                  }
-                  targetId={
-                    conversationInfo.type === 'personal'
-                      ? conversationInfo.userId
-                      : conversationInfo.invitedUsers?.filter(
-                          (id: any) => id !== auth.userId,
-                        )
-                  }
-                  text="Gọi lại"
-                  txtStyles={{color: appColors.blue, fontSize: 18}}
-                />
-              </View>
+              <ShowViewCall
+                name={name}
+                color={colors.text}
+                condition={condition}
+                content={content}
+                conversationInfo={conversationInfo}
+                isBlock={isBlock}
+                iColor={colors.icon}
+                reply={item?.reply}
+                userId={currentUserId}
+                key={index}
+              />
             ) : (
               <>
                 {item?.reply && item.reply.content && (
-                  <View
-                    style={[
-                      styles.replyStyles,
-                      {
-                        borderLeftColor:
-                          item?.reply?.senderId === currentUserId
-                            ? '#2196f3'
-                            : 'green',
-                      },
-                    ]}>
-                    <TextComponent
-                      styles={{fontSize: 14}}
-                      color={colors.text}
-                      label={UserInfo.getContent(item.reply.content)}
-                    />
-                  </View>
+                  <ReplyComponent
+                    senderId={item?.reply.senderId}
+                    currentUserId={currentUserId}
+                    color={colors.text}
+                    content={item.reply.content}
+                  />
                 )}
                 {isLink ? (
                   <View style={{height: item.title ? 275 : 255}}>
@@ -390,31 +261,17 @@ const ChatItems = (props: Props) => {
                     />
                   </View>
                 ) : isQrcode ? (
-                  <View
-                    style={{justifyContent: 'center', alignItems: 'center'}}>
-                    <SpaceComponent height={10} />
-                    <QRCode value={item.QRCode.qrdata} size={200} />
-                    <SpaceComponent height={5} />
-                    <View
-                      style={{
-                        backgroundColor: 'grey',
-                        width: '100%',
-                        height: 1,
-                      }}
-                    />
-                    <SpaceComponent height={10} />
-                    <TouchableOpacity
-                      onPress={() =>
-                        showNotificationQrCode(
-                          item.QRCode.qrdata,
-                          item.messageId,
-                          text,
-                          item.timestamp,
-                        )
-                      }>
-                      <TextComponent label="Quét mã " color={appColors.blue} />
-                    </TouchableOpacity>
-                  </View>
+                  <ShowViewQrCode
+                    showNotificationQrCode={() =>
+                      showNotificationQrCode(
+                        item.QRCode.qrdata,
+                        item.messageId,
+                        text,
+                        item.timestamp,
+                      )
+                    }
+                    qrdata={item.QRCode.qrdata}
+                  />
                 ) : (
                   <TextComponent
                     key={index}
@@ -481,15 +338,18 @@ const ChatItems = (props: Props) => {
                 marginTop: 10,
               },
             ]}>
-            {props?.item.imagesUrl &&
-              renderImage(
-                props?.item.imagesUrl,
-                props?.item.senderId === currentUserId,
-              )}
+            {props?.item.imagesUrl && (
+              <RenderImageMess
+                navigation={navigation}
+                onPressImg={onPressImg}
+                arrImages={props?.item.imagesUrl}
+                isRight={isUser}
+              />
+            )}
           </View>
         )}
       </Swipeable>
-      {displayImgs && displayImgs.length > 0 && (
+      {displayImgs?.length > 0 && (
         <CustormImageViewing
           onChangeImageIndex={onChangeImageIndex}
           onClose={() => setIsVisible(false)}
@@ -517,26 +377,11 @@ const styles = StyleSheet.create({
 
     paddingTop: 4,
   },
-  replyStyles: {
-    borderRadius: 12,
-    maxWidth: 275,
-    marginHorizontal: 8,
 
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    borderLeftWidth: 3,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-  },
   imageContainerOther: {
     transform: [{rotate: '5deg'}],
   },
-  imageStyle: {
-    width: appInfo.size.WIDTH * 0.51, // Chiều rộng hình ảnh
-    height: appInfo.size.HEIGHT * 0.23, // Chiều cao hình ảnh
-    borderRadius: 10, // Bo góc hình ảnh
-    backgroundColor: appColors.grey,
-    resizeMode: 'cover',
-  },
+
   loadingIndicator: {
     position: 'absolute',
     top: '50%',
@@ -544,3 +389,62 @@ const styles = StyleSheet.create({
     zIndex: 1, // Đảm bảo rằng indicator nằm trên ảnh
   },
 });
+// <View>
+//   <View
+//     style={{
+//       alignItems: 'flex-start',
+//       justifyContent: 'flex-start',
+//     }}>
+//     <TextComponent
+//       key={index}
+//       label={content}
+//       color={colors.text}
+//       styles={[
+//         styles.contentStyles,
+//         {marginHorizontal: item?.reply ? 15 : 0, fontSize: 16},
+//       ]}
+//       title
+//     />
+//     <RowComponent>
+//       <CallIncoming size={12} color={colors.icon} />
+//       <TextComponent
+//         key={index}
+//         label={'Cuộc gọi thoại'}
+//         color={colors.text}
+//         styles={[
+//           styles.contentStyles,
+//           {marginHorizontal: item?.reply ? 15 : 0},
+//         ]}
+//         size={12}
+//       />
+//     </RowComponent>
+//   </View>
+//   <SpaceComponent height={5} />
+//   <SpaceComponent
+//     bgCrossBar="grey"
+//     width={'100%'}
+//     isCrossBar
+//     height={0.5}
+//   />
+//   <SpaceComponent height={5} />
+//   <CustomCallButtonComponent
+//     converInfo={conversationInfo}
+//     isDisible={isBlock}
+//     type={condition}
+//     styles={{justifyContent: 'center', alignItems: 'center'}}
+//     targetName={
+//       conversationInfo.type === 'personal'
+//         ? name
+//         : conversationInfo.groupName
+//     }
+//     targetId={
+//       conversationInfo.type === 'personal'
+//         ? conversationInfo.userId
+//         : conversationInfo.invitedUsers?.filter(
+//             (id: any) => id !== auth.userId,
+//           )
+//     }
+//     text="Gọi lại"
+//     txtStyles={{color: appColors.blue, fontSize: 18}}
+//   />
+// </View>

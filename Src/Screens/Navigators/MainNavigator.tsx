@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import SupportScreen from '../../SupportScreen/SupportScreen';
 import DetailEvent from '../Events/DetailEvent';
@@ -11,7 +11,6 @@ import {
   SearchScreen,
   SettingScreen,
 } from '../index';
-import GoongMapScreen from '../map/GoongMapScreen';
 import ChatScreen from '../Messages/ChatScreen';
 
 import NotificationScreen from '../notification/NotificationScreen';
@@ -28,6 +27,7 @@ import CallWaitingAccept from '../VideoCall/CallWaitingAccept';
 import TrashConversation from '../Messages/TrashConversation';
 import ReportScreen from '../Report/ReportScreen';
 import ScanBarcode from '../QRCode/ScanBarcode';
+import CreatePostScreen from '../MyPost/CreatePostScreen';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -51,7 +51,7 @@ const MainNavigator = () => {
         component={FriendsRequestScreen}
       />
       <Stack.Screen name="DetailEvent" component={DetailEvent} />
-      <Stack.Screen name="GoongMapScreen" component={GoongMapScreen} />
+      <Stack.Screen name="create_post" component={CreatePostScreen} />
       <Stack.Screen name="UserQRCode" component={UserQRCode} />
       <Stack.Screen name="FriendScreens" component={FriendScreens} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
@@ -63,8 +63,8 @@ const MainNavigator = () => {
       <Stack.Screen name="TrashConversation" component={TrashConversation} />
       <Stack.Screen name="ReportScreen" component={ReportScreen} />
       <Stack.Screen name="ScanBarcode" component={ScanBarcode} />
-      
-      
+      <Stack.Screen name="Create_post" component={CreatePostScreen} />
+
     </Stack.Navigator>
   );
 };

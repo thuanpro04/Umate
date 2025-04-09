@@ -34,6 +34,14 @@ export class UserInfo {
     });
     return vietnamDate;
   };
+  static getTime = (timestamp: string) => {
+    const vietnamTime = new Date(timestamp).toLocaleTimeString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return vietnamTime;
+  };
 
   static compareObject = (obj: any, obj2: any) => {
     for (let key in obj) {
