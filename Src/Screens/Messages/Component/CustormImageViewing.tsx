@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import CustomHeaderImages from './CustomHeaderImages';
 import CustomFootImages from './CustomFootImages';
 import ImageViewing from 'react-native-image-viewing';
@@ -13,25 +13,33 @@ interface Props {
 }
 const CustormImageViewing = (props: Props) => {
   const {imageIndex, images, isVisible, onChangeImageIndex, onClose} = props;
-  
+  const [index, setIndex] = useState(imageIndex);
+
   return (
     <ImageViewing
       imageIndex={imageIndex}
       images={images}
       visible={isVisible}
+      onImageIndexChange={imageIndex => setIndex(imageIndex)}
       onRequestClose={onClose}
       HeaderComponent={() => (
-        <CustomHeaderImages onPressClose={onClose} img={images[imageIndex]} />
+        <CustomHeaderImages
+          onPressClose={() => {
+            setIndex(0);
+            onClose();
+          }}
+          img={images[imageIndex]}
+        />
       )}
       FooterComponent={useCallback(
         () => (
           <CustomFootImages
-            indexImage={imageIndex}
+            indexImage={index}
             arrImages={images}
             onChangeImageIndex={onChangeImageIndex}
           />
         ),
-        [imageIndex],
+        [index, imageIndex],
       )}
     />
   );

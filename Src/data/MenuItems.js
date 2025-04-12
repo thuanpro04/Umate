@@ -8,15 +8,23 @@ import {
   SecurityUser,
   Setting2,
   Sms,
-  User
+  User,
+  UserEdit,
 } from 'iconsax-react-native';
-import { Flag, ImageIcon, ShieldOff, UserCheck, UserX } from 'lucide-react-native';
+import {
+  Flag,
+  ImageIcon,
+  ShieldOff,
+  UserCheck,
+  UserX,
+} from 'lucide-react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Octicons from 'react-native-vector-icons/Octicons';
-import { appInfo } from '../Theme/appInfo';
-import { appColors } from '../Theme/Colors/appColors';
+import {appInfo} from '../Theme/appInfo';
+import {appColors} from '../Theme/Colors/appColors';
+import QRCode from 'react-native-qrcode-svg';
 
 const size = appInfo.sizeIcon;
 const color = appColors.blue2;
@@ -31,7 +39,16 @@ const MenuItems = [
     title: 'friend',
     icon: <People size={size} color={color} variant="Bulk" />,
   },
-
+  {
+    key: 'profile',
+    title: 'profile',
+    icon: <UserEdit size={size} color={color} variant="Bulk" />,
+  },
+  {
+    key: 'qrcode',
+    title: 'QR Code',
+    icon: <QRCode size={size} color={color} variant="Bulk" />,
+  },
   {
     key: 'settings',
     title: 'setting',
@@ -245,7 +262,6 @@ const MenuChat = colors => {
       name: 'personal',
       icon: <UserCheck color={'violet'} size={18} />,
     },
- 
   ];
   const attributeUser = [
     {
@@ -263,15 +279,14 @@ const MenuChat = colors => {
       name: 'block',
       icon: <ShieldOff color={'green'} size={18} />,
     },
-    
   ];
   return {
     ChoiceItems,
     CategoryPersonal,
     CategoryGroup,
     attributeMember,
-    attributeUser
+    attributeUser,
   };
 };
 
-export { MenuChat, MenuItems };
+export {MenuChat, MenuItems};

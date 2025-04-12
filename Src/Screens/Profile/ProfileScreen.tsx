@@ -1,4 +1,4 @@
-import {UserEdit} from 'iconsax-react-native';
+import {ArrowLeft2, UserEdit} from 'iconsax-react-native';
 import React, {useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
@@ -24,6 +24,8 @@ import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import ZoomImageComponent from '../Messages/Component/ZoomImageComponent';
 import {profileStyles} from './profileStyles';
 import {use} from 'i18next';
+import RenderPost from '../MyPost/Components/RenderPost';
+import {authSelector} from '../../redux/reducers/authReducer';
 const ProfileScreen = ({navigation}: any) => {
   const userData = useSelector(profileSelector);
   const eventData = useSelector(eventSelector);
@@ -31,6 +33,7 @@ const ProfileScreen = ({navigation}: any) => {
   const profile = useSelector(profileSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
+  const auth = useSelector(authSelector);
   const {t} = useTranslation();
   const userInfo = {
     stats: {
@@ -44,26 +47,25 @@ const ProfileScreen = ({navigation}: any) => {
       console.log(index, item);
 
       return (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
-          style={[
-            profileStyles.postContainer,
-            {backgroundColor: colors.background},
-          ]}
-          key={item.eventId}>
-          <FastImage
-            source={{
-              uri: item.urlImage,
-              priority: FastImage.priority.high,
-              cache: FastImage.cacheControl.immutable,
-            }}
-            style={profileStyles.postImage}
-          />
-          <TextComponent
-            styles={profileStyles.postContent}
-            label={item.content ?? '...'}
-          />
-        </TouchableOpacity>
+        <RenderPost
+          privacy={item.privacy}
+          isFoot
+          url={item.url}
+          naviagtion={navigation}
+          liked={item.likes?.includes(auth.userId)}
+          id={item.id}
+          comments={item.comments}
+          shares={item.shares}
+          likes={item.likes}
+          images={item.images}
+          avatar={item.avatar}
+          name={item.name}
+          content={item.content}
+          createdAt={item.createdAt}
+          key={index}
+          handleLikePost={() => {}}
+          styleImage={{height: 220, width: '80%'}}
+        />
       );
     },
     [eventData],
@@ -85,10 +87,18 @@ const ProfileScreen = ({navigation}: any) => {
             paddingHorizontal: 12,
           },
         ]}>
-        <ZoomImageComponent
-          url={userData.avatar}
-          styles={profileStyles.avatar}
-        />
+        <View>
+          <ArrowLeft2
+            size={appInfo.sizeIconBold}
+            color={colors.icon}
+            style={{position: 'absolute', top: '-22%'}}
+            onPress={() => navigation.goBack()}
+          />
+          <ZoomImageComponent
+            url={userData.avatar}
+            styles={profileStyles.avatar}
+          />
+        </View>
         <View style={[profileStyles.infoContainer]}>
           <TextComponent styles={[profileStyles.name]} label={userData.name} />
           <SpaceComponent height={6} />

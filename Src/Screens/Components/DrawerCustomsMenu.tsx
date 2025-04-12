@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
   Platform,
@@ -11,18 +11,18 @@ import {
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { useDispatch, useSelector } from 'react-redux';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appColors } from '../../Theme/Colors/appColors';
-import { MenuItems } from '../../data/MenuItems';
-import { authSelector, removeAuth } from '../../redux/reducers/authReducer';
-import { removeEvent } from '../../redux/reducers/eventSlice';
-import { resetFriend } from '../../redux/reducers/friendSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appColors} from '../../Theme/Colors/appColors';
+import {MenuItems} from '../../data/MenuItems';
+import {authSelector, removeAuth} from '../../redux/reducers/authReducer';
+import {removeEvent} from '../../redux/reducers/eventSlice';
+import {resetFriend} from '../../redux/reducers/friendSlice';
 import {
   profileSelector,
   removeProfile,
 } from '../../redux/reducers/profileSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
 import LoadingModal from '../Modal/LoadingModal';
 import SocketService from '../Services/SocketService';
 import RowComponent from './RowComponent';
@@ -51,7 +51,7 @@ const DrawerCustomsMenu = ({navigation}: any) => {
       disPathch(resetFriend());
       disPathch(removeProfile());
       await AsyncStorage.removeItem('auth');
-      await AsyncStorage.removeItem("ConversationInfo")
+      await AsyncStorage.removeItem('ConversationInfo');
       // await onLogoutCallService();
       SocketService.disconnect();
       setIsLoading(false);
@@ -84,7 +84,12 @@ const DrawerCustomsMenu = ({navigation}: any) => {
           screen: 'contactUs',
         });
         break;
-
+      case 'profile':
+        navigation.navigate('profile');
+        break;
+      case 'qrcode':
+        navigation.navigate('UserQRCode');
+        break;
       case 'signOut':
         setIsLoading(true);
         await handleSignOutWithGoogle();

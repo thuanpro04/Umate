@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Modalize} from 'react-native-modalize';
 import {Portal} from 'react-native-portalize';
 import {TextComponent} from '../Components';
@@ -27,34 +27,48 @@ const LikeListModal = (props: Props) => {
   const [listUserInfo, setListUserInfo] = useState<any[]>([]);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
-  const getUserForHeartEvent = async () => {
-    if (listUsers?.length === 0) {
-      return;
-    }
-    const res = await userServices.getListUserInfo(listUsers);
-    if (res && res.data) {
-      console.log(res.data);
-      setListUserInfo(res.data);
-    }
-  };
-  const onOpenModal = async () => {
+
+  const getUserForHeartEvent = useCallback(
+    async (users: string[]) => {
+      if (users?.length === 0) {
+        setListUserInfo([]);
+        return;
+      }
+      const res = await userServices.getListUserInfo(users);
+      if (res && res.data) {
+        console.log(res.data);
+        setListUserInfo(res.data);
+      }
+    },
+    [listUsers],
+  );
+
+  useEffect(() => {
+    console.log('listUsers changed', listUsers);
+    getUserForHeartEvent(listUsers);
+  }, [listUsers]);
+  const onOpenModal = () => {
+    console.log(listUserInfo?.length, listUsers?.length);
     modalizeRef.current?.open();
-    getUserForHeartEvent();
   };
   const onCloseModal = () => {
     modalizeRef.current?.close();
   };
 
-  const renderItems = ({item, index}: any) => {
-    return (
-      <CarUserLikeComponent
-        item={item}
-        key={index}
-        navigation={navigation}
-        onCloseModal={onCloseModal}
-      />
-    );
-  };
+  const renderItems = useCallback(
+    ({item, index}: any) => {
+      return (
+        <CarUserLikeComponent
+          item={item}
+          key={index}
+          navigation={navigation}
+          onCloseModal={onCloseModal}
+        />
+      );
+    },
+    [navigation, onCloseModal],
+  );
+
   return (
     <View>
       <TouchableOpacity onPress={() => onOpenModal()}>

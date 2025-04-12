@@ -22,34 +22,26 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 interface Props {
   img: string;
   content: string;
-  timeStamp: string;
-  id: any;
-  like: boolean;
-  countLike: number;
-  listUsers: string[];
+  timeStamp: string; 
   navigation: any;
   href: string;
   title: string;
 }
 
-const CarComponent = (props: Props) => {
+const CarEventComponent = (props: Props) => {
   const {
     img,
     content,
     timeStamp,
-    id,
-    like,
-    countLike,
-    listUsers,
     navigation,
     href,
     title,
   } = props;
 
-  const [isLiked, setLiked] = useState(like);
+  // const [isLiked, setLiked] = useState(like);
   const [isProcessing, setProcessing] = useState(false);
   const [isShowContent, setIsShowContent] = useState(false);
-  const [count, setCount] = useState(countLike);
+  // const [count, setCount] = useState(countLike);
   const {t} = useTranslation();
   const auth = useSelector(authSelector);
   const theme: 'light' | 'dark' = useSelector(themeSelector);
@@ -66,38 +58,38 @@ const CarComponent = (props: Props) => {
     const formattedTime = `${day}/${month}/${formattedYear} ${hours}:${minutes} ${ampm}`;
     return formattedTime;
   };
-  const updateUserHeartForEvent = debounce(async (action: any) => {
-    const res = await eventSevices.updateUserHeartForEvent(
-      auth.userId,
-      id,
-      action,
-    );
-    if (res?.data) {
-      console.log(res?.data.messages, res.data.value);
-      const parseData = await UserInfo.getUserData();
-      const value: number = parseInt(res.data.value);
-      parseData.event.like += value;
-      await Promise.all([
-        dispatch(setLikeEvent(value)),
-        await UserInfo.setUserData(parseData),
-      ]);
-    }
-  }, 5000);
+  // const updateUserHeartForEvent = debounce(async (action: any) => {
+  //   const res = await eventSevices.updateUserHeartForEvent(
+  //     auth.userId,
+  //     id,
+  //     action,
+  //   );
+  //   if (res?.data) {
+  //     console.log(res?.data.messages, res.data.value);
+  //     const parseData = await UserInfo.getUserData();
+  //     const value: number = parseInt(res.data.value);
+  //     parseData.event.like += value;
+  //     await Promise.all([
+  //       dispatch(setLikeEvent(value)),
+  //       await UserInfo.setUserData(parseData),
+  //     ]);
+  //   }
+  // }, 5000);
 
-  const handleLikeClick = useCallback(async () => {
-    if (isProcessing) return; // If already processing, do nothing
+  // const handleLikeClick = useCallback(async () => {
+  //   if (isProcessing) return; // If already processing, do nothing
 
-    setProcessing(true);
-    const newLikedState = !isLiked;
-    setLiked(newLikedState);
+  //   setProcessing(true);
+  //   const newLikedState = !isLiked;
+  //   setLiked(newLikedState);
 
-    const newCount = newLikedState ? count + 1 : count > 0 ? count - 1 : 0;
-    setCount(newCount);
+  //   const newCount = newLikedState ? count + 1 : count > 0 ? count - 1 : 0;
+  //   setCount(newCount);
 
-    const action = newLikedState ? 'add' : 'cancel';
-    await updateUserHeartForEvent(action); // Await the debounced function
-    setProcessing(false);
-  }, [count, isLiked, isProcessing]);
+  //   const action = newLikedState ? 'add' : 'cancel';
+  //   await updateUserHeartForEvent(action); // Await the debounced function
+  //   setProcessing(false);
+  // }, [count, isLiked, isProcessing]);
 
   return (
     <View
@@ -171,7 +163,7 @@ const CarComponent = (props: Props) => {
         <ZoomImageComponent url={img} styles={localStyles.postImage} />
       </View>
       {/* Actions */}
-      <RowComponent styles={localStyles.actionRow}>
+      {/* <RowComponent styles={localStyles.actionRow}>
         <View
           style={[
             localStyles.actionButton,
@@ -209,7 +201,7 @@ const CarComponent = (props: Props) => {
             />
           }
         />
-      </RowComponent>
+      </RowComponent> */}
     </View>
   );
 };
@@ -282,4 +274,4 @@ const localStyles = StyleSheet.create({
     color: appColors.grey,
   },
 });
-export default CarComponent;
+export default CarEventComponent;

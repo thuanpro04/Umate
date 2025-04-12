@@ -1,14 +1,29 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../../redux/reducers/themeSlice';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {RowComponent} from '../../Components';
+import { Setting2 } from 'iconsax-react-native';
+import { debounce } from 'lodash';
+import { Users } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  ImageStyle,
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import FastImage from 'react-native-fast-image';
+import Foundation from 'react-native-vector-icons/Foundation';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../../redux/reducers/authReducer';
+import { themeSelector } from '../../../redux/reducers/themeSlice';
+import { appInfo } from '../../../Theme/appInfo';
+import { appColors } from '../../../Theme/Colors/appColors';
+import { RowComponent, SpaceComponent, TextComponent } from '../../Components';
+import CustormImageViewing from '../../Messages/Component/CustormImageViewing';
+import LikeListModal from '../../Modal/LikeListModal';
+import ShareEventModal from '../../Modal/ShareEventModal';
+import { UserInfo } from '../../Untils/UserInfo';
 import RenderPostImages from './RenderPostImages';
-import {UserInfo} from '../../Untils/UserInfo';
-
 interface Props {
   avatar: string;
   name: string;
@@ -17,19 +32,78 @@ interface Props {
   images: string[];
   shares: string;
   comments: string;
-  likes: string;
+  likes: string[];
+  id: string;
+  liked: boolean;
+  handleLikePost: () => void;
+  naviagtion: any;
+  url: string;
+  isFoot?: boolean;
+  styleImage?: StyleProp<ImageStyle>;
+  privacy: string;
 }
 const RenderPost = (props: Props) => {
-  const {avatar, content, createdAt, name, shares, comments, likes, images} =
-    props;
+  const {
+    avatar,
+    content,
+    createdAt,
+    name,
+    shares,
+    comments,
+    likes,
+    images,
+    id,
+    handleLikePost,
+    liked,
+    naviagtion,
+    url,
+    isFoot,
+    styleImage,
+    privacy,
+  } = props;
+  const [isVisible, setIsVisible] = useState(false);
+  const [indexImg, setIndexImg] = useState(0);
+  const [displayImgs, setDisplayImgs] = useState<any[]>([]);
+  const [isLiked, setLiked] = useState(liked);
   const theme = useSelector(themeSelector);
+  const auth = useSelector(authSelector);
   const colors = appColors[theme];
+  const {t} = useTranslation();
+
   const getTimestamp = () => {
-    let day = UserInfo.getDay(createdAt);
-    if (parseInt(day, 10) === new Date().getDay()) {
-      return `${UserInfo.getTime(createdAt)} ${day}`;
+    const now = new Date();
+    const created = new Date(createdAt);
+
+    const isToday =
+      now.getDate() === created.getDate() &&
+      now.getMonth() === created.getMonth() &&
+      now.getFullYear() === created.getFullYear();
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const isYesterday =
+      yesterday.getDate() === created.getDate() &&
+      yesterday.getMonth() === created.getMonth() &&
+      yesterday.getFullYear() === created.getFullYear();
+
+    if (isToday) {
+      return `${UserInfo.getTime(createdAt)} hôm nay`;
+    } else if (isYesterday) {
+      return `${UserInfo.getTime(createdAt)} hôm qua`;
     }
-    return `${UserInfo.getTime(createdAt)} hôm nay`;
+
+    return `${UserInfo.getTime(createdAt)} ${UserInfo.getDay(createdAt)}`;
+  };
+  const actionLikePost = debounce(async () => {
+    setLiked(!isLiked);
+    await handleLikePost();
+  }, 500);
+  const onPressImage = () => {
+    const imgs = images?.length > 0 ? images.map(url => ({uri: url})) : [];
+    setDisplayImgs(imgs);
+    setIndexImg(0);
+    setIsVisible(true);
   };
   return (
     <View style={[styles.postContainer, {backgroundColor: colors.card}]}>
@@ -37,10 +111,23 @@ const RenderPost = (props: Props) => {
       <RowComponent styles={styles.postHeader}>
         <FastImage source={{uri: avatar}} style={styles.userAvatar} />
         <View style={styles.postHeaderInfo}>
-          <Text style={[styles.userName, {color: colors.text}]}>{name}</Text>
-          <Text style={[styles.postTime, {color: colors.text2}]}>
-            {getTimestamp()}
-          </Text>
+          <RowComponent styles={{justifyContent: 'flex-start'}}>
+            <TextComponent
+              label={name}
+              styles={[styles.userName, {color: colors.text}]}
+            />
+            {privacy === 'private' ? (
+              <Setting2 size={12} color={colors.icon} />
+            ) : privacy === 'friends' ? (
+              <Users size={12} color={colors.icon} />
+            ) : (
+              <></>
+            )}
+          </RowComponent>
+          <TextComponent
+            label={getTimestamp()}
+            styles={[styles.postTime, {color: colors.text2}]}
+          />
         </View>
         <TouchableOpacity style={styles.moreButton}>
           <MaterialCommunityIcons
@@ -52,65 +139,105 @@ const RenderPost = (props: Props) => {
       </RowComponent>
 
       <View style={styles.postContent}>
-        <Text style={[styles.postText, {color: colors.text}]}>{content}</Text>
+        <TextComponent
+          label={content}
+          styles={[styles.postText, {color: colors.text}]}
+        />
       </View>
 
       {/* Post Images */}
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <RenderPostImages images={images} />
-      </View>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onPressImage}
+        style={{justifyContent: 'center', alignItems: 'center'}}>
+        <RenderPostImages images={images} styleImg={styleImage} />
+      </TouchableOpacity>
+      <SpaceComponent height={12} />
       {/* Post Stats */}
-      <RowComponent styles={styles.postStats}>
-        <View style={styles.likesContainer}>
-          <View style={styles.likeIconContainer}>
-            <MaterialCommunityIcons name="thumb-up" size={14} color="#ffffff" />
+      {!isFoot && (
+        <>
+          <RowComponent styles={styles.postStats}>
+            <View style={styles.likesContainer}>
+              <View style={styles.likeIconContainer}>
+                <MaterialCommunityIcons
+                  name="thumb-up"
+                  size={14}
+                  color="#ffffff"
+                />
+              </View>
+              <LikeListModal
+                title={likes?.length.toString()}
+                listUsers={likes}
+                navigation={naviagtion}
+              />
+            </View>
+            <View style={styles.commentsSharesContainer}>
+              <TextComponent
+                label={`${comments} ${t('comment')}`}
+                styles={[styles.statsText, {color: colors.text2}]}
+              />
+              <TextComponent
+                label={`${shares} ${t('share')}`}
+                styles={[styles.statsText, {color: colors.text2}]}
+              />
+            </View>
+          </RowComponent>
+
+          {/* Post Actions */}
+          <View style={[styles.postActions, {borderTopColor: colors.border}]}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={actionLikePost}>
+              <MaterialCommunityIcons
+                name="thumb-up-outline"
+                size={22}
+                color={isLiked ? appColors.blue : colors.icon}
+              />
+              <TextComponent
+                label={t('like')}
+                styles={[
+                  styles.actionText,
+                  {color: isLiked ? appColors.blue : colors.text2},
+                ]}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionButton}>
+              <MaterialCommunityIcons
+                name="comment-outline"
+                size={22}
+                color={colors.text2}
+              />
+              <TextComponent
+                label={t('comment')}
+                styles={[styles.actionText, {color: colors.text2}]}
+              />
+            </TouchableOpacity>
+            <ShareEventModal
+              {...props}
+              styles={[
+                styles.btnShare,
+                {borderColor: colors.border, borderWidth: 1},
+              ]}
+              title="Share"
+              icon={
+                <Foundation
+                  name="social-skillshare"
+                  size={appInfo.sizeIcon}
+                  color={colors.icon}
+                />
+              }
+            />
           </View>
-          <Text style={[styles.statsText, {color: colors.text2}]}>{likes}</Text>
-        </View>
-
-        <View style={styles.commentsSharesContainer}>
-          <Text style={[styles.statsText, {color: colors.text2}]}>
-            {comments} bình luận
-          </Text>
-          <Text style={[styles.statsText, {color: colors.text2}]}>
-            {shares} chia sẻ
-          </Text>
-        </View>
-      </RowComponent>
-
-      {/* Post Actions */}
-      <View style={[styles.postActions, {borderTopColor: colors.border}]}>
-        <TouchableOpacity style={styles.actionButton}>
-          <MaterialCommunityIcons
-            name="thumb-up-outline"
-            size={22}
-            color={colors.text2}
-          />
-          <Text style={[styles.actionText, {color: colors.text2}]}>Thích</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <MaterialCommunityIcons
-            name="comment-outline"
-            size={22}
-            color={colors.text2}
-          />
-          <Text style={[styles.actionText, {color: colors.text2}]}>
-            Bình luận
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <MaterialCommunityIcons
-            name="share-outline"
-            size={22}
-            color={colors.text2}
-          />
-          <Text style={[styles.actionText, {color: colors.text2}]}>
-            Chia sẻ
-          </Text>
-        </TouchableOpacity>
-      </View>
+        </>
+      )}
+      <CustormImageViewing
+        onClose={() => setIsVisible(false)}
+        isVisible={isVisible}
+        images={displayImgs}
+        onChangeImageIndex={setIndexImg}
+        imageIndex={indexImg}
+      />
     </View>
   );
 };
@@ -198,9 +325,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 4,
   },
   commentsSharesContainer: {
     flexDirection: 'row',
+  },
+  btnShare: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 18,
+    borderRadius: 25,
+  },
+  activeButton: {
+    backgroundColor: '#FFCDD2',
   },
 });

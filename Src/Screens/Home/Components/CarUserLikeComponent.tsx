@@ -1,19 +1,16 @@
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {Image, StyleSheet, View} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {globalStyles} from '../../../Styles/globalStyle';
+import {appColors} from '../../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../../Components';
-import {Image} from 'react-native';
-import {globalStyles} from '../../../Styles/globalStyle';
-import {UserInfo} from '../../Untils/UserInfo';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import {appInfo} from '../../../Theme/appInfo';
-import {appColors} from '../../../Theme/Colors/appColors';
-import {useNavigation} from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
 interface Props {
   item: any;
   navigation: any;
@@ -44,11 +41,22 @@ const CarUserLikeComponent = (props: Props) => {
           />
         </View>
       </RowComponent>
-      <AntDesign name={'heart'} size={appInfo.sizeIcon} color={appColors.red} />
+      <View style={styles.likeIconContainer}>
+        <MaterialCommunityIcons name="thumb-up" size={14} color="#ffffff" />
+      </View>
     </RowComponent>
   );
 };
 
 export default CarUserLikeComponent;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  likeIconContainer: {
+    backgroundColor: '#2196F3',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

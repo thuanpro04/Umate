@@ -179,6 +179,9 @@
   "feeling_now": "đang cảm thấy",
   "what_are_you_thinking": "Bạn đang nghĩ gì?",
   "add_to_post": "Thêm vào bài viết",
-  "images":"Hình ảnh",
-  "feeling":"Cảm xúc"
+  "images": "Hình ảnh",
+  "feeling": "Cảm xúc",
+  "news_feed": "Bảng tin",
+  "loading_more": "Đang tải thêm...",
+  "comment":"Bình luận"
 }

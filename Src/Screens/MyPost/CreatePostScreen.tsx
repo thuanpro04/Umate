@@ -94,12 +94,11 @@ const CreatePostScreen = ({navigation}: any) => {
       privacy: postPrivacy,
       userId: auth.userId,
     };
-    console.log(data);
     const res = await postServices.handleMyPost(data);
     if (res && res.data) {
       console.log('Post event successfully !!!', res.data);
       setIsLoading(false);
-      navigation.navigate(t('post'));
+      navigation.navigate(t('post')); // Pass a refresh flag
     }
     setIsLoading(false);
     // Reset form

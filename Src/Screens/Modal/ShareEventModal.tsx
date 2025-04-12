@@ -28,18 +28,17 @@ import {addEvent, eventSelector} from '../../redux/reducers/eventSlice';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import LoadingModal from './LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
-
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 interface Props {
   title: string;
   icon: ReactNode;
   styles?: StyleProp<ViewStyle>;
   href: string;
-  eventId: string;
+  postId: string;
   urlImg: string;
 }
 
-const ShareEventModal = (props: Props) => {
-  const {title, icon, styles, href, eventId, urlImg} = props;
+const ShareEventModal = ({...props}) => {
   const [value, setValue] = useState('');
   const modalizeRef = useRef<Modalize>();
   const [users, setUsers] = useState<any[]>([]);
@@ -50,9 +49,7 @@ const ShareEventModal = (props: Props) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const socket = useSelector(socketSelector).socket;
-  const url = `https://tdmu.edu.vn${href}`;
   const {t} = useTranslation();
-
   const dispatch = useDispatch();
   const onOpenModal = () => {
     modalizeRef.current?.open();
@@ -70,7 +67,7 @@ const ShareEventModal = (props: Props) => {
     recipients: string[],
   ) => {
     setIsLoading(true);
-    let content = UserInfo.encryptText(url);
+    let content = UserInfo.encryptText(props.url);
     const messageData = {
       senderId: auth.userId,
       content,
@@ -111,7 +108,6 @@ const ShareEventModal = (props: Props) => {
           );
         });
       }
-
       onCloseModal();
     } catch (error) {
       console.log('handle share event error: ', error);
@@ -125,11 +121,19 @@ const ShareEventModal = (props: Props) => {
 
       const data = {
         userId: auth.userId,
-        eventId,
-        content: value,
-        urlImg,
-        href: url,
+        postId: props.id,
+        title: value,
+        url: props.url,
+        avatar: props.avatar,
+        content: props.content,
+        name: props.name,
+        shares: props.shares,
+        comments: props.comment,
+        likes: props.likes,
+        images: props.images,
       };
+      console.log('data: ', data);
+
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
         const eventShares = res.data;
@@ -161,7 +165,7 @@ const ShareEventModal = (props: Props) => {
       {
         subject: 'Check out this event!',
         recipients: [], // Danh sách email người nhận (có thể truyền array)
-        body: `Hey, check out this event: <a href="${url}">${url}</a>`,
+        body: `Hey, check out this event: <a href="${props.url}">${props.url}</a>`,
         isHTML: true, // Sử dụng HTML để format nội dung email
       },
       (error, event) => {
@@ -178,8 +182,8 @@ const ShareEventModal = (props: Props) => {
 
     const shareOptions: any = {
       title: 'Chia sẽ sự kiện',
-      message: `Hãy xem sự kiện này ${url}`,
-      url: urlImg,
+      message: `Hãy xem sự kiện này ${props.url}`,
+      url: props.url,
       social: Share.Social.FACEBOOK,
     };
     try {
@@ -197,6 +201,7 @@ const ShareEventModal = (props: Props) => {
     }
     setIsLoading(false);
   }, []);
+
   const renderUserItems = ({item, index}: any) => {
     return (
       <TouchableOpacity
@@ -230,11 +235,21 @@ const ShareEventModal = (props: Props) => {
     );
   };
   return (
-    <View style={{}}>
-      <TouchableOpacity onPress={() => onOpenModal()} style={styles}>
-        {icon && icon}
-        <TextComponent styles={globalStyles.actionText} label={title} />
+    <View style={{flex: 1}}>
+      <TouchableOpacity
+        style={modalStyles.actionButton}
+        onPress={() => onOpenModal()}>
+        <MaterialCommunityIcons
+          name="share-outline"
+          size={22}
+          color={colors.text2}
+        />
+        <TextComponent
+          label={t('share')}
+          styles={[modalStyles.actionText, {color: colors.text2}]}
+        />
       </TouchableOpacity>
+
       <Portal>
         <Modalize
           ref={modalizeRef}
@@ -354,5 +369,16 @@ const modalStyles = StyleSheet.create({
   buttonText: {
     fontSize: 12,
     marginTop: 4,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  actionText: {
+    marginLeft: 4,
+    fontSize: 13,
   },
 });

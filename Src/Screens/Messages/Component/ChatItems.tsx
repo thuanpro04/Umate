@@ -28,6 +28,7 @@ import ShowViewCall from './ShowViewCall';
 import ShowViewQrCode from './ShowViewQrCode';
 import ShareDocuments from './ShareDocuments';
 import RenderImageMess from './RenderImageMess';
+import CustormLinkLocal from './CustormLinkLocal';
 interface Props {
   currentUserId: string;
   urlImages?: any[];
@@ -197,6 +198,7 @@ const ChatItems = (props: Props) => {
   const Message = ({item, index}: any) => {
     const content = UserInfo.decryptText(item.content);
     const isLink = urlRegex.test(content);
+    const isLocal = isLink && content.includes('http://localhost:3004/');
     const isQrcode = item.QRCode && item.QRCode?.qrdata;
     const text = isQrcode && content.split(' ')[3];
 
@@ -222,7 +224,11 @@ const ChatItems = (props: Props) => {
             style={[
               styles.container,
               {
-                backgroundColor: isUser ? colors.bgItem : colors.bgItem2,
+                backgroundColor: isLocal
+                  ? 'transparent'
+                  : isUser
+                  ? colors.bgItem
+                  : colors.bgItem2,
                 borderBottomLeftRadius: !isUser ? 0 : 20,
                 paddingTop: item?.reply ? 2 : 8,
                 borderBottomRightRadius: !isUser ? 20 : 0,
@@ -253,13 +259,22 @@ const ChatItems = (props: Props) => {
                   />
                 )}
                 {isLink ? (
-                  <View style={{height: item.title ? 275 : 255}}>
-                    <CustormLinkPreview
-                      theme={theme}
-                      txtLink={content}
-                      title={item.title}
-                    />
-                  </View>
+                  <>
+                    {!isLocal ? (
+                      <View style={{height: item.title ? 275 : 255}}>
+                        <CustormLinkPreview
+                          theme={theme}
+                          txtLink={content}
+                          title={item.title}
+                        />
+                      </View>
+                    ) : (
+                      <CustormLinkLocal
+                        isUser={isUser}
+                        openLinkLocal={() => console.log('hello')}
+                      /> 
+                    )}
+                  </>
                 ) : isQrcode ? (
                   <ShowViewQrCode
                     showNotificationQrCode={() =>

@@ -1,4 +1,6 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -6,35 +8,31 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {profileSelector} from '../../redux/reducers/profileSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {appColors} from '../../Theme/Colors/appColors';
 import {RowComponent, SpaceComponent, TextComponent} from '../Components';
-import ButtonImagePicker from '../Messages/Component/ButtonImagePicker';
-import RenderPost from './Components/RenderPost';
 import {postServices} from '../Services/postServices';
-import {useFocusEffect} from '@react-navigation/native';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {UserInfo} from '../Untils/UserInfo';
-
-// Mock data for demonstration
+import RenderPost from './Components/RenderPost';
 
 const MyPostScreen = ({navigation}: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [limitPage, setLimitPage] = useState(1);
   const profile = useSelector(profileSelector);
   const theme = useSelector(themeSelector);
   const colors = appColors[theme];
   const auth = useSelector(authSelector);
+  const {t} = useTranslation();
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -52,38 +50,78 @@ const MyPostScreen = ({navigation}: any) => {
     setLoading(true);
     const res = await postServices.getEventForUser(page, auth.userId);
     if (res && res.data) {
-      setPosts(prevPosts => [...prevPosts, ...res.data]);
+      setPosts(prevPosts => {
+        const newPosts = [...prevPosts, ...res.data];
+        const uniquePosts = newPosts.filter(
+          (post, index, self) =>
+            self.findIndex(p => p.id === post.id) === index,
+        );
+        return uniquePosts;
+      });
       setPage(prev => prev + 1);
+      // setLimitPage(res.data.totalPage);
     }
     setLoading(false);
   }, [page, auth.userId, loading]);
-
-  useEffect(() => {
-    loadMorePosts();
-  });
-
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh(); // Trigger refresh when coming back from CreatePostScreen
+    }, [navigation, onRefresh]),
+  );
+  const handleLikePost = async (id: string) => {
+    const res = await postServices.handleLikePost(auth.userId, id);
+    if (res && res.data) {
+      setPosts(prevPosts =>
+        prevPosts.map(post => {
+          if (post.id === id) {
+            const isLiked = post.likes.includes(auth.userId);
+            return {
+              ...post,
+              likes: isLiked
+                ? post.likes.filter((userId: any) => userId !== auth.userId)
+                : [...post.likes, auth.userId],
+            };
+          }
+          return post;
+        }),
+      );
+      console.log('Like post successfully !!', res.data);
+    }
+  };
   const renderPost = useCallback(
-    ({item, index}: any) => (
-      <RenderPost
-        comments={item.comments}
-        shares={item.shares}
-        likes={item.likes}
-        images={item.images}
-        avatar={item.user.avatar}
-        name={item.user.name}
-        content={item.content}
-        createdAt={item.createdAt}
-        key={index}
-      />
-    ),
-    [posts, page],
+    ({item, index}: any) => {
+
+      return (
+        <RenderPost
+          privacy={item.privacy}
+          url={item.url}
+          naviagtion={navigation}
+          liked={item.likes.includes(auth.userId)}
+          id={item.id}
+          comments={item.comments}
+          shares={item.shares}
+          likes={item.likes}
+          images={item.images}
+          avatar={item.user.avatar}
+          name={item.user.name}
+          content={item.content}
+          createdAt={item.createdAt}
+          key={index}
+          handleLikePost={() => handleLikePost(item.id)}
+        />
+      );
+    },
+    [posts, page, handleLikePost],
   );
 
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: colors.background}]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, {color: colors.text}]}>Bảng tin</Text>
+        <TextComponent
+          label={t('news_feed')}
+          styles={[styles.headerTitle, {color: colors.text}]}
+        />
       </View>
 
       <SpaceComponent height={10} />
@@ -120,15 +158,16 @@ const MyPostScreen = ({navigation}: any) => {
             colors={[colors.primary || '#000']}
           />
         }
-        onEndReached={() => (page === posts.length ? loadMorePosts : () => {})}
+        onEndReached={() => page <= limitPage && loadMorePosts()}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={colors.primary} />
-              <Text style={[styles.loadingText, {color: colors.text2}]}>
-                Đang tải thêm...
-              </Text>
+              <TextComponent
+                label={t('loading_more')}
+                styles={[styles.loadingText, {color: colors.text2}]}
+              />
             </View>
           ) : null
         }
@@ -144,6 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: StatusBar.currentHeight,
     paddingHorizontal: 0,
+    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',

@@ -8,6 +8,7 @@ import FriendsRespondScreen from '../Friends/FriendsRespondScreen';
 import {
   AddGroupScreens,
   ContactUsScreen,
+  ProfileScreen,
   SearchScreen,
   SettingScreen,
 } from '../index';
@@ -64,6 +65,7 @@ const MainNavigator = () => {
       <Stack.Screen name="ReportScreen" component={ReportScreen} />
       <Stack.Screen name="ScanBarcode" component={ScanBarcode} />
       <Stack.Screen name="Create_post" component={CreatePostScreen} />
+      <Stack.Screen name="profile" component={ProfileScreen} />
 
     </Stack.Navigator>
   );

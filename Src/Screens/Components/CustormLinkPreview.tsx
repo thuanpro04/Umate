@@ -13,6 +13,7 @@ interface Props {
 const CustormLinkPreview = memo((props: Props) => {
   const {txtLink, title, theme} = props;
   const colors = appColors[theme];
+
   const renderImage = useCallback(
     (image: any) => {
       if (!image?.url) return <View style={styles.imagePlaceholder} />; // Hiển thị placeholder nếu không có ảnh
@@ -30,6 +31,7 @@ const CustormLinkPreview = memo((props: Props) => {
     },
     [txtLink],
   );
+ 
 
   return (
     <LinkPreview

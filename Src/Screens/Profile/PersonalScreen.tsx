@@ -45,6 +45,7 @@ import {profileStyles} from './profileStyles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {profileSelector, setMylove} from '../../redux/reducers/profileSlice';
 import {debounce} from 'lodash';
+import RenderPost from '../MyPost/Components/RenderPost';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -103,25 +104,27 @@ const PersonalScreen = ({navigation}: any) => {
     setDetail(!isDetail);
     bgColor.value = isDetail ? '#009688' : '#009688';
   };
-  const renderPost = ({item}: any) => {
+  const renderPost = ({item, index}: any) => {
     return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate('DetailEvent', {href: item.href})}
-        style={[profileStyles.postContainer, {backgroundColor: colors.card}]}
-        key={item._id}>
-        <FastImage
-          source={{
-            uri: item.urlImage,
-            priority: FastImage.priority.high,
-            cache: FastImage.cacheControl.immutable,
-          }}
-          style={profileStyles.postImage}
-        />
-        <TextComponent
-          label={item.content}
-          styles={profileStyles.postContent}
-        />
-      </TouchableOpacity>
+      <RenderPost
+        privacy={item.privacy}
+        isFoot
+        url={item.url}
+        naviagtion={navigation}
+        liked={item.likes?.includes(auth.userId)}
+        id={item.id}
+        comments={item.comments}
+        shares={item.shares}
+        likes={item.likes}
+        images={item.images}
+        avatar={item.avatar}
+        name={item.name}
+        content={item.content}
+        createdAt={item.createdAt}
+        key={index}
+        handleLikePost={() => {}}
+        styleImage={{height: 220, width: '80%'}}
+      />
     );
   };
 
@@ -370,7 +373,10 @@ const PersonalScreen = ({navigation}: any) => {
 
   return !isLoading ? (
     <SafeAreaView
-      style={[profileStyles.container, {backgroundColor: colors.background}]}>
+      style={[
+        profileStyles.container,
+        {backgroundColor: colors.background, marginBottom: 12},
+      ]}>
       <StatusBar barStyle="dark-content" />
 
       {userInfo ? (
@@ -407,7 +413,7 @@ const PersonalScreen = ({navigation}: any) => {
           {userInfo.eventShares && (
             <FlatList
               inverted
-              data={userInfo.eventShares}
+              data={userInfo.eventShares.reverse()}
               renderItem={renderPost}
               keyExtractor={item => item._id}
               contentContainerStyle={profileStyles.postList}

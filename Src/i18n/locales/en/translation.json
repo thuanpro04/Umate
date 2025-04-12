@@ -180,6 +180,10 @@
   "what_are_you_thinking": "What's on your mind?",
   "add_to_post": "Add to post",
   "images":"Images",
-  "feeling":"Feeling"
+  "feeling":"Feeling",
+  "news_feed_en": "News Feed"  ,
+  "loading_more": "Loading more...",
+  "comment":"Comment"
+
 
 }

@@ -40,7 +40,7 @@ const AppRouters = () => {
     
     if (userData) {
       
-      const parsedData = JSON.parse(userData);
+      const parsedData = JSON.parse(userData);      
       dispatch(addAuth(parsedData.auth));
       dispatch(addProfile(parsedData.profile));
       dispatch(addFriend(parsedData.friend));

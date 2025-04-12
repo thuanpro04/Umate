@@ -1,18 +1,24 @@
-import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import {
+  ImageStyle,
+  StyleProp,
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
 import FastImage from 'react-native-fast-image';
 interface Props {
   images: string[];
+  styleImg?: StyleProp<ImageStyle>;
 }
 const RenderPostImages = (props: Props) => {
-  const {images} = props;
+  const {images, styleImg} = props;
   if (!images || images.length === 0) return null;
-
   if (images.length === 1) {
     return (
       <FastImage
         source={{uri: images[0]}}
-        style={styles.singleImage}
+        style={[styles.singleImage, styleImg as any]}
         resizeMode={FastImage.resizeMode.cover}
       />
     );
@@ -79,6 +85,7 @@ const styles = StyleSheet.create({
   multipleImagesContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingHorizontal: 10,
   },
   multipleImage: {
     height: 200,
