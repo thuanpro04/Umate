@@ -7,6 +7,7 @@ const { generateUniqueID } = require("../untils/informationUntils");
 const { EventModel } = require("../models/eventModel");
 const { UserModel } = require("../models/usersModel");
 const { handleSendNotification } = require("./notificationServices");
+const { formatUser } = require("./postServices");
 const handlePostEvent = async (req, res) => {
   const data = req.body;
   const newEvent = new EventModel({
@@ -22,8 +23,20 @@ const handlePostEvent = async (req, res) => {
     data: newEvent,
   });
 };
+let cachedData = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 8 * 60 * 1000;
+const getEvents = async (forceRefresh) => {
+  const currentTime = Date.now();
+  if (
+    forceRefresh &&
+    cachedData &&
+    currentTime - lastFetchTime < CACHE_DURATION
+  ) {
+    console.log("từ từ thoi");
 
-const getEvents = async () => {
+    return cachedData;
+  }
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url, {
@@ -54,7 +67,6 @@ const getEvents = async () => {
       const content = article.querySelector(".new_item_desc");
       // const eventId = crypto.randomUUID();
       return {
-        // eventId,
         title: titleElement ? titleElement.getAttribute("title").trim() : null,
         image: img ? img.src : null, // URL hình ảnh
         href: titleElement ? titleElement.getAttribute("href") : null,
@@ -70,51 +82,31 @@ const getEvents = async () => {
     console.log("Không có dữ liệu mới để kiểm tra.");
     return [];
   }
-
-  // **Lấy danh sách title từ scrapedData**
-  const scrapedTitles = scrapedData.map((e) => e.title);
-
-  // **Tìm các sự kiện đã tồn tại trong DB theo title**
-  const existingEvents = await EventModel.find({
-    title: { $in: scrapedTitles },
-  }).lean();
-
-  // **Tạo danh sách title đã tồn tại trong DB**
-  const existingTitles = new Set(existingEvents.map((event) => event.title));
-
-  // **Lọc ra những sự kiện chưa tồn tại**
-  const newEvents = scrapedData.filter(
-    (event) => !existingTitles.has(event.title)
-  );
-
-  // **Chỉ lưu nếu có sự kiện mới**
-  if (newEvents.length > 0) {
-    await EventModel.insertMany(newEvents);
-    console.log(`✅ Đã lưu ${newEvents.length} bài viết mới.`);
-  } else {
-    console.log("⚡ Không có bài viết mới nào.");
-  }
-
-  return newEvents;
+  const events = scrapedData.map((item) => ({
+    id: generateUniqueID(),
+    ...item,
+  }));
+  cachedData = events;
+  lastFetchTime = currentTime;
+  return events;
 };
 
 const handleGetEvent = async (req, res) => {
-  const { curentPage, limit } = req.query;
+  const { curentPage, limit, forceRefresh } = req.query;
   try {
-    console.log({ curentPage, limit });
+    console.log({ curentPage, limit, forceRefresh });
 
     // const hasNewEvent = await checkForNewEvent();
-    const eventPage = await getEvents();
-
-    const totalEvents = await EventModel.countDocuments();
-    const events = await EventModel.find({})
-      .skip((curentPage - 1) * limit)
-      .limit(Number(limit));
+    const eventPage = await getEvents(forceRefresh === "true");
+    // const totalEvents = await EventModel.countDocuments();
+    // const events = await EventModel.find({})
+    //   .skip((curentPage - 1) * limit)
+    //   .limit(Number(limit));
     res.status(200).json({
       message: "Get events successfully!",
       data: {
-        events,
-        totalPages: Math.ceil(totalEvents / limit),
+        events: eventPage,
+        totalPages: Math.ceil(eventPage.length / limit),
       },
     });
   } catch (error) {
@@ -168,33 +160,51 @@ const handleShareEventMyApp = async (req, res) => {
   const data = req.body;
 
   try {
+    // Ensure data matches the postSchema structure
+    const postData = {
+      postId: data.postId,
+      url: data.url,
+      userId: data.userId,
+      content: data.content,
+      title: data.title || "",
+      images: data.images || [],
+      privacy: data.privacy || "public",
+      reactions: [],
+      likeCount: data.likes,
+      commentCount: data.comments,
+      shareCount: data.shares,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      avatar: data.avatar,
+      name: data.name,
+    };
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { userId: data.userId },
       {
         $addToSet: {
-          eventShares: {
-            eventId: data.userId,
-            content: data.content,
-            urlImage: data.urlImg,
-            href: data.href,
-          },
+          eventShares: postData,
         },
       },
-      { new: true } // Trả về tài liệu đã cập nhật
+      { new: true } // Return the updated document
     );
 
     if (!updatedUser) {
-      console.log(`Không tìm thấy người dùng với userId: ${userId}`);
-      return null;
+      console.log(`Không tìm thấy người dùng với userId: ${data.userId}`);
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
-
-    console.log("Người dùng đã được cập nhật:", updatedUser);
+    console.log("Người dùng đã được cập nhật:", updatedUser.eventShares);
     res.status(200).json({
       message: "Share event successfully !!!!",
       data: updatedUser.eventShares,
     });
   } catch (error) {
     console.log("Share event error: ", error);
+    res.status(500).json({
+      message: "An error occurred while sharing the event",
+    });
   }
 };
 const handleGetEventShared = async (req, res) => {

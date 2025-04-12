@@ -5,6 +5,9 @@ const postSchema = new mongoose.Schema({
     require: true,
     unique: true,
   },
+  url: {
+    type: String,
+  },
   userId: {
     type: String,
     required: true,
@@ -13,11 +16,20 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
   },
+  title: {
+    type: String,
+  },
   images: [
     {
       type: String,
     },
   ],
+  avatar: {
+    type: String,
+  },
+  name: {
+    type: String,
+  },
   feeling: {
     icon: { type: String }, // emoticon-happy, emoticon-sad, etc.
     name: { type: String }, // Vui vẻ, Buồn, etc.
@@ -36,15 +48,12 @@ const postSchema = new mongoose.Schema({
       },
       createdAt: { type: Date, default: Date.now },
     },
-  ],likeCount: {
-    type: Number,
-    default: 0,
-  },
+  ],
+  likeCount: [{ type: String, ref: "User" }],
   commentCount: {
     type: Number,
     default: 0,
   },
-
   // Số lượt chia sẻ
   shareCount: {
     type: Number,
@@ -54,7 +63,6 @@ const postSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
   updatedAt: {
     type: Date,
     default: Date.now,
@@ -65,4 +73,5 @@ postSchema.index({ privacy: 1, createdAt: -1 });
 const PostModel = mongoose.model("Post", postSchema);
 module.exports = {
   PostModel,
+  postSchema,
 };

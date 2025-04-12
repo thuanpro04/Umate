@@ -1,5 +1,4 @@
 const { default: mongoose } = require("mongoose");
-
 const commentSchema = new mongoose.Schema({
   commentId: {
     type: String,

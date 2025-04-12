@@ -1,4 +1,5 @@
 const { default: mongoose, Document } = require("mongoose");
+const { PostModel, postSchema } = require("./postModel");
 const userSchema = new mongoose.Schema({
   userId: {
     type: String,
@@ -47,14 +48,7 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
-  eventShares: [
-    {
-      eventId: { type: String, ref: "event" },
-      content: { type: String },
-      urlImage: { type: String },
-      href: { type: String },
-    },
-  ],
+  eventShares: [postSchema],
   friends: [{ type: String, ref: "User" }],
   friendRequests: [{ type: String, ref: "User" }],
   removeFriends: [{ type: String, ref: "User" }],
@@ -74,5 +68,5 @@ const userSchema = new mongoose.Schema({
 });
 const UserModel = mongoose.model("User", userSchema);
 module.exports = {
-  UserModel
+  UserModel,
 };

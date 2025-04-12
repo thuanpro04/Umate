@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../models/usersModel");
 const { findUserById } = require("../Services/userServices");
+const { formatUser } = require("../Services/postServices");
 const getJsonWebToken = async (email, id) => {
   const payload = {
     email,
