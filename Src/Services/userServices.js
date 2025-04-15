@@ -1,7 +1,7 @@
 const { UserModel } = require("../models/usersModel");
 
 const findUserById = async (userId) => {
-  return await UserModel.findOne({ userId }).lean();
+  return await UserModel.findOne({ userId })
 };
 const getUsersByIds = async (userFriends) => {
   users = await UserModel.find({ userId: { $in: userFriends } }).lean();

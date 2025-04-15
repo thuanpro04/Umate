@@ -180,7 +180,7 @@ const handleShareEventMyApp = async (req, res) => {
     };
 
     const updatedUser = await UserModel.findOneAndUpdate(
-      { userId: data.userId },
+      { userId: data.currentId },
       {
         $addToSet: {
           eventShares: postData,

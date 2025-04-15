@@ -50,6 +50,7 @@ const postSchema = new mongoose.Schema({
     },
   ],
   likeCount: [{ type: String, ref: "User" }],
+  hide: [{ type: String, ref: "User" }],
   commentCount: {
     type: Number,
     default: 0,

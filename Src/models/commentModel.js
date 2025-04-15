@@ -16,30 +16,31 @@ const commentSchema = new mongoose.Schema({
     required: true,
     ref: "User",
   },
-  parentCommentId: {
-    type: String,
-    ref: "Comment",
-    default: null,
-  },
-
-  content: {
+  replies: [
+    {
+      commentRepId: { type: String },
+      commentId: { type: String },
+      userId: { type: String, ref: "User" },
+      name: { type: String },
+      avatar: { type: String },
+      comment: { type: String },
+      timestamp: { type: Date, index: true },
+      createdAt: {
+        type: Date,
+      },
+    },
+  ],
+  comment: {
     type: String,
     required: true,
   },
-  images: [
-    {
-      uri: { type: String },
-    },
-  ],
+  avatar: { type: String },
+  name: { type: String },
   createdAt: {
     type: Date,
     default: Date.now,
   },
-
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  timestamp: { type: Date, index: true },
 });
 commentSchema.index({ postId: 1, createdAt: 1 });
 commentSchema.index({ parentCommentId: 1 });
