@@ -183,7 +183,8 @@
   "feeling":"Feeling",
   "news_feed_en": "News Feed"  ,
   "loading_more": "Loading more...",
-  "comment":"Comment"
+  "comment":"Comment",
+  "no_comments_yet":"No comments yet"
 
 
 }

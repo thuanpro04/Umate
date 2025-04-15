@@ -29,6 +29,7 @@ import TrashConversation from '../Messages/TrashConversation';
 import ReportScreen from '../Report/ReportScreen';
 import ScanBarcode from '../QRCode/ScanBarcode';
 import CreatePostScreen from '../MyPost/CreatePostScreen';
+import ReportPostScreen from '../MyPost/ReportPostScreen';
 const MainNavigator = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -66,6 +67,7 @@ const MainNavigator = () => {
       <Stack.Screen name="ScanBarcode" component={ScanBarcode} />
       <Stack.Screen name="Create_post" component={CreatePostScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
+      <Stack.Screen name="ReportPostScreen" component={ReportPostScreen} />
 
     </Stack.Navigator>
   );

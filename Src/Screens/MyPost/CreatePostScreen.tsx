@@ -93,6 +93,8 @@ const CreatePostScreen = ({navigation}: any) => {
       feeling,
       privacy: postPrivacy,
       userId: auth.userId,
+      name: profile.name,
+      avatar: profile.avatar,
     };
     const res = await postServices.handleMyPost(data);
     if (res && res.data) {
@@ -176,7 +178,10 @@ const CreatePostScreen = ({navigation}: any) => {
             </RowComponent>
             <TouchableOpacity
               onPress={handlePostSubmit}
-              disabled={!postContent.trim() && selectedImages.length === 0}
+              disabled={
+                (!postContent.trim() && selectedImages.length === 0) ||
+                isLoading
+              }
               style={[
                 styles.postButton,
                 {

@@ -194,7 +194,7 @@ const ChatItems = (props: Props) => {
       console.log('Update attended successfully !!', res.data);
     }
   };
-
+  const onPressLink = async () => {};
   const Message = ({item, index}: any) => {
     const content = UserInfo.decryptText(item.content);
     const isLink = urlRegex.test(content);
@@ -271,8 +271,8 @@ const ChatItems = (props: Props) => {
                     ) : (
                       <CustormLinkLocal
                         isUser={isUser}
-                        openLinkLocal={() => console.log('hello')}
-                      /> 
+                        openLinkLocal={() => onPressLink()}
+                      />
                     )}
                   </>
                 ) : isQrcode ? (

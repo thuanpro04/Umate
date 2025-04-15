@@ -1,29 +1,45 @@
-import { Setting2 } from 'iconsax-react-native';
-import { debounce } from 'lodash';
-import { Users } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {Setting2} from 'iconsax-react-native';
+import {debounce} from 'lodash';
 import {
+  Accessibility,
+  Anchor,
+  Axe,
+  BadgeX,
+  Files,
+  RemoveFormatting,
+  Users,
+} from 'lucide-react-native';
+import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {
+  Alert,
   ImageStyle,
+  Platform,
   StyleProp,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Foundation from 'react-native-vector-icons/Foundation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../../redux/reducers/authReducer';
-import { themeSelector } from '../../../redux/reducers/themeSlice';
-import { appInfo } from '../../../Theme/appInfo';
-import { appColors } from '../../../Theme/Colors/appColors';
-import { RowComponent, SpaceComponent, TextComponent } from '../../Components';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../../redux/reducers/authReducer';
+import {themeSelector} from '../../../redux/reducers/themeSlice';
+import {appInfo} from '../../../Theme/appInfo';
+import {appColors} from '../../../Theme/Colors/appColors';
+import {RowComponent, SpaceComponent, TextComponent} from '../../Components';
 import CustormImageViewing from '../../Messages/Component/CustormImageViewing';
 import LikeListModal from '../../Modal/LikeListModal';
 import ShareEventModal from '../../Modal/ShareEventModal';
-import { UserInfo } from '../../Untils/UserInfo';
+import {UserInfo} from '../../Untils/UserInfo';
 import RenderPostImages from './RenderPostImages';
+import {Menu, MenuDivider, MenuItem} from 'react-native-material-menu';
+import {postServices} from '../../Services/postServices';
+import PrivacySelector from './PrivacySelector';
+import Clipboard from '@react-native-clipboard/clipboard';
+import PostActions from './PostActions';
 interface Props {
   avatar: string;
   name: string;
@@ -33,7 +49,7 @@ interface Props {
   shares: string;
   comments: string;
   likes: string[];
-  id: string;
+  postId: string;
   liked: boolean;
   handleLikePost: () => void;
   naviagtion: any;
@@ -41,6 +57,15 @@ interface Props {
   isFoot?: boolean;
   styleImage?: StyleProp<ImageStyle>;
   privacy: string;
+  userId: string;
+  handleRemovePost?: () => void;
+  isMore?: boolean;
+  isReport?: boolean;
+  handleHidePostForUser?: () => void;
+  isHide?: boolean;
+  isPrivacy?: boolean;
+  handleUpdatePrivacy?: (postId: string, privacy: string) => void;
+  onChangeComment: (count: number) => void;
 }
 const RenderPost = (props: Props) => {
   const {
@@ -52,7 +77,7 @@ const RenderPost = (props: Props) => {
     comments,
     likes,
     images,
-    id,
+    postId,
     handleLikePost,
     liked,
     naviagtion,
@@ -60,11 +85,23 @@ const RenderPost = (props: Props) => {
     isFoot,
     styleImage,
     privacy,
+    userId,
+    handleRemovePost,
+    isMore,
+    isReport,
+    handleHidePostForUser,
+    isHide,
+    isPrivacy,
+    handleUpdatePrivacy,
+    onChangeComment,
   } = props;
   const [isVisible, setIsVisible] = useState(false);
   const [indexImg, setIndexImg] = useState(0);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
   const [isLiked, setLiked] = useState(liked);
+  const [showPrivacySelector, setShowPrivacySelector] = useState(false);
+  const [privacyOption, setPrivacyOption] = useState(privacy);
+  const [isShowMenu, setIsShowMenu] = useState(false);
   const theme = useSelector(themeSelector);
   const auth = useSelector(authSelector);
   const colors = appColors[theme];
@@ -105,20 +142,69 @@ const RenderPost = (props: Props) => {
     setIndexImg(0);
     setIsVisible(true);
   };
+  const handleCopyPostLink = async () => {
+    Clipboard.setString(url);
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(
+        'Đã sao chép liên kết vào bộ nhớ tạm',
+        ToastAndroid.SHORT,
+      );
+    } else {
+      Alert.alert('Thành công', 'Đã sao chép liên kết vào bộ nhớ tạm');
+    }
+  };
+  const actionMenu = (key: string) => {
+    switch (key) {
+      case 'remove':
+        handleRemovePost && handleRemovePost();
+        break;
+      case 'hide':
+        handleHidePostForUser && handleHidePostForUser();
+        break;
+      case 'copy':
+        handleCopyPostLink();
+        break;
+      case 'privacy':
+        setShowPrivacySelector(true);
+        break;
+      case 'report':
+        naviagtion.navigate('ReportPostScreen', {
+          postId: postId,
+          postAuthor: userId,
+        });
+        break;
+    }
+    onCloseMenu();
+  };
+
+  const menuData = [
+    {
+      key: 'copy',
+      title: 'Sao chép liên kết',
+      icon: <Files size={appInfo.sizeIcon} color={'blue'} />,
+    },
+  ];
+  function onCloseMenu() {
+    setIsShowMenu(false);
+  }
+
   return (
     <View style={[styles.postContainer, {backgroundColor: colors.card}]}>
       {/* Post Header */}
       <RowComponent styles={styles.postHeader}>
-        <FastImage source={{uri: avatar}} style={styles.userAvatar} />
+        <TouchableOpacity
+          onPress={() => naviagtion.navigate('PersonalScreen', {userId})}>
+          <FastImage source={{uri: avatar}} style={styles.userAvatar} />
+        </TouchableOpacity>
         <View style={styles.postHeaderInfo}>
           <RowComponent styles={{justifyContent: 'flex-start'}}>
             <TextComponent
               label={name}
               styles={[styles.userName, {color: colors.text}]}
             />
-            {privacy === 'private' ? (
+            {privacyOption === 'private' ? (
               <Setting2 size={12} color={colors.icon} />
-            ) : privacy === 'friends' ? (
+            ) : privacyOption === 'friends' ? (
               <Users size={12} color={colors.icon} />
             ) : (
               <></>
@@ -129,13 +215,92 @@ const RenderPost = (props: Props) => {
             styles={[styles.postTime, {color: colors.text2}]}
           />
         </View>
-        <TouchableOpacity style={styles.moreButton}>
-          <MaterialCommunityIcons
-            name="dots-horizontal"
-            size={22}
-            color={colors.text2}
-          />
-        </TouchableOpacity>
+        {!isMore && (
+          <Menu
+            visible={isShowMenu}
+            style={{
+              borderRadius: 16,
+              paddingVertical: 8,
+              shadowColor: '#000',
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              shadowOffset: {width: 0, height: 5},
+              elevation: 5,
+              backgroundColor: colors.background,
+            }}
+            anchor={
+              <MaterialCommunityIcons
+                onPress={() => setIsShowMenu(true)}
+                name="dots-horizontal"
+                size={22}
+                color={colors.text2}
+              />
+            }
+            onRequestClose={onCloseMenu}>
+            <View>
+              {isReport ? (
+                <>
+                  <MenuItem
+                    style={styles.menuItem}
+                    onPress={() => actionMenu('report')}>
+                    <BadgeX size={appInfo.sizeIcon} color={'red'} />
+                    <SpaceComponent width={12} />
+                    <TextComponent label="Báo cáo" />
+                  </MenuItem>
+                  <MenuDivider />
+                </>
+              ) : (
+                <>
+                  <MenuItem
+                    style={styles.menuItem}
+                    onPress={() => actionMenu('remove')}>
+                    <BadgeX size={appInfo.sizeIcon} color={'coral'} />
+                    <SpaceComponent width={12} />
+                    <TextComponent label={'Xóa bài'} />
+                  </MenuItem>
+                  <MenuDivider />
+                </>
+              )}
+              {menuData.map(item => {
+                return (
+                  <React.Fragment key={item.key}>
+                    <MenuItem
+                      style={styles.menuItem}
+                      onPress={() => actionMenu(item.key)}>
+                      {item.icon}
+                      <SpaceComponent width={12} />
+                      <TextComponent label={item.title} />
+                    </MenuItem>
+                    <MenuDivider />
+                  </React.Fragment>
+                );
+              })}
+              {isPrivacy ? (
+                <>
+                  <MenuItem
+                    style={styles.menuItem}
+                    onPress={() => actionMenu('privacy')}>
+                    <Anchor size={appInfo.sizeIcon} color={'violet'} />
+                    <SpaceComponent width={12} />
+                    <TextComponent label={'Quyền'} />
+                  </MenuItem>
+                  <MenuDivider />
+                </>
+              ) : (
+                <>
+                  <MenuItem
+                    style={styles.menuItem}
+                    onPress={() => actionMenu('hide')}>
+                    <Axe size={appInfo.sizeIcon} color={'green'} />
+                    <SpaceComponent width={12} />
+                    <TextComponent label={isHide ? 'Bỏ ẩn' : 'Ẩn bài'} />
+                  </MenuItem>
+                  <MenuDivider />
+                </>
+              )}
+            </View>
+          </Menu>
+        )}
       </RowComponent>
 
       <View style={styles.postContent}>
@@ -202,17 +367,12 @@ const RenderPost = (props: Props) => {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
-              <MaterialCommunityIcons
-                name="comment-outline"
-                size={22}
-                color={colors.text2}
-              />
-              <TextComponent
-                label={t('comment')}
-                styles={[styles.actionText, {color: colors.text2}]}
-              />
-            </TouchableOpacity>
+            <PostActions
+              {...props}
+              navigation={naviagtion}
+              colors={colors}
+              t={t}
+            />
             <ShareEventModal
               {...props}
               styles={[
@@ -237,6 +397,15 @@ const RenderPost = (props: Props) => {
         images={displayImgs}
         onChangeImageIndex={setIndexImg}
         imageIndex={indexImg}
+      />
+      <PrivacySelector
+        visible={showPrivacySelector}
+        onClose={() => setShowPrivacySelector(false)}
+        onSelect={(value: any) => {
+          setPrivacyOption(value);
+          handleUpdatePrivacy && handleUpdatePrivacy(postId, value);
+        }}
+        currentPrivacy={privacyOption}
       />
     </View>
   );
@@ -338,5 +507,12 @@ const styles = StyleSheet.create({
   },
   activeButton: {
     backgroundColor: '#FFCDD2',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 });

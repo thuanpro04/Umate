@@ -1,35 +1,34 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import {ArrowLeft} from 'iconsax-react-native';
-import {MoreVerticalIcon} from 'lucide-react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { ArrowLeft } from 'iconsax-react-native';
+import { MoreVerticalIcon } from 'lucide-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
   SafeAreaView,
   StyleSheet,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { MenuChat } from '../../data/MenuItems';
+import { authSelector } from '../../redux/reducers/authReducer';
 import {
-  addFriend,
   friendSelector,
   removeFriend,
-  setBlock,
+  setBlock
 } from '../../redux/reducers/friendSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import {HeaderComponent} from '../Components';
-import {userServices} from '../Services/userService';
-import CarUserComponent from './Components/CarUserComponent';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { globalStyles } from '../../Styles/globalStyle';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { HeaderComponent } from '../Components';
 import ActionModal from '../Modal/ActionModal';
-import {UserInfo} from '../Untils/UserInfo';
-import {friendServices} from '../Services/friendService.';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {MenuChat} from '../../data/MenuItems';
-import {useTranslation} from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingModal from '../Modal/LoadingModal';
+import { friendServices } from '../Services/friendService.';
+import { userServices } from '../Services/userService';
+import { UserInfo } from '../Untils/UserInfo';
+import CarUserComponent from './Components/CarUserComponent';
 
 const FriendScreens = ({navigation}: any) => {
   const [data, setData] = useState<any[]>([]);

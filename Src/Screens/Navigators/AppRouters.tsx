@@ -37,10 +37,10 @@ const AppRouters = () => {
 
   const handleCheckLogin = async () => {
     const userData = await getItem();
-    
+
     if (userData) {
-      
-      const parsedData = JSON.parse(userData);      
+      const parsedData = JSON.parse(userData);
+
       dispatch(addAuth(parsedData.auth));
       dispatch(addProfile(parsedData.profile));
       dispatch(addFriend(parsedData.friend));

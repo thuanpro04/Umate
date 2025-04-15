@@ -29,6 +29,7 @@ import {profileSelector} from '../../redux/reducers/profileSlice';
 import LoadingModal from './LoadingModal';
 import {UserInfo} from '../Untils/UserInfo';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 interface Props {
   title: string;
   icon: ReactNode;
@@ -118,9 +119,8 @@ const ShareEventModal = ({...props}) => {
   const handlePostEventMyApp = async () => {
     try {
       setIsLoading(true);
-
       const data = {
-        userId: auth.userId,
+        userId: props.userId,
         postId: props.id,
         title: value,
         url: props.url,
@@ -131,15 +131,18 @@ const ShareEventModal = ({...props}) => {
         comments: props.comment,
         likes: props.likes,
         images: props.images,
+        currentId: auth.userId,
       };
-      console.log('data: ', data);
-
       const res = await eventSevices.shareEventMyApp(data);
       if (res?.data) {
         const eventShares = res.data;
-        console.log(eventShares);
+        const parseData = await UserInfo.getUserData();
+        parseData.event.eventShares = eventShares;
 
-        dispatch(addEvent({...event, eventShares}));
+        await Promise.all([
+          AsyncStorage.setItem('userData', JSON.stringify(parseData)),
+          dispatch(addEvent({...event, eventShares})),
+        ]);
       }
     } catch (error) {
       console.log('share event my app error: ', error);
@@ -298,6 +301,7 @@ const ShareEventModal = ({...props}) => {
             <SpaceComponent height={12} />
             <View style={modalStyles.shareOptions}>
               <TouchableOpacity
+                disabled={isLoading}
                 style={[
                   modalStyles.shareButton,
                   {
@@ -312,6 +316,7 @@ const ShareEventModal = ({...props}) => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                disabled={isLoading}
                 style={[modalStyles.shareButton, {borderColor: colors.border}]}
                 onPress={() => handleShare('email')}>
                 <Icon name="email" size={24} color={colors.email} />
@@ -319,6 +324,7 @@ const ShareEventModal = ({...props}) => {
               </TouchableOpacity>
 
               <TouchableOpacity
+                disabled={isLoading}
                 style={[modalStyles.shareButton, {borderColor: colors.border}]}
                 onPress={async () => await handleShare('In-App')}>
                 <Icon name="send" size={24} color={colors.inApp} />

@@ -39,7 +39,8 @@ const MyPostScreen = ({navigation}: any) => {
     setPage(1); // Reset page to 1 on refresh
     postServices.getEventForUser(1, auth.userId).then(res => {
       if (res && res.data) {
-        setPosts(res.data);
+        setPosts(res.data.postData);
+        setLimitPage(res.data.totalPage);
       }
       setRefreshing(false);
     });
@@ -51,7 +52,7 @@ const MyPostScreen = ({navigation}: any) => {
     const res = await postServices.getEventForUser(page, auth.userId);
     if (res && res.data) {
       setPosts(prevPosts => {
-        const newPosts = [...prevPosts, ...res.data];
+        const newPosts = [...prevPosts, ...res.data.postData];
         const uniquePosts = newPosts.filter(
           (post, index, self) =>
             self.findIndex(p => p.id === post.id) === index,
@@ -59,7 +60,7 @@ const MyPostScreen = ({navigation}: any) => {
         return uniquePosts;
       });
       setPage(prev => prev + 1);
-      // setLimitPage(res.data.totalPage);
+      setLimitPage(res.data.totalPage);
     }
     setLoading(false);
   }, [page, auth.userId, loading]);
@@ -88,22 +89,70 @@ const MyPostScreen = ({navigation}: any) => {
       console.log('Like post successfully !!', res.data);
     }
   };
+  const handleRemovePost = async (id: string) => {
+    setLoading(true);
+    const res = await postServices.handleRemovePost(id);
+    if (res?.data) {
+      setPosts(prev => prev.filter(e => e.id !== id));
+      console.log('Remove post successfully!! ', res.data);
+    }
+    setLoading(false);
+  };
+  const handleHidePostForUser = async (postId: string) => {
+    setLoading(true);
+    const res = await postServices.handleHidePost(auth.userId, postId);
+    if (res && res.data) {
+      console.log('Hide post successfully !!', res.data);
+      setPosts(prevPosts =>
+        prevPosts.map(post => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              hide: [...post.hide, res.data],
+            };
+          }
+          return post;
+        }),
+      );
+    }
+    setLoading(false);
+  };
+  const onChangeComment = (count: number, postId: string) => {
+    console.log('Count: ', count);
+    setPosts(prev => {
+      return prev.map(item => {
+        if (item.postId === postId) {
+          return {
+            ...item,
+            comments: item.comments + count,
+          };
+        }
+        return item;
+      });
+    });
+  };
   const renderPost = useCallback(
     ({item, index}: any) => {
-
       return (
         <RenderPost
+          onChangeComment={(count: number) =>
+            onChangeComment(count, item.postId)
+          }
+          handleHidePostForUser={() => handleHidePostForUser(item.id)}
+          isReport={auth.userId !== item.userId}
+          handleRemovePost={() => handleRemovePost(item.id)}
+          userId={item.userId}
           privacy={item.privacy}
           url={item.url}
           naviagtion={navigation}
           liked={item.likes.includes(auth.userId)}
-          id={item.id}
+          postId={item.postId}
           comments={item.comments}
           shares={item.shares}
           likes={item.likes}
           images={item.images}
-          avatar={item.user.avatar}
-          name={item.user.name}
+          avatar={item.avatar}
+          name={item.name}
           content={item.content}
           createdAt={item.createdAt}
           key={index}
@@ -111,7 +160,7 @@ const MyPostScreen = ({navigation}: any) => {
         />
       );
     },
-    [posts, page, handleLikePost],
+    [posts, page, handleLikePost, handleRemovePost],
   );
 
   return (
@@ -158,7 +207,7 @@ const MyPostScreen = ({navigation}: any) => {
             colors={[colors.primary || '#000']}
           />
         }
-        onEndReached={() => page <= limitPage && loadMorePosts()}
+        onEndReached={() => page < limitPage && loadMorePosts()}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           loading ? (
@@ -171,6 +220,7 @@ const MyPostScreen = ({navigation}: any) => {
             </View>
           ) : null
         }
+        nestedScrollEnabled={true}
       />
     </SafeAreaView>
   );

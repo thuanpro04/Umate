@@ -15,13 +15,25 @@ interface Props {
   styles?: StyleProp<TextStyle>;
   flex?: number;
   numberOfLine?: number;
+  handleTextLayout?: (e: any) => void;
 }
 const TextComponent = (props: Props) => {
-  const {label, size, color, font, title, styles, flex, numberOfLine} = props;
+  const {
+    label,
+    size,
+    color,
+    font,
+    title,
+    styles,
+    flex,
+    numberOfLine,
+    handleTextLayout,
+  } = props;
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   return (
     <Text
+      onTextLayout={handleTextLayout}
       style={[
         {
           fontSize: title

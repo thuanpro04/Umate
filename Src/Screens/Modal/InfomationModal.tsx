@@ -1,21 +1,17 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useRef} from 'react';
-import {Portal} from 'react-native-portalize';
-import {Modalize} from 'react-native-modalize';
-import {RowComponent, SpaceComponent, TextComponent} from '../Components';
 import {
   LikeDislike,
-  Map,
-  Map1,
-  MessageRemove,
-  Velas,
+  MessageRemove
 } from 'iconsax-react-native';
-import {appInfo} from '../../Theme/appInfo';
-import {appColors} from '../../Theme/Colors/appColors';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {useTranslation} from 'react-i18next';
+import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet } from 'react-native';
+import { Modalize } from 'react-native-modalize';
+import { Portal } from 'react-native-portalize';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appInfo } from '../../Theme/appInfo';
+import { appColors } from '../../Theme/Colors/appColors';
+import { RowComponent, SpaceComponent, TextComponent } from '../Components';
 interface Props {
   visible: boolean;
   onClose: () => void;

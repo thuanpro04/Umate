@@ -105,7 +105,7 @@ const CarEventComponent = (props: Props) => {
             style={localStyles.profileImage}
           />
           <TextComponent
-            label="@Admin"
+            label="Thủ dầu một"
             styles={localStyles.username}
             size={16}
           />

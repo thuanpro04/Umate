@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {ArrowLeft, Message2, UserAdd} from 'iconsax-react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {
@@ -24,7 +24,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import {authSelector} from '../../redux/reducers/authReducer';
-import {eventSelector} from '../../redux/reducers/eventSlice';
+import {addEvent, eventSelector} from '../../redux/reducers/eventSlice';
 import {friendSelector} from '../../redux/reducers/friendSlice';
 import {themeSelector} from '../../redux/reducers/themeSlice';
 import {globalStyles} from '../../Styles/globalStyle';
@@ -46,6 +46,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import {profileSelector, setMylove} from '../../redux/reducers/profileSlice';
 import {debounce} from 'lodash';
 import RenderPost from '../MyPost/Components/RenderPost';
+import {Repeat} from 'lucide-react-native';
+import {postServices} from '../Services/postServices';
+import {UserInfo} from '../Untils/UserInfo';
+import SocketService from '../Services/SocketService';
 
 const PersonalScreen = ({navigation}: any) => {
   const auth = useSelector(authSelector);
@@ -58,7 +62,9 @@ const PersonalScreen = ({navigation}: any) => {
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
+  const [isShowPost, setIsShowPost] = useState(false);
   const eventData = useSelector(eventSelector);
+  const [posts, setPosts] = useState<any[]>([]);
   const {t} = useTranslation();
   const bgColor = useSharedValue('#009688');
   const event = useSelector(eventSelector);
@@ -86,47 +92,140 @@ const PersonalScreen = ({navigation}: any) => {
   });
   useFocusEffect(
     useCallback(() => {
-      handleGetUserInfoById();
-    }, [userId]),
+      handleGetUserInfoById(userId);
+    }, [userId, navigation]),
   );
-  const handleGetUserInfoById = async () => {
+
+  const handleGetUserInfoById = async (userId: string) => {
     setIsLoading(true);
     const res = await userServices.getUserInfo(userId);
     if (res && res.data) {
       setUserInfo(res.data);
-
-      // console.log('userInfo', userInfo);
+      setPosts(
+        res.data?.eventShares.filter(
+          (item: any) => !item.hide.includes(userId),
+        ),
+      );
     }
     setIsLoading(false);
   };
-
+  const handleLikePost = async (id: string) => {
+    const res = await postServices.handleLikePost(auth.userId, id);
+    if (res && res.data) {
+      setPosts(prevPosts =>
+        prevPosts.map(post => {
+          if (post.postId === id) {
+            const isLiked = post.likeCount.includes(auth.userId);
+            return {
+              ...post,
+              likeCount: isLiked
+                ? post.likeCount.filter((userId: any) => userId !== auth.userId)
+                : [...post.likeCount, auth.userId],
+            };
+          }
+          return post;
+        }),
+      );
+      console.log('Like post successfully !!', res.data);
+    }
+  };
   const toggleDetail = () => {
     setDetail(!isDetail);
     bgColor.value = isDetail ? '#009688' : '#009688';
   };
-  const renderPost = ({item, index}: any) => {
-    return (
-      <RenderPost
-        privacy={item.privacy}
-        isFoot
-        url={item.url}
-        naviagtion={navigation}
-        liked={item.likes?.includes(auth.userId)}
-        id={item.id}
-        comments={item.comments}
-        shares={item.shares}
-        likes={item.likes}
-        images={item.images}
-        avatar={item.avatar}
-        name={item.name}
-        content={item.content}
-        createdAt={item.createdAt}
-        key={index}
-        handleLikePost={() => {}}
-        styleImage={{height: 220, width: '80%'}}
-      />
-    );
+  const onChangePost = () => {
+    setTimeout(() => {
+      setIsShowPost(!isShowPost);
+    }, 300);
   };
+  const fetchMypost = async () => {
+    const res = await postServices.getMyPost(userId, auth.userId);
+    if (res?.data) {
+      console.log('get my post successfully !!', res.data);
+      setPosts(res.data);
+    }
+  };
+
+  const handleRemovePost = async (id: string, isShared: boolean) => {
+    const service = isShared
+      ? postServices.handleRemovePostShare
+      : postServices.handleRemovePost;
+
+    const res = await service(id, auth.userId);
+    if (res?.data) {
+      console.log('Post removed successfully:', res.data);
+      // Tạo mảng cập nhật mới trước khi sử dụng
+      const updatedPosts = posts.filter(post => post.postId !== id);
+
+      // Cập nhật state local
+      setPosts(updatedPosts);
+
+      if (isShared) {
+        const userData = await UserInfo.getUserData();
+        userInfo.eventShares = userInfo.eventShares.filter(
+          (e: any) => e.postId !== id,
+        );
+        // Đảm bảo event và eventShares tồn tại
+        if (userData && userData.event) {
+          // Sử dụng mảng đã cập nhật thay vì posts
+          userData.event.eventShares = updatedPosts;
+          console.log('updatedPosts', updatedPosts);
+
+          await Promise.all([
+            AsyncStorage.setItem('userData', JSON.stringify(userData)),
+            // Đảm bảo không bao giờ truyền undefined vào action
+            dispatch(addEvent({eventShares: updatedPosts} as any)),
+          ]);
+        }
+      }
+    }
+  };
+  const handleHidePostForUser = async (postId: string) => {
+    // setIsLoading(true);
+    const res = await postServices.handleHidePost(
+      auth.userId,
+      postId,
+      'personal',
+    );
+    if (res && res.data) {
+      console.log('Hide post successfully !!', res.data);
+      setPosts(res.data);
+    }
+    // setIsLoading(false);
+  };
+  const renderPost = useCallback(
+    ({item, index}: any) => {
+      return (
+        <>
+          <RenderPost
+            // handleHidePostForUser={() => handleHidePostForUser(item.postId)}
+            isMore
+            // handleRemovePost={() => handleRemovePost(item.postId, !isShowPost)}
+            userId={item.userId}
+            privacy={item.privacy}
+            isFoot={!isShowPost}
+            url={item.url}
+            naviagtion={navigation}
+            liked={item.likeCount?.includes(auth.userId)}
+            id={item.id}
+            comments={item.commentCount}
+            shares={item.shareCount}
+            likes={item.likeCount}
+            images={item.images}
+            avatar={item.avatar ?? profile.avatar}
+            name={item.name ?? profile.name}
+            content={item.content}
+            createdAt={item.createdAt}
+            key={index}
+            handleLikePost={() => handleLikePost(item.postId)}
+            styleImage={{height: 220, width: '80%'}}
+          />
+          <SpaceComponent height={12} />
+        </>
+      );
+    },
+    [posts, userInfo],
+  );
 
   const handleAddFriend = async (friendUserId: string) => {
     const res = await friendServices.handleFriendActionAdd_Cancel(
@@ -146,6 +245,17 @@ const PersonalScreen = ({navigation}: any) => {
       dispatch(setMylove(res.data));
     }
   }, 1000);
+  useEffect(() => {
+    if (isShowPost) {
+      fetchMypost();
+    } else {
+      setPosts(
+        userInfo?.eventShares.filter(
+          (item: any) => !item.hide?.includes(userId),
+        ),
+      );
+    }
+  }, [isShowPost]);
   const renderHeader = () => {
     const dataUser = [
       {
@@ -406,14 +516,30 @@ const PersonalScreen = ({navigation}: any) => {
             ))}
           </View>
 
-          <TextComponent
-            label={t('recently_share')}
-            styles={profileStyles.sectionTitle}
-          />
+          <RowComponent
+            styles={{justifyContent: 'flex-start', paddingRight: 32}}>
+            {isShowPost ? (
+              <TextComponent
+                styles={[profileStyles.sectionTitle, {flex: 1}]}
+                label={'Bài đăng gần đây'}
+              />
+            ) : (
+              <TextComponent
+                styles={[profileStyles.sectionTitle, {flex: 1}]}
+                label={t('recently_share')}
+              />
+            )}
+
+            <Repeat
+              size={appInfo.sizeIcon}
+              color={colors.icon}
+              onPress={onChangePost}
+            />
+          </RowComponent>
           {userInfo.eventShares && (
             <FlatList
               inverted
-              data={userInfo.eventShares.reverse()}
+              data={posts}
               renderItem={renderPost}
               keyExtractor={item => item._id}
               contentContainerStyle={profileStyles.postList}

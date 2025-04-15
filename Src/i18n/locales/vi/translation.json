@@ -183,5 +183,7 @@
   "feeling": "Cảm xúc",
   "news_feed": "Bảng tin",
   "loading_more": "Đang tải thêm...",
-  "comment":"Bình luận"
+  "comment":"Bình luận",
+  "no_comments_yet":"Không có bình luận nào"
+
 }

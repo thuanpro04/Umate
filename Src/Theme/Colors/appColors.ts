@@ -186,4 +186,5 @@ export const appColors: any = {
   bgIcon: '#fafaaf',
   grey3: '#808080',
   lightGrey: '#D3D3D3',
+  primary: '#1E90FF',
 };
