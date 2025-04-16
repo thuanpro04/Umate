@@ -109,6 +109,7 @@ const ShareEventModal = ({...props}) => {
           );
         });
       }
+      props.onChangeShare(1);
       onCloseModal();
     } catch (error) {
       console.log('handle share event error: ', error);
@@ -153,12 +154,15 @@ const ShareEventModal = ({...props}) => {
     switch (platform) {
       case 'In-App':
         await handlePostEventMyApp();
+        props.onChangeShare(1);
         break;
       case 'facebook':
         await handleShareInFacebook();
+        props.onChangeShare(1);
         break;
       default:
         handleShareInEmail();
+        props.onChangeShare(1);
         break;
     }
     onCloseModal();

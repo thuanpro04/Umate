@@ -65,7 +65,8 @@ interface Props {
   isHide?: boolean;
   isPrivacy?: boolean;
   handleUpdatePrivacy?: (postId: string, privacy: string) => void;
-  onChangeComment: (count: number) => void;
+  onChangeComment?: (count: number) => void;
+  onChangeShare?: (count: number) => void;
 }
 const RenderPost = (props: Props) => {
   const {
@@ -94,6 +95,7 @@ const RenderPost = (props: Props) => {
     isPrivacy,
     handleUpdatePrivacy,
     onChangeComment,
+    onChangeShare
   } = props;
   const [isVisible, setIsVisible] = useState(false);
   const [indexImg, setIndexImg] = useState(0);

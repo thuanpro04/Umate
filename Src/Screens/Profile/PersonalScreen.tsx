@@ -146,68 +146,50 @@ const PersonalScreen = ({navigation}: any) => {
     }
   };
 
-  const handleRemovePost = async (id: string, isShared: boolean) => {
-    const service = isShared
-      ? postServices.handleRemovePostShare
-      : postServices.handleRemovePost;
-
-    const res = await service(id, auth.userId);
-    if (res?.data) {
-      console.log('Post removed successfully:', res.data);
-      // Tạo mảng cập nhật mới trước khi sử dụng
-      const updatedPosts = posts.filter(post => post.postId !== id);
-
-      // Cập nhật state local
-      setPosts(updatedPosts);
-
-      if (isShared) {
-        const userData = await UserInfo.getUserData();
-        userInfo.eventShares = userInfo.eventShares.filter(
-          (e: any) => e.postId !== id,
-        );
-        // Đảm bảo event và eventShares tồn tại
-        if (userData && userData.event) {
-          // Sử dụng mảng đã cập nhật thay vì posts
-          userData.event.eventShares = updatedPosts;
-          console.log('updatedPosts', updatedPosts);
-
-          await Promise.all([
-            AsyncStorage.setItem('userData', JSON.stringify(userData)),
-            // Đảm bảo không bao giờ truyền undefined vào action
-            dispatch(addEvent({eventShares: updatedPosts} as any)),
-          ]);
+  const onChangeComment = (count: number, postId: string) => {
+    console.log('Count: ', count);
+    setPosts(prev => {
+      return prev.map(item => {
+        if (item.postId === postId) {
+          return {
+            ...item,
+            comments: item.comments + count,
+          };
         }
-      }
-    }
+        return item;
+      });
+    });
   };
-  const handleHidePostForUser = async (postId: string) => {
-    // setIsLoading(true);
-    const res = await postServices.handleHidePost(
-      auth.userId,
-      postId,
-      'personal',
-    );
-    if (res && res.data) {
-      console.log('Hide post successfully !!', res.data);
-      setPosts(res.data);
-    }
-    // setIsLoading(false);
+  const onChangeShare = (count: number, postId: string) => {
+    setPosts(prev => {
+      return prev.map(post => {
+        if (post.postId === postId) {
+          return {
+            ...post,
+            shares: post.shares + count,
+          };
+        }
+        return post;
+      });
+    });
   };
   const renderPost = useCallback(
     ({item, index}: any) => {
       return (
         <>
           <RenderPost
-            // handleHidePostForUser={() => handleHidePostForUser(item.postId)}
+            onChangeShare={(count: number) => onChangeShare(count, item.postId)}
+            onChangeComment={(count: number) =>
+              onChangeComment(count, item.postId)
+            }
             isMore
-            // handleRemovePost={() => handleRemovePost(item.postId, !isShowPost)}
             userId={item.userId}
             privacy={item.privacy}
             isFoot={!isShowPost}
             url={item.url}
             naviagtion={navigation}
             liked={item.likeCount?.includes(auth.userId)}
-            id={item.id}
+            postId={item.postId}
             comments={item.commentCount}
             shares={item.shareCount}
             likes={item.likeCount}
@@ -379,21 +361,6 @@ const PersonalScreen = ({navigation}: any) => {
           ) : (
             <View style={profileStyles.profileContainer}>
               <RowComponent>
-                <TouchableOpacity
-                  onPress={onPressMyLove}
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    zIndex: 1,
-                    left: '12.5%',
-                    transform: [{rotate: '-180deg'}],
-                  }}>
-                  {isHeart ? (
-                    <AntDesign name="heart" size={22} color="red" />
-                  ) : (
-                    <AntDesign name="hearto" size={22} color="pink" />
-                  )}
-                </TouchableOpacity>
                 <ZoomImageComponent
                   url={
                     userInfo.avatar
@@ -415,7 +382,7 @@ const PersonalScreen = ({navigation}: any) => {
                   />
                 )}
               </RowComponent>
-              <SpaceComponent height={20} />
+              <SpaceComponent height={16} />
               <TextComponent
                 styles={profileStyles.name}
                 label={userInfo.name}
@@ -447,6 +414,18 @@ const PersonalScreen = ({navigation}: any) => {
                 label={t('detail')}
                 textStyle={[profileStyles.btn_Detail]}
               />
+              <SpaceComponent height={6} />
+              <TouchableOpacity
+                onPress={onPressMyLove}
+                style={{
+                  transform: [{rotate: '-180deg'}],
+                }}>
+                {isHeart ? (
+                  <AntDesign name="heart" size={22} color="red" />
+                ) : (
+                  <AntDesign name="hearto" size={22} color="pink" />
+                )}
+              </TouchableOpacity>
             </View>
           )
         ) : (

@@ -1,6 +1,6 @@
-import {useFocusEffect} from '@react-navigation/native';
-import React, {useCallback, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -13,13 +13,13 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
-import {authSelector} from '../../redux/reducers/authReducer';
-import {profileSelector} from '../../redux/reducers/profileSlice';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {appColors} from '../../Theme/Colors/appColors';
-import {RowComponent, SpaceComponent, TextComponent} from '../Components';
-import {postServices} from '../Services/postServices';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../redux/reducers/authReducer';
+import { profileSelector } from '../../redux/reducers/profileSlice';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appColors } from '../../Theme/Colors/appColors';
+import { RowComponent, SpaceComponent, TextComponent } from '../Components';
+import { postServices } from '../Services/postServices';
 import RenderPost from './Components/RenderPost';
 
 const MyPostScreen = ({navigation}: any) => {
@@ -74,7 +74,7 @@ const MyPostScreen = ({navigation}: any) => {
     if (res && res.data) {
       setPosts(prevPosts =>
         prevPosts.map(post => {
-          if (post.id === id) {
+          if (post.postId === id) {
             const isLiked = post.likes.includes(auth.userId);
             return {
               ...post,
@@ -93,7 +93,7 @@ const MyPostScreen = ({navigation}: any) => {
     setLoading(true);
     const res = await postServices.handleRemovePost(id);
     if (res?.data) {
-      setPosts(prev => prev.filter(e => e.id !== id));
+      setPosts(prev => prev.filter(e => e.postId !== id));
       console.log('Remove post successfully!! ', res.data);
     }
     setLoading(false);
@@ -105,7 +105,7 @@ const MyPostScreen = ({navigation}: any) => {
       console.log('Hide post successfully !!', res.data);
       setPosts(prevPosts =>
         prevPosts.map(post => {
-          if (post.id === postId) {
+          if (post.postId === postId) {
             return {
               ...post,
               hide: [...post.hide, res.data],
@@ -131,6 +131,19 @@ const MyPostScreen = ({navigation}: any) => {
       });
     });
   };
+  const onChangeShare = (count: number, postId: string) => {
+    setPosts(prev => {
+      return prev.map(post => {
+        if (post.postId === postId) {
+          return {
+            ...post,
+            shares: post.shares + count,
+          };
+        }
+        return post;
+      });
+    });
+  };
   const renderPost = useCallback(
     ({item, index}: any) => {
       return (
@@ -138,9 +151,10 @@ const MyPostScreen = ({navigation}: any) => {
           onChangeComment={(count: number) =>
             onChangeComment(count, item.postId)
           }
-          handleHidePostForUser={() => handleHidePostForUser(item.id)}
+          onChangeShare={(count: number) => onChangeShare(count, item.postId)}
+          handleHidePostForUser={() => handleHidePostForUser(item.postId)}
           isReport={auth.userId !== item.userId}
-          handleRemovePost={() => handleRemovePost(item.id)}
+          handleRemovePost={() => handleRemovePost(item.postId)}
           userId={item.userId}
           privacy={item.privacy}
           url={item.url}
@@ -156,7 +170,7 @@ const MyPostScreen = ({navigation}: any) => {
           content={item.content}
           createdAt={item.createdAt}
           key={index}
-          handleLikePost={() => handleLikePost(item.id)}
+          handleLikePost={() => handleLikePost(item.postId)}
         />
       );
     },

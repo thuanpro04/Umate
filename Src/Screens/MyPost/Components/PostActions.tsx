@@ -10,8 +10,7 @@ import CommentModal from '../../Modal/CommentModal';
 const PostActions = (props: any) => {
   const {navigation, colors, t, onChangeComment} = props;
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [comments, setComments] = useState([]);
+ 
 
   // Lấy 5 bình luận mới nhất
   const fetchRecentComments = async () => {};
@@ -36,7 +35,6 @@ const PostActions = (props: any) => {
           styles={[styles.actionText, {color: colors.text2}]}
         />
         <CommentModal
-          onChangeComment={onChangeComment}
           {...props}
           colors={colors}
           t={t}

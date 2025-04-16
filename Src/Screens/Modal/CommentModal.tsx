@@ -1,32 +1,24 @@
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-  FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Portal} from 'react-native-portalize';
 import {Modalize} from 'react-native-modalize';
-import CommentInput from '../MyPost/Components/CommentInput';
-import {RowComponent, SpaceComponent, TextComponent} from '../Components';
+import {Portal} from 'react-native-portalize';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FastImage from 'react-native-fast-image';
-import {globalStyles} from '../../Styles/globalStyle';
-import {appColors} from '../../Theme/Colors/appColors';
-import {UserInfo} from '../Untils/UserInfo';
-import RenderComment from '../MyPost/Components/RenderComment';
-import {postServices} from '../Services/postServices';
-import {useFocusEffect} from '@react-navigation/native';
-import LoadingModal from './LoadingModal';
 import {useSelector} from 'react-redux';
 import {profileSelector} from '../../redux/reducers/profileSlice';
+import {TextComponent} from '../Components';
+import CommentInput from '../MyPost/Components/CommentInput';
+import RenderComment from '../MyPost/Components/RenderComment';
+import {postServices} from '../Services/postServices';
+import LoadingModal from './LoadingModal';
+import {authSelector} from '../../redux/reducers/authReducer';
 
 const CommentModal = (props: any) => {
   const {navigation, colors, t, visible, onClose, onChangeComment} = props;
@@ -40,6 +32,7 @@ const CommentModal = (props: any) => {
     commentInputRef.current?.openKeyboard();
   };
   const profile = useSelector(profileSelector);
+  const auth = useSelector(authSelector);
   useEffect(() => {
     console.log(comments, 123);
 
@@ -90,7 +83,10 @@ const CommentModal = (props: any) => {
       });
     });
     console.log('Reply: ', data.comment);
-    const res = await postServices.handleReplyComment(newReply);
+    const res = await postServices.handleReplyComment({
+      ...newReply,
+      receiverId: replyingTo.userId,
+    });
     if (res?.data) {
       console.log('Reply comment successfully!!');
     }
@@ -99,14 +95,14 @@ const CommentModal = (props: any) => {
   const handleSendComment = async (comment: string) => {
     const data = {
       postId: props.postId,
-      userId: props.userId,
+      userId: auth.userId,
       name: profile.name,
       comment,
       avatar: profile.avatar,
       timestamp: Date.now(),
       createdAt: new Date(),
     };
-    onChangeComment(1)
+    onChangeComment(1);
     if (replyingTo) {
       handleReplyComment(data);
     } else {

@@ -54,7 +54,9 @@ const NotificationScreen = ({navigation}: any) => {
       setDataNotifi(prev => prev.filter(item => item._id !== id));
     }
   };
-
+  const handleNotificationPost = () => {
+    navigation.navigate(t('post'));
+  };
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
       const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -99,6 +101,7 @@ const NotificationScreen = ({navigation}: any) => {
       const type = item.type;
       const content =
         type === 'qrcode' ? t(`${temp[0]}`) + temp[1] : t(`${item.content}`);
+        
       return (
         <Animated.View style={{transform: [{scale: scaleAnim}]}}>
           <TouchableOpacity
@@ -111,9 +114,22 @@ const NotificationScreen = ({navigation}: any) => {
                 ? showModalAttended()
                 : type === 'groupInvite'
                 ? () => {}
+                : type === 'post'
+                ? handleNotificationPost()
                 : handlePress()
             }>
-            <View style={styles.iconContainer}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor:
+                    type === 'post'
+                      ? 'pink'
+                      : type === 'groupInvite'
+                      ? 'coral'
+                      : '#007BFF',
+                },
+              ]}>
               {type === 'groupInvite' ? (
                 <MaterialCommunityIcons
                   name="lightbulb-group-outline"
@@ -124,6 +140,12 @@ const NotificationScreen = ({navigation}: any) => {
                 <CallCalling size={appInfo.sizeIconBold} color="#FFFFFF" />
               ) : type === 'qrcode' ? (
                 <Bezier size={appInfo.sizeIconBold} color="#FFFFFF" />
+              ) : type === 'post' ? (
+                <MaterialIcons
+                  name="compost"
+                  size={appInfo.sizeIconBold}
+                  color={'#FFFFFF'}
+                />
               ) : (
                 <FontAwesome5
                   name="user-friends"
@@ -292,7 +314,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#007BFF', // blue
+
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
