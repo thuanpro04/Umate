@@ -3,6 +3,7 @@ const notificationSchema = new mongoose.Schema({
   groupId: { type: String, ref: "GroupConversation" },
   senderId: { type: String },
   receiverId: { type: String, require: true },
+  postId: { type: String },
   title: { type: String, require: true },
   content: { type: String },
   type: { type: String },

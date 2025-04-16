@@ -1,6 +1,8 @@
 const { CommentModel } = require("../models/commentModel");
 const { PostModel } = require("../models/postModel");
 const { generateUniqueID } = require("../untils/informationUntils");
+const { addNotificationForUser } = require("./notificationServices");
+const { sendNotificationCallToUser } = require("./socketService");
 const { findUserById } = require("./userServices");
 
 const handleActionMyPostEvent = async (req, res) => {
@@ -95,14 +97,21 @@ const handleActionLikePostForUser = async (req, res) => {
       });
     }
     let likeCount = post.likeCount;
-    console.log("likeCount: ", post.likeCount);
-
     const isLike = likeCount.includes(userId);
     likeCount = isLike
       ? likeCount.filter((e) => e !== userId)
       : [...likeCount, userId];
     post.likeCount = likeCount;
     await post.save();
+    const user = await findUserById(userId);
+    !isLike &&
+      (await addNotificationForUser(
+        null,
+        userId,
+        post.userId,
+        `${user.name} vừa bày tỏ cảm xúc với bài viết của bạn – tổng cộng ${post.likeCount.length} lượt thích rồi đấy!`,
+        "post"
+      ));
     res.status(200).json({
       message: "Like post successfully !!",
       data: likeCount,
@@ -313,14 +322,30 @@ const handleActionUpdatePrivacy = async (req, res) => {
     console.log("Update privacy error: ", error);
   }
 };
+const handleUpdateCommentCount = async (postId) => {
+  return await PostModel.findOneAndUpdate(
+    { postId },
+    { $inc: { commentCount: 1 } }
+  );
+};
 const handleActionCreateComment = async (req, res) => {
   const data = req.body;
+  console.log("Data comment: ", data);
+
   try {
     const comment = new CommentModel(data);
     await comment.save();
-    const updatedCommentCount = await PostModel.findOneAndUpdate(
-      { postId: data.postId },
-      { $inc: { commentCount: 1 } }
+    await handleUpdateCommentCount(data.postId);
+    console.log("Comment created successfully !!");
+    const post = await getPost(data.postId);
+
+    await addNotificationForUser(
+      null,
+      data.userId,
+      post.userId,
+      `${data.name} vừa comment bài viết của bạn`,
+      "post",
+      data.postId
     );
     res.status(200).json({
       message: "Comment created successfully !!",
@@ -349,12 +374,26 @@ const hanldeActionGetComments = async (req, res) => {
 };
 const handleAddReplyComment = async (req, res) => {
   const data = req.body;
+
   try {
     const updatedComment = await CommentModel.findOneAndUpdate(
       { commentId: data.commentId },
       { $push: { replies: data } },
       { new: true }
     );
+    await handleUpdateCommentCount(data.postId);
+    console.log(data.userId, "!==", data.receiverId);
+
+    if (String(data.userId) !== String(data.receiverId)) {
+      await addNotificationForUser(
+        null,
+        data.userId,
+        data.receiverId,
+        `${data.name} vừa trả lời bình luận của bạn`,
+        "post",
+        data.postId
+      );
+    }
     if (!updatedComment) {
       return res.status(404).json({
         message: "Comment not found",

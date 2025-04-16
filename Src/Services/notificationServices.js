@@ -142,7 +142,8 @@ const addNotificationForUser = async (
   content,
   type,
   title,
-  data
+  data,
+  postId
 ) => {
   const user = await findUserById(currentUserId);
   const userIds = Array.isArray(userId) ? userId : [userId];
@@ -155,6 +156,7 @@ const addNotificationForUser = async (
     content,
     type,
     data,
+    postId,
   }));
   await notificationModel.insertMany(notifications);
   console.log("Notified for user !!");
@@ -294,7 +296,7 @@ module.exports = {
   handleActionNotification,
   handleActionInviteToGroup,
   handleGetNotifications,
-  addNotificationForUser,     
+  addNotificationForUser,
   handleActionDeleteNotification,
   deletedNotification,
   handleActionSendEmail,
