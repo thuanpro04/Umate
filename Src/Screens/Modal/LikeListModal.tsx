@@ -36,7 +36,6 @@ const LikeListModal = (props: Props) => {
       }
       const res = await userServices.getListUserInfo(users);
       if (res && res.data) {
-        console.log(res.data);
         setListUserInfo(res.data);
       }
     },
@@ -44,11 +43,9 @@ const LikeListModal = (props: Props) => {
   );
 
   useEffect(() => {
-    console.log('listUsers changed', listUsers);
     getUserForHeartEvent(listUsers);
   }, [listUsers]);
   const onOpenModal = () => {
-    console.log(listUserInfo?.length, listUsers?.length);
     modalizeRef.current?.open();
   };
   const onCloseModal = () => {

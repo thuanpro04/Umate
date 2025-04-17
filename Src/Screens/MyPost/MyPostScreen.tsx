@@ -1,6 +1,6 @@
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -13,16 +13,22 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../redux/reducers/authReducer';
-import { profileSelector } from '../../redux/reducers/profileSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { appColors } from '../../Theme/Colors/appColors';
-import { RowComponent, SpaceComponent, TextComponent } from '../Components';
-import { postServices } from '../Services/postServices';
+import {useSelector} from 'react-redux';
+import {authSelector} from '../../redux/reducers/authReducer';
+import {profileSelector} from '../../redux/reducers/profileSlice';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {appColors} from '../../Theme/Colors/appColors';
+import {RowComponent, SpaceComponent, TextComponent} from '../Components';
+import {postServices} from '../Services/postServices';
 import RenderPost from './Components/RenderPost';
 
 const MyPostScreen = ({navigation}: any) => {
+  const route = useRoute();
+  let notifiPostId =
+    (route.params as {notifiPostId?: string})?.notifiPostId ?? null;
+  const [scrollToPostId, setScrollToPostId] = useState<string | null>(
+    notifiPostId,
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,6 +39,7 @@ const MyPostScreen = ({navigation}: any) => {
   const colors = appColors[theme];
   const auth = useSelector(authSelector);
   const {t} = useTranslation();
+  const flatlistRef = useRef<FlatList>(null);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -144,6 +151,22 @@ const MyPostScreen = ({navigation}: any) => {
       });
     });
   };
+  useEffect(() => {
+    if (scrollToPostId && posts.length > 0 && flatlistRef.current) {
+      const index = posts.findIndex(post => post.postId === scrollToPostId);
+      if (index !== -1) {
+        flatlistRef.current.scrollToIndex({index, animated: true});
+        setScrollToPostId(null); // Sử dụng setState để cập nhật state
+      }
+    }
+  }, [scrollToPostId, posts]);
+
+  // Cập nhật khi có notifiPostId mới từ route.params
+  useEffect(() => {
+    if (notifiPostId) {
+      setScrollToPostId(notifiPostId);
+    }
+  }, [notifiPostId]);
   const renderPost = useCallback(
     ({item, index}: any) => {
       return (
@@ -210,6 +233,7 @@ const MyPostScreen = ({navigation}: any) => {
       <SpaceComponent height={10} />
 
       <FlatList
+        ref={flatlistRef}
         data={posts}
         renderItem={renderPost}
         keyExtractor={(item, index) => `${item.id}-${index}`}

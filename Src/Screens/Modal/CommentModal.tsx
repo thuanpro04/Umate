@@ -34,8 +34,6 @@ const CommentModal = (props: any) => {
   const profile = useSelector(profileSelector);
   const auth = useSelector(authSelector);
   useEffect(() => {
-    console.log(comments, 123);
-
     if (visible) {
       onOpenModal();
     } else {

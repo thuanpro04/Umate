@@ -54,8 +54,10 @@ const NotificationScreen = ({navigation}: any) => {
       setDataNotifi(prev => prev.filter(item => item._id !== id));
     }
   };
-  const handleNotificationPost = () => {
-    navigation.navigate(t('post'));
+  const handleNotificationPost = (postId: string) => {
+    console.log(postId,555);
+
+    navigation.navigate(t('post'), {notifiPostId: postId});
   };
   const RenderNotificationItem = useCallback(
     ({item}: any) => {
@@ -101,7 +103,7 @@ const NotificationScreen = ({navigation}: any) => {
       const type = item.type;
       const content =
         type === 'qrcode' ? t(`${temp[0]}`) + temp[1] : t(`${item.content}`);
-        
+
       return (
         <Animated.View style={{transform: [{scale: scaleAnim}]}}>
           <TouchableOpacity
@@ -115,7 +117,7 @@ const NotificationScreen = ({navigation}: any) => {
                 : type === 'groupInvite'
                 ? () => {}
                 : type === 'post'
-                ? handleNotificationPost()
+                ? handleNotificationPost(item.postId)
                 : handlePress()
             }>
             <View

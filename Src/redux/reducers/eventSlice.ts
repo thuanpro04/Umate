@@ -18,8 +18,6 @@ const eventSlice = createSlice({
       state.like += action.payload;
     },
     addEvent: (state, action: PayloadAction<EventState>) => {
-      console.log(action.payload.eventShares, 1234);
-
       state.eventShares = action.payload.eventShares;
     },
     removeEvent: state => {
