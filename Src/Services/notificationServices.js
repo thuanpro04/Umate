@@ -145,6 +145,8 @@ const addNotificationForUser = async (
   data,
   postId
 ) => {
+ 
+
   const user = await findUserById(currentUserId);
   const userIds = Array.isArray(userId) ? userId : [userId];
   const notifications = userIds.map((receiverId) => ({

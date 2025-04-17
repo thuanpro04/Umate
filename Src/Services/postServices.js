@@ -343,8 +343,10 @@ const handleActionCreateComment = async (req, res) => {
       null,
       data.userId,
       post.userId,
-      `${data.name} vừa comment bài viết của bạn`,
+      `Vừa comment bài viết của bạn`,
       "post",
+      data.name,
+      null,
       data.postId
     );
     res.status(200).json({
@@ -389,8 +391,10 @@ const handleAddReplyComment = async (req, res) => {
         null,
         data.userId,
         data.receiverId,
-        `${data.name} vừa trả lời bình luận của bạn`,
+        `Vừa trả lời bình luận của bạn`,
         "post",
+        data.name,
+        null,
         data.postId
       );
     }
