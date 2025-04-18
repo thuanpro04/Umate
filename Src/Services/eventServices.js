@@ -8,6 +8,7 @@ const { EventModel } = require("../models/eventModel");
 const { UserModel } = require("../models/usersModel");
 const { handleSendNotification } = require("./notificationServices");
 const { formatUser } = require("./postServices");
+const { PostModel } = require("../models/postModel");
 const handlePostEvent = async (req, res) => {
   const data = req.body;
   const newEvent = new EventModel({
@@ -156,6 +157,12 @@ const handleActionHeartForEvent = async (req, res) => {
     console.log("handle add heart fail error: ", error);
   }
 };
+const updateShareCountPost = async (postId) => {
+  return await PostModel.findByIdAndUpdate(
+    { postId },
+    { $inc: { shareCount: 1 } }
+  );
+};
 const handleShareEventMyApp = async (req, res) => {
   const data = req.body;
 
@@ -196,6 +203,7 @@ const handleShareEventMyApp = async (req, res) => {
       });
     }
     console.log("Người dùng đã được cập nhật:", updatedUser.eventShares);
+    await updateShareCountPost(data.postId);
     res.status(200).json({
       message: "Share event successfully !!!!",
       data: updatedUser.eventShares,

@@ -13,3 +13,4 @@ eventRouter.get("/action-heart", ActionHeartForEvent);
 eventRouter.post("/share-event", shareEventMyApp);
 eventRouter.post("/get-event", getEventShared)
 module.exports = eventRouter;
+

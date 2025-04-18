@@ -7,7 +7,6 @@ const getUsersByIds = async (userFriends) => {
   users = await UserModel.find({ userId: { $in: userFriends } }).lean();
   return users;
 };
-
 const updateUserById = async (userId, updateAction) => {
   const result = await UserModel.updateOne({ userId }, updateAction);
   return result;
