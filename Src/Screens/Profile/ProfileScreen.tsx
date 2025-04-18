@@ -159,7 +159,7 @@ const ProfileScreen = ({navigation}: any) => {
             url={item.url}
             naviagtion={navigation}
             liked={item.likeCount?.includes(auth.userId)}
-            id={item.postId}
+            postId={item.postId}
             comments={item.commentCount}
             shares={item.shareCount}
             likes={item.likeCount}
@@ -170,7 +170,7 @@ const ProfileScreen = ({navigation}: any) => {
             createdAt={item.createdAt}
             key={index}
             handleLikePost={() => handleLikePost(item.postId)}
-            styleImage={{height: 220,}}
+            styleImage={{height: 220}}
           />
           <SpaceComponent height={12} />
         </>

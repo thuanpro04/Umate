@@ -59,6 +59,7 @@ const PersonalScreen = ({navigation}: any) => {
   const [isHeart, setIsHeart] = useState(
     profile?.myLove?.includes(auth.userId),
   );
+  
   const {userId} = useRoute().params as {userId: string};
   const [isLoading, setIsLoading] = useState(false);
   const [isDetail, setDetail] = useState(false);
@@ -224,7 +225,7 @@ const PersonalScreen = ({navigation}: any) => {
     const res = await userServices.handleMylove(userId, auth.userId, isHeart);
     if (res && res.data) {
       console.log('Add my love sucessfully !!', res.data);
-      dispatch(setMylove(res.data));
+      dispatch(setMylove(auth.userId));
     }
   }, 1000);
   useEffect(() => {

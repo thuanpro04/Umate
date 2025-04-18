@@ -85,7 +85,7 @@ const SetUpProfile = ({navigation}: any) => {
 
   const dispatch = useDispatch();
   const onNavigation = () => {
-    navigation.navigate(t('profile'));
+    navigation.navigate('profile');
   };
   const onchangeProfile = useCallback((key: string, value: string) => {
     setProfile(prev => ({...prev, [key]: value.trim()}));
@@ -139,7 +139,6 @@ const SetUpProfile = ({navigation}: any) => {
           t('welcome_umate'),
         );
   };
-  console.log(auth);
 
   const setUpProfileUser = async () => {
     if (!validateFields()) {
@@ -223,7 +222,7 @@ const SetUpProfile = ({navigation}: any) => {
         style={[globalStyles.userImg, {zIndex: -1, width: 160, height: 160}]}
       />
     );
-  },[handleSelected,onchangeProfile])
+  }, [handleSelected, onchangeProfile]);
   return (
     <SafeAreaView
       style={[profileStyles.container, {backgroundColor: colors.background}]}

@@ -9,7 +9,7 @@ import WelcomtoApp from '../WelcomtoApp';
 import Toast from 'react-native-toast-message';
 import {ToastConfig} from '../Components';
 import {setTheme, themeSelector} from '../../redux/reducers/themeSlice';
-import {addProfile} from '../../redux/reducers/profileSlice';
+import {addProfile, setMylove} from '../../redux/reducers/profileSlice';
 import {addFriend} from '../../redux/reducers/friendSlice';
 import {addEvent} from '../../redux/reducers/eventSlice';
 import SocketManager from '../../redux/SocketManager';
@@ -42,6 +42,7 @@ const AppRouters = () => {
       const parsedData = JSON.parse(userData);
 
       dispatch(addAuth(parsedData.auth));
+      dispatch(setMylove(parsedData.profile.myLove));
       dispatch(addProfile(parsedData.profile));
       dispatch(addFriend(parsedData.friend));
       dispatch(addEvent(parsedData.event));
