@@ -13,6 +13,7 @@ const checkUserDeleteConversation = (conv, currentUserId) => {
   const deletedEntry = conv.deletedBy?.find(
     (item) => item.userId === currentUserId
   );
+  
   if (!deletedEntry) {
     return false;
   }

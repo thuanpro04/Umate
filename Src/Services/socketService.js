@@ -25,6 +25,7 @@ const getMoldMessage = (userId, type, content) => {
 let io; // Lưu trữ đối tượng io
 const sendNotificationCallToUser = (userId, eventName, data) => {
   if (!io) return;
+
   if (userId && users[userId]) {
     io.to(users[userId]).emit(eventName, data);
     console.log("Đã gửi đến: ", users[userId]);
@@ -40,14 +41,38 @@ async function updateOnlineUser(userId, isOnline) {
   await updateOneUser(userId, "online", isOnline);
 }
 const sendToUser = (userId, userMessages) => {
-  console.log("Đã thông báo: ", users[userId]);
+  console.log("Đã thông báo: ", users[userId], userMessages);
   sendNotificationCallToUser(userId, "receive_message", userMessages);
+  let messData;
 
   if (!userMessages.isNotification) {
-    sendNotificationCallToUser(userId, "notification_message", {
-      ...userMessages,
-      typeNotifi: "message",
-    });
+    if (!userMessages.typeCall) {
+      messData = {
+        name: userMessages.name,
+        content: userMessages.content,
+        avatar: userMessages.avatar,
+        conversationId:
+          userMessages.converInfo.conversationId ?? userMessages.conversationId,
+        majoring: userMessages?.converInfo.majoring,
+        sex: userMessages?.converInfo.sex,
+        block: userMessages?.converInfo.block,
+        lastMessage: userMessages?.converInfo.lastMessage,
+        lastMessageTimestamp: userMessages?.converInfo.lastMessageTimestamp,
+        statusLastMessage: userMessages?.converInfo.statusLastMessage,
+        notification: userMessages?.converInfo.notification,
+        nickNames: userMessages?.converInfo.nickNames,
+        theme: userMessages?.converInfo.theme,
+        pinnedBy: userMessages?.converInfo.pinnedBy,
+        type: userMessages?.converInfo.type,
+        userId: userMessages.senderId,
+        typeNotifi: "message",
+      };
+    }
+    sendNotificationCallToUser(
+      userId,
+      "notification_message",
+      messData ?? { ...userMessages, typeNotifi: "message" }
+    );
   }
 };
 const sendForMe = (id, messageData) => {
@@ -117,7 +142,6 @@ function initializeSocket(server) {
           return;
         }
         sendNotificationCallToUser(callData.targetId, "incomingCall", callData);
-
         console.log(`📞 Đã gửi cuộc gọi đến user`);
       }
     });
@@ -126,7 +150,10 @@ function initializeSocket(server) {
       const result = sendNotificationCallToUser(
         data.userId,
         "feedbackAccepted",
-        data
+        {
+          ...data,
+          typeNotifi: "message",
+        }
       );
 
       if (result) {
@@ -162,7 +189,10 @@ function initializeSocket(server) {
       const { targetId, userId, type } = data;
       const messageData = getMoldMessage(userId, type, data.content);
       const sendToUser = (id) => {
-        sendNotificationCallToUser(id, "feedbackCancelCall", data);
+        sendNotificationCallToUser(id, "feedbackCancelCall", {
+          ...data,
+          typeNotifi: "message",
+        });
       };
 
       if (type === "group_voice" || type === "group_video") {
@@ -190,8 +220,12 @@ function initializeSocket(server) {
         data.typeCall === "personal_voice" ||
         data.typeCall === "personal_video"
       ) {
-        sendNotificationCallToUser(data.senderId, "feedbackCancelCall", data);
+        // sendNotificationCallToUser(data.senderId, "feedbackCancelCall", {
+        //   ...data,
+        //   typeNotifi: "message",
+        // });
       }
+
       handleSendMessages(data);
     });
     socket.on("send_message", async (data) => {
@@ -209,6 +243,8 @@ function initializeSocket(server) {
         ids.forEach((item) => sendToUser(item, userMessages));
       }
       // sendForMe(userMessages.senderId, userMessages);
+      console.log("userMessages", userMessages);
+
       sendQRcodeDataForGroup(userMessages);
     });
     socket.on("leave_group", (userId) => {

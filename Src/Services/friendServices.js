@@ -46,6 +46,7 @@ const handleFriendRequestAction = async (req, res, action) => {
           "notification_message",
           dataNoti
         );
+        
       await addNotificationForUser(
         null,
         currentUserId,

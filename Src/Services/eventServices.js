@@ -185,7 +185,7 @@ const handleShareEventMyApp = async (req, res) => {
       avatar: data.avatar,
       name: data.name,
     };
-
+    
     const updatedUser = await UserModel.findOneAndUpdate(
       { userId: data.currentId },
       {
