@@ -74,6 +74,7 @@ const CallWaitingScreen = ({route, navigation}: any) => {
       type: callData.type,
       avatar: profile.avatar,
       targetAvatar: callData.avatar,
+      conversationId:callData.conversationId
     });
     return socket?.off('callAccepted');
   };

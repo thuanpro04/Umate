@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, StyleSheet} from 'react-native';
+import {Alert, StyleSheet, ToastAndroid} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {appColors} from '../../../Theme/Colors/appColors';
 import {RowComponent, SpaceComponent} from '../../Components';
@@ -13,20 +13,20 @@ const CustomHeaderImages = (props: Props) => {
 
   const downloadImage = async () => {
     imageService.downLoadImageForMe(img.uri);
-   
+   ToastAndroid.show("Lưu thành công",ToastAndroid.SHORT)
   };
   return (
     <RowComponent styles={{justifyContent: 'flex-end', padding: 16}}>
       <MaterialIcons
         name="file-download"
-        color={appColors.white}
+        color={'#eeeeee'}
         size={32}
         onPress={() => downloadImage()}
       />
       <SpaceComponent width={40} />
       <MaterialIcons
         name="close"
-        color={appColors.white}
+        color={'#eeeeee'}
         size={32}
         onPress={onPressClose}
       />

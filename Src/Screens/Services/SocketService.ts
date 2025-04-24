@@ -30,11 +30,11 @@ class SocketService {
     PushNotification.configure({
       onNotification: async function (notification) {
         console.log('NOTIFICATION:', {
-          ...notification.data.converInfo,
+          ...notification.data,
           typeNotifi: notification.data.typeNotifi,
         });
         self.handleNotification({
-          ...notification.data.converInfo,
+          ...notification.data,
           typeNotifi: notification.data.typeNotifi,
         });
       },
@@ -43,6 +43,8 @@ class SocketService {
     });
   }
   public handleNotification(data: any) {
+    console.log(data, 12);
+
     if (data.typeNotifi === 'message') {
       AsyncStorage.setItem('ConversationInfo', JSON.stringify({...data}));
       this.navigation?.navigate('Chat');
@@ -52,14 +54,15 @@ class SocketService {
   }
 
   public sendNotification(data: any) {
-
     PushNotification.localNotification({
       channelId: 'zego_video_call',
       title: data.name,
       message:
         data.content?.length === 0
           ? 'hình ảnh mới'
-          : UserInfo.decryptText(data.content),
+          : data.typeNotifi === 'message'
+          ? UserInfo.decryptText(data.content)
+          : data.content,
       userInfo: {
         ...data,
       },

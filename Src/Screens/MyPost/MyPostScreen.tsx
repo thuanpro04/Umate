@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -102,6 +103,7 @@ const MyPostScreen = ({navigation}: any) => {
     if (res?.data) {
       setPosts(prev => prev.filter(e => e.postId !== id));
       console.log('Remove post successfully!! ', res.data);
+      ToastAndroid.show('Đã xóa bài !!', ToastAndroid.SHORT);
     }
     setLoading(false);
   };
@@ -121,6 +123,7 @@ const MyPostScreen = ({navigation}: any) => {
           return post;
         }),
       );
+      ToastAndroid.show('Đã ẩn bài !!', ToastAndroid.SHORT);
     }
     setLoading(false);
   };
@@ -169,6 +172,8 @@ const MyPostScreen = ({navigation}: any) => {
   }, [notifiPostId]);
   const renderPost = useCallback(
     ({item, index}: any) => {
+      const isLike = item.likes.includes(auth.userId);
+
       return (
         <RenderPost
           onChangeComment={(count: number) =>
@@ -182,7 +187,7 @@ const MyPostScreen = ({navigation}: any) => {
           privacy={item.privacy}
           url={item.url}
           naviagtion={navigation}
-          liked={item.likes.includes(auth.userId)}
+          liked={isLike}
           postId={item.postId}
           comments={item.comments}
           shares={item.shares}
@@ -194,6 +199,7 @@ const MyPostScreen = ({navigation}: any) => {
           createdAt={item.createdAt}
           key={index}
           handleLikePost={() => handleLikePost(item.postId)}
+          item={item}
         />
       );
     },

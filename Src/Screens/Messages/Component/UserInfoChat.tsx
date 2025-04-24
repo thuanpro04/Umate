@@ -207,12 +207,13 @@ const UserInfoChat = ({navigation}: any) => {
     try {
       const messageData = {
         senderId: auth.userId,
-        content: `Điểm danh - ${time.trim()} phút`,
+        content: UserInfo.encryptText(`Điểm danh - ${time.trim()} phút`),
         imagesUrl: [],
         groupId: idConver,
         QRCode: {qrdata: data, attended: []},
         recipients: converInfo.invitedUsers,
-        lastMessage:"Mã QR điểm danh"
+        lastMessage:"Mã QR điểm danh",
+        converInfo
       };
 
       socket?.emit('send_qrcode', messageData);

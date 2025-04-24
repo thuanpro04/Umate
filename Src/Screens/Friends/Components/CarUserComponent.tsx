@@ -73,8 +73,6 @@ const CarUserComponent = (props: Props) => {
   };
 
   const actionMenu = async (key: string) => {
-    console.log(key);
-
     switch (key) {
       case 'report':
         hideMenu();
@@ -175,7 +173,12 @@ const CarUserComponent = (props: Props) => {
               visible={isVisible}
               onRequestClose={hideMenu}
               anchor={
-                <TouchableOpacity onPress={showMenu}>{icon}</TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    showMenu();
+                  }}>
+                  {icon}
+                </TouchableOpacity>
               }
               style={{
                 borderRadius: 16,

@@ -63,6 +63,7 @@ const CustomCallButtonComponent = (props: Props) => {
         type,
         groupId: converInfo.groupId ?? undefined,
         targetAvatar: converInfo.avatar,
+        conversationId:converInfo.conversationId
       };
       socket.emit('sendCallInvitation', callData);
       navigation.navigate('CallWaitingAccept', {
@@ -74,7 +75,7 @@ const CustomCallButtonComponent = (props: Props) => {
         type,
         groupId: converInfo.groupId ?? undefined,
         targetAvatar: converInfo.avatar,
-
+        conversationId:converInfo.conversationId
       });
       return socket.off('sendCallInvitation');
     } catch (error) {

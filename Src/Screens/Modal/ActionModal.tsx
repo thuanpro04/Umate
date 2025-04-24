@@ -1,15 +1,15 @@
-import React, {useState} from 'react';
-import {Modal, StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
-import {appColors} from '../../Theme/Colors/appColors';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Modal, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { useSelector } from 'react-redux';
+import { themeSelector } from '../../redux/reducers/themeSlice';
+import { appColors } from '../../Theme/Colors/appColors';
 import {
   ButtonComponent,
   RowComponent,
   SpaceComponent,
   TextComponent,
 } from '../Components';
-import {useSelector} from 'react-redux';
-import {themeSelector} from '../../redux/reducers/themeSlice';
-import {useTranslation} from 'react-i18next';
 interface Props {
   title: string;
   descriptions?: string;
@@ -23,6 +23,7 @@ const ActionModal = (props: Props) => {
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const {t} = useTranslation();
+
   return (
     <Modal visible={visible} transparent style={{}}>
       <View style={localStyles.overlay}>
@@ -34,7 +35,7 @@ const ActionModal = (props: Props) => {
             {descriptions && (
               <TextComponent
                 label={descriptions}
-                styles={{marginLeft: 4, fontStyle: 'italic',}}
+                styles={{marginLeft: 4, fontStyle: 'italic'}}
               />
             )}
           </View>

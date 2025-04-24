@@ -67,6 +67,7 @@ interface Props {
   handleUpdatePrivacy?: (postId: string, privacy: string) => void;
   onChangeComment?: (count: number) => void;
   onChangeShare?: (count: number) => void;
+  item?: any;
 }
 const RenderPost = (props: Props) => {
   const {
@@ -95,17 +96,18 @@ const RenderPost = (props: Props) => {
     isPrivacy,
     handleUpdatePrivacy,
     onChangeComment,
-    onChangeShare
+    onChangeShare,
+    item,
   } = props;
   const [isVisible, setIsVisible] = useState(false);
   const [indexImg, setIndexImg] = useState(0);
   const [displayImgs, setDisplayImgs] = useState<any[]>([]);
-  const [isLiked, setLiked] = useState(liked);
+  const auth = useSelector(authSelector);
+  const [isLiked, setLiked] = useState(likes?.includes(auth.userId));
   const [showPrivacySelector, setShowPrivacySelector] = useState(false);
   const [privacyOption, setPrivacyOption] = useState(privacy);
   const [isShowMenu, setIsShowMenu] = useState(false);
   const theme = useSelector(themeSelector);
-  const auth = useSelector(authSelector);
   const colors = appColors[theme];
   const {t} = useTranslation();
 

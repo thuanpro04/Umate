@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -100,6 +101,7 @@ const CreatePostScreen = ({navigation}: any) => {
     if (res && res.data) {
       console.log('Post event successfully !!!', res.data);
       setIsLoading(false);
+      ToastAndroid.show("Đăng bài thành công.",ToastAndroid.SHORT)
       navigation.navigate(t('post')); // Pass a refresh flag
     }
     setIsLoading(false);

@@ -204,7 +204,13 @@ const ShareEventModal = ({...props}) => {
     setIsLoading(true);
     const res = await messageServices.getAllConversationUsers(auth.userId);
     if (res?.data && res) {
-      setUsers(res?.data.allConversations);
+      const validUsers = res?.data.allConversations.filter(
+        (item: any) =>
+          item && // loại null, undefined, false
+          Object.keys(item).length > 0, // loại object rỗng
+      );
+
+      setUsers(validUsers);
     }
     setIsLoading(false);
   }, []);
@@ -235,7 +241,7 @@ const ShareEventModal = ({...props}) => {
         />
         <SpaceComponent height={6} />
         <TextComponent
-          label={item.name ? item.name : item.groupName.split(' ')[0]}
+          label={item.name ?? item.groupName?.split(' ')[0]}
           styles={globalStyles.actionText}
         />
       </TouchableOpacity>

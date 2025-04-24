@@ -1,33 +1,33 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { ArrowLeft } from 'iconsax-react-native';
-import { MoreVerticalIcon } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useFocusEffect} from '@react-navigation/native';
+import {ArrowLeft} from 'iconsax-react-native';
+import {MoreVerticalIcon} from 'lucide-react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
   SafeAreaView,
   StyleSheet,
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { MenuChat } from '../../data/MenuItems';
-import { authSelector } from '../../redux/reducers/authReducer';
+import {useDispatch, useSelector} from 'react-redux';
+import {MenuChat} from '../../data/MenuItems';
+import {authSelector} from '../../redux/reducers/authReducer';
 import {
   friendSelector,
   removeFriend,
-  setBlock
+  setBlock,
 } from '../../redux/reducers/friendSlice';
-import { themeSelector } from '../../redux/reducers/themeSlice';
-import { globalStyles } from '../../Styles/globalStyle';
-import { appInfo } from '../../Theme/appInfo';
-import { appColors } from '../../Theme/Colors/appColors';
-import { HeaderComponent } from '../Components';
+import {themeSelector} from '../../redux/reducers/themeSlice';
+import {globalStyles} from '../../Styles/globalStyle';
+import {appInfo} from '../../Theme/appInfo';
+import {appColors} from '../../Theme/Colors/appColors';
+import {HeaderComponent} from '../Components';
 import ActionModal from '../Modal/ActionModal';
 import LoadingModal from '../Modal/LoadingModal';
-import { friendServices } from '../Services/friendService.';
-import { userServices } from '../Services/userService';
-import { UserInfo } from '../Untils/UserInfo';
+import {friendServices} from '../Services/friendService.';
+import {userServices} from '../Services/userService';
+import {UserInfo} from '../Untils/UserInfo';
 import CarUserComponent from './Components/CarUserComponent';
 
 const FriendScreens = ({navigation}: any) => {
@@ -37,7 +37,7 @@ const FriendScreens = ({navigation}: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [limitPage, setLimitPage] = useState(1);
-
+  const [selectUser, setSelectUser] = useState<any>('');
   const theme: 'light' | 'dark' = useSelector(themeSelector);
   const colors = appColors[theme ?? 'light'];
   const auth = useSelector(authSelector);
@@ -80,14 +80,14 @@ const FriendScreens = ({navigation}: any) => {
         dispatch(removeFriend(res.data)),
         AsyncStorage.setItem('userData', JSON.stringify(parseData)),
       ]);
-       console.log('friendData.friend: ', friendData.friends);
-     
+      console.log('friendData.friend: ', friendData.friends);
     }
     setIsLoading(false);
   };
-  
-  const handleBlockUser = async () => {
+
+  const handleBlockUser = async (user: any) => {
     setShowBlockModal(true);
+    setSelectUser(user);
   };
   const actionBlockUser = async (userId: string, userFriendId: string) => {
     setIsLoading(true);
@@ -121,15 +121,18 @@ const FriendScreens = ({navigation}: any) => {
               navigation.navigate('PersonalScreen', {userId: item.userId})
             }
             menuData={MenuChat(colors).attributeUser}
-            onPressUnFriend={() => setShowUnfriendModal(true)}
+            onPressUnFriend={() => {
+              setShowUnfriendModal(true);
+              setSelectUser(item);
+            }}
             userId={item.userId}
             icon={<MoreVerticalIcon size={22} color={colors.icon} />}
             authori={item.majoring ?? t('majoring')}
             userName={item.name}
             url={item.avatar}
-            onPressMore={() => {}}
+            onPressMore={() => console.log('Hello')}
             navigation={navigation}
-            onPressBlock={handleBlockUser}
+            onPressBlock={() => handleBlockUser(item)}
             isBlock={getIsBlock(item.userId)}
           />
           <ActionModal
@@ -137,21 +140,23 @@ const FriendScreens = ({navigation}: any) => {
             onPressNo={() => {
               closeModalAction();
             }}
-            onPressYes={() => handleRemoveFriend(item.userId)}
+            onPressYes={() => handleRemoveFriend(selectUser.userId)}
             descriptions={t('remove_friend_confirmation')}
-            title={`${t('unfriend ')}${item.name}`}
+            title={`${t('unfriend ')}${selectUser.name}`}
           />
           <ActionModal
             visible={isShowBlockModal}
             onPressNo={() => setShowBlockModal(false)}
-            onPressYes={() => actionBlockUser(auth.userId, item.userId)}
+            onPressYes={() => actionBlockUser(auth.userId, selectUser.userId)}
             descriptions={
-              getIsBlock(item.userId) ? t('unblock_friend') : t('block_friend')
+              getIsBlock(selectUser.userId)
+                ? t('unblock_friend')
+                : t('block_friend')
             }
             title={
-              getIsBlock(item.userId)
-                ? t('confirm_unblock') + item.name
-                : t('confirm_block') + item.name
+              getIsBlock(selectUser.userId)
+                ? t('confirm_unblock') + selectUser.name
+                : t('confirm_block') + selectUser.name
             }
           />
         </React.Fragment>

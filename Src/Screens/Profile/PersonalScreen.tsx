@@ -301,7 +301,7 @@ const PersonalScreen = ({navigation}: any) => {
           style={{position: 'absolute', left: '5%', top: '5%'}}
         />
         {userId !== auth.userId ? (
-          !friendData.friends.includes(userId) ? (
+          !friendData.friends?.includes(userId) ? (
             <UserAdd
               onPress={() => handleAddFriend(userId)}
               size={appInfo.sizeIconBold}

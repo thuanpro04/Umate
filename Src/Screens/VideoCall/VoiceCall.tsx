@@ -20,12 +20,14 @@ import store from '../../redux/store';
 import {User} from 'iconsax-react-native';
 import {UserInfo} from '../Untils/UserInfo';
 const VoiceCall = (props: any) => {
-  const {roomID, name, type, avatar, targetAvatar} = useRoute().params as {
+  const {roomID, name, type, avatar, targetAvatar, conversationId} = useRoute()
+    .params as {
     roomID: string;
     name: string;
     type: string;
     avatar: string;
     targetAvatar: string;
+    conversationId: string;
   };
   const navigation = useNavigation<any>();
   const auth = useSelector(authSelector);
@@ -33,7 +35,6 @@ const VoiceCall = (props: any) => {
   const calls = dataCall.incomingCall;
   const socket = SocketService.getSocket();
   const {t} = useTranslation();
-  console.log(name, 124);
 
   let appID: number = parseInt(process.env.APPID as string);
   const getCallConfig = (type: string) => {
@@ -58,6 +59,7 @@ const VoiceCall = (props: any) => {
       imagesUrl: [],
       reply: '',
       typeCall: type,
+      conversationId
     };
 
     let dataCall;
@@ -79,7 +81,7 @@ const VoiceCall = (props: any) => {
     if (calls) {
       try {
         const data = getDataCall(duration);
-        // socket?.emit('call_end', data);
+        socket?.emit('call_end', data);
         socket?.emit('send_message', data);
         store.dispatch(setIncomingCall(null));
         console.log('Save call data successfully!!');

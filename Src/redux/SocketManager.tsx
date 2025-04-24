@@ -40,7 +40,7 @@ const SocketManager = () => {
         const handleCancelCall = (data: any) => {
           console.log('Xử lý hủy cuộc gọi trong SocketManager');
           if (isMounted) {
-            navigation.goBack();
+            navigation.navigate(t('home'));
           }
         };
         // const handleDisplayScreenOnCLickNotification = (data: any) => {

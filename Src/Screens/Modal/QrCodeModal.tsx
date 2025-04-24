@@ -22,7 +22,7 @@ interface Props {
 }
 
 const QrCodeModal = ({visible, onClose, onPress, groupId, type}: Props) => {
-  const data = [15, 30, 45, 60, 120, 180];
+  const data = [5,15, 30, 45, 60, 120, 180];
   const qrData = JSON.stringify({
     id: groupId,
     type,

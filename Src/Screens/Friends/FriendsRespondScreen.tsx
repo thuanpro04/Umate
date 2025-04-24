@@ -182,7 +182,7 @@ const FriendsRespondScreen = () => {
               await handleRemoveFriend(selectedUser.userId)
             }
             descriptions={t('remove_friend_confirmation')}
-            title={`${t('unfriend')} ${item.name}`}
+            title={`${t('unfriend')} ${selectedUser.name}`}
           />
         </React.Fragment>
       );
